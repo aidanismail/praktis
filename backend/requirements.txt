@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+sqlalchemy
+alembic
+pydantic
+pydantic-settings
+python-jose[cryptography] # Untuk JWT
+passlib[bcrypt] # Untuk Password Hash
+pandas
+boto3 # Untuk MinIO
+loguru

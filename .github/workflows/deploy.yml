@@ -1,0 +1,21 @@
+name: Deploy PrakTIs to Server
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: CI - Check Frontend
+        working-directory: ./frontend
+        run: |
+          npm install
+          npm run build
+
+      - name: Print Success
+        run: echo "CI Passed! Ready for CD to server."
