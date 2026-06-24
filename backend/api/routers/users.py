@@ -1,5 +1,6 @@
 import csv
 import io
+import asyncio
 
 from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status, Response, UploadFile, File
@@ -58,25 +59,9 @@ async def read_users_me(current_user: User = Depends(get_current_user)):
 
 require_superadmin = RoleChecker([RoleEnum.SUPERADMIN])
 
-@router.post("/import-csv")
-async def import_students_csv(
-    file: UploadFile = File(...),
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_superadmin)
-):
-    if not file.filename.endswith(".csv"):
-        raise HTTPException(status_code=400, detail="Invalid file format. Please upload a .csv file.")
-    
-    content = await file.read()
-    try:
-        decoded_content = content.decode('utf-8')
-        csv_reader = csv.DictReader(io.StringIO(decoded_content))
-    except Exception:
-        raise HTTPException(status_code=400, detail="Failed to parse CSV file.")
-
+def process_csv_data(rows_list):
     users_to_insert = []
-    
-    for row in csv_reader:
+    for row in rows_list:
         npm = row.get("npm", "").strip()
         email = row.get("email", "").strip()
         
@@ -94,11 +79,38 @@ async def import_students_csv(
             "force_password_change": True,
             "is_active": True
         })
+    return users_to_insert
+
+
+@router.post("/import-csv")
+async def import_students_csv(
+    file: UploadFile = File(...),
+    db: AsyncSession = Depends(get_db),
+    _current_user: User = Depends(require_superadmin)
+):
+    if not file.filename.endswith(".csv"):
+        raise HTTPException(status_code=400, detail="Invalid file format. Please upload a .csv file.")
+    
+    content = await file.read()
+    try:
+        decoded_content = content.decode('utf-8')
+        reader = csv.DictReader(io.StringIO(decoded_content))
+        rows_list = list(reader)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to parse CSV file: {str(e)}")
+
+    if not rows_list:
+        raise HTTPException(status_code=400, detail="CSV is empty.")
+
+    users_to_insert = await asyncio.to_thread(process_csv_data, rows_list)
     
     if not users_to_insert:
-        raise HTTPException(status_code=400, detail="CSV is empty or missing 'npm' and 'email' columns.")
+        raise HTTPException(status_code=400, detail="Missing required 'npm' or 'email' values in rows.")
 
-    inserted_count = await bulk_create_users(db, users_to_insert)
+    try:
+        inserted_count = await bulk_create_users(db, users_to_insert)
+    except Exception as db_err:
+        raise HTTPException(status_code=400, detail=f"Database insertion failed: {str(db_err)}")
     
     return {
         "message": "Import successful",
