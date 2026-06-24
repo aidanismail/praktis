@@ -6,6 +6,11 @@ RUN corepack enable pnpm
 COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml* ./
 RUN PNPM_CONFIG_STRICT_DEP_BUILDS=false pnpm i --frozen-lockfile
 
+# dev
+FROM deps AS dev
+WORKDIR /app
+CMD ["pnpm", "dev"]
+
 # builder
 FROM node:22-alpine AS builder
 WORKDIR /app

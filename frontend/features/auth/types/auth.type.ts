@@ -16,6 +16,6 @@ export type LoginResponse = {
 export type AuthMeResponse = User;
 
 export type ChangePasswordRequest = {
-  current_password: string;
+  old_password: string;
   new_password: string;
 };

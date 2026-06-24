@@ -18,7 +18,7 @@ export function ChangePasswordForm() {
   const form = useForm<ChangePasswordFormValues>({
     resolver: zodResolver(changePasswordSchema),
     defaultValues: {
-      current_password: "",
+      old_password: "",
       new_password: "",
       confirm_password: "",
     },
@@ -26,7 +26,7 @@ export function ChangePasswordForm() {
 
   function onSubmit(values: ChangePasswordFormValues) {
     changePasswordMutation.mutate({
-      current_password: values.current_password,
+      old_password: values.old_password,
       new_password: values.new_password,
     });
   }
@@ -59,24 +59,24 @@ export function ChangePasswordForm() {
 
         <div className="space-y-2">
           <label
-            htmlFor="current_password"
+            htmlFor="old_password"
             className="text-sm font-medium text-slate-800"
           >
-            Current password
+            old password
           </label>
 
           <input
-            id="current_password"
+            id="old_password"
             type="password"
             placeholder="Enter your generated password"
-            autoComplete="current-password"
+            autoComplete="old-password"
             className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
-            {...form.register("current_password")}
+            {...form.register("old_password")}
           />
 
-          {form.formState.errors.current_password ? (
+          {form.formState.errors.old_password ? (
             <p className="text-sm text-red-600">
-              {form.formState.errors.current_password.message}
+              {form.formState.errors.old_password.message}
             </p>
           ) : null}
         </div>

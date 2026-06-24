@@ -10,8 +10,12 @@ from pydantic import BaseModel
 from core.database import get_db
 from core.config import settings
 from core.security import verify_password, create_access_token
+
 from models.user import User, RoleEnum
+
 from schemas.user import UserResponse
+from schemas.user import ChangePasswordRequest
+
 from services.user_service import get_user_by_username, get_password_hash, bulk_create_users
 from api.dependencies import get_current_user, RoleChecker
 
@@ -51,6 +55,25 @@ async def login(response: Response, login_data: LoginRequest, db: AsyncSession =
 async def logout(response: Response):
     response.delete_cookie("access_token")
     return {"message": "Logout successful"}
+
+@router.post("/change-password")
+async def change_password(
+    data: ChangePasswordRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
+    if not verify_password(data.old_password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect old password"
+            )
+    
+    current_user.hashed_password = get_password_hash(data.new_password)
+    current_user.force_password_change = False
+
+    db.add(current_user)
+    await db.commit()
+
+    return {"message": "Password changed successfully"}
 
 @router.get("/me", response_model=UserResponse)
 async def read_users_me(current_user: User = Depends(get_current_user)):

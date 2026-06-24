@@ -23,6 +23,9 @@ export function getMe() {
 export function changePassword(payload: ChangePasswordRequest) {
   return apiClient<AuthMeResponse>(API_ENDPOINTS.auth.changePassword, {
     method: "POST",
-    body: JSON.stringify(payload),
+    body: JSON.stringify({
+      old_password: payload.old_password,
+      new_password: payload.new_password,
+    }),
   });
 }

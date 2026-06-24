@@ -20,3 +20,7 @@ class UserResponse(UserBase):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+class ChangePasswordRequest(BaseModel):
+    old_password: str
+    new_password: str
