@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import insert
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from models.user import User
 from schemas.user import UserCreate
 from core.security import get_password_hash
@@ -23,13 +23,10 @@ async def create_user(db: AsyncSession, user_in: UserCreate) -> User:
     return db_user
 
 async def bulk_create_users(db: AsyncSession, users_data: list[dict]) -> int:
-    """
-    users_data format: [{"email": "...", "username": "...", "role": "...", "hashed_password": "..."}]
-    """
     if not users_data:
         return 0
         
-    stmt = insert(User).values(users_data)
+    stmt = pg_insert(User).values(users_data)
     stmt = stmt.on_conflict_do_nothing(index_elements=['username'])
     
     result = await db.execute(stmt)

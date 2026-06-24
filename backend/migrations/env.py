@@ -13,7 +13,12 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from core.config import settings
 from core.database import Base
+
 from models.user import Base as UserBase 
+from models.module import Module
+from models.attendance import Course, ClassSession, Attendance
+from models.enrollment import Enrollment 
+from models.grade import Grade           
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
