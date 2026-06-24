@@ -6,7 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from core.database import Base
 
 class Enrollment(Base):
-    __tableame__ = "enrollments"
+    __tablename__ = "enrollments"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True),
                                           primary_key=True,
@@ -15,5 +15,5 @@ class Enrollment(Base):
     student_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("students.id", ondelete="CASCADE"))
 
     __table_args__ = (
-        UniqueConstraint("course_id", "student_id", name="uix_course_student")
+        UniqueConstraint("course_id", "student_id", name="uix_course_student"),
     )
