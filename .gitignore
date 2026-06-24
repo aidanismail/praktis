@@ -1,6 +1,63 @@
-# .gitignore (Root)
-node_modules/
+# Environment and local secrets
 .env
+.env.*
+.envrc
+
+# Dependencies and package-manager caches
+node_modules/
+.pnp
+.pnp.*
+.pnpm-store/
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Build outputs and framework artifacts
+.next/
+out/
+build/
+dist/
+.turbo/
+.vercel/
+coverage/
+htmlcov/
+*.tsbuildinfo
+next-env.d.ts
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Python
 __pycache__/
+*.py[cod]
+*$py.class
 .venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+*.egg-info/
+
+# Local databases and generated data
+*.sqlite
+*.sqlite3
+*.db
+
+# Certificates and private keys
+*.pem
+*.key
+
+# OS and editor files
 .DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

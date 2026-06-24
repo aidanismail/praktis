@@ -9,7 +9,8 @@ RUN PNPM_CONFIG_STRICT_DEP_BUILDS=false pnpm i --frozen-lockfile
 # builder
 FROM node:22-alpine AS builder
 WORKDIR /app
-RUN corepack enable pnpm
+RUN corepack enable pnpm && \
+    corepack prepare pnpm@11.1.2 --activate
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN pnpm build
