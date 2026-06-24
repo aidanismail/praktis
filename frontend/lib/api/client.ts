@@ -1,8 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
-
-type ApiClientOptions = RequestInit & {
-  token?: string | null;
-};
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 type ApiErrorResponse = {
   detail?: string;
@@ -23,22 +19,21 @@ export class ApiError extends Error {
 
 export async function apiClient<T>(
   endpoint: string,
-  options: ApiClientOptions = {}
+  options: RequestInit = {}
 ): Promise<T> {
-  const { token, headers, ...fetchOptions } = options;
+  const isFormData = options.body instanceof FormData;
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    ...fetchOptions,
+    ...options,
+    credentials: "include",
     headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...headers
-    }
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
+      ...options.headers,
+    },
   });
 
   const contentType = response.headers.get("content-type");
   const isJson = contentType?.includes("application/json");
-
   const data = isJson ? await response.json().catch(() => null) : null;
 
   if (!response.ok) {

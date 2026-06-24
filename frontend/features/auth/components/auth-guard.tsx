@@ -1,3 +1,5 @@
+// src/features/auth/components/auth-guard.tsx
+
 "use client";
 
 import { Loader2 } from "lucide-react";
@@ -10,7 +12,6 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const accessToken = useAuthStore((state) => state.accessToken);
   const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
   const clearAuth = useAuthStore((state) => state.clearAuth);
@@ -19,14 +20,9 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     async function checkSession() {
-      if (!accessToken) {
-        clearAuth();
-        router.replace("/login");
-        return;
-      }
-
       try {
-        const freshUser = await getMe(accessToken);
+        const freshUser = await getMe();
+
         setUser(freshUser);
 
         if (
@@ -45,7 +41,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     }
 
     checkSession();
-  }, [accessToken, clearAuth, pathname, router, setUser]);
+  }, [clearAuth, pathname, router, setUser]);
 
   if (isChecking || !user) {
     return (

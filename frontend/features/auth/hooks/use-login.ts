@@ -1,3 +1,5 @@
+// src/features/auth/hooks/use-login.ts
+
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
@@ -8,21 +10,19 @@ import { useAuthStore } from "@/stores/auth-store";
 
 export function useLogin() {
   const router = useRouter();
-  const setAuth = useAuthStore((state) => state.setAuth);
+  const setUser = useAuthStore((state) => state.setUser);
 
   return useMutation({
     mutationFn: async (payload: LoginRequest) => {
-      const tokenResponse = await login(payload);
-      const user = await getMe(tokenResponse.access_token);
+      await login(payload);
 
-      return {
-        accessToken: tokenResponse.access_token,
-        user
-      };
+      const user = await getMe();
+
+      return user;
     },
 
-    onSuccess: ({ accessToken, user }) => {
-      setAuth({ accessToken, user });
+    onSuccess: (user) => {
+      setUser(user);
 
       if (user.force_password_change) {
         router.replace("/change-password");

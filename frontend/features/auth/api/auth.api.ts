@@ -4,27 +4,25 @@ import type {
   AuthMeResponse,
   ChangePasswordRequest,
   LoginRequest,
-  LoginResponse
+  LoginResponse,
 } from "../types/auth.type";
 
 export function login(payload: LoginRequest) {
   return apiClient<LoginResponse>(API_ENDPOINTS.auth.login, {
     method: "POST",
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
   });
 }
 
-export function getMe(token: string) {
+export function getMe() {
   return apiClient<AuthMeResponse>(API_ENDPOINTS.auth.me, {
     method: "GET",
-    token
   });
 }
 
-export function changePassword(token: string, payload: ChangePasswordRequest) {
+export function changePassword(payload: ChangePasswordRequest) {
   return apiClient<AuthMeResponse>(API_ENDPOINTS.auth.changePassword, {
     method: "POST",
-    token,
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
   });
 }
