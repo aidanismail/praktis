@@ -16,8 +16,8 @@ export function LoginForm() {
     resolver: zodResolver(loginSchema),
     defaultValues: {
       username: "",
-      password: "",
-    },
+      password: ""
+    }
   });
 
   function onSubmit(values: LoginFormValues) {
@@ -32,11 +32,11 @@ export function LoginForm() {
         </div>
 
         <h1 className="text-2xl font-semibold tracking-tight text-slate-950">
-          Sign in to Praktis
+          Sign in to praktis.
         </h1>
 
         <p className="mt-2 text-sm leading-6 text-slate-500">
-          Use your generated student, asprak, or superadmin account to continue.
+          Gunakan akun yang telah dibuat untuk melanjutkan.
         </p>
       </div>
 
@@ -121,7 +121,7 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={loginMutation.isPending}
-          className="flex h-11 w-full items-center justify-center rounded-xl bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
+          className="flex h-11 w-full items-center justify-center rounded-xl bg-slate-950 px-4 text-sm font-medium text-white transition cursor-pointer hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {loginMutation.isPending ? (
             <>
@@ -135,8 +135,8 @@ export function LoginForm() {
 
         <div className="rounded-2xl bg-slate-50 px-4 py-3">
           <p className="text-center text-xs leading-5 text-slate-500">
-            First-time users will be asked to change their generated password
-            before accessing the dashboard.
+            Pengguna baru akan diminta untuk mengubah kata sandi yang telah
+            dibuatkan untuk mereka sebelum mengakses dasbor.
           </p>
         </div>
       </form>

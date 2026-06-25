@@ -1,5 +1,3 @@
-// src/features/auth/types/auth.type.ts
-
 import type { User } from "@/types/user.type";
 
 export type LoginRequest = {

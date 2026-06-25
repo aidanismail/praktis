@@ -1,14 +1,19 @@
-// src/features/auth/components/auth-guard.tsx
-
 "use client";
 
 import { Loader2 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { getMe } from "../api/auth.api";
+import { getDefaultDashboardByRole, ROUTES } from "@/constants/routes";
 import { useAuthStore } from "@/stores/auth-store";
+import type { UserRole } from "@/types/user.type";
+import { getMe } from "../api/auth.api";
 
-export function AuthGuard({ children }: { children: React.ReactNode }) {
+type AuthGuardProps = {
+  children: React.ReactNode;
+  allowedRoles?: UserRole[];
+};
+
+export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -19,29 +24,41 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    async function checkSession() {
+    async function checkAuth() {
       try {
         const freshUser = await getMe();
-
         setUser(freshUser);
 
         if (
           freshUser.force_password_change &&
-          pathname !== "/change-password"
+          pathname !== ROUTES.changePassword
         ) {
-          router.replace("/change-password");
+          router.replace(ROUTES.changePassword);
+          return;
+        }
+
+        if (
+          !freshUser.force_password_change &&
+          pathname === ROUTES.changePassword
+        ) {
+          router.replace(getDefaultDashboardByRole(freshUser.role));
+          return;
+        }
+
+        if (allowedRoles && !allowedRoles.includes(freshUser.role)) {
+          router.replace(getDefaultDashboardByRole(freshUser.role));
           return;
         }
 
         setIsChecking(false);
       } catch {
         clearAuth();
-        router.replace("/login");
+        router.replace(ROUTES.login);
       }
     }
 
-    checkSession();
-  }, [clearAuth, pathname, router, setUser]);
+    checkAuth();
+  }, [allowedRoles, clearAuth, pathname, router, setUser]);
 
   if (isChecking || !user) {
     return (

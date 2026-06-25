@@ -5,6 +5,7 @@ import "./globals.css";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"]
 });
 
@@ -20,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${dmSans.variable}  h-full antialiased`}>
-      <body className="min-h-full flex flex-col">
+      <body className="font-dm-sans min-h-full">
         <Providers>{children}</Providers>
       </body>
     </html>

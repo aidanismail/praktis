@@ -67,6 +67,12 @@ async def change_password(
             detail="Incorrect old password"
             )
     
+    if verify_password(data.new_password, current_user.hashed_password):
+        raise HTTPException(
+        status_code=400,
+        detail="New password must be different from current password"
+        )
+    
     current_user.hashed_password = get_password_hash(data.new_password)
     current_user.force_password_change = False
 

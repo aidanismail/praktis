@@ -1,12 +1,11 @@
-// src/features/auth/hooks/use-login.ts
-
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { getDefaultDashboardByRole, ROUTES } from "@/constants/routes";
+import { useAuthStore } from "@/stores/auth-store";
 import { getMe, login } from "../api/auth.api";
 import type { LoginRequest } from "../types/auth.type";
-import { useAuthStore } from "@/stores/auth-store";
 
 export function useLogin() {
   const router = useRouter();
@@ -15,21 +14,18 @@ export function useLogin() {
   return useMutation({
     mutationFn: async (payload: LoginRequest) => {
       await login(payload);
-
-      const user = await getMe();
-
-      return user;
+      return getMe();
     },
 
     onSuccess: (user) => {
       setUser(user);
 
       if (user.force_password_change) {
-        router.replace("/change-password");
+        router.replace(ROUTES.changePassword);
         return;
       }
 
-      router.replace("/dashboard");
+      router.replace(getDefaultDashboardByRole(user.role));
     }
   });
 }

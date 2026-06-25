@@ -9,7 +9,10 @@ RUN PNPM_CONFIG_STRICT_DEP_BUILDS=false pnpm i --frozen-lockfile
 # dev
 FROM deps AS dev
 WORKDIR /app
-CMD ["pnpm", "dev"]
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV WATCHPACK_POLLING=true
+ENV CHOKIDAR_USEPOLLING=true
+CMD ["pnpm", "dev", "--hostname", "0.0.0.0", "--webpack"]
 
 # builder
 FROM node:22-alpine AS builder

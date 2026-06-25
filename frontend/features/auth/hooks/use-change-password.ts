@@ -2,9 +2,11 @@
 
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { ApiError } from "@/lib/api/client";
+import { getDefaultDashboardByRole, ROUTES } from "@/constants/routes";
+import { useAuthStore } from "@/stores/auth-store";
 import { changePassword, getMe } from "../api/auth.api";
 import type { ChangePasswordRequest } from "../types/auth.type";
-import { useAuthStore } from "@/stores/auth-store";
 
 export function useChangePassword() {
   const router = useRouter();
@@ -14,17 +16,19 @@ export function useChangePassword() {
   return useMutation({
     mutationFn: async (payload: ChangePasswordRequest) => {
       await changePassword(payload);
-      const user = await getMe();
-      return user;
+      return getMe();
     },
 
     onSuccess: (user) => {
       setUser(user);
-      router.replace("/dashboard");
+      router.replace(getDefaultDashboardByRole(user.role));
     },
 
-    onError: () => {
-      clearAuth();
+    onError: (error) => {
+      if (error instanceof ApiError && error.status === 401) {
+        clearAuth();
+        router.replace(ROUTES.login);
+      }
     },
   });
 }
