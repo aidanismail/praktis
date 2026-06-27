@@ -20,6 +20,12 @@ export function getMe() {
   });
 }
 
+export function logout() {
+  return apiClient<string>(API_ENDPOINTS.auth.logout, {
+    method: "POST",
+  });
+}
+
 export function changePassword(payload: ChangePasswordRequest) {
   return apiClient<AuthMeResponse>(API_ENDPOINTS.auth.changePassword, {
     method: "POST",

@@ -32,7 +32,7 @@ export function LoginForm() {
         </div>
 
         <h1 className="text-2xl font-semibold tracking-tight text-slate-950">
-          Sign in to praktis.
+          Sign in to praktis
         </h1>
 
         <p className="mt-2 text-sm leading-6 text-slate-500">

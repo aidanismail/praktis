@@ -1,5 +1,15 @@
 node_modules
 .next
+out
+dist
 .git
+Dockerfile
+.dockerignore
+
 .env
-README.md
+.env.*
+!.env.example
+
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*

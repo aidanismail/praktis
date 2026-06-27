@@ -1,5 +1,3 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
-
 type ApiErrorDetail =
   | string
   | {
@@ -86,7 +84,7 @@ export async function apiClient<T>(
 ): Promise<T> {
   const isFormData = options.body instanceof FormData;
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const response = await fetch(endpoint, {
     ...options,
     credentials: "include",
     headers: {
