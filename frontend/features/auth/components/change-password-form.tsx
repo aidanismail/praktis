@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 
 import {
   changePasswordSchema,
-  type ChangePasswordFormValues,
+  type ChangePasswordFormValues
 } from "../schemas/auth.schema";
 import { useChangePassword } from "../hooks/use-change-password";
 
@@ -20,14 +20,14 @@ export function ChangePasswordForm() {
     defaultValues: {
       current_password: "",
       new_password: "",
-      confirm_password: "",
-    },
+      confirm_password: ""
+    }
   });
 
   function onSubmit(values: ChangePasswordFormValues) {
     changePasswordMutation.mutate({
       old_password: values.current_password,
-      new_password: values.new_password,
+      new_password: values.new_password
     });
   }
 
@@ -39,12 +39,12 @@ export function ChangePasswordForm() {
         </div>
 
         <h1 className="text-2xl font-semibold tracking-tight text-slate-950">
-          Change your password
+          Ganti Passwordmu
         </h1>
 
         <p className="mt-2 text-sm leading-6 text-slate-500">
-          For account safety, first-time users must replace their generated
-          password before accessing Praktis.
+          Demi keamanan akun, pengguna baru wajib mengganti kata sandi yang
+          telah dibuatkan sebelum mengakses Praktis.
         </p>
       </div>
 
@@ -62,7 +62,7 @@ export function ChangePasswordForm() {
             htmlFor="current_password"
             className="text-sm font-medium text-slate-800"
           >
-            Current password
+            Password lama
           </label>
 
           <input
@@ -86,7 +86,7 @@ export function ChangePasswordForm() {
             htmlFor="new_password"
             className="text-sm font-medium text-slate-800"
           >
-            New password
+            Password baru
           </label>
 
           <div className="relative">
@@ -125,7 +125,7 @@ export function ChangePasswordForm() {
             htmlFor="confirm_password"
             className="text-sm font-medium text-slate-800"
           >
-            Confirm new password
+            Confirm password baru
           </label>
 
           <input
@@ -161,8 +161,8 @@ export function ChangePasswordForm() {
 
         <div className="rounded-2xl bg-slate-50 px-4 py-3">
           <p className="text-center text-xs leading-5 text-slate-500">
-            You will be redirected to the dashboard after your password is
-            updated successfully.
+            Anda akan diarahkan ke dasbor setelah kata sandi Anda berhasil
+            diperbarui.
           </p>
         </div>
       </form>

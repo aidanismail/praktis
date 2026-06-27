@@ -7,8 +7,16 @@ services:
 
   frontend:
     build:
+      context: ./frontend
+      dockerfile: Dockerfile
       target: dev
     volumes:
       - ./frontend:/app
       - /app/node_modules
       - /app/.next
+    environment:
+      NEXT_TELEMETRY_DISABLED: "1"
+      WATCHPACK_POLLING: "1000"
+      CHOKIDAR_USEPOLLING: "true"
+      CHOKIDAR_INTERVAL: "1000"
+    command: pnpm dev --hostname 0.0.0.0 --webpack

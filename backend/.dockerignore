@@ -4,3 +4,15 @@ __pycache__
 .venv
 venv
 .env
+
+.venv
+venv
+__pycache__
+*.pyc
+.git
+Dockerfile
+.dockerignore
+
+.env
+.env.*
+!.env.example

@@ -20,12 +20,12 @@ export function useLogin() {
     onSuccess: (user) => {
       setUser(user);
 
-      if (user.force_password_change) {
+      if (user.force_password_change && user.role === "praktikan") {
         router.replace(ROUTES.changePassword);
         return;
+      } else {
+        router.replace(getDefaultDashboardByRole(user.role));
       }
-
-      router.replace(getDefaultDashboardByRole(user.role));
     }
   });
 }

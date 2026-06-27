@@ -31,6 +31,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
 
         if (
           freshUser.force_password_change &&
+          freshUser.role === "praktikan" &&
           pathname !== ROUTES.changePassword
         ) {
           router.replace(ROUTES.changePassword);
