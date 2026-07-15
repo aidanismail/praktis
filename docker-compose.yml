@@ -37,6 +37,18 @@ services:
     networks:
       - praktis_network
 
+  cache:
+    image: redis:7-alpine
+    container_name: praktis_cache
+    restart: unless-stopped
+    networks:
+      - praktis_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   backend:
     build:
       context: ./backend
@@ -51,11 +63,14 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       MINIO_USE_SSL: "false"
+      REDIS_URL: redis://cache:6379/0
     depends_on:
       db:
         condition: service_healthy
       storage:
         condition: service_started
+      cache:
+        condition: service_healthy
     networks:
       - praktis_network
 
@@ -73,7 +88,7 @@ services:
     container_name: praktis_proxy
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "8080:80"
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:

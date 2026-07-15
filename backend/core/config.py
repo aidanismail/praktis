@@ -22,6 +22,12 @@ class Settings(BaseSettings):
     # cors
     CORS_ORIGINS: str = "http://localhost:3000"
 
+    # environment
+    ENVIRONMENT: str = "development"
+
+    #redis
+    REDIS_URL: str = "redis://localhost:6379/0"
+
     # minio conf
     MINIO_ROOT_USER: str
     MINIO_ROOT_PASSWORD: str
@@ -35,4 +41,4 @@ class Settings(BaseSettings):
     
     model_config = SettingsConfigDict(env_file=ENV_FILE, extra="ignore")
 
-settings = Settings()
+settings = Settings()  # type: ignore

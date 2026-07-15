@@ -1,9 +1,11 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
+from sqlalchemy import CursorResult
 from models.user import User
 from schemas.user import UserCreate
 from core.security import get_password_hash
+
 
 async def get_user_by_username(db: AsyncSession, username: str) -> User | None:
     result = await db.execute(select(User).where(User.username == username))
@@ -30,6 +32,7 @@ async def bulk_create_users(db: AsyncSession, users_data: list[dict]) -> int:
     stmt = stmt.on_conflict_do_nothing(index_elements=['username'])
     
     result = await db.execute(stmt)
+    assert isinstance(result, CursorResult)
     await db.commit()
     
     return result.rowcount

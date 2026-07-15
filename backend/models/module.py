@@ -16,11 +16,14 @@ class Module(Base):
                                        nullable=False)
     description: Mapped[str] = mapped_column(String(500), 
                                              nullable=True)
-    file_key: Mapped[str] = mapped_column(String(255), 
-                                          unique=True, 
+    file_key: Mapped[str] = mapped_column(String(255),
+                                          unique=True,
                                           nullable=False)
-    
-    uploaded_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), 
+
+    course_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("courses.id", ondelete="CASCADE"),
+                                                        nullable=True)
+
+    uploaded_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"),
                                                    nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), 
                                                  default=lambda: datetime.now(timezone.utc))

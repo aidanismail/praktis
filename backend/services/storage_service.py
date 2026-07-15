@@ -3,6 +3,7 @@ from botocore.client import Config
 from botocore.exceptions import ClientError
 from core.config import settings
 
+
 class StorageService:
     def __init__(self):
         protocol = "https" if settings.MINIO_USE_SSL else "http"
