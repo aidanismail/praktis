@@ -1,32 +1,40 @@
+# syntax=docker/dockerfile:1
+
 ARG NODE_VERSION=22-alpine
 ARG PNPM_VERSION=11.1.2
 
-# deps
-FROM node:${NODE_VERSION} AS deps
+# shared pnpm toolchain
+FROM node:${NODE_VERSION} AS pnpm-base
+ARG PNPM_VERSION
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
+ENV PNPM_HOME=/pnpm
+ENV PATH="${PNPM_HOME}:${PATH}"
 RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
-COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml* ./
-RUN PNPM_CONFIG_STRICT_DEP_BUILDS=false pnpm install --frozen-lockfile
 
-# dev
-FROM deps AS dev
+# production dependencies
+FROM pnpm-base AS deps
+COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml* ./
+RUN --mount=type=cache,id=praktis-frontend-pnpm,target=/pnpm/store \
+    PNPM_CONFIG_STRICT_DEP_BUILDS=false \
+    pnpm install --frozen-lockfile --store-dir /pnpm/store
+
+# development
+FROM pnpm-base AS dev
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV WATCHPACK_POLLING=1000
 ENV CHOKIDAR_USEPOLLING=true
 ENV CHOKIDAR_INTERVAL=1000
-COPY . .
+ENV PNPM_CONFIG_STRICT_DEP_BUILDS=false
 EXPOSE 3000
-CMD ["pnpm", "dev", "--hostname", "0.0.0.0", "--webpack"]
+CMD ["sh", "-c", "pnpm install --frozen-lockfile --prefer-offline --store-dir /pnpm/store && exec pnpm dev --hostname 0.0.0.0 --webpack"]
 
 # builder
-FROM node:${NODE_VERSION} AS builder
-WORKDIR /app
-RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
-COPY --from=deps /app/node_modules ./node_modules
+FROM deps AS builder
 COPY . .
-RUN pnpm build
+RUN --mount=type=cache,id=praktis-frontend-next,target=/app/.next/cache \
+    pnpm build
 
 # runner
 FROM node:${NODE_VERSION} AS runner

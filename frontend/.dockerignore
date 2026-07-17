@@ -1,10 +1,12 @@
 node_modules
 .next
+.pnpm-store
 out
 dist
 .git
 Dockerfile
 .dockerignore
+*.tsbuildinfo
 
 .env
 .env.*

@@ -11,12 +11,31 @@ services:
       dockerfile: Dockerfile
       target: dev
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
-      - /app/.next
+      - type: bind
+        source: ./frontend
+        target: /app
+      - type: volume
+        source: frontend_node_modules
+        target: /app/node_modules
+        volume:
+          nocopy: true
+      - type: volume
+        source: frontend_next
+        target: /app/.next
+        volume:
+          nocopy: true
+      - type: volume
+        source: frontend_pnpm_store
+        target: /pnpm/store
+        volume:
+          nocopy: true
     environment:
       NEXT_TELEMETRY_DISABLED: "1"
       WATCHPACK_POLLING: "1000"
       CHOKIDAR_USEPOLLING: "true"
       CHOKIDAR_INTERVAL: "1000"
-    command: pnpm dev --hostname 0.0.0.0 --webpack
+
+volumes:
+  frontend_node_modules:
+  frontend_next:
+  frontend_pnpm_store:
