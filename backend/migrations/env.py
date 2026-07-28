@@ -18,8 +18,9 @@ from models.user import Base as UserBase
 from models.module import Module
 from models.course import Course, ClassSession
 from models.attendance import Attendance
-from models.enrollment import Enrollment 
-from models.grade import Grade           
+from models.enrollment import Enrollment
+from models.grade import Grade
+from models.course_staff import CourseStaff
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

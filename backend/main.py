@@ -1,3 +1,7 @@
+from functools import lru_cache
+
+from alembic.config import Config as AlembicConfig
+from alembic.script import ScriptDirectory
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
@@ -6,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.config import settings
 from core.cache import init_redis, close_redis
 from core.database import get_db
+from services.storage_service import storage_service
 from contextlib import asynccontextmanager
 
 from api.routers import users
@@ -41,6 +46,7 @@ from every endpoint except `/auth/me`, `/auth/login`, `/auth/logout`, and
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_redis()
+    await storage_service.ensure_bucket()
     yield
     await close_redis()
 
@@ -100,16 +106,42 @@ app.include_router(courses.router)
 app.include_router(grades.router)
 app.include_router(export.router)
 
+@lru_cache(maxsize=1)
+def _alembic_head() -> str | None:
+    try:
+        script = ScriptDirectory.from_config(AlembicConfig("alembic.ini"))
+        return script.get_current_head()
+    except Exception:
+        return None
+
+
 @app.get(
     "/health",
     tags=["Health"],
     summary="Health check",
-    description="Reports service status and whether the database connection is currently working. Unauthenticated.",
+    description=(
+        "Reports service status, whether the database connection is currently working, "
+        "and whether the schema is at the latest Alembic revision. Unauthenticated."
+    ),
 )
 async def health_check(db: AsyncSession = Depends(get_db)):
+    db_connected = False
+    migrations_current = False
     try:
         await db.execute(text("SELECT 1"))
         db_connected = True
+
+        head = _alembic_head()
+        if head is not None:
+            result = await db.execute(text("SELECT version_num FROM alembic_version"))
+            row = result.first()
+            migrations_current = row is not None and row[0] == head
     except Exception:
-        db_connected = False
-    return {"status": "ok" if db_connected else "degraded", "db_connected": db_connected}
+        pass
+
+    healthy = db_connected and migrations_current
+    return {
+        "status": "ok" if healthy else "degraded",
+        "db_connected": db_connected,
+        "migrations_current": migrations_current,
+    }

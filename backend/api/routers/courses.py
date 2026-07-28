@@ -1,17 +1,20 @@
 import json
 import uuid
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
-from sqlalchemy import CursorResult
+from sqlalchemy import CursorResult, delete
 
 from core.database import get_db
 from core.cache import cache_get, cache_set, cache_delete_pattern
 from models.user import User, RoleEnum
 from models.course import Course, ClassSession
+from models.course_staff import CourseStaff
 from models.enrollment import Enrollment
 from api.dependencies import get_current_active_user, RoleChecker
+from api.permissions import require_course_access
 from schemas.course import (
     CourseCreate,
     CourseResponse,
@@ -20,16 +23,17 @@ from schemas.course import (
     ClassSessionCreate,
     ClassSessionResponse,
     EnrolledStudentResponse,
+    StaffAssignRequest,
+    StaffAssignResponse,
+    StaffMemberResponse,
 )
 
 router = APIRouter(prefix="/courses", tags=["Courses"])
 
 require_superadmin = RoleChecker([RoleEnum.SUPERADMIN])
-require_staff = RoleChecker([RoleEnum.SUPERADMIN, RoleEnum.ASPRAK])
-require_view = RoleChecker([RoleEnum.SUPERADMIN, RoleEnum.ASPRAK])
 
 UNAUTHENTICATED_401 = {401: {"description": "Missing or invalid session cookie."}}
-FORBIDDEN_403 = {403: {"description": "Caller's role isn't permitted here, or a password change is still pending."}}
+FORBIDDEN_403 = {403: {"description": "Caller's role isn't permitted here, isn't assigned to this course, or a password change is still pending."}}
 COURSE_NOT_FOUND_404 = {404: {"description": "No course exists with the given course_id."}}
 
 
@@ -38,7 +42,7 @@ COURSE_NOT_FOUND_404 = {404: {"description": "No course exists with the given co
     response_model=CourseResponse,
     summary="Create a course",
     description="Superadmin only. Course `code` must be unique.",
-    responses={**UNAUTHENTICATED_401, **FORBIDDEN_403, 400: {"description": "Course code already exists."}},
+    responses={**UNAUTHENTICATED_401, **FORBIDDEN_403, 409: {"description": "Course code already exists."}},
 )
 async def create_course(
     data: CourseCreate,
@@ -47,12 +51,17 @@ async def create_course(
 ):
     existing = await db.execute(select(Course).where(Course.code == data.code))
     if existing.scalars().first():
-        raise HTTPException(status_code=400, detail="Course code already exists")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Course code already exists")
 
     course = Course(code=data.code, name=data.name)
     db.add(course)
-    await db.commit()
+    try:
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Course code already exists")
     await db.refresh(course)
+    await cache_delete_pattern("cache:courses:*")
     return course
 
 
@@ -61,8 +70,9 @@ async def create_course(
     response_model=list[CourseResponse],
     summary="List courses",
     description=(
-        "A `praktikan` sees only courses they're enrolled in; every other role sees all "
-        "courses. Results are cached for ~30s per (role, user)."
+        "A `praktikan` sees courses they're enrolled in, an `asprak` sees "
+        "courses they're assigned to, and a `superadmin` sees all courses. "
+        "Results are cached for ~30s per (role, user)."
     ),
     responses=UNAUTHENTICATED_401,  # type: ignore
 )
@@ -80,6 +90,12 @@ async def list_courses(
             select(Course)
             .join(Enrollment, Enrollment.course_id == Course.id)
             .where(Enrollment.student_id == current_user.id)
+        )
+    elif current_user.role == RoleEnum.ASPRAK:
+        result = await db.execute(
+            select(Course)
+            .join(CourseStaff, CourseStaff.course_id == Course.id)
+            .where(CourseStaff.user_id == current_user.id)
         )
     else:
         result = await db.execute(select(Course))
@@ -104,10 +120,12 @@ async def _get_course_or_404(db: AsyncSession, course_id: uuid.UUID) -> Course:
     summary="Enroll students in a course",
     description=(
         "Superadmin only. `usernames` are matched against existing accounts (typically "
-        "students' NPMs); usernames with no matching account are ignored, and students "
+        "students' NPMs). Only active `praktikan` accounts are enrolled; usernames that "
+        "match no account are reported in `unmatched_usernames`, and matches that are "
+        "not active praktikan accounts are reported in `skipped_invalid`. Students "
         "already enrolled are skipped rather than duplicated."
     ),
-    responses={**UNAUTHENTICATED_401, **FORBIDDEN_403, **COURSE_NOT_FOUND_404, 400: {"description": "None of the given usernames matched an existing user."}},
+    responses={**UNAUTHENTICATED_401, **FORBIDDEN_403, **COURSE_NOT_FOUND_404, 400: {"description": "None of the given usernames matched an enrollable student account."}},
 )
 async def enroll_students(
     course_id: uuid.UUID,
@@ -118,14 +136,30 @@ async def enroll_students(
     await _get_course_or_404(db, course_id)
 
     if not data.usernames:
-        return {"message": "No usernames provided", "matched": 0, "enrolled": 0, "skipped_duplicates": 0}
+        return {
+            "message": "No usernames provided",
+            "matched": 0,
+            "enrolled": 0,
+            "skipped_duplicates": 0,
+            "unmatched_usernames": [],
+            "skipped_invalid": [],
+        }
 
     result = await db.execute(select(User).where(User.username.in_(data.usernames)))
-    users = result.scalars().all()
-    if not users:
-        raise HTTPException(status_code=400, detail="No matching users found for provided usernames")
+    matched_users = result.scalars().all()
+    matched_names = {u.username for u in matched_users}
+    unmatched = sorted(set(data.usernames) - matched_names)
 
-    values = [{"id": uuid.uuid4(), "course_id": course_id, "student_id": u.id} for u in users]
+    students = [u for u in matched_users if u.role == RoleEnum.PRAKTIKAN and u.is_active]
+    skipped_invalid = sorted(u.username for u in matched_users if u not in students)
+
+    if not students:
+        raise HTTPException(
+            status_code=400,
+            detail="No matching active praktikan accounts found for provided usernames",
+        )
+
+    values = [{"id": uuid.uuid4(), "course_id": course_id, "student_id": u.id} for u in students]
     stmt = pg_insert(Enrollment).values(values)
     stmt = stmt.on_conflict_do_nothing(constraint="uix_course_student")
     result = await db.execute(stmt)
@@ -135,9 +169,11 @@ async def enroll_students(
 
     return {
         "message": "Enrollment successful",
-        "matched": len(users),
+        "matched": len(students),
         "enrolled": result.rowcount,
-        "skipped_duplicates": len(users) - result.rowcount,
+        "skipped_duplicates": len(students) - result.rowcount,
+        "unmatched_usernames": unmatched,
+        "skipped_invalid": skipped_invalid,
     }
 
 
@@ -145,16 +181,19 @@ async def enroll_students(
     "/{course_id}/sessions",
     response_model=ClassSessionResponse,
     summary="Create a class session",
-    description="Superadmin/asprak only. Represents one lab meeting (e.g. 'Pertemuan 1') that attendance and grades are recorded against.",
+    description=(
+        "Superadmin, or an asprak assigned to this course. Represents one lab meeting "
+        "(e.g. 'Pertemuan 1') that attendance and grades are recorded against."
+    ),
     responses={**UNAUTHENTICATED_401, **FORBIDDEN_403, **COURSE_NOT_FOUND_404},
 )
 async def create_session(
     course_id: uuid.UUID,
     data: ClassSessionCreate,
     db: AsyncSession = Depends(get_db),
-    _current_user: User = Depends(require_staff),
+    current_user: User = Depends(get_current_active_user),
 ):
-    await _get_course_or_404(db, course_id)
+    await require_course_access(db, current_user, course_id, write=True)
 
     session = ClassSession(course_id=course_id, title=data.title, date=data.date)
     db.add(session)
@@ -165,17 +204,20 @@ async def create_session(
 
 @router.get(
     "/{course_id}/sessions",
-    response_model=list[ClassSessionResponse],
     summary="List a course's sessions",
-    description="Available to any authenticated, non-locked user. Ordered by date.",
-    responses={**UNAUTHENTICATED_401, **COURSE_NOT_FOUND_404},
+    response_model=list[ClassSessionResponse],
+    description=(
+        "Requires access to the course: superadmin, assigned asprak, or an "
+        "enrolled praktikan. Ordered by date."
+    ),
+    responses={**UNAUTHENTICATED_401, **FORBIDDEN_403, **COURSE_NOT_FOUND_404},
 )
 async def list_sessions(
     course_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    _current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_active_user),
 ):
-    await _get_course_or_404(db, course_id)
+    await require_course_access(db, current_user, course_id, write=False)
 
     result = await db.execute(
         select(ClassSession).where(ClassSession.course_id == course_id).order_by(ClassSession.date)
@@ -188,17 +230,19 @@ async def list_sessions(
     response_model=list[EnrolledStudentResponse],
     summary="List a course's enrolled students",
     description=(
-        "Superadmin/asprak only. Used by the attendance/grading UI to know which "
-        "students to display. Cached for ~30s per course."
+        "Superadmin, or assigned asprak. Used by the attendance/grading UI to "
+        "know which students to display. Cached for ~30s per course."
     ),
     responses={**UNAUTHENTICATED_401, **FORBIDDEN_403, **COURSE_NOT_FOUND_404},
 )
 async def list_students(
     course_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    _current_user: User = Depends(require_view),
+    current_user: User = Depends(get_current_active_user),
 ):
-    await _get_course_or_404(db, course_id)
+    await require_course_access(db, current_user, course_id, write=False)
+    if current_user.role == RoleEnum.PRAKTIKAN:
+        raise HTTPException(status_code=403, detail="Students cannot view the course roster")
 
     cache_key = f"cache:courses:students:{course_id}"
     cached = await cache_get(cache_key)
@@ -215,3 +259,128 @@ async def list_students(
     payload = [EnrolledStudentResponse.model_validate(s).model_dump(mode="json") for s in students]
     await cache_set(cache_key, json.dumps(payload), ttl=30)
     return payload
+
+
+@router.get(
+    "/{course_id}/staff",
+    response_model=list[StaffMemberResponse],
+    summary="List a course's assigned staff",
+    description="Superadmin only. Returns the asprak accounts assigned to this course.",
+    responses={**UNAUTHENTICATED_401, **FORBIDDEN_403, **COURSE_NOT_FOUND_404},
+)
+async def list_staff(
+    course_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    _current_user: User = Depends(require_superadmin),
+):
+    await _get_course_or_404(db, course_id)
+
+    result = await db.execute(
+        select(User)
+        .join(CourseStaff, CourseStaff.user_id == User.id)
+        .where(CourseStaff.course_id == course_id)
+        .order_by(User.username)
+    )
+    return result.scalars().all()
+
+
+@router.post(
+    "/{course_id}/staff",
+    response_model=StaffAssignResponse,
+    summary="Assign asprak to a course",
+    description=(
+        "Superadmin only. Every matched username must be an active `asprak` account; "
+        "otherwise the whole request is rejected with the offending usernames. "
+        "Existing assignments are skipped rather than duplicated."
+    ),
+    responses={
+        **UNAUTHENTICATED_401,
+        **FORBIDDEN_403,
+        **COURSE_NOT_FOUND_404,
+        422: {"description": "One or more matched usernames are not active asprak accounts."},
+    },
+)
+async def assign_staff(
+    course_id: uuid.UUID,
+    data: StaffAssignRequest,
+    db: AsyncSession = Depends(get_db),
+    _current_user: User = Depends(require_superadmin),
+):
+    await _get_course_or_404(db, course_id)
+
+    if not data.usernames:
+        return {
+            "message": "No usernames provided",
+            "matched": 0,
+            "added": 0,
+            "skipped_duplicates": 0,
+            "unmatched_usernames": [],
+        }
+
+    result = await db.execute(select(User).where(User.username.in_(data.usernames)))
+    matched_users = result.scalars().all()
+    matched_names = {u.username for u in matched_users}
+    unmatched = sorted(set(data.usernames) - matched_names)
+
+    invalid = sorted(
+        u.username for u in matched_users
+        if u.role != RoleEnum.ASPRAK or not u.is_active
+    )
+    if invalid:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "message": "Only active asprak accounts can be assigned as course staff",
+                "invalid_usernames": invalid,
+            },
+        )
+    if not matched_users:
+        raise HTTPException(status_code=400, detail="No matching users found for provided usernames")
+
+    values = [{"id": uuid.uuid4(), "course_id": course_id, "user_id": u.id} for u in matched_users]
+    stmt = pg_insert(CourseStaff).values(values)
+    stmt = stmt.on_conflict_do_nothing(constraint="uix_course_staff")
+    result = await db.execute(stmt)
+    assert isinstance(result, CursorResult)
+    await db.commit()
+    await cache_delete_pattern("cache:courses:*")
+
+    return {
+        "message": "Staff assignment successful",
+        "matched": len(matched_users),
+        "added": result.rowcount,
+        "skipped_duplicates": len(matched_users) - result.rowcount,
+        "unmatched_usernames": unmatched,
+    }
+
+
+@router.delete(
+    "/{course_id}/staff/{user_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Remove a staff assignment from a course",
+    description="Superadmin only.",
+    responses={
+        **UNAUTHENTICATED_401,
+        **FORBIDDEN_403,
+        404: {"description": "Course not found, or the user has no assignment on this course."},
+    },
+)
+async def remove_staff(
+    course_id: uuid.UUID,
+    user_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    _current_user: User = Depends(require_superadmin),
+):
+    await _get_course_or_404(db, course_id)
+
+    result = await db.execute(
+        delete(CourseStaff).where(
+            CourseStaff.course_id == course_id,
+            CourseStaff.user_id == user_id,
+        )
+    )
+    assert isinstance(result, CursorResult)
+    if result.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Staff assignment not found")
+    await db.commit()
+    await cache_delete_pattern("cache:courses:*")

@@ -1,4 +1,10 @@
 services:
+  migrate:
+    build:
+      target: dev
+    volumes:
+      - ./backend:/app
+
   backend:
     build:
       target: dev

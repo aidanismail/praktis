@@ -1,6 +1,11 @@
+import logging
+
 from redis import asyncio as aioredis
+from redis.exceptions import RedisError
 
 from core.config import settings
+
+logger = logging.getLogger(__name__)
 
 redis_client: aioredis.Redis | None = None
 
@@ -17,15 +22,25 @@ async def close_redis() -> None:
 async def cache_get(key: str) -> str | None:
     if redis_client is None:
         return None
-    return await redis_client.get(key)
+    try:
+        return await redis_client.get(key)
+    except (RedisError, OSError) as exc:
+        logger.warning("Cache read failed for %s: %s", key, exc)
+        return None
 
 async def cache_set(key: str, value: str, ttl: int = 30) -> None:
     if redis_client is None:
         return
-    await redis_client.set(key, value, ex=ttl)
+    try:
+        await redis_client.set(key, value, ex=ttl)
+    except (RedisError, OSError) as exc:
+        logger.warning("Cache write failed for %s: %s", key, exc)
 
 async def cache_delete_pattern(pattern: str) -> None:
     if redis_client is None:
         return
-    async for key in redis_client.scan_iter(pattern):
-        await redis_client.delete(key)
+    try:
+        async for key in redis_client.scan_iter(pattern):
+            await redis_client.delete(key)
+    except (RedisError, OSError) as exc:
+        logger.warning("Cache invalidation failed for %s: %s", pattern, exc)

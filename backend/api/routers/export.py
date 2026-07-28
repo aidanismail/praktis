@@ -9,12 +9,11 @@ from core.database import get_db
 from models.user import User, RoleEnum
 from models.attendance import Attendance
 from models.grade import Grade
-from api.dependencies import RoleChecker
+from api.dependencies import get_current_active_user
+from api.permissions import require_session_access
 from services.export_service import build_csv, build_xlsx
 
 router = APIRouter(prefix="/export", tags=["Export"])
-
-require_view = RoleChecker([RoleEnum.SUPERADMIN, RoleEnum.ASPRAK])
 
 MEDIA_TYPES = {
     "csv": "text/csv",
@@ -22,7 +21,7 @@ MEDIA_TYPES = {
 }
 
 UNAUTHENTICATED_401 = {401: {"description": "Missing or invalid session cookie."}}
-STAFF_ONLY_403 = {403: {"description": "Requires superadmin/asprak, or a pending password change."}}
+STAFF_ONLY_403 = {403: {"description": "Caller isn't assigned to this session's course, or a password change is pending."}}
 EXPORT_RESPONSES = {
     200: {
         "description": "File download containing one row per student.",
@@ -48,15 +47,19 @@ def _stream(content: bytes, media_type: str, filename: str) -> StreamingResponse
 @router.get(
     "/attendance/{session_id}",
     summary="Export a session's attendance as CSV or XLSX",
-    description="Superadmin/asprak only. Downloads username/email/status for every student marked in the session.",
+    description="Superadmin, or an asprak assigned to the session's course. Downloads username/email/status for every student marked in the session.",
     responses=EXPORT_RESPONSES,  # type: ignore
 )
 async def export_attendance(
     session_id: uuid.UUID,
     format: str = Query("csv", pattern="^(csv|xlsx)$", description="Output file format: 'csv' or 'xlsx'."),
     db: AsyncSession = Depends(get_db),
-    _current_user: User = Depends(require_view),
+    current_user: User = Depends(get_current_active_user),
 ):
+    await require_session_access(db, current_user, session_id, write=False)
+    if current_user.role == RoleEnum.PRAKTIKAN:
+        raise HTTPException(status_code=403, detail="Students cannot export session records")
+
     result = await db.execute(
         select(Attendance, User.username, User.email)
         .join(User, User.id == Attendance.student_id)
@@ -77,15 +80,19 @@ async def export_attendance(
 @router.get(
     "/grades/{session_id}",
     summary="Export a session's grades as CSV or XLSX",
-    description="Superadmin/asprak only. Downloads username/email/score for every student graded in the session.",
+    description="Superadmin, or an asprak assigned to the session's course. Downloads username/email/score for every student graded in the session.",
     responses=EXPORT_RESPONSES,  # type: ignore
 )
 async def export_grades(
     session_id: uuid.UUID,
     format: str = Query("csv", pattern="^(csv|xlsx)$", description="Output file format: 'csv' or 'xlsx'."),
     db: AsyncSession = Depends(get_db),
-    _current_user: User = Depends(require_view),
+    current_user: User = Depends(get_current_active_user),
 ):
+    await require_session_access(db, current_user, session_id, write=False)
+    if current_user.role == RoleEnum.PRAKTIKAN:
+        raise HTTPException(status_code=403, detail="Students cannot export session records")
+
     result = await db.execute(
         select(Grade, User.username, User.email)
         .join(User, User.id == Grade.student_id)

@@ -1,6 +1,8 @@
-import csv
-import io
 import asyncio
+
+from sqlalchemy import or_
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.future import select
 
 from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status, Response, UploadFile, File
@@ -17,12 +19,14 @@ from schemas.common import MessageResponse
 from schemas.user import UserResponse, ChangePasswordRequest, LoginRequest, ImportCsvResponse
 
 from services.user_service import get_user_by_username, get_password_hash, bulk_create_users
+from services.import_service import parse_import_file, ImportRow
 from api.dependencies import get_current_user, RoleChecker
 
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
-from typing import Any
+_DUMMY_HASH = get_password_hash("praktis-timing-pad")
+
 UNAUTHENTICATED_401 = {401: {"description": "Missing or invalid session cookie."}}
 PASSWORD_CHANGE_REQUIRED_403 = {403: {"description": "Account is locked until the user changes their password."}}
 
@@ -48,7 +52,13 @@ async def login(response: Response,
                 ):
 
     user = await get_user_by_username(db, login_data.username)
-    if not user or not verify_password(login_data.password, user.hashed_password):
+    if user is None:
+        verify_password(login_data.password, _DUMMY_HASH)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+        )
+    if not verify_password(login_data.password, user.hashed_password) or not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
@@ -135,21 +145,13 @@ async def read_users_me(current_user: User = Depends(get_current_user)):
 
 require_superadmin = RoleChecker([RoleEnum.SUPERADMIN])
 
-def process_csv_data(rows_list):
+def build_user_rows(rows: list[ImportRow]) -> list[dict]:
     users_to_insert = []
-    for row in rows_list:
-        npm = row.get("npm", "").strip()
-        email = row.get("email", "").strip()
-        
-        if not npm or not email:
-            continue
-            
-        default_password = f"Praktis{npm}"
-        hashed_password = get_password_hash(default_password)
-        
+    for row in rows:
+        hashed_password = get_password_hash(f"Praktis{row.npm}")
         users_to_insert.append({
-            "username": npm,
-            "email": email,
+            "username": row.npm,
+            "email": row.email,
             "role": RoleEnum.PRAKTIKAN,
             "hashed_password": hashed_password,
             "force_password_change": True,
@@ -161,51 +163,98 @@ def process_csv_data(rows_list):
 @router.post(
     "/import-csv",
     response_model=ImportCsvResponse,
-    summary="Bulk-import students from a CSV file",
+    summary="Bulk-import students from a CSV or XLSX file",
     description=(
-        "Superadmin-only. Accepts a `.csv` file with `npm` and `email` columns and creates "
-        "a `praktikan` account for each row: username = NPM, default password = `Praktis{npm}`, "
-        "with `force_password_change=True`. Rows with an NPM that already exists are silently "
-        "skipped (not an error)."
+        "Superadmin-only. Accepts a `.csv` or `.xlsx` file with `npm` and `email` columns "
+        "and creates a `praktikan` account for each valid row: username = NPM, default "
+        "password = `Praktis{npm}`, with `force_password_change=True`. Rows with an NPM or "
+        "email that already exists are skipped and counted; rows that fail validation are "
+        "reported in `invalid_rows` (not an error)."
     ),
     responses={
         **UNAUTHENTICATED_401,
         **PASSWORD_CHANGE_REQUIRED_403,
-        400: {"description": "Not a .csv file, file is empty/unparseable, or no valid rows found."},
+        400: {"description": "Unsupported file type, file is empty/unparseable, or missing npm/email columns."},
+        413: {"description": "File exceeds the size limit."},
+        422: {"description": "File exceeds the maximum number of rows."},
     },
 )
 async def import_students_csv(
-    file: UploadFile = File(..., description="CSV file with `npm` and `email` header columns."),
+    file: UploadFile = File(..., description="CSV or XLSX file with `npm` and `email` header columns."),
     db: AsyncSession = Depends(get_db),
     _current_user: User = Depends(require_superadmin)):
 
-    if not file.filename or not file.filename.endswith(".csv"):
-        raise HTTPException(status_code=400, detail="Invalid file format. Please upload a .csv file.")
-    
-    content = await file.read()
-    try:
-        decoded_content = content.decode('utf-8')
-        reader = csv.DictReader(io.StringIO(decoded_content))
-        rows_list = list(reader)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Failed to parse CSV file: {str(e)}")
+    if not file.filename or not file.filename.lower().endswith((".csv", ".xlsx")):
+        raise HTTPException(status_code=400, detail="Invalid file format. Please upload a .csv or .xlsx file.")
 
-    if not rows_list:
-        raise HTTPException(status_code=400, detail="CSV is empty.")
-
-    users_to_insert = await asyncio.to_thread(process_csv_data, rows_list)
-    
-    if not users_to_insert:
-        raise HTTPException(status_code=400, detail="Missing required 'npm' or 'email' values in rows.")
+    content = await file.read(settings.IMPORT_MAX_BYTES + 1)
+    if len(content) > settings.IMPORT_MAX_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail=f"File exceeds the {settings.IMPORT_MAX_BYTES // (1024 * 1024)}MB size limit.",
+        )
+    if not content:
+        raise HTTPException(status_code=400, detail="File is empty.")
 
     try:
-        inserted_count = await bulk_create_users(db, users_to_insert)
-    except Exception as db_err:
-        raise HTTPException(status_code=400, detail=f"Database insertion failed: {str(db_err)}")
-    
+        parsed = await asyncio.to_thread(parse_import_file, file.filename, content)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except Exception:
+        raise HTTPException(status_code=400, detail="Failed to parse the uploaded file.")
+
+    if parsed.total_rows == 0:
+        raise HTTPException(status_code=400, detail="File contains no data rows.")
+    if parsed.total_rows > settings.IMPORT_MAX_ROWS:
+        raise HTTPException(
+            status_code=422,
+            detail=f"File has {parsed.total_rows} rows; the maximum is {settings.IMPORT_MAX_ROWS}.",
+        )
+
+    skipped_username = 0
+    skipped_email = 0
+    rows_to_insert = parsed.rows
+    if rows_to_insert:
+        npms = [r.npm for r in rows_to_insert]
+        emails = [r.email for r in rows_to_insert]
+        result = await db.execute(
+            select(User.username, User.email).where(
+                or_(User.username.in_(npms), User.email.in_(emails))
+            )
+        )
+        existing_usernames = set()
+        existing_emails = set()
+        for username, email in result.all():
+            existing_usernames.add(username)
+            existing_emails.add(email.lower())
+
+        remaining = []
+        for row in rows_to_insert:
+            if row.npm in existing_usernames:
+                skipped_username += 1
+            elif row.email.lower() in existing_emails:
+                skipped_email += 1
+            else:
+                remaining.append(row)
+        rows_to_insert = remaining
+
+    inserted_count = 0
+    if rows_to_insert:
+        users_to_insert = await asyncio.to_thread(build_user_rows, rows_to_insert)
+        try:
+            inserted_count = await bulk_create_users(db, users_to_insert)
+        except IntegrityError:
+            await db.rollback()
+            raise HTTPException(
+                status_code=409,
+                detail="Import conflicted with concurrently created accounts; please retry.",
+            )
+
     return {
         "message": "Import successful",
-        "total_processed": len(users_to_insert),
-        "total_inserted": inserted_count,
-        "skipped_duplicates": len(users_to_insert) - inserted_count
+        "total_rows": parsed.total_rows,
+        "inserted": inserted_count,
+        "skipped_duplicate_username": skipped_username,
+        "skipped_duplicate_email": skipped_email,
+        "invalid_rows": parsed.invalid_rows,
     }

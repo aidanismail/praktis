@@ -20,10 +20,20 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     # cors
-    CORS_ORIGINS: str = "http://localhost:3000"
+    CORS_ORIGINS: str = "http://localhost:8080"
 
     # environment
     ENVIRONMENT: str = "development"
+
+    # security policies
+    PASSWORD_MIN_LENGTH: int = 8
+
+    # student import limits
+    IMPORT_MAX_BYTES: int = 5 * 1024 * 1024
+    IMPORT_MAX_ROWS: int = 2000
+
+    # module upload limit
+    MODULE_MAX_UPLOAD_BYTES: int = 25 * 1024 * 1024
 
     #redis
     REDIS_URL: str = "redis://localhost:6379/0"
@@ -32,6 +42,7 @@ class Settings(BaseSettings):
     MINIO_ROOT_USER: str
     MINIO_ROOT_PASSWORD: str
     MINIO_ENDPOINT: str
+    MINIO_PUBLIC_ENDPOINT: str = "http://localhost:8080"
     MINIO_USE_SSL: bool = False
     MINIO_BUCKET_NAME: str = "praktis-modules"
 

@@ -1,6 +1,11 @@
+import logging
+
 from fastapi import HTTPException, Request, status
+from redis.exceptions import RedisError
 
 from core import cache
+
+logger = logging.getLogger(__name__)
 
 
 def rate_limiter(times: int, seconds: int, scope: str):
@@ -8,16 +13,18 @@ def rate_limiter(times: int, seconds: int, scope: str):
         if cache.redis_client is None:
             return
 
-        forwarded_for = request.headers.get("x-forwarded-for")
-        if forwarded_for:
-            client_ip = forwarded_for.split(",")[0].strip()
-        else:
-            client_ip = request.client.host if request.client else "unknown"
+        client_ip = request.headers.get("x-real-ip") or (
+            request.client.host if request.client else "unknown"
+        )
         key = f"ratelimit:{scope}:{client_ip}"
 
-        current = await cache.redis_client.incr(key)
-        if current == 1:
-            await cache.redis_client.expire(key, seconds)
+        try:
+            current = await cache.redis_client.incr(key)
+            if current == 1:
+                await cache.redis_client.expire(key, seconds)
+        except (RedisError, OSError) as exc:
+            logger.error("Rate limiter unavailable for %s: %s", scope, exc)
+            return
 
         if current > times:
             raise HTTPException(
