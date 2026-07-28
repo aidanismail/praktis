@@ -1,5 +1,6 @@
 import uuid
-from pydantic import BaseModel, EmailStr, ConfigDict, Field
+from pydantic import BaseModel, EmailStr, ConfigDict, Field, field_validator
+from core.config import settings
 from models.user import RoleEnum
 
 
@@ -26,14 +27,33 @@ class Token(BaseModel):
 
 class ChangePasswordRequest(BaseModel):
     old_password: str = Field(..., description="The user's current password.")
-    new_password: str = Field(..., description="New password to set. Must differ from the old password.")
+    new_password: str = Field(
+        ...,
+        min_length=settings.PASSWORD_MIN_LENGTH,
+        description="New password to set. Must differ from the old password.",
+    )
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_bcrypt_length(cls, v: str) -> str:
+        if len(v.encode("utf-8")) > 72:
+            raise ValueError("Password cannot exceed 72 bytes (UTF-8)")
+        return v
 
 class LoginRequest(BaseModel):
     username: str = Field(..., description="Login username (NPM for students).", examples=["140810220001"])
     password: str = Field(..., description="Account password.")
 
+class ImportRowError(BaseModel):
+    row: int = Field(..., description="1-based data row number in the uploaded file.")
+    reason: str = Field(..., description="Why the row was rejected.")
+
 class ImportCsvResponse(BaseModel):
     message: str = Field(..., description="Summary of the import outcome.", examples=["Import successful"])
-    total_processed: int = Field(..., description="Number of valid rows parsed from the CSV.")
-    total_inserted: int = Field(..., description="Number of new student accounts actually created.")
-    skipped_duplicates: int = Field(..., description="Rows skipped because the username (NPM) already existed.")
+    total_rows: int = Field(..., description="Number of data rows found in the file.")
+    inserted: int = Field(..., description="Number of new student accounts actually created.")
+    skipped_duplicate_username: int = Field(..., description="Rows skipped because the username (NPM) already existed.")
+    skipped_duplicate_email: int = Field(..., description="Rows skipped because the email already existed.")
+    invalid_rows: list[ImportRowError] = Field(
+        default_factory=list, description="Rows rejected during validation, with reasons."
+    )

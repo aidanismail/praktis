@@ -1,6 +1,7 @@
 import uuid
 from datetime import date as date_type
 from pydantic import BaseModel, ConfigDict, Field
+from models.user import RoleEnum
 
 
 class CourseCreate(BaseModel):
@@ -40,6 +41,35 @@ class EnrolledStudentResponse(BaseModel):
 
 class EnrollResponse(BaseModel):
     message: str = Field(..., description="Summary of the enrollment outcome.", examples=["Enrollment successful"])
-    matched: int = Field(..., description="Number of provided usernames that matched an existing user.")
+    matched: int = Field(..., description="Number of provided usernames that matched an active praktikan account.")
     enrolled: int = Field(..., description="Number of students newly enrolled in the course.")
     skipped_duplicates: int = Field(..., description="Number of students who were already enrolled and thus skipped.")
+    unmatched_usernames: list[str] = Field(
+        default_factory=list, description="Usernames that matched no existing account."
+    )
+    skipped_invalid: list[str] = Field(
+        default_factory=list,
+        description="Usernames that matched an account which is not an active praktikan and were not enrolled.",
+    )
+
+class StaffAssignRequest(BaseModel):
+    usernames: list[str] = Field(
+        ..., description="Usernames of asprak accounts to assign to this course.", examples=[["asprak1", "asprak2"]]
+    )
+
+class StaffAssignResponse(BaseModel):
+    message: str = Field(..., description="Summary of the assignment outcome.")
+    matched: int = Field(..., description="Number of provided usernames that matched an active asprak account.")
+    added: int = Field(..., description="Number of new staff assignments created.")
+    skipped_duplicates: int = Field(..., description="Assignments skipped because they already existed.")
+    unmatched_usernames: list[str] = Field(
+        default_factory=list, description="Usernames that matched no existing account."
+    )
+
+class StaffMemberResponse(BaseModel):
+    id: uuid.UUID = Field(..., description="Unique user identifier.")
+    username: str = Field(..., description="Staff member's username.")
+    email: str = Field(..., description="Staff member's email address.")
+    role: RoleEnum = Field(..., description="Staff member's role.")
+
+    model_config = ConfigDict(from_attributes=True)

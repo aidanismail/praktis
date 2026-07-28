@@ -49,12 +49,13 @@ services:
       timeout: 5s
       retries: 5
 
-  backend:
+  migrate:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: praktis_backend
-    restart: unless-stopped
+    container_name: praktis_migrate
+    restart: "no"
+    command: ["alembic", "upgrade", "head"]
     env_file:
       - .env
     environment:
@@ -67,10 +68,35 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - praktis_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: praktis_backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      MINIO_ENDPOINT: storage:9000
+      MINIO_PUBLIC_ENDPOINT: ${MINIO_PUBLIC_ENDPOINT:-http://localhost:8080}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_USE_SSL: "false"
+      MINIO_BUCKET_NAME: praktis-modules
+      REDIS_URL: redis://cache:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
       storage:
         condition: service_started
       cache:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     networks:
       - praktis_network
 
