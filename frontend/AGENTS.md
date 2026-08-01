@@ -1,0 +1,79 @@
+# Frontend-Specific Instructions
+
+These instructions extend the repository-root `AGENTS.md` for work inside `frontend/`.
+
+## Default edit permission
+
+Frontend work is allowed only after the root `PLANS.MD` is approved. The default product scope is the `asprak` and `praktikan` experiences.
+
+Do not implement `superadmin` features unless the owner explicitly assigns them.
+
+## Current stack
+
+- Next.js 16 App Router
+- React 19
+- TypeScript
+- Tailwind CSS 4
+- TanStack Query
+- React Hook Form
+- Zod
+- Zustand
+- Lucide React
+- pnpm 11.1.2
+
+## Structure conventions
+
+- Keep `src/app/**/page.tsx` and layouts thin.
+- Put domain behavior in `src/features/<feature>/`.
+- Preferred feature folders, when relevant:
+  - `api/`
+  - `components/`
+  - `constants/`
+  - `hooks/`
+  - `schemas/`
+  - `types/`
+  - `utils/`
+- Put cross-feature API plumbing in `src/lib/api/`.
+- Put shared user/session state in the existing auth store only when it is genuinely client state.
+- Do not duplicate TanStack Query server data into Zustand.
+- Use kebab-case filenames and named exports for reusable components and hooks.
+- Preserve strict types. Avoid `any`, broad assertions, and silent response coercion.
+- Reuse the existing API error normalization rather than rendering raw backend objects.
+
+## API integration
+
+- Use browser-facing endpoints beginning with `/api/`.
+- Never add a browser API base URL environment variable for local Docker development.
+- Keep `credentials: "include"`.
+- Do not store or inspect the HttpOnly token.
+- Do not invent endpoint names, field names, enum values, or pagination contracts.
+- When an API contract is missing or ambiguous, document it in `PLANS.MD` and ask the owner.
+- Do not modify backend code to make frontend integration easier without explicit authorization.
+
+## Authentication and routing
+
+- Active roles are `superadmin`, `asprak`, and `praktikan`.
+- Only `praktikan` is forced through first-login password change when `force_password_change` is true.
+- Preserve route protection and avoid redirect loops.
+- Logout must call the backend endpoint, clear client user state, and redirect to login.
+- UI role checks are for navigation and presentation only, not security authorization.
+
+## UI expectations
+
+- White-mode professional academic dashboard.
+- Left sidebar navigation and right content area.
+- Fast interaction with minimal full-page loading.
+- Prefer dialogs or drawers for contained edit/create actions when suitable.
+- Every data view needs loading, empty, error, and success behavior.
+- Every form needs labels, validation feedback, disabled/pending states, and keyboard usability.
+- Preserve responsive behavior; do not design only for one desktop width.
+
+## Frontend validation
+
+From `frontend/`:
+
+- `pnpm typecheck`
+- `pnpm lint`
+- `pnpm build`
+
+There is currently no `pnpm test` script. Do not run or claim it exists. If automated frontend testing is needed, propose the framework and dependency changes in `PLANS.MD` and wait for approval.
