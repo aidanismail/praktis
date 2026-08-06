@@ -16,7 +16,8 @@ from core.database import Base
 
 from models.user import Base as UserBase 
 from models.module import Module
-from models.course import Course, ClassSession
+from models.course import Course
+from models.class_session import ClassSession
 from models.attendance import Attendance
 from models.enrollment import Enrollment
 from models.grade import Grade

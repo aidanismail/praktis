@@ -17,6 +17,7 @@ from api.routers import users
 from api.routers import modules
 from api.routers import attendance
 from api.routers import courses
+from api.routers import class_sessions
 from api.routers import grades
 from api.routers import export
 
@@ -103,6 +104,7 @@ app.include_router(users.router)
 app.include_router(modules.router)
 app.include_router(attendance.router)
 app.include_router(courses.router)
+app.include_router(class_sessions.router)
 app.include_router(grades.router)
 app.include_router(export.router)
 

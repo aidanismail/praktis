@@ -5,7 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from models.user import User, RoleEnum
-from models.course import Course, ClassSession
+from models.course import Course
+from models.class_session import ClassSession
 from models.course_staff import CourseStaff
 from models.enrollment import Enrollment
 

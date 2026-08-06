@@ -73,6 +73,18 @@ class StorageService:
                 raise
         return await asyncio.to_thread(_head)
 
+    async def get_object_bytes(self, object_name: str, byte_range: str = "bytes=0-10") -> bytes | None:
+        """Return the specified byte range of the object, or None if it doesn't exist."""
+        def _get():
+            try:
+                response = self.internal.get_object(Bucket=self.bucket_name, Key=object_name, Range=byte_range)
+                return response['Body'].read()
+            except ClientError as exc:
+                if exc.response.get("Error", {}).get("Code") in ("404", "NoSuchKey", "NotFound"):
+                    return None
+                raise
+        return await asyncio.to_thread(_get)
+
     async def delete_object(self, object_name: str) -> None:
         await asyncio.to_thread(
             self.internal.delete_object, Bucket=self.bucket_name, Key=object_name
