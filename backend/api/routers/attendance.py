@@ -49,6 +49,9 @@ async def bulk_update_attendance(
 ):
     session = await require_session_access(db, current_user, session_id, write=True)
 
+    if session.attendance_status != "OPEN":
+        raise HTTPException(status_code=400, detail="Attendance window is not open for this session")
+
     if not data.records:
         return {"message": "No records to update"}
 

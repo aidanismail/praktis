@@ -10,7 +10,8 @@ from sqlalchemy import CursorResult, delete
 from core.database import get_db
 from core.cache import cache_get, cache_set, cache_delete_pattern
 from models.user import User, RoleEnum
-from models.course import Course, ClassSession
+from models.course import Course
+from models.class_session import ClassSession
 from models.course_staff import CourseStaff
 from models.enrollment import Enrollment
 from api.dependencies import get_current_active_user, RoleChecker
@@ -41,25 +42,37 @@ COURSE_NOT_FOUND_404 = {404: {"description": "No course exists with the given co
     "/",
     response_model=CourseResponse,
     summary="Create a course",
-    description="Superadmin only. Course `code` must be unique.",
-    responses={**UNAUTHENTICATED_401, **FORBIDDEN_403, 409: {"description": "Course code already exists."}},
+    description="Superadmin only. The combination of `code`, `academic_year`, and `semester` must be unique.",
+    responses={**UNAUTHENTICATED_401, **FORBIDDEN_403, 409: {"description": "This course offering already exists."}},
 )
 async def create_course(
     data: CourseCreate,
     db: AsyncSession = Depends(get_db),
     _current_user: User = Depends(require_superadmin),
 ):
-    existing = await db.execute(select(Course).where(Course.code == data.code))
+    existing = await db.execute(
+        select(Course).where(
+            Course.code == data.code,
+            Course.academic_year == data.academic_year,
+            Course.semester == data.semester
+        )
+    )
     if existing.scalars().first():
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Course code already exists")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This course offering already exists")
 
-    course = Course(code=data.code, name=data.name)
+    course = Course(
+        code=data.code,
+        name=data.name,
+        academic_year=data.academic_year,
+        semester=data.semester,
+        is_active=data.is_active
+    )
     db.add(course)
     try:
         await db.commit()
     except IntegrityError:
         await db.rollback()
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Course code already exists")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This course offering already exists")
     await db.refresh(course)
     await cache_delete_pattern("cache:courses:*")
     return course
