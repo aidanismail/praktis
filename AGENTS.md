@@ -31,6 +31,8 @@ Before changing implementation files for any coding task:
 
 Planning and read-only inspection are allowed before approval. Implementation edits are not.
 
+Record whether the owner wants direct agent edits or ready-to-type guidance. Approval does not override an explicit ready-to-type preference.
+
 For a trivial documentation-only correction, still update `PLANS.MD`, but the plan may be brief.
 
 ## Git restrictions
@@ -82,7 +84,7 @@ Non-destructive schema upgrades may be proposed in `PLANS.MD`. Because backend c
 - Browser authentication uses backend-managed HttpOnly cookies. Never store access tokens in Zustand, localStorage, sessionStorage, or client-readable cookies.
 - Preserve `credentials: "include"` for authenticated browser requests.
 - Nginx strips the browser-facing `/api/` prefix before forwarding requests to FastAPI. Do not change that contract casually.
-- Keep route `page.tsx` files thin. Put feature behavior in `src/features/<feature>/`.
+- Keep `frontend/app/**/page.tsx` files thin. Put feature behavior in `frontend/features/<feature>/`.
 - Prefer modular components, typed API payloads, schemas, hooks, and constants over large route components.
 - Reuse existing components and patterns before creating new abstractions.
 - Do not invent backend endpoints or response shapes. Inspect the existing contract or ask the owner.
@@ -91,11 +93,11 @@ Non-destructive schema upgrades may be proposed in `PLANS.MD`. Because backend c
 
 ### Asprak
 
-Expected domain areas include assigned practicum classes, module management, attendance, grading, and report/export interactions.
+Expected domain areas include assigned academic-period practicum courses; full module and class-session lifecycle; attendance; grade entry and per-session publication; and report/export interactions. Product requirements do not prove a backend contract exists.
 
 ### Praktikan
 
-Expected domain areas include enrolled practicum classes, module access/download, personal attendance, released grades, profile, and first-login password change.
+Expected domain areas include enrolled academic-period courses, visible module access/download, personal attendance, published grades only, profile, and first-login password change.
 
 ### Superadmin
 
@@ -113,7 +115,7 @@ After approved implementation:
 6. Review the final diff for regressions, security issues, performance risks, accessibility issues, and accidental scope expansion.
 7. Report every command run and whether it passed, failed, or was skipped.
 
-Current known baseline:
+Recorded baseline from August 1, 2026:
 
 - Frontend `pnpm typecheck`: passes.
 - Frontend `pnpm lint`: passes.
@@ -124,6 +126,8 @@ Current known baseline:
 - `docker compose config` passes in the provided local baseline.
 
 Read `docs/TESTING_AND_QUALITY.md` before validation.
+
+Backend tests execute `TRUNCATE ... CASCADE` against the configured test database. Never run them until `TEST_DATABASE_URL` is explicitly resolved and verified as disposable test-only data.
 
 ## Performance requirements
 
@@ -136,6 +140,7 @@ For every implementation review:
 - use TanStack Query for server-state caching where appropriate
 - avoid premature memoization, but investigate visible rerender or request duplication
 - verify file-size and row-count constraints for upload/import interfaces
+- treat approximately 20 courses, 200+ Praktikan users total, and 8-10 modules per course as the initial scale; still bound retained multi-year histories
 - check responsive layout and keyboard usability
 
 ## Security requirements
@@ -150,6 +155,8 @@ For every implementation review:
 - do not log credentials or complete authentication payloads
 - preserve same-origin Nginx routing
 - flag any backend authorization gap to the owner instead of patching backend code without permission
+- treat unpublished grades as private and hidden modules as inaccessible to Praktikan
+- never claim extension-only upload checks prove actual PDF/DOCX content
 
 ## Documentation map
 
@@ -166,6 +173,7 @@ Read only the documents relevant to the current task:
 - `docs/ROADMAP.md`: current and future product direction
 - `docs/CODE_REVIEW.md`: final review checklist
 - `docs/SKILLS.md`: available repository skills
+- `BAGAS_BACKEND_HANDOFF.md`: current proposed backend gaps; proposals are not confirmed contracts
 
 ## Final response format
 

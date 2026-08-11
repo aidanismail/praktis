@@ -1,76 +1,89 @@
 # Product Roadmap
 
-## Completed foundation
+Last updated: August 2, 2026
+
+Roadmap labels distinguish implemented foundations from product requirements and blocked contracts. A listed feature is not complete merely because a placeholder screen or partial endpoint exists.
+
+## Implemented foundation
 
 - Docker Compose development environment
-- Nginx same-origin routing
+- Nginx same-origin `/api/` routing
 - PostgreSQL, MinIO, and Redis services
 - Alembic migration service
-- cookie-based authentication integration
-- login, logout, current-user resolution, and first-login password change
-- role-aware dashboard shell and placeholder navigation
+- backend-managed cookie login/logout/current-user/password-change endpoints
+- frontend login, password-change, route-guard, and role-dashboard foundation
+- role-aware dashboard shell with placeholder feature navigation
+- backend course assignment/enrollment, module presign/confirm/list, attendance, grade entry, and export foundations
 - GitHub Actions CI foundation
 
-## Current ownership split
+## Stabilization before feature expansion
 
-### Aidan / frontend agent
+### Aidan/frontend
 
-- Asprak workflows
-- Praktikan workflows
-- frontend integration with confirmed backend contracts
-- UX, accessibility, loading/error behavior, performance, and frontend security review
+- resolve production dependency advisories
+- correct auth response types
+- remove avoidable duplicate `/auth/me` requests
+- distinguish unauthorized responses from transient failures
+- make logout failure and pending behavior accurate
+- preserve accessibility and responsive behavior
 
-### Bagas
+### Bagas/backend handoff
 
-- Backend implementation and contracts
-- Superadmin workflows
-- database and migrations
-- auth/authorization enforcement
-- import/export processing
-- MinIO and Redis backend behavior
+P0 contracts required for complete product behavior are detailed in `BAGAS_BACKEND_HANDOFF.md`:
 
-## Suggested Asprak sequence
+- academic-period course identity
+- per-session grade publish/unpublish and Praktikan privacy
+- complete module edit/replace/delete/visibility lifecycle
+- class-session update/reschedule and safe deletion/archive
 
-1. Assigned practicum class list
-2. Class detail shell
-3. Module list and upload integration
-4. Attendance session and roster UI
-5. Attendance save/error handling
-6. Grade entry and release-status UI
-7. Reports/export integration
+Pre-pilot security items include unpredictable temporary passwords, the Praktikan-only forced-password invariant, and the effective import proxy limit.
 
-Each item requires a fresh owner-approved `PLANS.MD`.
+## Asprak delivery sequence
 
-## Suggested Praktikan sequence
+Each implementation slice requires a current owner-approved `PLANS.MD` and a confirmed backend contract.
 
-1. Enrolled practicum class list
-2. Class detail and module list
-3. Module view/download behavior
+1. Assigned academic-period course list
+2. Course detail shell and roster context
+3. Module list/upload
+4. Module edit, replace, visibility, and delete
+5. Class-session create/list/edit/reschedule/delete-or-archive
+6. Attendance roster, local interaction, explicit save, and failure recovery
+7. Grade entry and draft review
+8. Grade publish/unpublish/correct/republish
+9. Reports and export integration
+
+Static design work may begin earlier, but final integration must not invent P0 contracts.
+
+## Praktikan delivery sequence
+
+1. Enrolled academic-period course list
+2. Course detail and visible module list
+3. Module view/download
 4. Personal attendance history
-5. Released grades
+5. Published grades only
 6. Profile/account information
-
-Each item requires a fresh owner-approved `PLANS.MD`.
 
 ## Superadmin
 
-Handled by Bagas. The frontend agent must not implement this roadmap area without explicit reassignment.
+Bagas owns Superadmin, course/enrollment/staff administration, import behavior, and related frontend work unless Aidan explicitly reassigns a task.
 
 ## Quality work
 
-- introduce frontend automated testing after owner approval of framework and dependencies
-- resolve or document backend Pytest baseline errors with Bagas
-- strengthen CI environment-name consistency
+- introduce an approved frontend automated-test framework
+- resolve or document the backend Pytest baseline with Bagas
+- add contract tests for publication, module lifecycle, session safety, and authorization
+- remove CI environment-name inconsistencies
 - add targeted accessibility checks
-- add performance budgets once representative screens and data sizes exist
+- add performance budgets and bounded history contracts as representative data grows
+- validate production dependency security without audit suppression
 
 ## Deployment
 
-Production server setup and CD remain deferred until the university server, domain, HTTPS, secrets, backup, and operational ownership are ready.
+Production setup and CD remain deferred until the university server, domain, HTTPS, secret management, least-privilege storage credentials, backups, monitoring, and operational ownership are ready.
 
 ## Future possibilities, not current scope
 
 - richer LMS features
 - quizzes, midterms, and final exams
 - secure examination tooling
-- mobile client consuming the FastAPI contract
+- mobile client consuming the confirmed FastAPI contract

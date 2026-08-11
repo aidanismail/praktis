@@ -2,67 +2,69 @@
 
 Use this after implementation and before returning control to the owner.
 
-## Scope
+## Scope and contract
 
-- [ ] The implementation matches the approved `PLANS.MD`.
-- [ ] No backend files changed without explicit authorization.
-- [ ] No Superadmin feature changed without explicit authorization.
-- [ ] No unrelated refactor or formatting noise was introduced.
-- [ ] No Git write/history action was performed.
+- [ ] Work matches the approved `PLANS.MD` and chosen direct-edit/ready-to-type mode.
+- [ ] Current behavior is not confused with a proposed target contract.
+- [ ] No backend, infrastructure, or Superadmin file changed without explicit authorization.
+- [ ] No unrelated refactor, formatting noise, generated artifact, or Git write occurred.
+- [ ] Any unresolved backend gap is recorded in `BAGAS_BACKEND_HANDOFF.md`.
 
 ## Correctness
 
-- [ ] Success path works.
-- [ ] Loading, empty, validation-error, server-error, and unauthorized states are handled.
-- [ ] API fields and enum values match the confirmed backend contract.
-- [ ] Role-specific routing does not loop or leak another role's interface.
-- [ ] State is not duplicated unnecessarily.
+- [ ] Success, loading, empty, validation, network/server, unauthorized, forbidden, retry, and conflict states are handled.
+- [ ] API fields, enum wire values, methods, and errors match the confirmed contract.
+- [ ] Academic-period identity is displayed when course offerings could be confused.
+- [ ] Role routing does not loop or leak another role's interface.
+- [ ] Server state is not copied unnecessarily into Zustand.
+
+## Lifecycle and privacy
+
+- [ ] Draft/unpublished grades never reach Praktikan UI or any Praktikan-facing export.
+- [ ] Publish, unpublish, correct, and republish states remain explicit.
+- [ ] Hidden modules remain hidden from Praktikan.
+- [ ] Replace/delete/session-delete flows handle confirmation and partial failure.
+- [ ] No UI implies successful deletion when backend/storage cleanup failed.
+- [ ] Academic records are not silently destroyed by session deletion.
 
 ## Frontend architecture
 
-- [ ] Route files remain thin.
-- [ ] Feature code is modular and colocated appropriately.
-- [ ] Types avoid `any` and unjustified assertions.
-- [ ] Shared abstractions are genuinely shared.
-- [ ] Same-origin `/api/` routing and cookie credentials are preserved.
+- [ ] Routes under `frontend/app/` remain thin.
+- [ ] Feature behavior stays under `frontend/features/<feature>/`.
+- [ ] Shared API plumbing stays under `frontend/lib/api/`.
+- [ ] Types avoid `any`, unjustified assertions, and token-shaped browser responses.
+- [ ] Same-origin `/api/` and `credentials: include` remain intact.
 
 ## UX and accessibility
 
-- [ ] Controls have visible labels.
-- [ ] Keyboard navigation and focus behavior work.
+- [ ] Controls have visible labels and native keyboard behavior.
+- [ ] Focus, dialogs/drawers, confirmations, and status messages are usable.
 - [ ] Pending actions cannot be submitted repeatedly.
-- [ ] Errors are understandable and do not expose internals.
-- [ ] Layout works at representative desktop and mobile widths.
+- [ ] Errors are understandable and expose no internals.
+- [ ] Representative desktop and mobile widths work.
 
 ## Performance
 
-- [ ] No obvious duplicate requests.
-- [ ] No unnecessary large client component boundary.
-- [ ] Large lists are paginated or otherwise bounded.
-- [ ] Expensive work is not repeated during every render.
-- [ ] New dependencies are justified and approved.
+- [ ] No obvious duplicate request or invalidation loop exists.
+- [ ] Client-component boundaries are justified.
+- [ ] Lists are bounded when expected retained size requires it.
+- [ ] Expensive work is not repeated on every render.
+- [ ] New dependencies are approved and justified.
+- [ ] Cache behavior cannot expose stale role, publication, or visibility data improperly.
 
 ## Security
 
-- [ ] No secrets, tokens, passwords, or private env values appear in code or logs.
-- [ ] Token storage remains HttpOnly/backend-managed.
-- [ ] Role UI is not presented as authorization.
+- [ ] Tokens, passwords, secrets, private env values, and stack traces are absent.
+- [ ] Backend-managed HttpOnly token storage remains intact.
+- [ ] Frontend role UI is not treated as authorization.
 - [ ] User-controlled content is rendered safely.
-- [ ] Upload constraints and error cases are represented accurately.
+- [ ] Upload type, size, intent, and cleanup assumptions match the backend.
+- [ ] Backend tests, if authorized, target an explicitly verified disposable database.
 
-## Validation
+## Validation and report
 
-- [ ] `pnpm typecheck`
-- [ ] `pnpm lint`
-- [ ] `pnpm build`
-- [ ] Relevant automated tests, or explicit “not available” report
-- [ ] Relevant manual scenarios
-- [ ] Docker checks when service configuration changed
-
-## Final report
-
-- [ ] Lists changed files.
-- [ ] Lists every validation command and result.
-- [ ] Includes performance findings.
-- [ ] Includes security findings.
-- [ ] Includes known limitations and backend assumptions.
+- [ ] Every command is listed with PASS, FAIL, SKIPPED, or NOT AVAILABLE.
+- [ ] Frontend typecheck, lint, and build ran when required.
+- [ ] Automated tests ran when available and safe, or limitations are explicit.
+- [ ] Performance, security, accessibility, API assumptions, and known gaps are reported.
+- [ ] Changed files are listed and owner changes are preserved.

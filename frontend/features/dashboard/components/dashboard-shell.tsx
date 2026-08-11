@@ -39,7 +39,7 @@ export function DashboardShell({ user }: DashboardShellProps) {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50 text-slate-950">
+    <div className="flex min-h-dvh items-start bg-slate-50 text-slate-950">
       <DashboardSidebar
         items={navigationItems}
         activeItemId={activeItemId}

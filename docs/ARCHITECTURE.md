@@ -2,7 +2,7 @@
 
 ## System shape
 
-Praktis uses a separated frontend/backend architecture inside one Docker Compose development environment.
+Praktis uses a separated frontend/backend architecture in one Docker Compose development environment.
 
 ```text
 Browser
@@ -33,19 +33,18 @@ FastAPI
 
 The backend waits for database health, Redis health, MinIO startup, and successful migration completion.
 
-## Browser-facing URLs
+## Local host exposure
 
-- Application: `http://localhost:8080`
+- Application and API entry point: `http://localhost:8080`
 - Swagger: `http://localhost:8080/docs`
-- API: `http://localhost:8080/api/...`
-- MinIO console: `http://localhost:9001`
-- PostgreSQL host access: `localhost:5432`
+- PostgreSQL is host-published on port `5432`.
+- MinIO API and console are host-published on ports `9000` and `9001`.
 
-Direct browser calls to backend container port 8000 are not part of the standard workflow.
+These direct ports exist in the current local Compose configuration. They must not be described as internal-only. Production exposure, binding, firewalling, TLS, and least-privilege credentials remain deployment decisions.
+
+Direct browser calls to backend container port `8000` are not part of the standard workflow.
 
 ## Nginx API-prefix behavior
-
-The Nginx configuration uses:
 
 ```nginx
 location /api/ {
@@ -53,59 +52,80 @@ location /api/ {
 }
 ```
 
-Therefore a browser request to `/api/auth/me` is forwarded to FastAPI as `/auth/me`. Frontend endpoint constants must retain the browser-facing `/api/` prefix.
+A browser request to `/api/auth/me` is forwarded as `/auth/me`. Frontend constants retain `/api/`; Nginx owns prefix removal.
+
+The MinIO location currently sets `client_max_body_size 30m`, supporting the 25 MiB module policy. The `/api/` location has no matching repository-defined body-size setting, so the effective student-import limit may differ from the backend's 5 MiB policy until Bagas aligns the proxy contract.
 
 ## Frontend architecture
 
-Known conventions:
+Actual repository paths:
 
-- App Router routes under `src/app/`
-- feature-oriented logic under `src/features/`
-- shared API client under `src/lib/api/`
-- authenticated user UI state in Zustand
-- remote server state in TanStack Query where appropriate
-- forms with React Hook Form and Zod
+- routes: `frontend/app/`
+- feature behavior: `frontend/features/`
+- shared API plumbing: `frontend/lib/api/`
+- shared query setup: `frontend/lib/react-query/`
+- client UI state: `frontend/stores/`
+- shared types/constants: `frontend/types/` and `frontend/constants/`
 
-Route files should compose feature components rather than contain feature implementations.
+Route files should stay thin and compose feature components. TanStack Query owns remote server state where appropriate. Zustand stores genuine client/session-derived UI state and never stores tokens.
+
+## Backend architecture
+
+- FastAPI routers: `backend/api/routers/`
+- authorization helpers: `backend/api/dependencies.py` and `backend/api/permissions.py`
+- Pydantic schemas: `backend/schemas/`
+- SQLAlchemy models: `backend/models/`
+- services: `backend/services/`
+- Alembic history: `backend/migrations/`
+- tests: `backend/tests/`
+
+Backend implementation is Bagas-owned. Frontend work may inspect these files but cannot change them without explicit authorization.
+
+## Domain boundaries
+
+### Current implementation
+
+- Course contains globally unique code and name.
+- Class sessions belong to a course.
+- Enrollment and staff assignment scope Praktikan and Asprak access.
+- Modules use a presign/confirm/list flow.
+- Attendance and grades are stored per session/student.
+
+### Confirmed target gaps
+
+- Course must represent an academic-period offering.
+- Module edit/replace/delete/visibility and safe storage lifecycle are missing.
+- Session update/reschedule and safe deletion/archive are missing.
+- Session-level grade publication is missing.
+
+Do not design final frontend contracts for these gaps until `BAGAS_BACKEND_HANDOFF.md` is confirmed by Bagas.
 
 ## Authentication architecture
 
 - FastAPI issues and invalidates an HttpOnly cookie.
-- Browser fetch requests include credentials.
-- The frontend calls `/api/auth/me` to resolve the current user.
-- Zustand stores the user/session-derived UI state, not the token.
-- Only Praktikan users with `force_password_change: true` are redirected to change-password.
+- Browser fetch includes credentials through the shared API client.
+- `/api/auth/me` resolves the current user.
+- Only Praktikan with `force_password_change: true` is intended to be redirected.
+- Frontend role UI is not authorization.
 
-See `docs/AUTH_AND_RBAC.md`.
+See `docs/AUTH_AND_RBAC.md` for the current backend mismatch and frontend stabilization status.
 
 ## Storage architecture
 
-- Backend internal endpoint: `storage:9000`
-- Browser/public endpoint defaults to `http://localhost:8080`
-- Bucket name: `praktis-modules`
+- Internal endpoint: `storage:9000`
+- Public signing endpoint defaults to `http://localhost:8080`
+- Bucket: `praktis-modules`
 - Nginx proxies `/praktis-modules/` to MinIO
-- Current configured module upload maximum: 25 MiB
-- Nginx request-body maximum for the storage location: 30 MiB
+- Module maximum: 25 MiB
+- Storage-location Nginx maximum: 30 MiB
 
-Do not expose MinIO credentials in frontend code.
-
-## Environment model
-
-The backend settings require:
-
-- PostgreSQL credentials and database URL
-- JWT secret and algorithm
-- CORS origins
-- environment name
-- password policy
-- import/upload limits
-- Redis URL
-- MinIO credentials and endpoints
-
-Environment files are local secrets and must remain uncommitted. Public frontend environment variables must not contain credentials or server secrets.
+The current application signs with MinIO root credentials. Production should use a least-privilege application identity. Presigned URLs must remain short-lived and must not be confused with exposing the secret key.
 
 ## Current limitations
 
-- The complete repository tree was not supplied, so agents must inspect relevant directories before planning changes.
-- Production server infrastructure is not provisioned yet.
-- CI exists; deployment automation is deferred.
+- Production infrastructure is not provisioned.
+- CI exists; CD is deferred.
+- P0 backend contracts in `BAGAS_BACKEND_HANDOFF.md` are not implemented.
+- Frontend feature screens remain mostly placeholders.
+- Frontend automated tests are not configured.
+- Backend tests have a known erroring baseline and a destructive truncation fixture for the selected test database.

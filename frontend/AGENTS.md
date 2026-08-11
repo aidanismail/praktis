@@ -8,6 +8,8 @@ Frontend work is allowed only after the root `PLANS.MD` is approved. The default
 
 Do not implement `superadmin` features unless the owner explicitly assigns them.
 
+When Aidan requests ready-to-type collaboration, provide ordered code or patches and review what Aidan enters; do not edit implementation files silently.
+
 ## Current stack
 
 - Next.js 16 App Router
@@ -23,8 +25,8 @@ Do not implement `superadmin` features unless the owner explicitly assigns them.
 
 ## Structure conventions
 
-- Keep `src/app/**/page.tsx` and layouts thin.
-- Put domain behavior in `src/features/<feature>/`.
+- Keep `app/**/page.tsx` and layouts thin.
+- Put domain behavior in `features/<feature>/`.
 - Preferred feature folders, when relevant:
   - `api/`
   - `components/`
@@ -33,7 +35,7 @@ Do not implement `superadmin` features unless the owner explicitly assigns them.
   - `schemas/`
   - `types/`
   - `utils/`
-- Put cross-feature API plumbing in `src/lib/api/`.
+- Put cross-feature API plumbing in `lib/api/`.
 - Put shared user/session state in the existing auth store only when it is genuinely client state.
 - Do not duplicate TanStack Query server data into Zustand.
 - Use kebab-case filenames and named exports for reusable components and hooks.
@@ -48,6 +50,7 @@ Do not implement `superadmin` features unless the owner explicitly assigns them.
 - Do not store or inspect the HttpOnly token.
 - Do not invent endpoint names, field names, enum values, or pagination contracts.
 - When an API contract is missing or ambiguous, document it in `PLANS.MD` and ask the owner.
+- Check root `BAGAS_BACKEND_HANDOFF.md`; stop the affected integration while a required item is unresolved.
 - Do not modify backend code to make frontend integration easier without explicit authorization.
 
 ## Authentication and routing
@@ -55,7 +58,7 @@ Do not implement `superadmin` features unless the owner explicitly assigns them.
 - Active roles are `superadmin`, `asprak`, and `praktikan`.
 - Only `praktikan` is forced through first-login password change when `force_password_change` is true.
 - Preserve route protection and avoid redirect loops.
-- Logout must call the backend endpoint, clear client user state, and redirect to login.
+- Logout must confirm backend success before clearing client state and redirecting; failures remain visible and retryable.
 - UI role checks are for navigation and presentation only, not security authorization.
 
 ## UI expectations
@@ -67,6 +70,7 @@ Do not implement `superadmin` features unless the owner explicitly assigns them.
 - Every data view needs loading, empty, error, and success behavior.
 - Every form needs labels, validation feedback, disabled/pending states, and keyboard usability.
 - Preserve responsive behavior; do not design only for one desktop width.
+- Treat course offerings as academic-period records, draft grades as private, and hidden modules as unavailable to Praktikan once the backend contracts exist.
 
 ## Frontend validation
 

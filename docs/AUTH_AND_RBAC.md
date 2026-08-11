@@ -8,72 +8,76 @@ asprak
 praktikan
 ```
 
-There is no Dosen Pengampu role in the current product.
+`Dosen Pengampu` is not an active application role. A historical database enum value does not authorize introducing it into product behavior.
 
 ## Session model
 
-- The backend manages the authentication token in an HttpOnly cookie.
-- Frontend code cannot and must not read the token.
-- Authenticated requests use `credentials: "include"`.
-- The frontend resolves session identity through `/api/auth/me`.
-- Zustand may store the returned user object for UI behavior.
-- Zustand must never store the access token.
+- FastAPI stores the authentication token in an HttpOnly cookie.
+- Frontend JavaScript cannot and must not read the token.
+- Authenticated requests use `credentials: include` through the shared API client.
+- `/api/auth/me` resolves session identity.
+- Zustand may store the returned user for UI behavior but never the access token.
+- TanStack Query may coordinate current-user request caching.
 
 ## Browser-facing auth endpoints
 
-Use confirmed repository contracts. Known browser-facing paths include:
+Confirmed current paths:
 
-- `/api/auth/login`
-- `/api/auth/me`
-- `/api/auth/logout`
-- `/api/auth/change-password`
+- `POST /api/auth/login` returns `{ message: string }` and sets the cookie.
+- `GET /api/auth/me` returns the current user.
+- `POST /api/auth/logout` returns `{ message: string }` and deletes the cookie.
+- `POST /api/auth/change-password` returns `{ message: string }`.
 
-Nginx removes `/api/` before forwarding to FastAPI.
+Nginx removes `/api/` before forwarding.
 
 ## First-login password rule
 
-A user is forced to the password-change page only when both conditions are true:
+Confirmed product predicate:
 
 ```ts
-user.role === "praktikan" && user.force_password_change === true
+user.role === praktikan && user.force_password_change === true
 ```
 
-The same predicate must be used consistently in login success handling and route guards.
+Use this predicate consistently in login handling and route guards. Asprak and Superadmin are not intended to be blocked by this product rule.
 
-Asprak and Superadmin users are not redirected to change-password under the current owner decision.
+Current backend mismatch: `get_current_active_user` blocks every role when `force_password_change` is true, and the model defaults that field to true. Bagas must align creation and authorization invariants before pilot; see `BAGAS_BACKEND_HANDOFF.md`.
 
 ## Logout flow
 
 1. Call the backend logout endpoint.
-2. Backend deletes the same cookie key/path used during login.
-3. Clear the frontend user state.
+2. Confirm success before claiming logout completed.
+3. Clear current-user query data and client user state.
 4. Redirect to login.
-5. A subsequent `/api/auth/me` request should be unauthorized.
+5. Confirm a subsequent `/api/auth/me` is unauthorized.
 
-Clearing Zustand alone is not logout.
+On network or 5xx failure, keep the user informed and allow retry. Clearing Zustand alone does not invalidate the cookie.
+
+Current frontend mismatch: the dashboard clears local auth and redirects even when the backend request fails. This remains part of the frontend auth stabilization follow-up.
 
 ## Route guards
 
 Route guards should:
 
-- resolve the current user from the backend
-- redirect unauthenticated users to login
+- resolve/reuse one current-user query
+- redirect to login only on confirmed unauthenticated responses
+- show retryable state for network/5xx failures
 - enforce the Praktikan first-login rule
 - apply allowed-role presentation rules
-- avoid repeated redirects and infinite request loops
+- avoid redirect and request loops
 
-React development mode may cause duplicate effect execution. A small number of duplicate `/auth/me` requests during development can occur, but continuous repeated calls indicate a dependency/remount problem and must be investigated.
+React development behavior can reveal repeated effects, but login and password-change navigation should seed/reuse current-user data rather than force an avoidable second `/auth/me` request.
 
 ## Authorization boundary
 
-Frontend role checks control navigation and user experience only. They do not protect data. FastAPI must authorize every protected operation.
+Frontend checks control navigation and presentation only. FastAPI must authorize every protected read, write, publication, visibility, export, and lifecycle action against the caller's role and course assignment/enrollment.
 
-Because backend changes are outside default agent scope, report missing authorization to the owner and backend lead rather than silently patching it.
+Report backend gaps to Aidan and Bagas. Do not patch backend authorization without explicit current-task permission.
 
 ## Sensitive-data rules
 
-- Never log passwords.
-- Never log complete login payloads.
-- Never expose JWT secrets or MinIO credentials.
-- Never move auth tokens into localStorage or client-readable cookies.
-- Do not include secrets in `NEXT_PUBLIC_*` variables.
+- Never log passwords or full login/change-password payloads.
+- Never expose JWT secrets or MinIO secret keys.
+- Never move auth tokens into localStorage, sessionStorage, Zustand, or readable cookies.
+- Do not put secrets in `NEXT_PUBLIC_*` variables.
+- Treat unpublished grades as private data and enforce visibility in the backend.
+- Temporary imported passwords must be unpredictable before pilot.

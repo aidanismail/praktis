@@ -1,49 +1,31 @@
 ---
 name: validate-change
-description: Validate an implemented Praktis change for correctness, regressions, performance, security, accessibility, and build quality. Use after implementation and before reporting completion.
+description: Validate an implemented Praktis change for approved scope, correctness, regressions, performance, security/privacy, accessibility, safe testing, and build quality. Use after implementation and before reporting completion.
 ---
 
 # Validate Change
 
-## 1. Scope and diff review
+## Scope and evidence
 
-- Compare changed files with approved `PLANS.MD`.
-- Check for backend or Superadmin scope violations.
-- Check for unrelated formatting or refactors.
-- Confirm no secrets or generated artifacts were added.
+1. Compare changed files with approved `PLANS.MD` and collaboration mode.
+2. Check backend/Superadmin boundaries, unrelated churn, generated artifacts, secrets, and preserved owner changes.
+3. Confirm Current behavior is not confused with Target or Proposed contracts.
 
-## 2. Relevant commands
+## Commands
 
-For frontend changes, run from `frontend/`:
+- For frontend implementation, run `pnpm typecheck`, `pnpm lint`, and `pnpm build` from `frontend/`.
+- Run the approved production audit and affected Docker build for dependency work.
+- Run Docker/Nginx checks only for affected service/configuration work.
+- Run backend tests only when authorized and after verifying `TEST_DATABASE_URL` is disposable test-only data; its fixture truncates tables.
+- Do not run nonexistent frontend tests.
 
-```text
-pnpm typecheck
-pnpm lint
-pnpm build
-```
+## Review
 
-Do not run `pnpm test`; it is not configured unless the approved change adds it.
+- Exercise relevant success, loading, empty, validation, network/server, unauthorized, forbidden, conflict, retry, lifecycle, and responsive scenarios.
+- Inspect duplicate requests, cache invalidation, client boundaries, global state, rendering cost, list bounds, dependencies, and multi-year growth.
+- Inspect cookies, role assumptions, unpublished grades, hidden modules, sensitive data, unsafe HTML, upload validation/cleanup, and direct-service exposure.
+- Inspect labels, keyboard/focus behavior, announcements, contrast, confirmations, and pending/disabled behavior.
 
-For Docker/Nginx/dependency changes, run targeted Compose validation and builds.
+## Report
 
-For backend work, run checks only when backend edits were explicitly authorized. Preserve and report the known Pytest baseline.
-
-## 3. Functional scenarios
-
-Check success, loading, empty, validation error, server failure, unauthorized session, forbidden role, and responsive behavior as relevant.
-
-## 4. Performance review
-
-Inspect duplicate requests, cache behavior, client-component boundaries, unnecessary global state, unbounded lists, repeated expensive rendering, and dependency size.
-
-## 5. Security review
-
-Inspect auth/cookie behavior, role assumptions, input validation, sensitive-data exposure, unsafe HTML, upload constraints, and direct-service exposure.
-
-## 6. Accessibility review
-
-Inspect labels, keyboard navigation, focus behavior, status messaging, contrast, and disabled/pending behavior.
-
-## 7. Report
-
-For every command and scenario, report PASS, FAIL, SKIPPED, or NOT AVAILABLE. Never claim a test ran when it did not.
+Report each command and scenario as PASS, FAIL, SKIPPED, or NOT AVAILABLE. List changed files, performance/security/accessibility findings, backend assumptions, and known limitations. Never claim a test or contract exists without evidence.

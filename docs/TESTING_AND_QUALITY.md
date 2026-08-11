@@ -1,23 +1,25 @@
 # Testing and Quality Gates
 
-## Current observed baseline
+## Recorded baseline
 
-| Area | Command | Observed status |
+The following baseline was observed before the current documentation alignment. It is dated historical evidence, not a permanent guarantee.
+
+| Area | Command | Recorded status |
 |---|---|---|
-| Frontend type safety | `pnpm typecheck` | Pass |
-| Frontend lint | `pnpm lint` | Pass |
-| Frontend production build | `pnpm build` | Pass |
-| Frontend automated tests | `pnpm test` | Not configured; command missing |
-| Backend tests | `pytest` | 42 tests collected; baseline run ends in errors |
-| Database migrations | `alembic upgrade head` | Pass in supplied local run |
-| Compose validation | `docker compose config` | Pass in supplied local run |
-| Docker image build | `docker compose build` | Must be rerun to completion when required; supplied screenshot does not establish final status |
+| Frontend type safety | `pnpm typecheck` | PASS on August 1, 2026 |
+| Frontend lint | `pnpm lint` | PASS on August 1, 2026 |
+| Frontend production build | `pnpm build` | PASS on August 1, 2026 |
+| Frontend automated tests | `pnpm test` | NOT AVAILABLE; script missing |
+| Backend tests | `pytest` | 42 tests collected; baseline ended in errors |
+| Database migrations | `alembic upgrade head` | PASS in supplied local baseline |
+| Compose validation | `docker compose config` | PASS in supplied local baseline |
+| Docker image build | `docker compose build` | Supplied screenshot did not establish completion |
 
-Do not hide or rewrite this baseline. Compare post-change results against it.
+Compare future results with exact commands and dates. Do not rewrite the baseline or call it current without rerunning it.
 
 ## Mandatory frontend checks
 
-For meaningful frontend implementation changes:
+For meaningful frontend changes, run from `frontend/`:
 
 ```powershell
 pnpm typecheck
@@ -25,75 +27,66 @@ pnpm lint
 pnpm build
 ```
 
-Run them from `frontend/`.
+Dependency work also runs the approved production audit and affected Docker build.
 
-## Automated frontend tests
+## Frontend automated testing
 
-There is no frontend test script or test framework in the supplied package configuration.
+No frontend test framework or test script is configured. Adding one requires an approved plan covering framework, dependencies, scripts, CI, and focused tests. Until then, report automated tests as NOT AVAILABLE.
 
-When a feature needs automated tests:
+Priority future coverage includes:
 
-1. include the proposed framework, files, scripts, and dependencies in `PLANS.MD`
-2. wait for owner approval
-3. add focused tests rather than broad snapshot coverage
-4. document how the tests run in CI
+- auth guard 401 versus transient failure
+- first-password redirects
+- logout failure/retry
+- course role scoping
+- module lifecycle state
+- attendance bulk interaction/save
+- grade publish/unpublish privacy
 
-Until then, do not claim automated frontend tests passed.
+## Backend test safety and baseline
 
-## Backend tests
+Backend tests are Bagas-owned. `backend/tests/conftest.py` creates/migrates the selected test database and executes `TRUNCATE ... CASCADE` on its tables.
 
-Backend Pytest is owned by Bagas. The agent may run targeted tests for integration investigation, but it must not modify backend tests or implementation without explicit authorization.
+Before running any backend test:
 
-Because the current baseline errors during setup/execution, record:
+- explicitly verify `TEST_DATABASE_URL`
+- verify the database name is disposable and test-only
+- never use development, staging, production, or user data
+- obtain owner direction if the target is ambiguous
 
-- exact failing fixture/setup line
-- whether the error predates the change
-- whether frontend behavior can be validated independently
+The current source defines 42 tests. Do not run them for frontend-only or documentation-only changes. When an authorized run fails, record the exact failure and compare it with the dated baseline.
 
-## Manual scenario validation
+## Missing backend contract tests
 
-Every frontend feature plan should list role-specific manual scenarios, including:
+The Bagas handoff requires focused tests for:
 
-- success path
-- empty state
-- loading state
-- API validation error
-- unauthorized/expired session
-- forbidden role
-- network/server failure
-- keyboard navigation
-- responsive layout
+- academic-period course uniqueness and serialization
+- grade publish/unpublish/republish and Praktikan privacy
+- incomplete roster and invalid release transitions
+- module content validation, intent ownership, visibility, replacement, deletion, and cleanup
+- class-session update and safe delete/archive behavior
+- Praktikan-only forced-password invariant
+- import behavior at the effective proxy/backend size boundary
+
+## Manual frontend scenarios
+
+Every feature plan should cover success, empty, loading, validation error, unauthorized/expired session, forbidden role, network/server failure, retry, keyboard behavior, and representative responsive widths.
+
+Lifecycle features additionally cover destructive confirmation, partial failure, stale data, publication/visibility transitions, and retry safety.
 
 ## Performance review
 
-After implementation, inspect:
+Inspect duplicate requests, client-component boundaries, unnecessary global state, expensive tables, list bounds, full-page navigation, dependency size, upload behavior, cache invalidation, and multi-year data growth.
 
-- duplicate requests
-- excessive client components
-- unnecessary global state
-- expensive rendering of large tables
-- missing pagination for potentially large collections
-- avoidable full-page navigation or reloads
-- large dependencies added for small functionality
-- upload progress and file-size enforcement
-
-Use browser profiling or network inspection when the task justifies it. Report what was actually checked.
+At the confirmed initial scale, not every course-scoped list requires pagination. Personal history and retained cross-year collections still need a bounded plan before they grow substantially.
 
 ## Security review
 
-After implementation, inspect:
-
-- role and authorization assumptions
-- cookie credentials behavior
-- sensitive data in UI, console, errors, and network payloads
-- input and file validation
-- unsafe HTML rendering
-- open redirects or route-guard bypass
-- accidental direct backend/MinIO credential exposure
+Inspect authorization assumptions, cookie behavior, unpublished/private data, sensitive UI/log/network data, input/file validation, unsafe HTML, open redirects, upload cleanup, and direct service exposure.
 
 ## Docker checks
 
-Run when Docker, Nginx, environment, dependencies, or service wiring changes:
+Run only when Docker, Nginx, dependencies, environment, or service wiring changes:
 
 ```powershell
 docker compose config
@@ -102,15 +95,8 @@ docker compose up -d
 docker compose ps
 ```
 
-Use browser smoke checks through `http://localhost:8080` and inspect targeted logs.
+Smoke through `http://localhost:8080` and inspect targeted logs.
 
-## Completion report
+## Completion reporting
 
-The agent's final report must label each check:
-
-- PASS
-- FAIL
-- SKIPPED, with reason
-- NOT AVAILABLE, with reason
-
-Never collapse failed or skipped checks into a generic “tested.”
+Label every check PASS, FAIL, SKIPPED, or NOT AVAILABLE with the command and reason. Never collapse failed, skipped, or unavailable checks into “tested.”
