@@ -8,6 +8,8 @@ from sqlalchemy.dialects.postgresql import insert
 from core.database import get_db
 from models.user import User, RoleEnum
 from models.grade import Grade
+from models.class_session import ClassSession
+from models.enrollment import Enrollment
 from schemas.grade import BulkGradeRequest, GradeResponse
 from schemas.common import MessageResponse
 from api.dependencies import get_current_active_user
@@ -44,6 +46,9 @@ async def bulk_update_grades(
     current_user: User = Depends(get_current_active_user),
 ):
     session = await require_session_access(db, current_user, session_id, write=True)
+
+    if session.grades_published:
+        raise HTTPException(status_code=409, detail="Cannot edit grades for a published session. Unpublish first.")
 
     if not data.records:
         return {"message": "No records to update"}
@@ -101,6 +106,52 @@ async def list_grades(
     return result.scalars().all()
 
 
+@router.post(
+    "/sessions/{session_id}/publish",
+    response_model=MessageResponse,
+    summary="Publish grades for a session",
+    description="Asprak only. Grades will become visible to Praktikan.",
+    responses={**UNAUTHENTICATED_401, **FORBIDDEN_403, **SESSION_NOT_FOUND_404},
+)
+async def publish_grades(
+    session_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    session = await require_session_access(db, current_user, session_id, write=True)
+    if session.grades_published:
+        raise HTTPException(status_code=400, detail="Grades are already published for this session")
+
+    session.grades_published = True
+    session.grades_published_at = func.now()
+    session.grades_published_by = current_user.id
+    await db.commit()
+    return {"message": "Grades successfully published."}
+
+
+@router.post(
+    "/sessions/{session_id}/unpublish",
+    response_model=MessageResponse,
+    summary="Unpublish grades for a session",
+    description="Asprak only. Grades will be hidden from Praktikan.",
+    responses={**UNAUTHENTICATED_401, **FORBIDDEN_403, **SESSION_NOT_FOUND_404},
+)
+async def unpublish_grades(
+    session_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    session = await require_session_access(db, current_user, session_id, write=True)
+    if not session.grades_published:
+        raise HTTPException(status_code=400, detail="Grades are not published for this session")
+
+    session.grades_published = False
+    session.grades_published_at = None
+    session.grades_published_by = None
+    await db.commit()
+    return {"message": "Grades successfully unpublished."}
+
+
 @router.get(
     "/me",
     response_model=list[GradeResponse],
@@ -112,5 +163,9 @@ async def my_grades(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
-    result = await db.execute(select(Grade).where(Grade.student_id == current_user.id))
+    result = await db.execute(
+        select(Grade)
+        .join(ClassSession, Grade.session_id == ClassSession.id)
+        .where(Grade.student_id == current_user.id, ClassSession.grades_published == True)
+    )
     return result.scalars().all()

@@ -2,13 +2,13 @@ import datetime
 import uuid
 
 from core.security import create_access_token, get_password_hash
-from models.course import Course, ClassSession
+from models.course import Course
+from models.class_session import ClassSession
 from models.course_staff import CourseStaff
 from models.enrollment import Enrollment
 from models.user import User, RoleEnum
 
 DEFAULT_PASSWORD = "praktis-test-password"
-# bcrypt is slow; hash the shared test password once.
 _PASSWORD_HASH = get_password_hash(DEFAULT_PASSWORD)
 
 
@@ -41,7 +41,8 @@ def set_auth(client, user: User) -> None:
 
 
 async def create_course(db, code: str | None = None) -> Course:
-    course = Course(code=code or f"C{uuid.uuid4().hex[:8]}", name="Test Course")
+    final_code = code or f"C{uuid.uuid4().hex[:8]}"
+    course = Course(code=final_code, name="Test Course", academic_year="2023/2024", semester="Ganjil")
     db.add(course)
     await db.commit()
     await db.refresh(course)
@@ -49,7 +50,7 @@ async def create_course(db, code: str | None = None) -> Course:
 
 
 async def create_class_session(db, course: Course) -> ClassSession:
-    session = ClassSession(course_id=course.id, title="Pertemuan 1", date=datetime.date(2026, 7, 1))
+    session = ClassSession(course_id=course.id, title="Pertemuan 1", date=datetime.date(2026, 7, 1), attendance_status="OPEN")
     db.add(session)
     await db.commit()
     await db.refresh(session)

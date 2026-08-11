@@ -25,5 +25,6 @@ class Module(Base):
 
     uploaded_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"),
                                                    nullable=False)
+    is_published: Mapped[bool] = mapped_column(nullable=False, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), 
                                                  default=lambda: datetime.now(timezone.utc))
