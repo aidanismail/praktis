@@ -1,13 +1,13 @@
 ---
 name: frontend-feature
-description: Build or refactor an owner-approved modular Next.js frontend feature in Praktis. Use for components, hooks, schemas, API wrappers, state, routes, and role-based Asprak or Praktikan UI after PLANS.MD approval; stop on unresolved backend handoffs and avoid Superadmin/backend edits.
+description: Build or refactor an owner-approved modular Next.js frontend feature in Praktis. Use for components, hooks, schemas, API wrappers, state, routes, and role-based Asprak or Praktikan UI after PLANS.MD approval; require Current API operations and avoid Bagas-owned Superadmin frontend/backend edits.
 ---
 
 # Frontend Feature Workflow
 
 1. Confirm approved scope and direct-edit or ready-to-type mode.
-2. Reinspect nearby features and root `BAGAS_BACKEND_HANDOFF.md`.
-3. Stop the affected integration if its required contract remains Proposed or Blocked.
+2. Reinspect nearby features, `docs/FULL_STACK_WORKFLOW.md`, and relevant `docs/API_CONTRACT_STATUS.md` entries.
+3. Verify the required operation against source/OpenAPI and stop the affected integration if it is Partial, Proposed, or Blocked.
 4. Keep `frontend/app/**/page.tsx` and layouts focused on composition.
 5. Put domain behavior under `frontend/features/<feature>/`; reuse `frontend/lib/`, shared types, and existing components.
 6. Use precise API types, Zod for input schemas, React Hook Form for forms, TanStack Query for server state, and Zustand only for genuine client state.

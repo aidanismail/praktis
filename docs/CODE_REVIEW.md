@@ -7,8 +7,10 @@ Use this after implementation and before returning control to the owner.
 - [ ] Work matches the approved `PLANS.MD` and chosen direct-edit/ready-to-type mode.
 - [ ] Current behavior is not confused with a proposed target contract.
 - [ ] No backend, infrastructure, or Superadmin file changed without explicit authorization.
+- [ ] Aidan-owned Asprak/Praktikan frontend work and Bagas-owned backend/Superadmin frontend work remain clearly separated.
 - [ ] No unrelated refactor, formatting noise, generated artifact, or Git write occurred.
-- [ ] Any unresolved backend gap is recorded in `BAGAS_BACKEND_HANDOFF.md`.
+- [ ] Every integrated operation is Current in `docs/API_CONTRACT_STATUS.md`; unresolved gaps are recorded there as Partial, Proposed, or Blocked with an owner and next action.
+- [ ] Documentation, source/OpenAPI evidence, migrations, and tests do not contradict each other.
 
 ## Correctness
 
@@ -22,7 +24,7 @@ Use this after implementation and before returning control to the owner.
 
 - [ ] Draft/unpublished grades never reach Praktikan UI or any Praktikan-facing export.
 - [ ] Publish, unpublish, correct, and republish states remain explicit.
-- [ ] Hidden modules remain hidden from Praktikan.
+- [ ] Unpublished modules remain inaccessible to Praktikan.
 - [ ] Replace/delete/session-delete flows handle confirmation and partial failure.
 - [ ] No UI implies successful deletion when backend/storage cleanup failed.
 - [ ] Academic records are not silently destroyed by session deletion.
@@ -59,6 +61,8 @@ Use this after implementation and before returning control to the owner.
 - [ ] Frontend role UI is not treated as authorization.
 - [ ] User-controlled content is rendered safely.
 - [ ] Upload type, size, intent, and cleanup assumptions match the backend.
+- [ ] Cookie-authenticated write behavior does not weaken the unresolved CSRF requirement.
+- [ ] New non-null migration fields have an explicit backfill/default/rollout strategy before deployment.
 - [ ] Backend tests, if authorized, target an explicitly verified disposable database.
 
 ## Validation and report

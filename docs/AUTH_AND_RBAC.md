@@ -40,7 +40,7 @@ user.role === praktikan && user.force_password_change === true
 
 Use this predicate consistently in login handling and route guards. Asprak and Superadmin are not intended to be blocked by this product rule.
 
-Current backend mismatch: `get_current_active_user` blocks every role when `force_password_change` is true, and the model defaults that field to true. Bagas must align creation and authorization invariants before pilot; see `BAGAS_BACKEND_HANDOFF.md`.
+Current backend mismatch: `get_current_active_user` blocks every role when `force_password_change` is true, and the model defaults that field to true. Bagas must align creation and authorization invariants before pilot; see the authentication entry in `docs/API_CONTRACT_STATUS.md`.
 
 ## Logout flow
 
@@ -72,6 +72,8 @@ React development behavior can reveal repeated effects, but login and password-c
 Frontend checks control navigation and presentation only. FastAPI must authorize every protected read, write, publication, visibility, export, and lifecycle action against the caller's role and course assignment/enrollment.
 
 Report backend gaps to Aidan and Bagas. Do not patch backend authorization without explicit current-task permission.
+
+Cookie-authenticated write requests also require an explicit CSRF design before production. Same-origin routing and `SameSite` cookies help but are not a complete CSRF contract; the current status is Blocked in `docs/API_CONTRACT_STATUS.md`.
 
 ## Sensitive-data rules
 

@@ -8,8 +8,9 @@ description: Validate an implemented Praktis change for approved scope, correctn
 ## Scope and evidence
 
 1. Compare changed files with approved `PLANS.MD` and collaboration mode.
-2. Check backend/Superadmin boundaries, unrelated churn, generated artifacts, secrets, and preserved owner changes.
-3. Confirm Current behavior is not confused with Target or Proposed contracts.
+2. Check Aidan-owned Asprak/Praktikan frontend boundaries, Bagas-owned backend/Superadmin frontend boundaries, unrelated churn, generated artifacts, secrets, and preserved owner changes.
+3. Confirm Current behavior is not confused with Partial, Target, Proposed, or Blocked contracts; compare changed integration with `docs/API_CONTRACT_STATUS.md` and its source evidence.
+4. Check whether documentation/status entries must change to avoid drift after the implementation.
 
 ## Commands
 
@@ -23,7 +24,7 @@ description: Validate an implemented Praktis change for approved scope, correctn
 
 - Exercise relevant success, loading, empty, validation, network/server, unauthorized, forbidden, conflict, retry, lifecycle, and responsive scenarios.
 - Inspect duplicate requests, cache invalidation, client boundaries, global state, rendering cost, list bounds, dependencies, and multi-year growth.
-- Inspect cookies, role assumptions, unpublished grades, hidden modules, sensitive data, unsafe HTML, upload validation/cleanup, and direct-service exposure.
+- Inspect cookies/CSRF assumptions, role enforcement, unpublished grades, unpublished modules, sensitive data, unsafe HTML, upload validation/cleanup, migrations when relevant, and direct-service exposure.
 - Inspect labels, keyboard/focus behavior, announcements, contrast, confirmations, and pending/disabled behavior.
 
 ## Report

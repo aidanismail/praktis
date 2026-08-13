@@ -10,6 +10,8 @@
 
 Never paste or print secret environment values into agent output.
 
+Before feature work, read `docs/FULL_STACK_WORKFLOW.md` and the relevant entries in `docs/API_CONTRACT_STATUS.md`. Run browser integration through Nginx at `http://localhost:8080`; direct browser calls to backend port `8000` are outside the project contract.
+
 ## Standard Docker workflow
 
 From the repository root:
@@ -122,3 +124,5 @@ Frontend dependency changes update both `frontend/package.json` and `frontend/pn
 ## Collaboration mode
 
 The owner may choose direct agent edits or ready-to-type code. In ready-to-type mode, the agent supplies ordered snippets/patches and reviews what the owner enters; it does not silently edit implementation files.
+
+Aidan owns Asprak/Praktikan frontend integration. Bagas owns backend and Superadmin frontend integration. Shared frontend changes must be called out in `PLANS.MD` and reviewed for all three roles.

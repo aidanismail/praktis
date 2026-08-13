@@ -2,6 +2,7 @@ import type { User } from "@/types/user.type";
 import type { DashboardNavItem } from "../constants/dashboard-navigation";
 import { DashboardPlaceholderCard } from "./dashboard-placeholder-card";
 import { DashboardStatCard } from "./dashboard-stat-card";
+import { AsprakCourseList } from "@/features/courses/components/asprak-course-list";
 
 type RoleDashboardProps = {
   user: User;
@@ -108,11 +109,14 @@ export function RoleDashboard({ user, activeItem }: RoleDashboardProps) {
           />
         ))}
       </div>
-
-      <DashboardPlaceholderCard
-        title={activeItem.label}
-        description={activeItem.description}
-      />
+      {user.role === "asprak" && activeItem.id === "classes" ? (
+        <AsprakCourseList userId={user.id}></AsprakCourseList>
+      ) : (
+        <DashboardPlaceholderCard
+          title={activeItem.label}
+          description={activeItem.description}
+        />
+      )}
     </section>
   );
 }

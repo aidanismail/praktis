@@ -5,7 +5,7 @@ description: Diagnose Praktis local Docker Compose, Nginx routing and body limit
 
 # Debug Docker Development
 
-1. Read `docs/ARCHITECTURE.md`, `docs/DEVELOPMENT.md`, and relevant security constraints.
+1. Read `docs/ARCHITECTURE.md`, `docs/DEVELOPMENT.md`, relevant security constraints, and `docs/API_CONTRACT_STATUS.md` when the symptom may be contract-related.
 2. Inspect with `docker compose config`, `docker compose ps`, targeted logs, and read-only container commands.
 3. Reach the application through `http://localhost:8080`; verify browser APIs use `/api/` and Nginx forwards to backend root paths.
 4. Verify dev targets and bind mounts: `./frontend:/app` and `./backend:/app`.
@@ -16,4 +16,4 @@ description: Diagnose Praktis local Docker Compose, Nginx routing and body limit
 9. Rebuild only the affected service after Dockerfile, lockfile, requirements, or build-configuration changes.
 10. Do not print `.env` secrets or credentials.
 11. Never run volume deletion, database reset/truncate/drop, migration downgrade, or storage deletion without explicit owner confirmation.
-12. Report the observed cause, evidence, smallest safe fix, and any production-versus-local distinction.
+12. Report the observed cause, evidence, smallest safe fix, any production-versus-local distinction, and whether contract readiness changed. Do not edit backend or Superadmin frontend files without explicit reassignment.

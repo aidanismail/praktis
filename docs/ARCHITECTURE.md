@@ -83,22 +83,17 @@ Backend implementation is Bagas-owned. Frontend work may inspect these files but
 
 ## Domain boundaries
 
-### Current implementation
+### Current and partial implementation
 
-- Course contains globally unique code and name.
-- Class sessions belong to a course.
-- Enrollment and staff assignment scope Praktikan and Asprak access.
-- Modules use a presign/confirm/list flow.
-- Attendance and grades are stored per session/student.
+- Courses include academic-year, semester, and active-state fields in current source. Migration/backfill safety and focused contract tests remain Partial.
+- Enrollment and staff assignment scope Praktikan and Asprak access; assigned-Asprak course and roster reads are available.
+- Class sessions belong to courses and have create, list, update, open, and close operations. Safe delete/archive is Blocked because no contract exists.
+- Modules have presign, confirm, list, metadata update, publish, unpublish, replace, and delete operations. Storage-compensation behavior and focused lifecycle tests remain Partial.
+- Attendance supports scoped recording and reads for the implemented operations.
+- Grades support draft entry, session publication controls, and a Praktikan self-read filtered to published sessions. Transition semantics and focused privacy tests remain Partial.
+- Attendance and grade exports exist; large-history and failure behavior still need evidence.
 
-### Confirmed target gaps
-
-- Course must represent an academic-period offering.
-- Module edit/replace/delete/visibility and safe storage lifecycle are missing.
-- Session update/reschedule and safe deletion/archive are missing.
-- Session-level grade publication is missing.
-
-Do not design final frontend contracts for these gaps until `BAGAS_BACKEND_HANDOFF.md` is confirmed by Bagas.
+Use `docs/API_CONTRACT_STATUS.md` for operation-level readiness. Product requirements in `docs/PRD.md` are Target behavior, not contract evidence.
 
 ## Authentication architecture
 
@@ -125,7 +120,9 @@ The current application signs with MinIO root credentials. Production should use
 
 - Production infrastructure is not provisioned.
 - CI exists; CD is deferred.
-- P0 backend contracts in `BAGAS_BACKEND_HANDOFF.md` are not implemented.
+- Several backend areas are Partial rather than wholly absent; migration safety, lifecycle tests, error semantics, and CSRF remain readiness gates.
 - Frontend feature screens remain mostly placeholders.
 - Frontend automated tests are not configured.
 - Backend tests have a known erroring baseline and a destructive truncation fixture for the selected test database.
+
+OpenAPI-to-TypeScript generation and contract-drift CI are Proposed, not current architecture.

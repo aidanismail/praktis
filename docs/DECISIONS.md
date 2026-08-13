@@ -1,6 +1,6 @@
 # Durable Project Decisions
 
-Last updated: August 2, 2026
+Last updated: August 11, 2026
 
 ## Product and roles
 
@@ -11,15 +11,16 @@ Last updated: August 2, 2026
 
 ## Team ownership
 
-- Aidan: product direction and frontend; Asprak and Praktikan experiences
-- Bagas: backend, API/data contracts, migrations, infrastructure behavior, tests, and Superadmin
+- Aidan: product direction and frontend integration for Asprak and Praktikan
+- Bagas: backend, API/data contracts, migrations, infrastructure behavior, backend tests, and Superadmin frontend integration
 - The coding agent defaults to Aidan's scope and does not silently cross into Bagas's area.
 
 ## Academic-period courses
 
 - A course is one academic-period practicum offering.
 - Offerings of the same subject in different academic years are different records.
-- The target backend contract must identify academic year and term/semester; section support depends on whether parallel offerings exist.
+- Current backend source identifies academic year and semester and supports an active-state field; migration/backfill and focused tests remain readiness requirements.
+- Section support remains a future decision if parallel offerings need to share the same subject and period.
 - Historical offerings should be retained and distinguishable from current offerings.
 
 ## Asprak lifecycle ownership
@@ -27,7 +28,7 @@ Last updated: August 2, 2026
 For assigned courses, the intended product permits Asprak to:
 
 - create, edit/reschedule, and safely delete or archive class sessions
-- list, upload, download, edit, replace, delete, publish, and hide modules
+- list, upload, download, edit, replace, delete, publish, and unpublish modules
 - record attendance and grades
 - publish, unpublish, correct, and republish grades per class session
 - export supported records
@@ -64,14 +65,16 @@ These are product decisions, not claims that every backend contract already exis
 - The owner may request direct edits or ready-to-type code; the plan must record which mode applies.
 - Git write/history actions remain owner-managed.
 - Backend and Superadmin changes require explicit authorization.
-- Missing backend contracts go to `BAGAS_BACKEND_HANDOFF.md` or an equivalent owner-approved handoff.
+- Contract readiness and unresolved handoffs go to `docs/API_CONTRACT_STATUS.md` using `docs/FULL_STACK_WORKFLOW.md`.
 - Validation reports testing, performance, security, accessibility, and known limitations without overstating results.
 
 ## Known current mismatches
 
-- Backend course identity does not yet include the academic period.
-- Grade publishing is not implemented; `/grades/me` currently exposes all recorded personal grades.
-- Complete module and session lifecycle contracts are incomplete.
+- Academic-period fields exist in source, but migration/backfill safety and focused tests remain unresolved.
+- Grade publication and published-only self-read exist in source, but transition, permission, and privacy tests remain incomplete.
+- Module lifecycle operations exist in source, but storage-compensation and lifecycle-test evidence remain incomplete.
+- Session update/open/close exist; safe delete/archive has no current contract.
 - Backend forced-password enforcement is broader than the Praktikan-only product rule.
+- CSRF protection for cookie-authenticated writes is unresolved before production.
 - The historical database enum includes `dosen`; active application code and product scope do not.
 - Frontend auth/dependency stabilization remains follow-up work.

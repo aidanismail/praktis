@@ -12,18 +12,19 @@ Praktis is a Praktikum Management System for Informatics practicum operations at
 
 ## Ownership and scope
 
-- Aidan owns product direction and frontend work for the `asprak` and `praktikan` experiences.
-- Bagas owns backend work and the `superadmin` experience.
+- Aidan owns product direction and frontend integration for the `asprak` and `praktikan` experiences.
+- Bagas owns backend/API/data work and frontend integration for the `superadmin` experience.
 - You may inspect the whole repository.
 - You may edit frontend code for `asprak` and `praktikan` work when the owner requests it.
-- Do not edit backend code, backend API contracts, database models, migrations, infrastructure contracts, or `superadmin` features unless the owner explicitly instructs you to do so in the current task.
+- Do not edit backend code, backend API contracts, database models, migrations, infrastructure contracts, or `superadmin` frontend features unless the owner explicitly instructs you to do so in the current task.
 - Never silently expand a task into Bagas's ownership area.
+- Shared auth, API plumbing, layouts, and design-system code must identify affected role consumers. A shared location does not erase role ownership.
 
 ## Mandatory plan-first workflow
 
 Before changing implementation files for any coding task:
 
-1. Inspect the relevant code, documentation, current Git diff, and available API contracts.
+1. Inspect the relevant code, documentation, current Git diff, available API contracts, and `docs/API_CONTRACT_STATUS.md`.
 2. Create or replace the repository-root `PLANS.MD` using its required template.
 3. Include exact files expected to change, assumptions, risks, API impact, test plan, performance checks, and security checks.
 4. Present the plan to the owner.
@@ -89,6 +90,26 @@ Non-destructive schema upgrades may be proposed in `PLANS.MD`. Because backend c
 - Reuse existing components and patterns before creating new abstractions.
 - Do not invent backend endpoints or response shapes. Inspect the existing contract or ask the owner.
 
+## Documentation authority and status
+
+Use this order when evidence conflicts:
+
+1. Aidan's explicit current decision
+2. `docs/DECISIONS.md`
+3. backend routes, schemas, permissions, migrations, tests, and runtime OpenAPI for Current API behavior
+4. `docs/API_CONTRACT_STATUS.md` for integration readiness
+5. `docs/PRD.md` for Target product behavior
+6. approved `PLANS.MD` for the current execution scope
+
+Classify material behavior as:
+
+- `Current`: implemented and evidenced; readiness limitations may still be listed
+- `Partial`: implemented in part or missing tests, migration safety, authorization clarity, or failure semantics
+- `Proposed`: desired shape not confirmed by the backend owner
+- `Blocked`: integration must stop pending a contract, decision, or safety requirement
+
+Source existence does not by itself prove production readiness. Keep volatile status in `docs/API_CONTRACT_STATUS.md` and link to it rather than duplicating status across documents.
+
 ## Role boundaries
 
 ### Asprak
@@ -101,7 +122,7 @@ Expected domain areas include enrolled academic-period courses, visible module a
 
 ### Superadmin
 
-Do not implement or modify superadmin features unless the owner explicitly assigns that work. Bagas owns this area.
+Do not implement or modify Superadmin frontend features unless the owner explicitly assigns that work. Bagas owns this area.
 
 ## Testing and completion
 
@@ -155,7 +176,7 @@ For every implementation review:
 - do not log credentials or complete authentication payloads
 - preserve same-origin Nginx routing
 - flag any backend authorization gap to the owner instead of patching backend code without permission
-- treat unpublished grades as private and hidden modules as inaccessible to Praktikan
+- treat unpublished grades as private and unpublished modules as inaccessible to Praktikan
 - never claim extension-only upload checks prove actual PDF/DOCX content
 
 ## Documentation map
@@ -173,7 +194,8 @@ Read only the documents relevant to the current task:
 - `docs/ROADMAP.md`: current and future product direction
 - `docs/CODE_REVIEW.md`: final review checklist
 - `docs/SKILLS.md`: available repository skills
-- `BAGAS_BACKEND_HANDOFF.md`: current proposed backend gaps; proposals are not confirmed contracts
+- `docs/FULL_STACK_WORKFLOW.md`: contract lifecycle and frontend/backend integration standard
+- `docs/API_CONTRACT_STATUS.md`: Current, Partial, Proposed, and Blocked integration ledger
 
 ## Final response format
 

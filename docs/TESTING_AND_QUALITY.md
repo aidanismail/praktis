@@ -56,9 +56,9 @@ Before running any backend test:
 
 The current source defines 42 tests. Do not run them for frontend-only or documentation-only changes. When an authorized run fails, record the exact failure and compare it with the dated baseline.
 
-## Missing backend contract tests
+## Backend evidence gaps
 
-The Bagas handoff requires focused tests for:
+Current source has backend tests for several foundational operations, but focused evidence is still needed for:
 
 - academic-period course uniqueness and serialization
 - grade publish/unpublish/republish and Praktikan privacy
@@ -67,6 +67,8 @@ The Bagas handoff requires focused tests for:
 - class-session update and safe delete/archive behavior
 - Praktikan-only forced-password invariant
 - import behavior at the effective proxy/backend size boundary
+
+Track readiness per operation in `docs/API_CONTRACT_STATUS.md`; do not describe a whole domain as tested because one route has coverage. These tests are Bagas-owned unless Aidan explicitly reassigns backend work.
 
 ## Manual frontend scenarios
 

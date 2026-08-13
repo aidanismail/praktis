@@ -7,11 +7,11 @@
 - Started: June 13, 2026
 - Product status: in progress
 - Target release: TBD
-- Product and frontend lead: Aidan
-- Backend lead: Bagas
-- Last product-decision update: August 2, 2026
+- Product lead and Asprak/Praktikan frontend integration: Aidan
+- Backend and Superadmin frontend integration: Bagas
+- Last product-decision update: August 11, 2026
 
-This document defines intended product behavior. It does not imply every requirement is implemented. Current contract gaps are listed below and detailed in `BAGAS_BACKEND_HANDOFF.md`. Later explicit owner decisions override earlier requirements when they conflict.
+This document defines intended product behavior. It does not imply every requirement is implemented. `docs/API_CONTRACT_STATUS.md` records current operation-level readiness, and `docs/FULL_STACK_WORKFLOW.md` defines the integration process. Later explicit owner decisions override earlier requirements when they conflict.
 
 ## Background
 
@@ -41,7 +41,7 @@ A course record represents one practicum offering in a specific academic period.
 
 The target contract must distinguish academic year and term/semester. It may also need a section identifier when parallel offerings exist. Historical offerings must remain identifiable without appearing current accidentally.
 
-Current implementation note: the backend currently stores only globally unique `code` and `name`. The required academic-period contract is blocked on Bagas's backend handoff.
+Current implementation note: backend source includes academic-year, semester, and active-state fields. Migration/backfill safety, uniqueness behavior, response semantics, and focused tests must be confirmed before treating the full area as Current.
 
 ## Active roles
 
@@ -57,7 +57,7 @@ For assigned practicum courses, Asprak may:
 
 - view course offerings and rosters
 - create, edit/reschedule, and safely delete or archive class sessions
-- list, upload, download, edit, replace, delete, publish, and hide learning modules
+- list, upload, download, edit, replace, delete, publish, and unpublish learning modules
 - record attendance using `Hadir`, `Sakit`, `Izin`, and `Alfa`
 - enter and correct grades
 - publish, unpublish, correct, and republish grades per class session
@@ -108,7 +108,7 @@ Temporary passwords must be unpredictable and delivered securely before a real p
 - Backend validation must verify actual file content, authorization, size, and upload intent.
 - Failed, expired, replaced, and abandoned uploads require safe object-storage cleanup.
 
-Current implementation supports presign, confirmation, and listing only. Full lifecycle behavior is a P0 backend handoff.
+Current source supports presign, confirmation, listing, metadata update, publish/unpublish, replace, and delete. The area remains Partial until intent ownership, actual-content validation, storage-compensation behavior, cleanup, permissions, and focused lifecycle tests are confirmed.
 
 ### Class sessions and attendance
 
@@ -127,7 +127,7 @@ Current implementation supports presign, confirmation, and listing only. Full li
 - Published/unpublished state and transition failures must be explicit in the UI.
 - Relevant records can be exported as CSV or XLSX when the backend supports the requested scope.
 
-Current implementation stores and returns grades but has no publication state. `/grades/me` currently returns all recorded personal grades, so the intended privacy rule is not yet implemented.
+Current source includes per-session publication state, publish/unpublish operations, and published-only filtering for `/grades/me`. The area remains Partial until transition semantics, incomplete-roster handling, permissions, response errors, and focused privacy tests are confirmed.
 
 ## High-priority journeys
 
@@ -144,7 +144,7 @@ Current implementation stores and returns grades but has no publication state. `
 1. Open an assigned course and its module area.
 2. Upload a valid file with title and description.
 3. Show progress/pending state and append the confirmed module without a full-page reload.
-4. Edit metadata, replace the file, publish/hide it, or delete it with clear confirmation and failure recovery.
+4. Edit metadata, replace the file, publish/unpublish it, or delete it with clear confirmation and failure recovery.
 
 ### Asprak attendance recording
 

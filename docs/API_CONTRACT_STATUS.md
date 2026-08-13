@@ -1,0 +1,138 @@
+# API Contract Status
+
+Last inspected: 2026-08-13  
+Branch: `feature/asprak-features`
+
+This is the integration-readiness ledger, not a release certificate. Status meanings are in [FULL_STACK_WORKFLOW.md](FULL_STACK_WORKFLOW.md).
+
+## Summary
+
+| Area | Status | Consumers | Next action |
+|---|---|---|---|
+| Cookie authentication | Partial | all roles | Stabilize Aidan-owned FE; Bagas resolves backend invariant/CSRF |
+| Academic-period course list | Current and frontend-integrated for Asprak assigned-course reads | Asprak | Runtime-smoke role scoping and retain history bounds as a follow-up |
+| Enrollment/staff | Current backend contract | Superadmin writes, Asprak roster reads | Bagas owns Superadmin FE |
+| Session create/list/update/open/close | Partial | Asprak; Praktikan reads | Confirm transitions and focused tests |
+| Safe session delete/archive | Blocked | Asprak | Backend contract absent |
+| Module presign/confirm/list | Partial | Asprak, Praktikan | Validate intent/cleanup/tests |
+| Module update/publish/replace/delete | Partial | Asprak, Praktikan visibility | Resolve storage/DB failure semantics |
+| Attendance bulk/list/personal | Current for implemented operations | Asprak, Praktikan | Integrate as a focused slice |
+| Grades and publication | Partial | Asprak, Praktikan | Confirm auth, transition errors, completeness, tests |
+| Exports | Partial | Asprak | Confirm tests and draft/publication scope |
+| OpenAPI-to-TypeScript automation | Proposed | all FE owners | Separate tooling/CI plan |
+| CSRF design | Blocked before production | all cookie writes | Bagas proposes; Aidan reviews FE impact |
+
+## Authentication
+
+Implemented: login sets an HttpOnly cookie; logout deletes it; change-password returns a message; `/auth/me` returns the user; cookie is SameSite Lax and Secure in production. Browser paths add `/api`.
+
+Partial gaps:
+
+- backend blocks every role with `force_password_change=true`, while Target is Praktikan-only
+- user model defaults the flag to true
+- frontend auth response types and request lifecycle do not match the backend
+- current guard conflates transient failures with 401 and can duplicate requests
+- logout clears local state even when backend logout fails
+- CSRF protection beyond SameSite is not defined
+
+## Academic-period courses
+
+Status: Current for the Asprak assigned-course read.
+
+Implemented and confirmed:
+
+- `GET /courses/` returns only courses assigned through `CourseStaff` when the caller is an authenticated Asprak
+- response fields are `id`, `code`, `name`, `academic_year`, `semester`, and `is_active`
+- `semester` uses `Ganjil` or `Genap`
+- uniqueness uses `(code, academic_year, semester)`
+- the populated-database migration/backfill and Asprak authentication behavior are safe for this integration
+- an Asprak assignment-scope test exists
+
+Bagas confirmed the response and migration/auth readiness through Aidan on 2026-08-13.
+
+Frontend integration added on 2026-08-13: the Asprak `My Practicum Classes` dashboard item uses a typed same-origin API wrapper, user-scoped TanStack Query key, bounded retry, and active/history request-state UI. Browser runtime smoke remains a manual validation item.
+
+Integration boundaries:
+
+- browser path is `GET /api/courses/`
+- request body and query parameters are absent
+- the frontend consumes the backend-scoped result and must not reconstruct assignment authorization
+- course creation and other Superadmin writes remain Bagas-owned
+- academic-year formatting validation and retained-history pagination remain follow-up concerns and do not block the confirmed initial scale
+
+## Roster and staff
+
+Superadmin enrollment/staff writes exist with focused tests. `GET /courses/{course_id}/students` supports assigned-Asprak roster reads. Bagas owns Superadmin FE; Aidan may consume the roster read in an approved Asprak course-detail slice.
+
+## Class sessions
+
+Implemented:
+
+- create/list under course routes
+- update by session ID
+- attendance open/close
+- response publication and attendance-status fields
+
+Partial/Blocked:
+
+- focused update/open/close tests were not found
+- repeated transition statuses are inconsistent
+- safe delete/archive is absent
+- new non-null state fields lack documented existing-row backfill
+
+The Asprak shell may list sessions. Do not build delete/archive UI.
+
+## Modules
+
+Implemented: presigned intent, confirmation, size/initial signature checks, role-scoped list, Praktikan published filter, metadata update, publish/unpublish, delete, and replacement.
+
+Partial gaps:
+
+- `is_published` migration backfill is undocumented
+- lifecycle/visibility/replacement/delete/cleanup tests were not found
+- intent consumption/replay is not documented
+- ZIP magic alone does not prove DOCX structure
+- database/storage ordering can report failure after one side succeeded
+- abandoned/rejected/superseded/orphan cleanup requires validation
+- list response omits `course_id`, limiting safe unfiltered grouping
+
+Plan list/upload separately. Treat replacement/delete as blocked for final integration until failure semantics are resolved.
+
+## Attendance
+
+Bulk upsert validates active enrolled Praktikan IDs. Session reads are staff-protected and personal history is user-scoped. Tests cover deduplication, invalid students, audit fields, role denial, and missing sessions.
+
+Status: Current for implemented bulk/list/personal operations. Open/close remains Partial under sessions.
+
+## Grades
+
+Implemented: bulk upsert, score validation, edit rejection while published, staff session list, publish/unpublish, and personal filtering to published sessions.
+
+Partial gaps:
+
+- no focused publication/privacy-transition tests found
+- repeated transitions use 400 while lifecycle conflict may require 409
+- route text says Asprak-only while shared permission code allows Superadmin
+- complete-roster publication is undecided
+- pre-publication tests require reconciliation
+
+Plan draft grade entry separately. Do not build final publication controls until Bagas confirms roles, transitions, completeness, and tests.
+
+## Exports
+
+Attendance and grade CSV/XLSX routes exist for staff. Confirm tests and whether grade exports intentionally include drafts before final Asprak integration.
+
+## Migration readiness
+
+Recent course, grade-publication, module-publication, and attendance-status migrations add non-null fields without server defaults or staged backfills. Empty-database success does not prove a populated upgrade.
+
+Bagas evidence required:
+
+1. existing-row values
+2. nullable/default/backfill/not-null sequence
+3. populated-database upgrade test
+4. safe rollback policy
+
+## Contract automation proposal
+
+A later approved task should export deterministic FastAPI OpenAPI 3.1, define stable operation IDs, generate or validate TypeScript types, configure same-origin cookie transport, and fail CI on drift. This does not exist today.

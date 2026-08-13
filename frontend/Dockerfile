@@ -10,7 +10,9 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 ENV PNPM_HOME=/pnpm
 ENV PATH="${PNPM_HOME}:${PATH}"
-RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
+RUN npm install --global corepack@latest && \
+    corepack enable && \
+    corepack install --global pnpm@${PNPM_VERSION}
 
 # production dependencies
 FROM pnpm-base AS deps

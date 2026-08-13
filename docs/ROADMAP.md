@@ -1,6 +1,6 @@
 # Product Roadmap
 
-Last updated: August 2, 2026
+Last updated: August 11, 2026
 
 Roadmap labels distinguish implemented foundations from product requirements and blocked contracts. A listed feature is not complete merely because a placeholder screen or partial endpoint exists.
 
@@ -13,7 +13,7 @@ Roadmap labels distinguish implemented foundations from product requirements and
 - backend-managed cookie login/logout/current-user/password-change endpoints
 - frontend login, password-change, route-guard, and role-dashboard foundation
 - role-aware dashboard shell with placeholder feature navigation
-- backend course assignment/enrollment, module presign/confirm/list, attendance, grade entry, and export foundations
+- backend academic-period courses, assignment/enrollment, class-session operations, module lifecycle operations, attendance, grade entry/publication, published-only personal grades, and export foundations
 - GitHub Actions CI foundation
 
 ## Stabilization before feature expansion
@@ -27,16 +27,17 @@ Roadmap labels distinguish implemented foundations from product requirements and
 - make logout failure and pending behavior accurate
 - preserve accessibility and responsive behavior
 
-### Bagas/backend handoff
+### Bagas/backend readiness
 
-P0 contracts required for complete product behavior are detailed in `BAGAS_BACKEND_HANDOFF.md`:
+`docs/API_CONTRACT_STATUS.md` records operation-level evidence. Current source implements more than the original foundation, but the next integrations still depend on:
 
-- academic-period course identity
-- per-session grade publish/unpublish and Praktikan privacy
-- complete module edit/replace/delete/visibility lifecycle
-- class-session update/reschedule and safe deletion/archive
+- safe academic-period migration/backfill behavior and focused tests
+- publication transition, permission, and privacy tests
+- module storage-compensation behavior and lifecycle tests
+- a safe session delete/archive contract
+- consistent auth response and forced-password invariants
 
-Pre-pilot security items include unpredictable temporary passwords, the Praktikan-only forced-password invariant, and the effective import proxy limit.
+Pre-pilot security items include unpredictable temporary passwords and the effective import proxy limit. CSRF for cookie-authenticated writes is Blocked before production.
 
 ## Asprak delivery sequence
 
@@ -52,7 +53,7 @@ Each implementation slice requires a current owner-approved `PLANS.MD` and a con
 8. Grade publish/unpublish/correct/republish
 9. Reports and export integration
 
-Static design work may begin earlier, but final integration must not invent P0 contracts.
+Static design work may begin earlier, but final integration must not build against Partial, Proposed, or Blocked operations.
 
 ## Praktikan delivery sequence
 

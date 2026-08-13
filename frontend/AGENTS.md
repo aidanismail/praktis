@@ -6,7 +6,9 @@ These instructions extend the repository-root `AGENTS.md` for work inside `front
 
 Frontend work is allowed only after the root `PLANS.MD` is approved. The default product scope is the `asprak` and `praktikan` experiences.
 
-Do not implement `superadmin` features unless the owner explicitly assigns them.
+Bagas owns Superadmin frontend integration. Do not implement, refactor, or complete `superadmin` behavior unless Aidan explicitly reassigns that work in the current task.
+
+Shared auth, API plumbing, layouts, and design-system code may serve multiple roles. Name the affected consumers in `PLANS.MD`; do not use a shared file as a reason to expand into Superadmin behavior.
 
 When Aidan requests ready-to-type collaboration, provide ordered code or patches and review what Aidan enters; do not edit implementation files silently.
 
@@ -50,7 +52,8 @@ When Aidan requests ready-to-type collaboration, provide ordered code or patches
 - Do not store or inspect the HttpOnly token.
 - Do not invent endpoint names, field names, enum values, or pagination contracts.
 - When an API contract is missing or ambiguous, document it in `PLANS.MD` and ask the owner.
-- Check root `BAGAS_BACKEND_HANDOFF.md`; stop the affected integration while a required item is unresolved.
+- Check `docs/API_CONTRACT_STATUS.md`; integrate only when the required contract is Current and its listed readiness conditions are satisfied.
+- Follow `docs/FULL_STACK_WORKFLOW.md` for contract evidence, handoffs, query behavior, errors, and validation.
 - Do not modify backend code to make frontend integration easier without explicit authorization.
 
 ## Authentication and routing
@@ -70,7 +73,7 @@ When Aidan requests ready-to-type collaboration, provide ordered code or patches
 - Every data view needs loading, empty, error, and success behavior.
 - Every form needs labels, validation feedback, disabled/pending states, and keyboard usability.
 - Preserve responsive behavior; do not design only for one desktop width.
-- Treat course offerings as academic-period records, draft grades as private, and hidden modules as unavailable to Praktikan once the backend contracts exist.
+- Treat course offerings as academic-period records, draft grades as private, and unpublished modules as unavailable to Praktikan.
 
 ## Frontend validation
 

@@ -13,17 +13,17 @@
 - Redis-backed caching/rate limiting with fail-open behavior when Redis is unavailable
 - role, course-assignment, and enrollment checks for implemented protected endpoints
 
-Verify code before claiming a control exists; this list describes the repository as inspected on August 2, 2026.
+Verify code before claiming a control exists; this list describes the repository as inspected on August 11, 2026.
 
 ## Known gaps by urgency
 
 ### Before complete Asprak/Praktikan functionality
 
-- `/grades/me` does not filter on publication because publication state does not exist.
+- Grade publication and published-only `/grades/me` filtering exist in source, but transition, permission, and privacy tests remain incomplete.
 - Module upload does not verify actual PDF/DOCX content.
 - Upload intents are not bound persistently to actor/course/expiry before confirmation.
 - Abandoned and partially failed object-storage uploads have no cleanup lifecycle.
-- Module visibility, replacement, and deletion contracts are missing.
+- Module visibility, replacement, and deletion operations exist, but storage-compensation and lifecycle-test evidence remain incomplete.
 - Session deletion must not silently cascade-delete academic records.
 
 ### Before pilot
@@ -38,9 +38,9 @@ Verify code before claiming a control exists; this list describes the repository
 - PostgreSQL and MinIO ports are host-published in local Compose.
 - The backend signs storage URLs with MinIO root credentials rather than a least-privilege identity.
 - Shared-campus/NAT behavior for per-IP login throttling needs review.
-- CSRF, HTTPS, secret rotation, backup, monitoring, and operational incident procedures need an explicit production threat-model review.
+- CSRF protection for cookie-authenticated writes is unresolved; HTTPS, secret rotation, backup, monitoring, and incident procedures also need an explicit production threat-model review.
 
-See `BAGAS_BACKEND_HANDOFF.md` for proposed backend acceptance criteria.
+See `docs/API_CONTRACT_STATUS.md` for readiness and `docs/FULL_STACK_WORKFLOW.md` for required handoff evidence.
 
 ## Frontend rules
 
