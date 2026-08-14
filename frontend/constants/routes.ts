@@ -3,7 +3,7 @@ import type { UserRole } from "@/types/user.type";
 export const ROUTES = {
   login: "/login",
   changePassword: "/change-password",
-  dashboard: "/dashboard",
+  dashboard: "/dashboard"
 } as const;
 
 export function getDefaultDashboardByRole(role: UserRole) {
@@ -17,4 +17,8 @@ export function getDefaultDashboardByRole(role: UserRole) {
     default:
       return "/dashboard";
   }
+}
+
+export function getCourseDetailRoute(courseId: string) {
+  return `/dashboard/courses/${encodeURIComponent(courseId)}`;
 }

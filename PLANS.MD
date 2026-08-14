@@ -1,181 +1,167 @@
-# Asprak Assigned-Course List Plan
+# Asprak Course Detail and Roster Plan
 
-> Plan only. Do not edit implementation files until Aidan explicitly approves this plan and direct-edit mode.
+> Plan only. Do not edit implementation files until Aidan explicitly approves this plan.
 
 ## Status
 
 - Requested by: Aidan
 - Date: 2026-08-13
 - Branch: `feature/asprak-features`
-- State: Complete — approved implementation and available automated validation finished
-- Collaboration mode: hybrid ready-to-type; Aidan writes all implementation code from agent-generated batches, while the agent directly maintains approved Markdown files and reviews each code batch before continuing
-- Backend confirmation: Aidan reported Bagas confirmed the assigned-course contract, populated-database safety, response stability, semester values, and Asprak authentication behavior are safe to integrate.
+- State: Implemented and validated — manual browser smoke pending
+- Collaboration mode: hybrid ready-to-type; Aidan writes implementation code from small agent-generated batches, while the agent maintains approved Markdown and reviews every code batch
+- Progress:
+  - [x] Batch 1 — route/API/type/query foundation
+  - [x] Batch 2 — assigned-course card navigation
+  - [x] Batch 3 — thin dynamic route and Asprak-only detail shell
+  - [x] Batch 4 — roster request-state UI and detail integration
+  - [x] Batch 5 — documentation, validation, and final review
 
 ## User outcome
 
-An authenticated Asprak can open **My Practicum Classes** in the existing dashboard and see only their assigned academic-period course offerings, separated into active and historical sections with useful loading, empty, forbidden/session, transient-error, and retry states.
+An authenticated Asprak can select an assigned course, open a dedicated course-detail URL, confirm the academic-period identity, and view the enrolled Praktikan roster with complete loading, empty, 401, 403, 404, transient-error, and retry states.
 
-This is the first dependency slice. Course-detail navigation, roster, sessions, modules, attendance, grades, reports, Praktikan behavior, Superadmin behavior, and backend changes are not part of this plan.
+This is Slice 2A. Session list/create/update/open/close/delete, modules, attendance, grades, exports, backend, Superadmin, and Praktikan work are excluded. Session integration will be planned separately after its Partial contract is confirmed Current.
 
-## Confirmed contract
+## Current contracts used
 
-### Current for this slice
+### Assigned course identity
 
-- Method/backend path: `GET /courses/`
-- Browser path: `GET /api/courses/`
-- Authentication: backend-managed HttpOnly cookie; frontend preserves `credentials: include`
-- Authorization: Bagas's backend returns only `CourseStaff`-assigned courses for an authenticated `asprak`
-- Response: `CourseResponse[]`
-- Fields: `id`, `code`, `name`, `academic_year`, `semester`, `is_active`
-- Semester wire values for integration: `Ganjil | Genap`
-- Errors used by the UI: 401 unauthenticated/expired session, 403 forbidden/gated, 5xx/network transient failure
-- Request body: none
-- Pagination/filter query parameters: none in the confirmed contract
+- `GET /api/courses/`
+- Current and already integrated
+- Used to confirm the selected course belongs to the signed-in Asprak and to render `code`, `name`, `academic_year`, `semester`, and `is_active`
+- There is no invented single-course endpoint
 
-### Explicitly not inferred
+### Enrolled roster
 
-- The frontend does not receive or evaluate staff-assignment records itself.
-- Frontend role checks do not replace backend authorization.
-- No course-detail endpoint, mutation, pagination, or filtering contract is invented.
+- Backend path: `GET /courses/{course_id}/students`
+- Browser path: `GET /api/courses/{courseId}/students`
+- Authentication: backend-managed HttpOnly cookie through the shared client
+- Authorization: Superadmin or assigned Asprak; this frontend slice enables the query only for Asprak, while FastAPI remains authoritative
+- Response: array of `{ id, username, email }`; `username` is displayed as NPM
+- Request body/query parameters: none
+- Current source caches the roster for about 30 seconds per course
+- Expected errors: 401, 403, 404, network/5xx
+- Focused roster-route tests were not found; the Current ledger entry, route source, shared access helper, enrollment tests, and shared permission tests are the available evidence. Backend tests remain Bagas-owned.
 
-## Approved-scope files
+## Planned code files
 
-| File | Planned change |
+| File | Change |
 |---|---|
-| `PLANS.MD` | Record this plan, approval, and final validation results. |
-| `docs/API_CONTRACT_STATUS.md` | Move the academic-period course-list operation to Current for the confirmed scope and record Bagas's owner confirmation/date without overstating other course operations. |
-| `frontend/lib/api/endpoints.ts` | Add the same-origin course-list endpoint constant. Shared file; new entry is consumed only by the Asprak feature in this slice. |
-| `frontend/features/courses/types/course.type.ts` | Add the exact confirmed `Course` and `Semester` TypeScript types. |
-| `frontend/features/courses/api/courses.api.ts` | Add a typed read-only wrapper around the shared API client. |
-| `frontend/features/courses/constants/course-query-keys.ts` | Add a stable query-key factory for assigned courses. |
-| `frontend/features/courses/hooks/use-assigned-courses.ts` | Add TanStack Query behavior with bounded retry that does not retry confirmed 401/403 responses. |
-| `frontend/features/courses/components/asprak-course-card.tsx` | Render one accessible academic-period offering and active/history status. |
-| `frontend/features/courses/components/asprak-course-list.tsx` | Render grouped active/history results plus loading, empty, error, and retry states. |
-| `frontend/features/dashboard/components/role-dashboard.tsx` | Replace only the Asprak `classes` placeholder with the live list; preserve Superadmin and Praktikan behavior. |
+| `frontend/constants/routes.ts` | Add an encoded course-detail route builder. Shared file; only Asprak consumes it in this slice. |
+| `frontend/lib/api/endpoints.ts` | Add an encoded course-roster endpoint builder. |
+| `frontend/features/courses/types/enrolled-student.type.ts` | Add the exact roster response type. |
+| `frontend/features/courses/api/courses.api.ts` | Add the typed roster read wrapper. |
+| `frontend/features/courses/constants/course-query-keys.ts` | Add a user-and-course-scoped roster key. |
+| `frontend/features/courses/hooks/use-course-roster.ts` | Add the roster query with 30-second freshness and no retry for 401/403/404. |
+| `frontend/features/courses/components/asprak-course-list.tsx` | Link each course offering to its dedicated detail route with visible keyboard focus. |
+| `frontend/features/courses/components/asprak-course-detail-page.tsx` | Resolve current Asprak, selected assigned course, invalid/unassigned course state, detail header, and back navigation. |
+| `frontend/features/courses/components/course-roster.tsx` | Render roster loading, empty, error/retry, count, and responsive student rows. |
+| `frontend/app/(dashboard)/dashboard/courses/[courseId]/page.tsx` | Add a thin App Router page that passes the dynamic ID into the feature component. |
 
-If implementation evidence requires any additional file, stop and amend/reapprove this plan before editing it.
+## Planned Markdown files
 
-## Implementation sequence
+- `PLANS.MD`: approval, batches, and final validation
+- `docs/API_CONTRACT_STATUS.md`: record the frontend roster integration after validation without changing session readiness
 
-1. Record the confirmed course-list scope as Current in the contract ledger.
-2. Add the endpoint constant and exact response types.
-3. Add the feature API wrapper and query-key factory.
-4. Add the query hook with one transient retry and no retry for 401/403.
-5. Build the course card and grouped list states.
-6. Mount the list only when `user.role === asprak` and `activeItem.id === classes`.
-7. Preserve placeholders for every other role/navigation item.
-8. Run validation and review the complete diff for ownership/scope drift.
+If another implementation file becomes necessary, stop and amend/reapprove this plan.
 
-## UI behavior
+## Delivery batches
 
-- Active offerings appear before historical offerings.
-- Each card shows course code, name, academic year, semester, and active/history status.
-- Loading uses a stable skeleton/status region without a full-page navigation.
-- Empty state explains that no assigned course is available and points the user to the administrator responsible for assignments.
-- 401 explains that the session expired and directs the user to sign in again without exposing token details.
-- 403 explains that access is unavailable without implying the frontend is the authorization source.
-- Network/5xx errors remain visible and retryable.
-- No course card implies a detail page or mutation that is not implemented in this slice.
+1. Route/endpoint builder, roster type, API wrapper, query key, and hook.
+2. Course-card navigation from the existing assigned-course list.
+3. Thin dynamic route and Asprak-only detail shell using the cached assigned-course query.
+4. Roster request-state UI and detail integration.
+5. Agent-maintained documentation plus full validation and final review.
+
+The agent will provide code paths and snippets; Aidan types code. Corrections will identify only the culprit and smallest replacement unless Aidan explicitly authorizes a direct code fix.
+
+## Behavior and boundaries
+
+- Course selection uses `/dashboard/courses/{courseId}`.
+- Direct entry reuses the assigned-course list; an ID absent from the Asprak result is shown as unavailable and does not start the roster request.
+- A non-Asprak role does not start either Asprak detail query and receives no Superadmin/Praktikan feature behavior.
+- The detail header shows course code, name, academic year, semester, and active/history status.
+- The roster shows total students, NPM, and email; no enrollment mutations or private fields are exposed.
+- Back navigation returns to the dashboard. Preserving the exact dashboard subsection through URL state is excluded.
+- No session placeholder may imply that session lifecycle integration is ready.
 
 ## API and data impact
 
-- Backend/API/database/migrations/OpenAPI: no changes.
-- Frontend adds a read-only consumer of the confirmed response.
-- Server state stays in TanStack Query; no course data is copied into Zustand.
-- Cache key is user-session scoped by logout behavior; no optimistic updates or invalidation are needed for a read-only list.
-
-## Assumptions
-
-- Bagas's confirmation relayed by Aidan is authoritative for the stated contract and migration/auth readiness.
-- The backend continues to enforce Asprak assignment scope.
-- The initial expected scale (about 20 active courses total) permits rendering the assigned result without frontend pagination.
-- Existing documentation changes, two owner deletions, and the pre-existing `frontend/Dockerfile` modification must be preserved.
-- No new dependency or automated-test framework is needed.
+- Backend, database, migrations, OpenAPI, Docker/Nginx, dependencies, and server data: no changes.
+- New frontend operation is read-only.
+- TanStack Query owns assigned-course and roster server state; Zustand remains auth/client state only.
+- Dynamic identifiers are encoded before building browser URLs.
 
 ## Risks and mitigations
 
 | Risk | Mitigation |
 |---|---|
-| A shared dashboard edit changes other roles | Gate the new content on both Asprak role and the `classes` item; manually verify all other items retain their current output. |
-| A stale session causes repeated requests | Do not retry 401/403; present a clear session/access state. |
-| Backend response drifts | Use exact types from the confirmed schema and update the ledger; future OpenAPI generation remains separate work. |
-| Historical results grow without a bound | Accept the confirmed initial scale; record pagination/history bounding as a future contract concern. |
-| Frontend appears to authorize assignments | Never filter from global data or trust client role checks; consume the backend-scoped list only. |
-| Dirty-worktree changes are overwritten | Patch only approved files and inspect the final diff by path. |
+| Arbitrary URL ID bypasses frontend selection | Resolve against assigned courses before querying; FastAPI authorization remains mandatory. |
+| Another user's cached roster appears | Include user ID and course ID in the query key. |
+| Shared route/API files expand another role | Add only builders consumed by this Asprak slice; do not alter Superadmin/Praktikan UI. |
+| Roster grows | Render the initial course-scoped size responsively; record backend pagination/search as a future bound. |
+| Session Partial status is blurred | No session request, mutation, or ready-looking session control. |
+| Dirty worktree is overwritten | Touch only planned files and preserve prior docs, deletions, and `frontend/Dockerfile`. |
 
-## Performance review
+## Performance
 
-- One query when the Asprak opens `classes`; no request for other roles or inactive dashboard items.
-- Use TanStack Query caching and avoid a duplicate Zustand copy.
-- Avoid unnecessary global state and new client boundaries beyond the existing client dashboard.
-- Render the confirmed small result directly; note future history bounding rather than adding premature virtualization.
-- Confirm retry cannot create a request loop.
+- Reuse the cached assigned-course query instead of introducing a single-course request.
+- Start the roster query only after role and assignment resolution.
+- Match the backend roster cache with 30-second frontend freshness.
+- Retry a transient failure once; never retry 401/403/404.
+- No redundant Zustand copy, optimistic update, new dependency, or unbounded cross-course request.
 
-## Security and privacy review
+## Security and privacy
 
-- Preserve `/api/` same-origin routing and `credentials: include`.
-- Never read, store, log, or display the HttpOnly token or authentication payload.
-- Treat backend assignment checks as the authorization boundary.
-- Do not expose raw backend objects, stack traces, or private environment values.
-- Do not change CORS, cookies, CSRF behavior, role checks, backend code, or Superadmin UI.
-- This read-only request adds no new CSRF-sensitive mutation.
+- Preserve same-origin `/api/`, `credentials: "include"`, and HttpOnly-token opacity.
+- Frontend role/assignment checks control presentation/request timing only; backend access checks remain authoritative.
+- Do not expose tokens, secrets, raw errors, stack traces, or fields beyond NPM/email.
+- Do not change authentication, CORS, cookies, CSRF, backend permissions, or Superadmin behavior.
+- No CSRF-sensitive write is introduced.
 
 ## Accessibility and responsive review
 
-- Use semantic headings/list structure and meaningful status labels.
-- Expose loading/error updates through an appropriate status region.
-- Retry/sign-in controls must be keyboard accessible with visible focus behavior.
-- Cards must remain readable at narrow mobile widths and desktop dashboard widths.
-- Do not rely on color alone for active/history meaning.
+- Course links and back/retry controls have visible focus and keyboard behavior.
+- Detail and roster use semantic headings/list or table structure.
+- Loading/error updates use appropriate status/alert semantics.
+- Active/history meaning is textual, not color-only.
+- NPM/email rows remain usable at narrow mobile and desktop dashboard widths.
 
-## Validation plan
+## Validation
 
-Report every result as PASS, FAIL, SKIPPED, or NOT AVAILABLE:
+- focused ESLint for changed code
+- `pnpm typecheck`
+- `pnpm lint`
+- `pnpm build`
+- `git diff --check` and exact-file/scope review
+- frontend tests: NOT AVAILABLE; no test script
+- backend tests/migrations: SKIPPED; backend-owned and unchanged
+- Docker checks: SKIPPED unless a runtime-only issue appears
 
-1. Narrow TypeScript/ESLint inspection of changed files when available.
-2. `pnpm typecheck` from `frontend/`.
-3. `pnpm lint` from `frontend/`.
-4. `pnpm build` from `frontend/`.
-5. Frontend automated tests: NOT AVAILABLE because no `test` script exists.
-6. Backend tests/migrations: SKIPPED; backend-owned and no backend change.
-7. Docker checks: SKIPPED unless implementation reveals a runtime-only integration issue; no service/config change is planned.
-8. `git diff --check` and changed-file/scope review.
+Manual scenarios: select active/historical course; direct valid URL; invalid/unassigned ID; populated/empty roster; loading; 401/403/404; transient failure/retry; non-Asprak direct entry; keyboard focus; mobile/desktop layout; back navigation.
 
-Manual scenarios:
+## Validation results
 
-- Asprak with active and historical assigned courses
-- Asprak with no assigned courses
-- loading state
-- expired/unauthenticated response
-- forbidden response
-- transient network/server failure and successful retry
-- Superadmin and Praktikan dashboard content remains unchanged
-- other Asprak navigation items remain placeholders
-- narrow mobile and normal desktop layout
-- keyboard focus and retry/sign-in operation
+Validated on 2026-08-14:
+
+- PASS — `pnpm typecheck`
+- PASS — `pnpm lint`
+- PASS — `pnpm build`; Next.js generated `/dashboard/courses/[courseId]` as a dynamic route
+- PASS — exact-file scope, contract, role-boundary, security/privacy, performance, and accessibility source review
+- FAIL — `git diff --check`; the owner accepted a non-functional trailing-space warning in `frontend/lib/api/endpoints.ts`
+- NOT AVAILABLE — frontend automated tests; no test script exists
+- SKIPPED — browser/runtime scenarios; no authenticated browser session or controlled error-state harness was available
+- SKIPPED — backend tests and migrations; backend-owned, unchanged, and the test fixture can truncate configured data
+- SKIPPED — Docker/Nginx checks; runtime wiring and dependencies were unchanged
+
+The roster remains an unpaginated course-scoped list. This is acceptable for the confirmed initial scale; pagination or search requires a future backend contract if individual rosters grow substantially.
 
 ## Rollback
 
-Frontend/documentation-only and owner-managed through Git. Removing the new feature files and reverting the two approved integration points restores the placeholder. No runtime data, backend, migration, dependency, storage, or infrastructure rollback is required.
+Owner-managed Git rollback only. Removing the dynamic route/detail/roster files and reverting the route, endpoint, query, API, and course-list integration restores the existing assigned-course list. No data or runtime rollback is required.
 
 ## Approval
 
-- [x] Aidan approves this exact scope
-- [x] Aidan selected ready-to-type implementation guidance for code and direct agent edits for Markdown
-- Approval notes: Approved conversationally on 2026-08-13. Deliver code in small batches with exact file paths and review each owner-written batch before continuing. The agent continuously maintains Markdown files within the approved scope.
-- Implementation exception: Aidan explicitly authorized the agent to directly correct only the identified Batch 3 UI defects before returning to owner-written code for Batch 4.
-
-## Completion and validation
-
-- PASS — focused ESLint for the Batch 1-3 course/API files
-- PASS — `pnpm typecheck`
-- PASS — `pnpm lint`
-- PASS — `pnpm build`
-- PASS — `git diff --check`
-- PASS — final scope, role-gating, same-origin credentials, token-storage, direct-backend-call, unsafe-HTML, and server-state ownership review
-- NOT AVAILABLE — frontend automated tests; no `test` script exists
-- SKIPPED — backend tests and migrations; backend-owned and no backend change
-- SKIPPED — Docker checks; no service, dependency, or configuration change
-- SKIPPED — interactive browser/manual scenarios; not executed in this ready-to-type batch session
-
-Implemented scope: the Asprak `My Practicum Classes` item now consumes the confirmed assigned-course read through typed feature APIs and TanStack Query, rendering loading, empty, 401, 403, transient-error/retry, active, and historical states. Course-detail navigation remains the next separately planned slice.
+- [x] Aidan approves this exact Slice 2A scope
+- [x] Aidan confirms ready-to-type code plus agent-maintained Markdown
+- Approval notes: Approved conversationally on 2026-08-13. Deliver implementation in the five planned batches and review each owner-written code batch before continuing.

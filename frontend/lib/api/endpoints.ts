@@ -7,6 +7,8 @@ export const API_ENDPOINTS = {
   },
 
   courses: {
-    list: "/api/courses/"
+    list: "/api/courses/",
+    students: (courseId: string) => 
+      `/api/courses/${encodeURIComponent(courseId)}/students`
   }
 } as const;

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { AlertCircle, BookOpen, RefreshCw } from "lucide-react";
-import { ROUTES } from "@/constants/routes";
+import { getCourseDetailRoute, ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useAssignedCourses } from "../hooks/use-assigned-courses";
 import type { Course } from "../types/course.type";
@@ -44,15 +44,21 @@ function CourseGroup({ id, title, description, courses }: CourseGroupProps) {
         <h3 id={id} className="text-lg font-semibold text-slate-950">
           {title}
         </h3>
-        <p className="mt-1 text-sm text-slate-500">
-          {description}
-        </p>
+        <p className="mt-1 text-sm text-slate-500">{description}</p>
       </div>
 
       <ul className="mt-4 grid gap-4 lg:grid-cols-2">
         {courses.map((course) => (
           <li key={course.id}>
-            <AsprakCourseCard course={course} />
+            <Link
+              href={getCourseDetailRoute(course.id)}
+              aria-label={`Open ${course.code} ${course.name},
+  ${course.academic_year} semester ${course.semester}`}
+              className="block h-full rounded-2xl transition
+  hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+            >
+              <AsprakCourseCard course={course} />
+            </Link>
           </li>
         ))}
       </ul>

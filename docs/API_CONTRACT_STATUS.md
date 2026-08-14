@@ -1,6 +1,6 @@
 # API Contract Status
 
-Last inspected: 2026-08-13  
+Last inspected: 2026-08-14
 Branch: `feature/asprak-features`
 
 This is the integration-readiness ledger, not a release certificate. Status meanings are in [FULL_STACK_WORKFLOW.md](FULL_STACK_WORKFLOW.md).
@@ -11,7 +11,7 @@ This is the integration-readiness ledger, not a release certificate. Status mean
 |---|---|---|---|
 | Cookie authentication | Partial | all roles | Stabilize Aidan-owned FE; Bagas resolves backend invariant/CSRF |
 | Academic-period course list | Current and frontend-integrated for Asprak assigned-course reads | Asprak | Runtime-smoke role scoping and retain history bounds as a follow-up |
-| Enrollment/staff | Current backend contract | Superadmin writes, Asprak roster reads | Bagas owns Superadmin FE |
+| Roster read / enrollment and staff | Current and frontend-integrated for assigned-Asprak roster reads; Current backend contract for writes | Asprak roster reads; Superadmin writes | Runtime-smoke roster states; Bagas owns Superadmin FE |
 | Session create/list/update/open/close | Partial | Asprak; Praktikan reads | Confirm transitions and focused tests |
 | Safe session delete/archive | Blocked | Asprak | Backend contract absent |
 | Module presign/confirm/list | Partial | Asprak, Praktikan | Validate intent/cleanup/tests |
@@ -62,7 +62,28 @@ Integration boundaries:
 
 ## Roster and staff
 
-Superadmin enrollment/staff writes exist with focused tests. `GET /courses/{course_id}/students` supports assigned-Asprak roster reads. Bagas owns Superadmin FE; Aidan may consume the roster read in an approved Asprak course-detail slice.
+Status: Current and frontend-integrated for assigned-Asprak roster reads.
+
+Confirmed backend behavior:
+
+- `GET /courses/{course_id}/students` returns `{ id, username, email }[]`; `username` is the Praktikan NPM
+- browser integration uses `GET /api/courses/{courseId}/students` through the shared same-origin cookie client
+- Superadmin or an assigned Asprak may read the roster; the frontend enables this slice only for Asprak, while FastAPI remains authoritative
+- the backend returns 401, 403, or 404 as applicable and caches the course roster for about 30 seconds
+
+Frontend integration added on 2026-08-14:
+
+- assigned-course cards link to an encoded dynamic course-detail route
+- direct entry first resolves the selected ID against the authenticated Asprak's assigned-course result, so an invalid or unassigned ID does not start a roster request
+- the roster uses a user-and-course-scoped TanStack Query key, 30-second freshness, one transient retry, and no automatic retry for 401/403/404
+- loading, empty, unauthorized, forbidden, missing-course, transient-error/retry, count, NPM, email, responsive, and keyboard-focus states are represented
+
+Limitations:
+
+- browser runtime smoke remains pending
+- no focused roster-route backend test was found; route source, the shared access helper, enrollment tests, and shared permission tests are the available evidence
+- the response is unpaginated; pagination/search requires a future contract if individual course rosters grow beyond the confirmed initial scale
+- Superadmin enrollment/staff frontend work remains Bagas-owned
 
 ## Class sessions
 
