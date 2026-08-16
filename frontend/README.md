@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Praktis Frontend
 
-## Getting Started
+Next.js App Router frontend for Praktis.
 
-First, run the development server:
+## Ownership
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Aidan: Asprak and Praktikan frontend integration
+- Bagas: Superadmin frontend integration and all backend contracts
+
+Shared auth, API plumbing, layouts, and design-system code must name its role consumers. Read [../AGENTS.md](../AGENTS.md), [AGENTS.md](AGENTS.md), [../docs/FULL_STACK_WORKFLOW.md](../docs/FULL_STACK_WORKFLOW.md), and [../docs/API_CONTRACT_STATUS.md](../docs/API_CONTRACT_STATUS.md) before planning work.
+
+## Standard entry point
+
+Start the complete stack from the repository root and browse through Nginx:
+
+```powershell
+docker compose up -d
+docker compose ps
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open <http://localhost:8080>. Browser API requests use `/api/...`; never call `localhost:8000` directly or add a browser-facing API base URL.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```text
+app/        thin route pages and layouts
+features/   domain APIs, components, hooks, schemas, types, constants, and utilities
+lib/        shared API and TanStack Query plumbing
+stores/     genuine client/session-derived state
+types/      cross-feature TypeScript types
+constants/  routes and shared constants
+```
 
-## Learn More
+Use TanStack Query for server state and Zustand only for genuine client state. Preserve `credentials: include`; never read or store the HttpOnly access token.
 
-To learn more about Next.js, take a look at the following resources:
+## Integration sequence
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+For each feature:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Confirm the role owner and approved `PLANS.MD`.
+2. Confirm the endpoint is Current in the contract ledger.
+3. Inspect the route, Pydantic schemas, permissions, tests, and runtime OpenAPI when available.
+4. Define precise API types and normalized errors; do not invent fields or silently coerce responses.
+5. Add query keys, query/mutation hooks, and targeted invalidation.
+6. Implement loading, empty, error, retry, unauthorized, forbidden, conflict, pending, and success states as applicable.
+7. Validate privacy, performance, accessibility, and responsive behavior.
 
-## Deploy on Vercel
+The proposed future standard is generated or CI-validated TypeScript types from FastAPI OpenAPI. It is not currently implemented.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Checks
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+From `frontend/`:
+
+```powershell
+pnpm typecheck
+pnpm lint
+pnpm build
+```
+
+There is no frontend test script. Report tests as NOT AVAILABLE unless an approved task adds one.

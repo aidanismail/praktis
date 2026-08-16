@@ -1,37 +1,30 @@
 ---
 name: implement-asprak-praktikan-feature
-description: Implement an owner-approved Praktis feature for the Asprak or Praktikan role. Use only after PLANS.MD is approved. Do not use for Superadmin or backend-owned implementation unless explicitly reassigned by the owner.
+description: Implement an owner-approved Praktis feature for the Asprak or Praktikan role. Use after PLANS.MD approval for scoped feature work; check the API contract ledger and stop affected integration unless the required operation is Current. Do not implement Bagas-owned Superadmin frontend or backend work unless explicitly reassigned.
 ---
 
 # Implement Asprak or Praktikan Feature
 
 ## Preconditions
 
-- Read the applicable `AGENTS.md` files.
-- Confirm `PLANS.MD` exists and its approval checkbox or owner message explicitly approves implementation.
-- Confirm the feature belongs to Asprak or Praktikan.
-- If backend support is missing, stop and produce a backend handoff instead of editing backend code.
+- Read applicable `AGENTS.md` files and relevant product/security/testing docs.
+- Confirm `PLANS.MD` approval, role scope, and direct-edit or ready-to-type mode.
+- Read `docs/FULL_STACK_WORKFLOW.md` and the relevant `docs/API_CONTRACT_STATUS.md` entries.
+- Verify required endpoints and fields in current backend code/OpenAPI; product requirements alone are insufficient.
 
 ## Workflow
 
-1. Re-inspect the exact files listed in `PLANS.MD`.
-2. Reuse current feature patterns and shared components.
-3. Keep route pages thin and feature logic modular.
-4. Define or update typed request/response contracts based only on confirmed backend behavior.
-5. Implement loading, empty, error, unauthorized, and success states.
-6. Preserve same-origin `/api/` paths and cookie credentials.
-7. Keep role-specific navigation and behavior isolated.
-8. Avoid unrelated refactors.
-9. Add focused tests only when the approved plan includes a test approach.
-10. Invoke or follow the `validate-change` skill before reporting completion.
+1. Reinspect the exact approved files and preserve unrelated owner changes.
+2. Reuse current feature patterns and keep route pages thin.
+3. Define types only from confirmed contracts.
+4. Implement all relevant request, empty, error, role, lifecycle, and success states.
+5. Preserve same-origin cookie authentication and backend authorization assumptions.
+6. Keep Asprak and Praktikan navigation/behavior isolated while sharing genuinely common code.
+7. Treat unpublished grades as private and unpublished modules as inaccessible to Praktikan.
+8. Add tests only when the approved plan contains a safe test approach.
+9. Avoid unrelated refactors and backend/Superadmin edits.
+10. Follow `validate-change` before reporting completion.
 
 ## Stop conditions
 
-Stop and ask the owner when:
-
-- an endpoint does not exist
-- request or response fields are ambiguous
-- backend authorization appears missing
-- a dependency addition is needed but not approved
-- implementation would affect Superadmin
-- implementation would require a migration or backend edit
+Stop the affected slice and update the contract ledger with owner and next action when an endpoint is missing, an operation is Partial/Proposed/Blocked, a field/state transition is ambiguous, authorization is absent, a dependency is unapproved, or work would require backend, migration, infrastructure, or Superadmin frontend changes.

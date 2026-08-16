@@ -3,10 +3,14 @@
 ## Prerequisites
 
 - Docker Desktop with Docker Compose
-- Git for read-only inspection and owner-managed source control
-- Node.js/pnpm only when running frontend checks outside Docker
-- Python virtual environment only when running backend checks outside Docker
-- A valid repository-root `.env`
+- Git for read-only agent inspection and owner-managed source control
+- Node.js and pnpm only for frontend checks outside Docker
+- Python virtual environment only for explicitly authorized backend checks outside Docker
+- A valid uncommitted repository-root `.env`
+
+Never paste or print secret environment values into agent output.
+
+Before feature work, read `docs/FULL_STACK_WORKFLOW.md` and the relevant entries in `docs/API_CONTRACT_STATUS.md`. Run browser integration through Nginx at `http://localhost:8080`; direct browser calls to backend port `8000` are outside the project contract.
 
 ## Standard Docker workflow
 
@@ -20,22 +24,20 @@ docker compose ps
 
 Open:
 
-- application: `http://localhost:8080`
+- application/API entry point: `http://localhost:8080`
 - Swagger: `http://localhost:8080/docs`
 - MinIO console: `http://localhost:9001`
 
-The development override is automatically loaded and selects `dev` build targets for frontend, backend, and migration services.
+The automatically loaded development override selects `dev` build targets and bind-mounts frontend/backend source.
 
-## Hot reload
+## Hot reload and rebuilds
 
-The development override bind-mounts:
+- `./frontend` is mounted at `/app` in the frontend container.
+- `./backend` is mounted at `/app` in backend and migration containers.
+- Frontend node_modules, Next cache, and pnpm store use named volumes.
+- Normal source edits should hot reload.
 
-- `./frontend` to `/app`
-- `./backend` to `/app`
-
-Frontend dependency and build caches use named volumes. Normal `.ts`, `.tsx`, `.css`, and `.py` edits should not require an image rebuild.
-
-Rebuild a service after changes to its Dockerfile, package lockfile, requirements, or Compose build configuration:
+Rebuild after Dockerfile, dependency, lockfile, requirements, or Compose build changes:
 
 ```powershell
 docker compose up -d --build frontend
@@ -55,15 +57,15 @@ Stopping `logs -f` with Ctrl+C does not stop containers.
 
 ## Migrations
 
-Compose includes a one-shot `migrate` service that runs `alembic upgrade head` before the backend starts.
+The one-shot `migrate` service runs `alembic upgrade head` before backend startup.
 
-For explicit non-destructive verification:
+Explicit non-destructive verification:
 
 ```powershell
 docker compose run --rm migrate
 ```
 
-Do not run downgrade/reset commands or delete volumes without owner confirmation.
+Backend migrations are Bagas-owned. Do not run downgrade/reset/drop/truncate commands or delete volumes without explicit authorization.
 
 ## Frontend checks
 
@@ -75,19 +77,28 @@ pnpm lint
 pnpm build
 ```
 
-`pnpm test` is not available in the current package scripts.
+There is no frontend `test` script in the current package configuration.
 
-## Backend checks
+## Backend test safety
 
-From `backend/` with the correct environment:
+The test fixture creates/migrates the selected test database and runs `TRUNCATE ... CASCADE` before tests. Do not run `pytest` merely because it appears in a checklist.
+
+Before any backend test run:
+
+1. Confirm backend work or integration investigation is explicitly authorized.
+2. Resolve `TEST_DATABASE_URL` without printing its password.
+3. Confirm the database name is a disposable test database, normally `praktis_test`.
+4. Confirm it is not development, staging, production, or user data.
+5. Stop and ask Aidan if any target is ambiguous.
+
+Only then, from `backend/`:
 
 ```powershell
 python -m compileall .
 pytest
-alembic upgrade head
 ```
 
-The supplied baseline Pytest run collected 42 tests and ended in errors. Treat this as a known baseline until the backend owner resolves or explains it.
+The observed baseline recorded August 1, 2026 collected 42 tests and ended in errors. It is a historical comparison point, not proof of current success.
 
 ## Safe shutdown
 
@@ -97,7 +108,7 @@ Preserve database and storage volumes:
 docker compose down
 ```
 
-Never run the following through the agent without explicit owner confirmation:
+Never run through the agent without explicit owner confirmation:
 
 ```powershell
 docker compose down -v
@@ -106,8 +117,12 @@ docker volume prune
 
 ## Dependency changes
 
-The agent must propose dependency additions in `PLANS.MD` and wait for approval.
+Dependency changes require an owner-approved `PLANS.MD`.
 
-Frontend dependency changes require updating both `package.json` and the pnpm lockfile, followed by a frontend rebuild.
+Frontend dependency changes update both `frontend/package.json` and `frontend/pnpm-lock.yaml`, then run the approved audit, checks, production build, and affected Docker build. Backend dependency changes remain outside the default agent scope.
 
-Backend dependency changes are outside the agent's default scope.
+## Collaboration mode
+
+The owner may choose direct agent edits or ready-to-type code. In ready-to-type mode, the agent supplies ordered snippets/patches and reviews what the owner enters; it does not silently edit implementation files.
+
+Aidan owns Asprak/Praktikan frontend integration. Bagas owns backend and Superadmin frontend integration. Shared frontend changes must be called out in `PLANS.MD` and reviewed for all three roles.

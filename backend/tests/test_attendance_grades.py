@@ -139,6 +139,8 @@ async def test_grades_me_returns_own_records(client, db):
         f"/grades/sessions/{session.id}/bulk",
         json={"records": [{"student_id": str(student.id), "score": 90}]},
     )
+    
+    await client.post(f"/grades/sessions/{session.id}/publish")
 
     set_auth(client, student)
     resp = await client.get("/grades/me")

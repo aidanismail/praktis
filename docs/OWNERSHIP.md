@@ -5,53 +5,53 @@
 ### Aidan
 
 - Product owner
-- Frontend owner
-- Owns Asprak product flows
-- Owns Praktikan product flows
-- Approves all agent implementation plans
+- Owns frontend integration for the Asprak and Praktikan product flows
+- Defines intended behavior and approves agent implementation plans
+- Chooses whether the agent edits files directly or supplies ready-to-type code
 
 ### Bagas
 
-- Backend owner
-- Owns backend API, persistence, migrations, authentication implementation, storage integration, and related tests
-- Owns the Superadmin product area
+- Backend owner and Superadmin frontend owner
+- Owns API and data contracts, persistence, migrations, authentication implementation, storage integration, infrastructure behavior, and backend tests
+- Owns frontend integration for the Superadmin product area
 
 ## Agent operating boundary
 
-The agent may inspect all code to understand the system. Its default implementation boundary is frontend work for Asprak and Praktikan.
+The agent may inspect the entire repository. Its default implementation boundary is frontend work for Asprak and Praktikan after owner-approved planning.
 
-The agent must not edit:
+The agent must not edit backend implementation, database schemas, migrations, API contracts, authentication cookies, Docker/Nginx contracts, or Superadmin frontend features unless Aidan explicitly authorizes that category in the current task. Changes to shared frontend code must preserve all roles and remain limited to what the approved Asprak/Praktikan slice requires.
 
-- backend implementation
-- database schemas or migrations
-- backend API contracts
-- authentication cookie implementation
-- global Docker/Nginx infrastructure
-- Superadmin features
-
-unless Aidan explicitly authorizes that category in the current task.
+Product documentation may describe intended behavior that is not implemented. Such behavior must be labeled Target, Proposed, or Blocked rather than Current.
 
 ## Cross-team integration process
 
-When Asprak or Praktikan frontend work needs backend support:
+When frontend work needs backend support:
 
-1. Inspect existing routes, schemas, and Swagger behavior.
-2. Record the current contract in `PLANS.MD`.
-3. Implement only against an existing confirmed contract.
-4. If the contract is missing or incompatible, stop and ask Aidan.
-5. Produce a concise backend handoff proposal for Bagas instead of editing backend code.
+1. Inspect routes, schemas, models, migrations, tests, and available OpenAPI behavior.
+2. Record the observed contract and its evidence in `docs/API_CONTRACT_STATUS.md` and the current `PLANS.MD`.
+3. Compare it with `docs/PRD.md`, `docs/DECISIONS.md`, and owner decisions.
+4. Implement only against an existing confirmed contract.
+5. If the contract is missing or incompatible, stop the affected implementation slice.
+6. Add a concise Proposed or Blocked entry to `docs/API_CONTRACT_STATUS.md` using the handoff fields in `docs/FULL_STACK_WORKFLOW.md`.
+7. Resume integration only after Bagas returns a confirmed contract and Aidan approves a new plan.
 
-A useful handoff contains:
+Each unresolved-contract entry should contain:
 
-- endpoint and HTTP method
-- role/permission requirement
-- request fields
-- response fields
-- error cases
-- pagination/filter behavior
-- file constraints, when applicable
+- priority and user impact
+- observed endpoint/data behavior
+- intended product behavior
+- proposed method/path and fields, labeled as proposals
+- role/permission requirements
+- validation, state transitions, and error cases
+- pagination/filter/file constraints when relevant
 - frontend acceptance criteria
+- security/performance implications
+- required backend tests
 
 ## Superadmin isolation
 
-The Superadmin role remains part of the product and may appear in shared auth types and navigation infrastructure. However, the agent must not add, refactor, or complete Superadmin feature behavior unless explicitly assigned.
+Superadmin may appear in shared role types and authentication/navigation infrastructure. The frontend agent must not add, refactor, or complete Superadmin behavior without explicit reassignment.
+
+## Current cross-team status
+
+Use `docs/API_CONTRACT_STATUS.md` as the canonical readiness ledger. Academic-period courses, publication controls, module/session lifecycle, authentication invariants, migration readiness, and CSRF have different readiness levels; do not reduce them to a single implemented/not-implemented claim. `docs/FULL_STACK_WORKFLOW.md` defines how Bagas and Aidan move an entry from Proposed or Blocked to Current.

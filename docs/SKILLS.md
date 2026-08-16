@@ -1,43 +1,43 @@
 # Repository Skills
 
-Codex repository skills are stored under `.agents/skills/<skill-name>/SKILL.md`.
+Praktis skills live under `.agents/skills/<skill-name>/SKILL.md`. They are concise procedures; project requirements remain in `docs/`, and live contracts remain in source/OpenAPI.
 
 ## Available skills
 
 ### `plan-first`
 
-Use before every implementation task. It inspects context, writes `PLANS.MD`, presents the plan, and stops for owner approval.
+Inspect the applicable instructions, docs, diff, source evidence, and `docs/API_CONTRACT_STATUS.md`; replace `PLANS.MD`; distinguish Current, Partial, Target, Proposed, and Blocked behavior; then stop for owner approval. Record direct-edit or ready-to-type mode.
 
 ### `implement-asprak-praktikan-feature`
 
-Use for end-to-end feature work in Aidan's Asprak or Praktikan scope.
+Implement an approved Asprak or Praktikan slice. Check `docs/API_CONTRACT_STATUS.md` and stop affected integration when a required contract is not Current for the intended operation.
 
 ### `frontend-feature`
 
-Use for modular Next.js frontend implementation after a plan is approved.
+Build modular Next.js behavior under the actual `frontend/app`, `frontend/features`, and `frontend/lib` structure after approval.
 
 ### `integrate-backend-api`
 
-Use when connecting frontend behavior to an existing FastAPI contract without editing backend code.
+Connect frontend behavior to a confirmed FastAPI contract while preserving same-origin `/api/` routing and HttpOnly-cookie authentication. Record a standardized Proposed/Blocked ledger entry instead of inventing missing behavior.
 
 ### `validate-change`
 
-Use after implementation to run checks and perform performance/security review.
+Review approved changes for scope, correctness, performance, security, privacy/publication, accessibility, build quality, and safe testing. Report PASS, FAIL, SKIPPED, or NOT AVAILABLE.
 
 ### `debug-docker-development`
 
-Use for local Docker, Nginx, hot-reload, service-health, and routing diagnostics without destructive operations.
+Diagnose local Compose, Nginx, health, build, migration, hot-reload, proxy limits, and host exposure non-destructively. Never delete volumes or reset data.
 
-## Invocation examples
+## Usage
 
-In Codex CLI, mention a skill explicitly with `$` when desired, for example:
+Skills trigger automatically when the task matches, or Aidan may name one explicitly, for example:
 
 ```text
-$plan-first Plan the Praktikan module-list screen. Do not implement yet.
+$plan-first Plan the Asprak module-management screen. Do not implement yet.
 ```
 
 ```text
-$implement-asprak-praktikan-feature Implement the approved attendance plan.
+$implement-asprak-praktikan-feature Implement the approved attendance slice.
 ```
 
-The root `AGENTS.md` already requires plan-first behavior, so explicit skill invocation is optional but useful for emphasis.
+Repository instructions remain authoritative when a skill and project rule overlap.

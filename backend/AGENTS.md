@@ -22,6 +22,10 @@ When frontend work exposes a backend problem, report:
 4. frontend impact
 5. suggested backend change, clearly marked as a proposal
 
+Use `docs/API_CONTRACT_STATUS.md` for contract readiness and `docs/FULL_STACK_WORKFLOW.md` for handoff fields. Include authorization, state transitions, error statuses, frontend consumers, acceptance criteria, migration/data impact, performance/security impact, and required tests. Product requirements are not evidence that a contract is implemented.
+
+A route becomes Current only when its method/path, request/response models, role rules, error behavior, state transitions, bounds, and relevant tests are evidenced. Mark it Partial when implementation exists but migration safety, tests, authorization, or failure recovery remains unresolved.
+
 Do not implement the proposal without explicit authorization.
 
 ## Explicitly authorized backend work
@@ -36,3 +40,5 @@ When the owner explicitly authorizes backend work:
 - run migrations only when approved and non-destructive
 - never hide the existing test baseline of collected tests ending in errors
 - do not perform database downgrade, reset, or volume deletion
+
+Before any Pytest run, resolve `TEST_DATABASE_URL` without exposing its password and verify the selected database is disposable and test-only. The fixture creates/migrates it and runs `TRUNCATE ... CASCADE`; stop if the target is ambiguous.
