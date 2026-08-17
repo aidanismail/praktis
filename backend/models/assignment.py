@@ -37,7 +37,7 @@ class Submission(Base):
     file_key: Mapped[str] = mapped_column(String(500))
     file_name: Mapped[str] = mapped_column(String(255))
     file_size: Mapped[int] = mapped_column(Integer, default=0)
-    submitted_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.timezone.utc)
+    submitted_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.datetime.now(datetime.timezone.utc))
     is_late: Mapped[bool] = mapped_column(Boolean, default=False)
     score: Mapped[float | None] = mapped_column(Float, nullable=True)
     feedback: Mapped[str | None] = mapped_column(Text, nullable=True)

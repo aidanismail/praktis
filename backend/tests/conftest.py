@@ -31,7 +31,7 @@ from main import app
 BASE_DIR = Path(__file__).resolve().parents[1]
 ASYNC_TEST_URL = TEST_DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://")
 
-TABLES = "users, courses, class_sessions, enrollments, course_staff, modules, attendances, grades"
+TABLES = "users, courses, class_sessions, enrollments, course_staff, modules, attendances, grades, announcements, announcement_comments, assignments, submissions"
 
 
 async def _create_database_if_missing() -> None:
