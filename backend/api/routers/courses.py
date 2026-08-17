@@ -16,8 +16,10 @@ from models.course_staff import CourseStaff
 from models.enrollment import Enrollment
 from api.dependencies import get_current_active_user, RoleChecker
 from api.permissions import require_course_access
+from schemas.common import MessageResponse
 from schemas.course import (
     CourseCreate,
+    CourseUpdate,
     CourseResponse,
     EnrollRequest,
     EnrollResponse,
@@ -78,6 +80,63 @@ async def create_course(
     return course
 
 
+@router.put(
+    "/{course_id}",
+    response_model=CourseResponse,
+    summary="Update a course offering",
+    description="Superadmin only. Update code, name, academic year, semester, or active status.",
+    responses={**UNAUTHENTICATED_401, **FORBIDDEN_403, **COURSE_NOT_FOUND_404},
+)
+async def update_course(
+    course_id: uuid.UUID,
+    data: CourseUpdate,
+    db: AsyncSession = Depends(get_db),
+    _current_user: User = Depends(require_superadmin),
+):
+    course = await _get_course_or_404(db, course_id)
+
+    if data.code is not None:
+        course.code = data.code
+    if data.name is not None:
+        course.name = data.name
+    if data.academic_year is not None:
+        course.academic_year = data.academic_year
+    if data.semester is not None:
+        course.semester = data.semester
+    if data.is_active is not None:
+        course.is_active = data.is_active
+
+    try:
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(status_code=409, detail="A course offering with these details already exists")
+
+    await db.refresh(course)
+    await cache_delete_pattern("cache:courses:*")
+    return course
+
+
+@router.delete(
+    "/{course_id}",
+    response_model=MessageResponse,
+    summary="Delete a course offering",
+    description="Superadmin only. Removes a course and all associated registrations.",
+    responses={**UNAUTHENTICATED_401, **FORBIDDEN_403, **COURSE_NOT_FOUND_404},
+)
+async def delete_course(
+    course_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    _current_user: User = Depends(require_superadmin),
+):
+    course = await _get_course_or_404(db, course_id)
+    await db.delete(course)
+    await db.commit()
+    await cache_delete_pattern("cache:courses:*")
+    return {"message": f"Successfully deleted course '{course.code}'"}
+
+
+
 @router.get(
     "/",
     response_model=list[CourseResponse],
@@ -125,6 +184,23 @@ async def _get_course_or_404(db: AsyncSession, course_id: uuid.UUID) -> Course:
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
     return course
+
+
+@router.get(
+    "/{course_id}",
+    response_model=CourseResponse,
+    summary="Get course detail by ID",
+    description="Returns detailed information for a specific course offering. Requires course access (enrolled student, assigned staff, or superadmin).",
+    responses={**UNAUTHENTICATED_401, **FORBIDDEN_403, **COURSE_NOT_FOUND_404},
+)
+async def get_course_detail(
+    course_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    await require_course_access(db, current_user, course_id, write=False)
+    course = await _get_course_or_404(db, course_id)
+    return CourseResponse.model_validate(course)
 
 
 @router.post(
@@ -397,3 +473,36 @@ async def remove_staff(
         raise HTTPException(status_code=404, detail="Staff assignment not found")
     await db.commit()
     await cache_delete_pattern("cache:courses:*")
+
+
+@router.delete(
+    "/{course_id}/students/{student_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Remove a student enrollment from a course",
+    description="Superadmin or assigned asprak.",
+    responses={
+        **UNAUTHENTICATED_401,
+        **FORBIDDEN_403,
+        404: {"description": "Course not found, or student is not enrolled in this course."},
+    },
+)
+async def remove_student_enrollment(
+    course_id: uuid.UUID,
+    student_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    await require_course_access(db, current_user, course_id, write=True)
+
+    result = await db.execute(
+        delete(Enrollment).where(
+            Enrollment.course_id == course_id,
+            Enrollment.student_id == student_id,
+        )
+    )
+    assert isinstance(result, CursorResult)
+    if result.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Student enrollment not found")
+    await db.commit()
+    await cache_delete_pattern("cache:courses:*")
+

@@ -13,6 +13,13 @@ class CourseCreate(BaseModel):
     semester: Literal["Ganjil", "Genap"] = Field(..., description="Semester of the offering.")
     is_active: bool = Field(True, description="Whether this offering is currently active.")
 
+class CourseUpdate(BaseModel):
+    code: str | None = Field(None, description="Updated course code.")
+    name: str | None = Field(None, description="Updated course name.")
+    academic_year: str | None = Field(None, description="Updated academic year.")
+    semester: Literal["Ganjil", "Genap"] | None = Field(None, description="Updated semester.")
+    is_active: bool | None = Field(None, description="Updated active status.")
+
 class CourseResponse(BaseModel):
     id: uuid.UUID = Field(..., description="Unique course identifier.")
     code: str = Field(..., description="Unique course code.", examples=["IF101"])

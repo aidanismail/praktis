@@ -1,4 +1,5 @@
 import asyncio
+import uuid
 
 from sqlalchemy import or_
 from sqlalchemy.exc import IntegrityError
@@ -16,9 +17,9 @@ from core.rate_limit import rate_limiter
 from models.user import User, RoleEnum
 
 from schemas.common import MessageResponse
-from schemas.user import UserResponse, ChangePasswordRequest, LoginRequest, ImportCsvResponse
+from schemas.user import UserResponse, ChangePasswordRequest, LoginRequest, ImportCsvResponse, AdminResetPasswordRequest, UserCreate
 
-from services.user_service import get_user_by_username, get_password_hash, bulk_create_users
+from services.user_service import get_user_by_username, get_password_hash, bulk_create_users, create_user
 from services.import_service import parse_import_file, ImportRow
 from api.dependencies import get_current_user, RoleChecker
 
@@ -53,12 +54,14 @@ async def login(response: Response,
 
     user = await get_user_by_username(db, login_data.username)
     if user is None:
-        verify_password(login_data.password, _DUMMY_HASH)
+        await asyncio.to_thread(verify_password, login_data.password, _DUMMY_HASH)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
         )
-    if not verify_password(login_data.password, user.hashed_password) or not user.is_active:
+    
+    is_valid = await asyncio.to_thread(verify_password, login_data.password, user.hashed_password)
+    if not is_valid or not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
@@ -144,6 +147,92 @@ async def read_users_me(current_user: User = Depends(get_current_user)):
 
 
 require_superadmin = RoleChecker([RoleEnum.SUPERADMIN])
+
+
+@router.get(
+    "/users",
+    response_model=list[UserResponse],
+    summary="List all registered system users",
+    description="Superadmin only. Returns all registered user accounts.",
+    responses={**UNAUTHENTICATED_401, 403: {"description": "Superadmin role required."}},
+)
+async def list_all_users(
+    db: AsyncSession = Depends(get_db),
+    _current_user: User = Depends(require_superadmin),
+):
+    result = await db.execute(select(User).order_by(User.username))
+    return result.scalars().all()
+
+
+@router.post(
+    "/users",
+    response_model=UserResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create a new user account",
+    description="Superadmin only. Creates a new user account with specified username, email, role, and password.",
+    responses={
+        **UNAUTHENTICATED_401,
+        403: {"description": "Superadmin role required."},
+        409: {"description": "Username or email already exists."},
+    },
+)
+async def create_new_user(
+    user_in: UserCreate,
+    db: AsyncSession = Depends(get_db),
+    _current_user: User = Depends(require_superadmin),
+):
+    existing_user = await get_user_by_username(db, user_in.username)
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"User with username '{user_in.username}' already exists.",
+        )
+
+    email_check = await db.execute(select(User).where(User.email == user_in.email))
+    if email_check.scalars().first():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"User with email '{user_in.email}' already exists.",
+        )
+
+    try:
+        new_user = await create_user(db, user_in)
+        return new_user
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Conflict creating user account.",
+        )
+
+
+@router.post(
+    "/users/{user_id}/reset-password",
+    response_model=MessageResponse,
+    summary="Reset a user's password",
+    description="Superadmin only. Resets the user's password to a default or specified new password and sets `force_password_change=True`.",
+    responses={**UNAUTHENTICATED_401, 403: {"description": "Superadmin role required."}, 404: {"description": "User not found."}},
+)
+async def reset_user_password(
+    user_id: uuid.UUID,
+    data: AdminResetPasswordRequest | None = None,
+    db: AsyncSession = Depends(get_db),
+    _current_user: User = Depends(require_superadmin),
+):
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    new_pass = data.new_password if data and data.new_password else f"Praktis{user.username}"
+    user.hashed_password = get_password_hash(new_pass)
+    user.force_password_change = True
+
+    db.add(user)
+    await db.commit()
+
+    return {"message": f"Successfully reset password for user '{user.username}'"}
+
 
 def build_user_rows(rows: list[ImportRow]) -> list[dict]:
     users_to_insert = []

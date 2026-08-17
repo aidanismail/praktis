@@ -40,6 +40,9 @@ class ChangePasswordRequest(BaseModel):
             raise ValueError("Password cannot exceed 72 bytes (UTF-8)")
         return v
 
+class AdminResetPasswordRequest(BaseModel):
+    new_password: str | None = Field(default=None, description="Optional custom new password. Defaults to Praktis{username}.")
+
 class LoginRequest(BaseModel):
     username: str = Field(..., description="Login username (NPM for students).", examples=["140810220001"])
     password: str = Field(..., description="Account password.")

@@ -34,7 +34,7 @@ export function ChangePasswordForm() {
   return (
     <div className="w-full rounded-3xl border border-white/10 bg-white/95 p-7 shadow-2xl shadow-black/20 backdrop-blur">
       <div className="mb-7">
-        <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-sm">
+        <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-xs">
           <ShieldCheck className="h-6 w-6" />
         </div>
 
@@ -147,7 +147,7 @@ export function ChangePasswordForm() {
         <button
           type="submit"
           disabled={changePasswordMutation.isPending}
-          className="flex h-11 w-full items-center justify-center rounded-xl bg-emerald-600 px-4 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
+          className="flex h-11 w-full items-center justify-center rounded-xl bg-slate-900 px-4 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {changePasswordMutation.isPending ? (
             <>

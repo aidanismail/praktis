@@ -55,7 +55,7 @@ function CourseGroup({ id, title, description, courses }: CourseGroupProps) {
               aria-label={`Open ${course.code} ${course.name},
   ${course.academic_year} semester ${course.semester}`}
               className="block h-full rounded-2xl transition
-  hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+  hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
             >
               <AsprakCourseCard course={course} />
             </Link>

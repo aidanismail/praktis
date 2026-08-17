@@ -162,6 +162,7 @@ async def confirm_module_upload(
     description="Returns modules with a fresh presigned download URL for each.",
     responses={**UNAUTHENTICATED_401, **FORBIDDEN_403, 404: {"description": "Course not found."}},
 )
+@router.get("", include_in_schema=False)
 async def list_modules(
     course_id: uuid.UUID | None = None,
     db: AsyncSession = Depends(get_db),
@@ -200,7 +201,9 @@ async def list_modules(
             "description": mod.description,
             "download_url": storage_service.generate_presigned_download_url(mod.file_key),
             "is_published": mod.is_published,
-            "created_at": mod.created_at.isoformat()
+            "created_at": mod.created_at.isoformat(),
+            "course_id": str(mod.course_id) if mod.course_id else None,
+            "file_key": mod.file_key,
         })
 
     await cache_set(cache_key, json.dumps(response), ttl=30)

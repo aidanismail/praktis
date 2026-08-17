@@ -67,6 +67,13 @@ importers:
       typescript:
         specifier: ^5
         version: 5.9.3
+    optionalDependencies:
+      lightningcss-linux-x64-gnu:
+        specifier: ^1.32.0
+        version: 1.32.0
+      lightningcss-linux-x64-musl:
+        specifier: ^1.32.0
+        version: 1.32.0
 
 packages:
 

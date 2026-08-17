@@ -61,3 +61,13 @@ Thumbs.db
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+.codex/
+.impeccable/
+.agents/*
+PLANS.md
+PRODUCT.md
+skills-lock.json
+.github/skills
+.github/agents
+.github/hooks

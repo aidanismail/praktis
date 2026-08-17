@@ -36,3 +36,5 @@ class ModuleResponse(BaseModel):
     download_url: str = Field(..., description="Presigned, time-limited URL to download the file directly from storage.")
     is_published: bool = Field(..., description="Whether this module is visible to Praktikan.")
     created_at: str = Field(..., description="ISO-8601 timestamp of when the module was uploaded.")
+    course_id: str | None = Field(None, description="Course ID this module belongs to.")
+    file_key: str | None = Field(None, description="MinIO storage file key.")

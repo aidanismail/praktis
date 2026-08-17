@@ -14,6 +14,11 @@ export const DASHBOARD_NAVIGATION: Record<UserRole, DashboardNavItem[]> = {
       description: "System summary and latest practicum activity."
     },
     {
+      id: "courses",
+      label: "Course Management",
+      description: "Create and manage practicum courses and academic periods."
+    },
+    {
       id: "users",
       label: "User Management",
       description: "Manage praktikan, asprak, and admin accounts."
@@ -37,11 +42,6 @@ export const DASHBOARD_NAVIGATION: Record<UserRole, DashboardNavItem[]> = {
       id: "grade-exports",
       label: "Grade Exports",
       description: "Export grading data to XLSX or CSV."
-    },
-    {
-      id: "settings",
-      label: "System Settings",
-      description: "Configure system-level settings."
     }
   ],
 

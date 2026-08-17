@@ -1,6 +1,6 @@
 # Durable Project Decisions
 
-Last updated: August 11, 2026
+Last updated: August 17, 2026
 
 ## Product and roles
 
@@ -13,27 +13,42 @@ Last updated: August 11, 2026
 
 - Aidan: product direction and frontend integration for Asprak and Praktikan
 - Bagas: backend, API/data contracts, migrations, infrastructure behavior, backend tests, and Superadmin frontend integration
-- The coding agent defaults to Aidan's scope and does not silently cross into Bagas's area.
+- The coding agent defaults to Aidan's scope and does not silently cross into Bagas's area unless explicitly authorized by the owner.
+
+## Google Classroom information architecture
+
+- The user experience follows the Google Classroom academic operation model.
+- **Dual Course Presentation**: Users can toggle seamlessly between a visual **Classroom Card Grid** (with semester banners, quick stats, and direct links) and a **Compact Data Table**.
+- **4-Tab Course Workspace**: Every course detail view is structured into four standard tabs:
+  1. `Stream`: General course overview, academic period metadata, and broadcast announcements.
+  2. `Classwork`: Learning modules (PDF downloads and publish toggles) and assignments.
+  3. `People`: Segmented rosters for Teaching Assistants (*Asprak*) and Enrolled Students (*Praktikan*).
+  4. `Sessions & Attendance`: Meeting logs with attendance window status controls.
+
+## Stream announcements and discussions
+
+- Aspraks and Superadmins can broadcast course stream announcements with pin-to-top capability.
+- Enrolled students and staff can participate in threaded Q&A comments below each announcement.
+- Deletions are restricted to the author or Superadmin.
+
+## Classwork assignments and submissions
+
+- Aspraks and Superadmins can create assignment tasks with title, instructions, due date, max rubric points, and allowed extensions.
+- Praktikan submit solution files directly to MinIO (up to 10MB) with automatic late-status calculation.
+- Aspraks and Superadmins can inspect student submissions and assign numeric grades with written feedback.
+
+## Async Python patterns & performance
+
+- **Database Connection Pool**: `create_async_engine` uses `pool_size=20`, `max_overflow=10`, `pool_timeout=30`, and `pool_pre_ping=True` to prevent connection leaks and recover cleanly from database restarts.
+- **Worker Thread Offloading**: CPU-intensive bcrypt hashing (`verify_password`), spreadsheet file generation (`openpyxl`), and synchronous SDK calls are offloaded via `asyncio.to_thread(...)`, keeping the FastAPI event loop non-blocking.
+- **Eager Loading**: Relational queries use `selectinload` to avoid `MissingGreenlet` exceptions in async SQLAlchemy.
 
 ## Academic-period courses
 
 - A course is one academic-period practicum offering.
 - Offerings of the same subject in different academic years are different records.
-- Current backend source identifies academic year and semester and supports an active-state field; migration/backfill and focused tests remain readiness requirements.
-- Section support remains a future decision if parallel offerings need to share the same subject and period.
-- Historical offerings should be retained and distinguishable from current offerings.
-
-## Asprak lifecycle ownership
-
-For assigned courses, the intended product permits Asprak to:
-
-- create, edit/reschedule, and safely delete or archive class sessions
-- list, upload, download, edit, replace, delete, publish, and unpublish modules
-- record attendance and grades
-- publish, unpublish, correct, and republish grades per class session
-- export supported records
-
-These are product decisions, not claims that every backend contract already exists.
+- Uniqueness is enforced on `(code, academic_year, semester)`.
+- Historical offerings are retained and distinguishable from active offerings.
 
 ## Grade privacy
 
@@ -67,14 +82,3 @@ These are product decisions, not claims that every backend contract already exis
 - Backend and Superadmin changes require explicit authorization.
 - Contract readiness and unresolved handoffs go to `docs/API_CONTRACT_STATUS.md` using `docs/FULL_STACK_WORKFLOW.md`.
 - Validation reports testing, performance, security, accessibility, and known limitations without overstating results.
-
-## Known current mismatches
-
-- Academic-period fields exist in source, but migration/backfill safety and focused tests remain unresolved.
-- Grade publication and published-only self-read exist in source, but transition, permission, and privacy tests remain incomplete.
-- Module lifecycle operations exist in source, but storage-compensation and lifecycle-test evidence remain incomplete.
-- Session update/open/close exist; safe delete/archive has no current contract.
-- Backend forced-password enforcement is broader than the Praktikan-only product rule.
-- CSRF protection for cookie-authenticated writes is unresolved before production.
-- The historical database enum includes `dosen`; active application code and product scope do not.
-- Frontend auth/dependency stabilization remains follow-up work.

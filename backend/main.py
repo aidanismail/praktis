@@ -1,8 +1,9 @@
+import uuid
 from functools import lru_cache
 
 from alembic.config import Config as AlembicConfig
 from alembic.script import ScriptDirectory
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -20,6 +21,8 @@ from api.routers import courses
 from api.routers import class_sessions
 from api.routers import grades
 from api.routers import export
+from api.routers import announcements
+from api.routers import assignments
 
 
 API_DESCRIPTION = """
@@ -84,6 +87,14 @@ app = FastAPI(
             "description": "Downloading attendance/grade data as CSV or XLSX.",
         },
         {
+            "name": "Announcements",
+            "description": "Course stream broadcasts, announcements, and discussion comments.",
+        },
+        {
+            "name": "Assignments",
+            "description": "Classwork tasks, student file submissions to MinIO, late tracking, and grading.",
+        },
+        {
             "name": "Health",
             "description": "Service liveness/readiness check.",
         },
@@ -100,6 +111,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+@app.middleware("http")
+async def add_correlation_and_security_headers(request: Request, call_next):
+    # 1. Attach Request ID
+    request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
+    request.state.request_id = request_id
+
+    # 2. Process request
+    response = await call_next(request)
+
+    # 3. Attach Response Headers
+    response.headers["X-Request-ID"] = request_id
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+
+    return response
+
 app.include_router(users.router)
 app.include_router(modules.router)
 app.include_router(attendance.router)
@@ -107,6 +136,8 @@ app.include_router(courses.router)
 app.include_router(class_sessions.router)
 app.include_router(grades.router)
 app.include_router(export.router)
+app.include_router(announcements.router)
+app.include_router(assignments.router)
 
 @lru_cache(maxsize=1)
 def _alembic_head() -> str | None:

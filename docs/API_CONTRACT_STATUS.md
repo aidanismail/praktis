@@ -154,6 +154,33 @@ Bagas evidence required:
 3. populated-database upgrade test
 4. safe rollback policy
 
+## Course Stream & Announcements
+
+Status: Current.
+
+Implemented and evidenced:
+- `GET /courses/{course_id}/announcements`: list stream announcements with pinned-first sorting, comment counts, and author information.
+- `POST /courses/{course_id}/announcements`: create course announcement (Superadmin & assigned Asprak).
+- `PATCH /courses/{course_id}/announcements/{id}`: update announcement (author or Superadmin).
+- `DELETE /courses/{course_id}/announcements/{id}`: delete announcement (author or Superadmin).
+- `POST /courses/{course_id}/announcements/{id}/comments`: add discussion comments (all enrolled Praktikan and assigned staff).
+- `DELETE /courses/{course_id}/announcements/{id}/comments/{comment_id}`: delete comment (author or Superadmin).
+- Pytest test suite in `tests/test_announcements_assignments.py` covers full lifecycle.
+
+## Classwork Assignments & Submissions
+
+Status: Current.
+
+Implemented and evidenced:
+- `GET /courses/{course_id}/assignments`: list assignments (published only for Praktikan, with my_submission attached; all for Asprak/Superadmin with submissions_count).
+- `POST /courses/{course_id}/assignments`: create assignment with due dates, max points, and allowed formats (Asprak & Superadmin).
+- `PATCH /courses/{course_id}/assignments/{id}`: update assignment properties.
+- `DELETE /courses/{course_id}/assignments/{id}`: delete assignment and associated submissions.
+- `POST /courses/{course_id}/assignments/{id}/submit`: direct multipart upload to MinIO with 10MB limit and automatic `is_late` calculation.
+- `GET /courses/{course_id}/assignments/{id}/submissions`: list all student submissions with download links (staff only).
+- `POST /courses/{course_id}/assignments/{id}/submissions/{sub_id}/grade`: submit score and text feedback.
+- Pytest test suite in `tests/test_announcements_assignments.py` covers assignment creation, submission, and grading.
+
 ## Contract automation proposal
 
 A later approved task should export deterministic FastAPI OpenAPI 3.1, define stable operation IDs, generate or validate TypeScript types, configure same-origin cookie transport, and fail CI on drift. This does not exist today.

@@ -59,7 +59,7 @@ export function CourseRoster({ userId, courseId }: CourseRosterProps) {
         <div className="flex items-start gap-3">
           <span
             className="flex h-10 w-10 shrink-0 items-center
-            justify-center rounded-xl bg-emerald-50 text-emerald-700"
+            justify-center rounded-xl bg-slate-100 text-slate-800"
           >
             <Users className="h-5 w-5" aria-hidden="true" />
           </span>
@@ -96,7 +96,7 @@ export function CourseRoster({ userId, courseId }: CourseRosterProps) {
             rounded-2xl border border-slate-200 bg-slate-50"
         >
           <Loader2
-            className="h-5 w-5 animate-spin text-emerald-600"
+            className="h-5 w-5 animate-spin text-slate-900"
             aria-hidden="true"
           />
           <span className="ml-3 text-sm text-slate-600">

@@ -1,9 +1,10 @@
+import asyncio
+import io
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-import io
 
 from core.database import get_db
 from models.user import User, RoleEnum
@@ -73,7 +74,8 @@ async def export_attendance(
         raise HTTPException(status_code=404, detail="No attendance records found for this session")
 
     headers = ["username", "email", "status"]
-    content = build_xlsx(rows, headers) if format == "xlsx" else build_csv(rows, headers)
+    builder_fn = build_xlsx if format == "xlsx" else build_csv
+    content = await asyncio.to_thread(builder_fn, rows, headers)
     return _stream(content, MEDIA_TYPES[format], f"attendance_{session_id}.{format}")
 
 
@@ -106,5 +108,6 @@ async def export_grades(
         raise HTTPException(status_code=404, detail="No grade records found for this session")
 
     headers = ["username", "email", "score"]
-    content = build_xlsx(rows, headers) if format == "xlsx" else build_csv(rows, headers)
+    builder_fn = build_xlsx if format == "xlsx" else build_csv
+    content = await asyncio.to_thread(builder_fn, rows, headers)
     return _stream(content, MEDIA_TYPES[format], f"grades_{session_id}.{format}")
