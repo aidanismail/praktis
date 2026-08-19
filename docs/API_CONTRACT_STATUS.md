@@ -1,6 +1,6 @@
 # API Contract Status
 
-Last inspected: 2026-08-14
+Last inspected: 2026-08-20
 Branch: `feature/asprak-features`
 
 This is the integration-readiness ledger, not a release certificate. Status meanings are in [FULL_STACK_WORKFLOW.md](FULL_STACK_WORKFLOW.md).
@@ -156,7 +156,7 @@ Bagas evidence required:
 
 ## Course Stream & Announcements
 
-Status: Current.
+Status: Current and frontend-integrated for the Asprak course Stream.
 
 Implemented and evidenced:
 - `GET /courses/{course_id}/announcements`: list stream announcements with pinned-first sorting, comment counts, and author information.
@@ -166,6 +166,20 @@ Implemented and evidenced:
 - `POST /courses/{course_id}/announcements/{id}/comments`: add discussion comments (all enrolled Praktikan and assigned staff).
 - `DELETE /courses/{course_id}/announcements/{id}/comments/{comment_id}`: delete comment (author or Superadmin).
 - Pytest test suite in `tests/test_announcements_assignments.py` covers full lifecycle.
+
+Frontend integration added on 2026-08-20:
+
+- the assigned-Asprak course workspace exposes active Stream and People tabs while leaving Classwork and Sessions & Attendance visibly unavailable
+- the Stream uses exact response/payload types, Zod forms, same-origin wrappers, and user-and-course-scoped TanStack Query state
+- Asprak can list and create announcements, manage only their own announcement controls, add comments, and manage only their own comment controls; FastAPI remains authoritative
+- writes wait for confirmed server success and invalidate only the affected course Stream instead of using optimistic destructive updates
+- loading, empty, 401, 403, 404, transient-error/retry, validation, pending, confirmation, and success states are represented
+
+Limitations:
+
+- authenticated browser lifecycle smoke remains pending
+- the list contract is unpaginated and needs a future bound for long-lived course streams
+- cookie-write CSRF design remains blocked before production even though local same-origin integration is Current
 
 ## Classwork Assignments & Submissions
 
