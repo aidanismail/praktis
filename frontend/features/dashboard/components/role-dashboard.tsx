@@ -2,6 +2,7 @@ import type { User } from "@/types/user.type";
 import type { DashboardNavItem } from "../constants/dashboard-navigation";
 import { DashboardPlaceholderCard } from "./dashboard-placeholder-card";
 import { AsprakCourseList } from "@/features/courses/components/asprak-course-list";
+import { AsprakCourseOverview } from "@/features/courses/components/asprak-course-overview";
 import { AdminOverview } from "@/features/admin/components/admin-overview";
 import { UserManagement } from "@/features/admin/components/user-management";
 import { BulkImportForm } from "@/features/admin/components/bulk-import-form";
@@ -55,8 +56,14 @@ export function RoleDashboard({
       }
     }
 
-    if (user.role === "asprak" && activeItem.id === "classes") {
-      return <AsprakCourseList userId={user.id} />;
+    if (user.role === "asprak") {
+      if (activeItem.id === "overview") {
+        return <AsprakCourseOverview userId={user.id} />;
+      }
+
+      if (activeItem.id === "classes") {
+        return <AsprakCourseList userId={user.id} />;
+      }
     }
 
     return (
