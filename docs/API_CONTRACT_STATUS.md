@@ -1,6 +1,6 @@
 # API Contract Status
 
-Last inspected: 2026-08-20
+Last inspected: 2026-08-27
 Branch: `feature/asprak-features`
 
 This is the integration-readiness ledger, not a release certificate. Status meanings are in [FULL_STACK_WORKFLOW.md](FULL_STACK_WORKFLOW.md).
@@ -9,7 +9,7 @@ This is the integration-readiness ledger, not a release certificate. Status mean
 
 | Area | Status | Consumers | Next action |
 |---|---|---|---|
-| Cookie authentication | Partial | all roles | Stabilize Aidan-owned FE; Bagas resolves backend invariant/CSRF |
+| Cookie authentication | Partial | all roles | Frontend logout hardened; Aidan retains auth-guard follow-up and Bagas resolves backend invariant/CSRF |
 | Academic-period course list | Current and frontend-integrated for Asprak assigned-course reads | Asprak | Runtime-smoke role scoping and retain history bounds as a follow-up |
 | Roster read / enrollment and staff | Current and frontend-integrated for assigned-Asprak roster reads; Current backend contract for writes | Asprak roster reads; Superadmin writes | Runtime-smoke roster states; Bagas owns Superadmin FE |
 | Session create/list/update/open/close | Partial | Asprak; Praktikan reads | Confirm transitions and focused tests |
@@ -26,13 +26,18 @@ This is the integration-readiness ledger, not a release certificate. Status mean
 
 Implemented: login sets an HttpOnly cookie; logout deletes it; change-password returns a message; `/auth/me` returns the user; cookie is SameSite Lax and Secure in production. Browser paths add `/api`.
 
-Partial gaps:
+Frontend auth hardening added on 2026-08-27:
+
+- login, logout, and change-password use the backend's `{ message: string }` response contract instead of a browser-readable token shape
+- logout waits for confirmed backend success before clearing client authentication and cached server state
+- logout failures retain the active client session, remain visible, and can be retried without claiming success
+- the Praktikan-only first-login redirect predicate remains unchanged
+
+Remaining Partial gaps:
 
 - backend blocks every role with `force_password_change=true`, while Target is Praktikan-only
 - user model defaults the flag to true
-- frontend auth response types and request lifecycle do not match the backend
-- current guard conflates transient failures with 401 and can duplicate requests
-- logout clears local state even when backend logout fails
+- the current auth guard conflates transient failures with 401 and can duplicate requests
 - CSRF protection beyond SameSite is not defined
 
 ## Academic-period courses

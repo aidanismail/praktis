@@ -9,8 +9,9 @@ import {
   ClipboardCheck,
   FileSpreadsheet,
   LogOut,
+  Loader2,
   Layers,
-  X,
+  X
 } from "lucide-react";
 import type { DashboardNavItem } from "../constants/dashboard-navigation";
 
@@ -19,6 +20,8 @@ type DashboardSidebarProps = {
   activeItemId: string;
   onSelectItem: (id: string) => void;
   onLogout: () => void;
+  isLoggingOut?: boolean;
+  hasLogoutError?: boolean;
   isCollapsed?: boolean;
   isMobileOpen?: boolean;
   onCloseMobile?: () => void;
@@ -33,7 +36,7 @@ const NAV_ICONS: Record<string, React.ElementType> = {
   modules: FileText,
   "attendance-reports": ClipboardCheck,
   "grade-exports": FileSpreadsheet,
-  profile: Users,
+  profile: Users
 };
 
 export function DashboardSidebar({
@@ -41,9 +44,11 @@ export function DashboardSidebar({
   activeItemId,
   onSelectItem,
   onLogout,
+  isLoggingOut = false,
+  hasLogoutError = false,
   isCollapsed = false,
   isMobileOpen = false,
-  onCloseMobile,
+  onCloseMobile
 }: DashboardSidebarProps) {
   const renderNavButtons = (collapsed: boolean, isMobileView: boolean) => (
     <nav className="flex-1 space-y-1 overflow-y-auto p-3 pt-4">
@@ -84,21 +89,41 @@ export function DashboardSidebar({
     </nav>
   );
 
-  const renderFooter = (collapsed: boolean) => (
-    <div className="border-t border-slate-200 p-3">
-      <button
-        type="button"
-        onClick={onLogout}
-        title="Sign Out"
-        className={`w-full rounded-2xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 apple-press transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-slate-50 hover:text-slate-900 flex items-center ${
-          collapsed ? "h-11 justify-center px-0" : "px-4 py-2.5 justify-center gap-2"
-        }`}
-      >
-        <LogOut className="h-4 w-4 shrink-0" />
-        {!collapsed && <span>Sign Out</span>}
-      </button>
-    </div>
-  );
+  const renderFooter = (collapsed: boolean) => {
+    const logoutLabel = isLoggingOut
+      ? "Signing Out..."
+      : hasLogoutError
+        ? "Retry Sign Out"
+        : "Sign Out";
+
+    return (
+      <div className="border-t border-slate-200 p-3">
+        <button
+          type="button"
+          onClick={onLogout}
+          disabled={isLoggingOut}
+          aria-describedby={hasLogoutError ? "logout-error-message" : undefined}
+          title={collapsed ? logoutLabel : undefined}
+          className={`flex w-full items-center rounded-2xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] apple-press hover:bg-slate-50 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-60 ${
+            collapsed
+              ? "h-11 justify-center px-0"
+              : "justify-center gap-2 px-4 py-2.5"
+          }`}
+        >
+          {isLoggingOut ? (
+            <Loader2
+              className="h-4 w-4 shrink-0 animate-spin"
+              aria-hidden="true"
+            />
+          ) : (
+            <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
+          )}
+
+          {!collapsed ? <span aria-live="polite">{logoutLabel}</span> : null}
+        </button>
+      </div>
+    );
+  };
 
   return (
     <>
