@@ -7,20 +7,20 @@ This is the integration-readiness ledger, not a release certificate. Status mean
 
 ## Summary
 
-| Area | Status | Consumers | Next action |
-|---|---|---|---|
-| Cookie authentication | Partial | all roles | Frontend logout hardened; Aidan retains auth-guard follow-up and Bagas resolves backend invariant/CSRF |
-| Academic-period course list | Current and frontend-integrated for Asprak assigned-course reads | Asprak | Runtime-smoke role scoping and retain history bounds as a follow-up |
-| Roster read / enrollment and staff | Current and frontend-integrated for assigned-Asprak roster reads; Current backend contract for writes | Asprak roster reads; Superadmin writes | Runtime-smoke roster states; Bagas owns Superadmin FE |
-| Session create/list/update/open/close | Partial | Asprak; Praktikan reads | Confirm transitions and focused tests |
-| Safe session delete/archive | Blocked | Asprak | Backend contract absent |
-| Module presign/confirm/list | Partial | Asprak, Praktikan | Validate intent/cleanup/tests |
-| Module update/publish/replace/delete | Partial | Asprak, Praktikan visibility | Resolve storage/DB failure semantics |
-| Attendance bulk/list/personal | Current for implemented operations | Asprak, Praktikan | Integrate as a focused slice |
-| Grades and publication | Partial | Asprak, Praktikan | Confirm auth, transition errors, completeness, tests |
-| Exports | Partial | Asprak | Confirm tests and draft/publication scope |
-| OpenAPI-to-TypeScript automation | Proposed | all FE owners | Separate tooling/CI plan |
-| CSRF design | Blocked before production | all cookie writes | Bagas proposes; Aidan reviews FE impact |
+| Area                                  | Status                                                                                                | Consumers                              | Next action                                                                                            |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Cookie authentication                 | Partial                                                                                               | all roles                              | Frontend logout hardened; Aidan retains auth-guard follow-up and Bagas resolves backend invariant/CSRF |
+| Academic-period course list           | Current and frontend-integrated for Asprak assigned-course reads                                      | Asprak                                 | Runtime-smoke role scoping and retain history bounds as a follow-up                                    |
+| Roster read / enrollment and staff    | Current and frontend-integrated for assigned-Asprak roster reads; Current backend contract for writes | Asprak roster reads; Superadmin writes | Runtime-smoke roster states; Bagas owns Superadmin FE                                                  |
+| Session create/list/update/open/close | Partial                                                                                               | Asprak; Praktikan reads                | Confirm transitions and focused tests                                                                  |
+| Safe session delete/archive           | Blocked                                                                                               | Asprak                                 | Backend contract absent                                                                                |
+| Module presign/confirm/list           | Partial                                                                                               | Asprak, Praktikan                      | Validate intent/cleanup/tests                                                                          |
+| Module update/publish/replace/delete  | Partial                                                                                               | Asprak, Praktikan visibility           | Resolve storage/DB failure semantics                                                                   |
+| Attendance bulk/list/personal         | Current for implemented operations                                                                    | Asprak, Praktikan                      | Integrate as a focused slice                                                                           |
+| Grades and publication                | Partial                                                                                               | Asprak, Praktikan                      | Confirm auth, transition errors, completeness, tests                                                   |
+| Exports                               | Partial                                                                                               | Asprak                                 | Confirm tests and draft/publication scope                                                              |
+| OpenAPI-to-TypeScript automation      | Proposed                                                                                              | all FE owners                          | Separate tooling/CI plan                                                                               |
+| CSRF design                           | Blocked before production                                                                             | all cookie writes                      | Bagas proposes; Aidan reviews FE impact                                                                |
 
 ## Authentication
 
@@ -166,6 +166,7 @@ Bagas evidence required:
 Status: Current and frontend-integrated for the Asprak course Stream.
 
 Implemented and evidenced:
+
 - `GET /courses/{course_id}/announcements`: list stream announcements with pinned-first sorting, comment counts, and author information.
 - `POST /courses/{course_id}/announcements`: create course announcement (Superadmin & assigned Asprak).
 - `PATCH /courses/{course_id}/announcements/{id}`: update announcement (author or Superadmin).
@@ -190,17 +191,57 @@ Limitations:
 
 ## Classwork Assignments & Submissions
 
-Status: Current.
+Status: Current and frontend-integrated only for assigned-Asprak assignment
+list/create. Remaining assignment-detail, update, delete, submission, and
+grading operations are Partial or Blocked.
 
-Implemented and evidenced:
-- `GET /courses/{course_id}/assignments`: list assignments (published only for Praktikan, with my_submission attached; all for Asprak/Superadmin with submissions_count).
-- `POST /courses/{course_id}/assignments`: create assignment with due dates, max points, and allowed formats (Asprak & Superadmin).
-- `PATCH /courses/{course_id}/assignments/{id}`: update assignment properties.
-- `DELETE /courses/{course_id}/assignments/{id}`: delete assignment and associated submissions.
-- `POST /courses/{course_id}/assignments/{id}/submit`: direct multipart upload to MinIO with 10MB limit and automatic `is_late` calculation.
-- `GET /courses/{course_id}/assignments/{id}/submissions`: list all student submissions with download links (staff only).
-- `POST /courses/{course_id}/assignments/{id}/submissions/{sub_id}/grade`: submit score and text feedback.
-- Pytest test suite in `tests/test_announcements_assignments.py` covers assignment creation, submission, and grading.
+Current and evidenced:
+
+- `GET /courses/{course_id}/assignments` returns all draft and published
+  assignments for an assigned Asprak, ordered newest first, with
+  `submissions_count`.
+- `POST /courses/{course_id}/assignments` allows an assigned Asprak to create an
+  assignment with title, optional description and due date, 1-1000 maximum points,
+  comma-separated allowed formats, and explicit publication state.
+- Both operations call the existing course-access permission dependency; write
+  access requires assigned course staff.
+- The create response returns the confirmed assignment with `submissions_count:
+0` and `my_submission: null`.
+- Runtime OpenAPI and inspected Pydantic schemas confirm the request and
+  response fields.
+
+Frontend integration added on 2026-08-27:
+
+- Classwork loads only after the assigned Asprak selects the Classwork tab.
+- The list and create operations use same-origin `/api/` paths, HttpOnly-cookie
+  authentication, typed payloads, Zod validation, React Hook Form, and a user-and-
+  course-scoped TanStack Query key.
+- New assignments default to draft, omit `session_id`, and allow only the
+  documented PDF, ZIP, and DOCX choices.
+- The UI represents loading, empty, 401, 403, 404, transient retry, validation,
+  pending, success, draft/published, deadline, maximum-points, allowed-format, and
+  submission-count states.
+- Creation waits for confirmed server success and invalidates only the affected
+  course assignment list.
+
+Integration boundaries and blockers:
+
+- Assignment detail, update, delete, Praktikan submission, Asprak submission
+  review, and grading are not integrated.
+- Praktikan detail and submission do not yet prove that unpublished assignments
+  are rejected when their IDs are known.
+- Submission-list and grading routes do not yet prove that the requested
+  assignment belongs to the authorized `course_id`.
+- Grade input is not yet bounded by the assignment's `max_points`.
+- Assignment update cannot explicitly clear optional description or due-date
+  values and does not return a proven accurate submission count.
+- Assignment deletion does not yet provide proven database/storage cleanup or
+  compensation semantics.
+- The Nginx `/api/` location does not yet align its request-body limit with the
+  backend's advertised 10 MiB assignment upload limit.
+- Authenticated assigned-Asprak browser acceptance for assignment list/create,
+  validation, draft/published creation, refresh persistence, responsive layout,
+  and keyboard tab behavior was owner-reported PASS on 2026-08-27.
 
 ## Contract automation proposal
 
