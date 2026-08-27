@@ -62,6 +62,15 @@ export function DashboardShell({ user }: DashboardShellProps) {
     window.dispatchEvent(new CustomEvent("assignment-submissions-back"));
   }, []);
 
+  const handleSelectNavigationItem = (id: string) => {
+    if (activeCourse) {
+      handleBackToCourses();
+    }
+
+    setActiveItemId(id);
+    setIsMobileSidebarOpen(false);
+  };
+
   const handleNavigateToCourse = (courseId: string) => {
     setActiveItemId("courses");
     const params = new URLSearchParams(window.location.search);
@@ -118,10 +127,7 @@ export function DashboardShell({ user }: DashboardShellProps) {
         <DashboardSidebar
           items={navigationItems}
           activeItemId={activeItemId}
-          onSelectItem={(id) => {
-            if (activeCourse) handleBackToCourses();
-            setActiveItemId(id);
-          }}
+          onSelectItem={handleSelectNavigationItem}
           onLogout={handleLogout}
           isLoggingOut={logoutMutation.isPending}
           hasLogoutError={logoutMutation.isError}
@@ -182,6 +188,7 @@ export function DashboardShell({ user }: DashboardShellProps) {
             activeItem={activeItem}
             user={user}
             onNavigateToCourse={handleNavigateToCourse}
+            onNavigateToNavItem={handleSelectNavigationItem}
           />
         </main>
       </div>

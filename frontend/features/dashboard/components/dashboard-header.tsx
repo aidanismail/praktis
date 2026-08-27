@@ -30,7 +30,7 @@ export function DashboardHeader({
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-200 bg-white shadow-xs">
-      <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6">
+      <div className="flex h-16 w-full items-center gap-5 px-4 sm:px-6">
         {/* Left: Hamburger & Google Classroom Breadcrumbs */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button

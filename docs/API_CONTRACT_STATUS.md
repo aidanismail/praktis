@@ -7,20 +7,24 @@ This is the integration-readiness ledger, not a release certificate. Status mean
 
 ## Summary
 
-| Area                                  | Status                                                                                                | Consumers                              | Next action                                                                                            |
-| ------------------------------------- | ----------------------------------------------------------------------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| Cookie authentication                 | Partial                                                                                               | all roles                              | Frontend logout hardened; Aidan retains auth-guard follow-up and Bagas resolves backend invariant/CSRF |
-| Academic-period course list           | Current and frontend-integrated for Asprak assigned-course reads                                      | Asprak                                 | Runtime-smoke role scoping and retain history bounds as a follow-up                                    |
-| Roster read / enrollment and staff    | Current and frontend-integrated for assigned-Asprak roster reads; Current backend contract for writes | Asprak roster reads; Superadmin writes | Runtime-smoke roster states; Bagas owns Superadmin FE                                                  |
-| Session create/list/update/open/close | Partial                                                                                               | Asprak; Praktikan reads                | Confirm transitions and focused tests                                                                  |
-| Safe session delete/archive           | Blocked                                                                                               | Asprak                                 | Backend contract absent                                                                                |
-| Module presign/confirm/list           | Partial                                                                                               | Asprak, Praktikan                      | Validate intent/cleanup/tests                                                                          |
-| Module update/publish/replace/delete  | Partial                                                                                               | Asprak, Praktikan visibility           | Resolve storage/DB failure semantics                                                                   |
-| Attendance bulk/list/personal         | Current for implemented operations                                                                    | Asprak, Praktikan                      | Integrate as a focused slice                                                                           |
-| Grades and publication                | Partial                                                                                               | Asprak, Praktikan                      | Confirm auth, transition errors, completeness, tests                                                   |
-| Exports                               | Partial                                                                                               | Asprak                                 | Confirm tests and draft/publication scope                                                              |
-| OpenAPI-to-TypeScript automation      | Proposed                                                                                              | all FE owners                          | Separate tooling/CI plan                                                                               |
-| CSRF design                           | Blocked before production                                                                             | all cookie writes                      | Bagas proposes; Aidan reviews FE impact                                                                |
+| Area                                                                    | Status                                                                                                | Consumers                              | Next action                                                                                            |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Cookie authentication                                                   | Partial                                                                                               | all roles                              | Frontend logout hardened; Aidan retains auth-guard follow-up and Bagas resolves backend invariant/CSRF |
+| Academic-period course list                                             | Current and frontend-integrated for Asprak assigned-course reads                                      | Asprak                                 | Runtime-smoke role scoping and retain history bounds as a follow-up                                    |
+| Roster read / enrollment and staff                                      | Current and frontend-integrated for assigned-Asprak roster reads; Current backend contract for writes | Asprak roster reads; Superadmin writes | Runtime-smoke roster states; Bagas owns Superadmin FE                                                  |
+| Session create/list/update/open/close                                   | Partial                                                                                               | Asprak; Praktikan reads                | Confirm transitions and focused tests                                                                  |
+| Safe session delete/archive                                             | Blocked                                                                                               | Asprak                                 | Backend contract absent                                                                                |
+| Module presign/confirm/list                                             | Partial                                                                                               | Asprak, Praktikan                      | Validate intent/cleanup/tests                                                                          |
+| Module update/publish/replace/delete                                    | Partial                                                                                               | Asprak, Praktikan visibility           | Resolve storage/DB failure semantics                                                                   |
+| Attendance bulk/list/personal                                           | Current for implemented operations                                                                    | Asprak, Praktikan                      | Integrate as a focused slice                                                                           |
+| Grades and publication                                                  | Partial                                                                                               | Asprak, Praktikan                      | Confirm auth, transition errors, completeness, tests                                                   |
+| Exports                                                                 | Partial                                                                                               | Asprak                                 | Confirm tests and draft/publication scope                                                              |
+| OpenAPI-to-TypeScript automation                                        | Proposed                                                                                              | all FE owners                          | Separate tooling/CI plan                                                                               |
+| CSRF design                                                             | Blocked before production                                                                             | all cookie writes                      | Bagas proposes; Aidan reviews FE impact                                                                |
+| Superadmin overview reads                                               | Current and frontend-integrated for                                                                   |
+| course, user, and health summary reads                                  | Superadmin                                                                                            |
+| Complete browser smoke for navigation, partial failures, and role scope |
+|                                                                         |
 
 ## Authentication
 
@@ -66,6 +70,44 @@ Integration boundaries:
 - the frontend consumes the backend-scoped result and must not reconstruct assignment authorization
 - course creation and other Superadmin writes remain Bagas-owned
 - academic-year formatting validation and retained-history pagination remain follow-up concerns and do not block the confirmed initial scale
+
+## Superadmin overview reads
+
+Status: Current and frontend-integrated for the approved Superadmin overview
+scope.
+
+Confirmed source behavior:
+
+- `GET /courses/` returns every academic-period course offering for an
+  authenticated Superadmin.
+- `GET /auth/users` is Superadmin-only and returns registered accounts using the
+  existing `UserResponse` shape.
+- `GET /health` returns service status, database connectivity, and Alembic
+  revision currency.
+- Browser integration uses `GET /api/courses/`, `GET /api/auth/users`, and
+  `GET /api/health` through the shared same-origin client.
+- No request body or query parameters are used by these overview reads.
+
+Frontend integration updated on 2026-08-27:
+
+- overview query keys are scoped by authenticated Superadmin ID
+- course, user, and health reads use independent TanStack Query states and
+  bounded retry
+- 401, 403, transient failure, loading, empty, refresh, and partial-data states
+  are represented
+- active course shortcuts are sorted deterministically and bounded to six
+- navigation uses native keyboard-accessible controls
+- the overview no longer calls the Partial global module-list operation merely
+  to calculate a count
+
+Limitations:
+
+- course and user endpoints still return complete unpaginated lists
+- browser runtime smoke remains required
+- the existing public health-endpoint exposure is backend behavior and is not
+  broadened by this frontend integration
+- module management remains governed by the existing Partial module lifecycle
+  entries
 
 ## Roster and staff
 

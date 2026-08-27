@@ -11,7 +11,7 @@ export const DASHBOARD_NAVIGATION: Record<UserRole, DashboardNavItem[]> = {
     {
       id: "overview",
       label: "Overview",
-      description: "System summary and latest practicum activity."
+      description: "Course offerings, account coverage, and platform readiness."
     },
     {
       id: "courses",

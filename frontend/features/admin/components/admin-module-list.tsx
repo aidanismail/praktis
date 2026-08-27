@@ -14,7 +14,7 @@ import {
   Plus,
   UploadCloud,
   FileCheck,
-  Eye,
+  Eye
 } from "lucide-react";
 import {
   fetchAdminModules,
@@ -22,7 +22,7 @@ import {
   publishModule,
   unpublishModule,
   deleteModule,
-  createAndUploadModule,
+  createAndUploadModule
 } from "../api/admin.api";
 import type { AdminModuleItem } from "../types/admin.type";
 import type { Course } from "@/features/courses/types/course.type";
@@ -33,13 +33,16 @@ export function AdminModuleList() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCourseFilter, setSelectedCourseFilter] = useState("all");
-  const [collapsedCourses, setCollapsedCourses] = useState<Set<string>>(new Set());
+  const [collapsedCourses, setCollapsedCourses] = useState<Set<string>>(
+    new Set()
+  );
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
-  const [selectedModuleForDetail, setSelectedModuleForDetail] = useState<AdminModuleItem | null>(null);
+  const [selectedModuleForDetail, setSelectedModuleForDetail] =
+    useState<AdminModuleItem | null>(null);
 
   // In-browser Document Preview state
   const [previewDoc, setPreviewDoc] = useState<{
@@ -76,7 +79,7 @@ export function AdminModuleList() {
     try {
       const [mList, cList] = await Promise.all([
         fetchAdminModules(),
-        fetchAdminCourses(),
+        fetchAdminCourses()
       ]);
       setModules(mList);
       setCourses(cList);
@@ -85,7 +88,11 @@ export function AdminModuleList() {
         if (updated) setSelectedModuleForDetail(updated);
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to load module management data");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to load module management data"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -97,7 +104,7 @@ export function AdminModuleList() {
       try {
         const [mList, cList] = await Promise.all([
           fetchAdminModules(),
-          fetchAdminCourses(),
+          fetchAdminCourses()
         ]);
         if (isMounted) {
           setModules(mList);
@@ -105,7 +112,11 @@ export function AdminModuleList() {
         }
       } catch (err: unknown) {
         if (isMounted) {
-          setError(err instanceof Error ? err.message : "Failed to load module management data");
+          setError(
+            err instanceof Error
+              ? err.message
+              : "Failed to load module management data"
+          );
         }
       } finally {
         if (isMounted) {
@@ -146,14 +157,18 @@ export function AdminModuleList() {
       }
       await loadData();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to update publish state");
+      setError(
+        err instanceof Error ? err.message : "Failed to update publish state"
+      );
     } finally {
       setActiveModuleId(null);
     }
   };
 
   const handleDelete = async (mod: AdminModuleItem) => {
-    if (!confirm(`Are you sure you want to permanently delete "${mod.title}"?`)) {
+    if (
+      !confirm(`Are you sure you want to permanently delete "${mod.title}"?`)
+    ) {
       return;
     }
 
@@ -226,8 +241,10 @@ export function AdminModuleList() {
       selectedCourseFilter === "all" || m.course_id === selectedCourseFilter;
     const matchesSearch =
       m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (m.description && m.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (course && course.code.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (m.description &&
+        m.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (course &&
+        course.code.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (course && course.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
     return matchesCourse && matchesSearch;
@@ -251,7 +268,10 @@ export function AdminModuleList() {
             <CheckCircle2 className="w-4 h-4 text-slate-300 shrink-0" />
             <span>{actionSuccess}</span>
           </div>
-          <button onClick={() => setActionSuccess(null)} className="text-slate-400 hover:text-white">
+          <button
+            onClick={() => setActionSuccess(null)}
+            className="text-slate-400 hover:text-white"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -263,7 +283,10 @@ export function AdminModuleList() {
             <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
             <span>{error}</span>
           </div>
-          <button onClick={() => setError(null)} className="text-rose-600 hover:text-rose-900">
+          <button
+            onClick={() => setError(null)}
+            className="text-rose-600 hover:text-rose-900"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -321,148 +344,161 @@ export function AdminModuleList() {
         </div>
       ) : (
         <div className="space-y-4">
-          {Array.from(groupedModules.entries()).map(([courseId, courseModules]) => {
-            const course = courseId !== "unassigned" ? courseMap.get(courseId) : undefined;
-            const isCollapsed = collapsedCourses.has(courseId);
+          {Array.from(groupedModules.entries()).map(
+            ([courseId, courseModules]) => {
+              const course =
+                courseId !== "unassigned" ? courseMap.get(courseId) : undefined;
+              const isCollapsed = collapsedCourses.has(courseId);
 
-            return (
-              <div
-                key={courseId}
-                className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden transition-all"
-              >
-                {/* Course Header */}
+              return (
                 <div
-                  onClick={() => toggleCourseCollapse(courseId)}
-                  className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between cursor-pointer hover:bg-slate-100/70 transition-colors"
+                  key={courseId}
+                  className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden transition-all"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-900 text-white px-2.5 py-0.5 rounded-full">
-                      {course ? course.code : "N/A"}
-                    </span>
-                    <h3 className="font-bold text-xs text-slate-900">
-                      {course ? course.name : "Unassigned Course"}
-                    </h3>
-                    <span className="text-[11px] text-slate-400">
-                      ({courseModules.length} module{courseModules.length > 1 ? "s" : ""})
+                  {/* Course Header */}
+                  <div
+                    onClick={() => toggleCourseCollapse(courseId)}
+                    className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between cursor-pointer hover:bg-slate-100/70 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-900 text-white px-2.5 py-0.5 rounded-full">
+                        {course ? course.code : "N/A"}
+                      </span>
+                      <h3 className="font-bold text-xs text-slate-900">
+                        {course ? course.name : "Unassigned Course"}
+                      </h3>
+                      <span className="text-[11px] text-slate-400">
+                        ({courseModules.length} module
+                        {courseModules.length > 1 ? "s" : ""})
+                      </span>
+                    </div>
+
+                    <span className="text-xs text-slate-400 font-semibold">
+                      {isCollapsed ? "Expand +" : "Collapse −"}
                     </span>
                   </div>
 
-                  <span className="text-xs text-slate-400 font-semibold">
-                    {isCollapsed ? "Expand +" : "Collapse −"}
-                  </span>
-                </div>
-
-                {/* Modules in Course */}
-                {!isCollapsed && (
-                  <div className="divide-y divide-slate-100">
-                    {courseModules.map((mod) => {
-                      const fileExt = mod.file_key.split(".").pop() || "pdf";
-                      return (
-                        <div
-                          key={mod.id}
-                          onClick={() => setSelectedModuleForDetail(mod)}
-                          className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/80 cursor-pointer transition-colors"
-                        >
-                          <div className="flex items-start gap-3.5">
-                            <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 shrink-0 mt-0.5">
-                              <FileText className="w-5 h-5" />
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <h4 className="font-bold text-xs text-slate-900 hover:underline">
-                                  {mod.title}
-                                </h4>
-                                <span
-                                  className={`px-2 py-0.2 rounded-full text-[10px] font-semibold flex items-center gap-1 ${
-                                    mod.is_published
-                                      ? "bg-slate-900 text-white"
-                                      : "bg-slate-100 text-slate-600 border border-slate-200"
-                                  }`}
-                                >
-                                  {mod.is_published ? (
-                                    <>
-                                      <Globe className="w-2.5 h-2.5" />
-                                      <span>Published</span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Lock className="w-2.5 h-2.5" />
-                                      <span>Draft</span>
-                                    </>
-                                  )}
+                  {/* Modules in Course */}
+                  {!isCollapsed && (
+                    <div className="divide-y divide-slate-100">
+                      {courseModules.map((mod) => {
+                        const fileExt = mod.file_key.split(".").pop() || "pdf";
+                        return (
+                          <div
+                            key={mod.id}
+                            onClick={() => setSelectedModuleForDetail(mod)}
+                            className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/80 cursor-pointer transition-colors"
+                          >
+                            <div className="flex items-start gap-3.5">
+                              <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 shrink-0 mt-0.5">
+                                <FileText className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <h4 className="font-bold text-xs text-slate-900 hover:underline">
+                                    {mod.title}
+                                  </h4>
+                                  <span
+                                    className={`px-2 py-0.2 rounded-full text-[10px] font-semibold flex items-center gap-1 ${
+                                      mod.is_published
+                                        ? "bg-slate-900 text-white"
+                                        : "bg-slate-100 text-slate-600 border border-slate-200"
+                                    }`}
+                                  >
+                                    {mod.is_published ? (
+                                      <>
+                                        <Globe className="w-2.5 h-2.5" />
+                                        <span>Published</span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Lock className="w-2.5 h-2.5" />
+                                        <span>Draft</span>
+                                      </>
+                                    )}
+                                  </span>
+                                </div>
+                                <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">
+                                  {mod.description ||
+                                    "No description provided."}
+                                </p>
+                                <span className="text-[10px] text-slate-400 font-mono mt-0.5 block">
+                                  Uploaded:{" "}
+                                  {new Date(
+                                    mod.created_at
+                                  ).toLocaleDateString()}
                                 </span>
                               </div>
-                              <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">
-                                {mod.description || "No description provided."}
-                              </p>
-                              <span className="text-[10px] text-slate-400 font-mono mt-0.5 block">
-                                Uploaded: {new Date(mod.created_at).toLocaleDateString()}
-                              </span>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div
+                              className="flex items-center gap-2 self-end sm:self-center"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {mod.download_url && (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setPreviewDoc({
+                                        title: mod.title,
+                                        fileUrl: mod.download_url!,
+                                        fileExtension: fileExt,
+                                        courseCode: course?.code
+                                      })
+                                    }
+                                    className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full text-xs flex items-center gap-1.5 transition-colors shadow-xs"
+                                  >
+                                    <Eye className="w-3.5 h-3.5" />
+                                    <span>Preview</span>
+                                  </button>
+
+                                  <a
+                                    href={mod.download_url}
+                                    download
+                                    className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                                  >
+                                    <Download className="w-3.5 h-3.5" />
+                                    <span className="hidden sm:inline">
+                                      Download
+                                    </span>
+                                  </a>
+                                </>
+                              )}
+
+                              <button
+                                type="button"
+                                disabled={activeModuleId === mod.id}
+                                onClick={() => handleTogglePublish(mod)}
+                                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+                                  mod.is_published
+                                    ? "border border-slate-200 text-slate-700 hover:bg-slate-100"
+                                    : "bg-slate-900 text-white hover:bg-slate-800 shadow-xs"
+                                }`}
+                              >
+                                {mod.is_published ? "Unpublish" : "Publish"}
+                              </button>
+
+                              <button
+                                type="button"
+                                disabled={activeModuleId === mod.id}
+                                onClick={() => handleDelete(mod)}
+                                className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg text-xs transition-colors"
+                                title="Delete Module"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
                             </div>
                           </div>
-
-                          {/* Action Buttons */}
-                          <div className="flex items-center gap-2 self-end sm:self-center" onClick={(e) => e.stopPropagation()}>
-                            {mod.download_url && (
-                              <>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setPreviewDoc({
-                                      title: mod.title,
-                                      fileUrl: mod.download_url!,
-                                      fileExtension: fileExt,
-                                      courseCode: course?.code,
-                                    })
-                                  }
-                                  className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full text-xs flex items-center gap-1.5 transition-colors shadow-xs"
-                                >
-                                  <Eye className="w-3.5 h-3.5" />
-                                  <span>Preview</span>
-                                </button>
-
-                                <a
-                                  href={mod.download_url}
-                                  download
-                                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-colors"
-                                >
-                                  <Download className="w-3.5 h-3.5" />
-                                  <span className="hidden sm:inline">Download</span>
-                                </a>
-                              </>
-                            )}
-
-                            <button
-                              type="button"
-                              disabled={activeModuleId === mod.id}
-                              onClick={() => handleTogglePublish(mod)}
-                              className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 ${
-                                mod.is_published
-                                  ? "border border-slate-200 text-slate-700 hover:bg-slate-100"
-                                  : "bg-slate-900 text-white hover:bg-slate-800 shadow-xs"
-                              }`}
-                            >
-                              {mod.is_published ? "Unpublish" : "Publish"}
-                            </button>
-
-                            <button
-                              type="button"
-                              disabled={activeModuleId === mod.id}
-                              onClick={() => handleDelete(mod)}
-                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg text-xs transition-colors"
-                              title="Delete Module"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+          )}
         </div>
       )}
 
@@ -475,8 +511,12 @@ export function AdminModuleList() {
           >
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
-                <h4 className="font-bold text-sm text-slate-900">Upload Learning Module</h4>
-                <p className="text-[11px] text-slate-400 mt-0.5">Add course syllabus, lab guides, or lecture slides</p>
+                <h4 className="font-bold text-sm text-slate-900">
+                  Upload Learning Module
+                </h4>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  Add course syllabus, lab guides, or lecture slides
+                </p>
               </div>
               <button
                 type="button"
@@ -489,14 +529,18 @@ export function AdminModuleList() {
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Target Course *</label>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Target Course *
+                </label>
                 <select
                   value={newModuleCourseId}
                   onChange={(e) => setNewModuleCourseId(e.target.value)}
                   required
                   className="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-slate-900"
                 >
-                  <option value="" disabled>Select Course</option>
+                  <option value="" disabled>
+                    Select Course
+                  </option>
                   {courses.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.code} - {c.name}
@@ -506,7 +550,9 @@ export function AdminModuleList() {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Module Title *</label>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Module Title *
+                </label>
                 <input
                   type="text"
                   value={newModuleTitle}
@@ -518,7 +564,9 @@ export function AdminModuleList() {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Description / Summary (Optional)</label>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Description / Summary (Optional)
+                </label>
                 <textarea
                   value={newModuleDescription}
                   onChange={(e) => setNewModuleDescription(e.target.value)}
@@ -529,14 +577,18 @@ export function AdminModuleList() {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Module File (.pdf, .docx) *</label>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Module File (.pdf, .docx) *
+                </label>
                 <div className="border-2 border-dashed border-slate-200 hover:border-slate-400 rounded-2xl p-4 text-center bg-slate-50/50 transition-colors">
                   {selectedFile ? (
                     <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-200">
                       <div className="flex items-center gap-2.5 overflow-hidden">
                         <FileCheck className="w-5 h-5 text-slate-800 shrink-0" />
                         <div className="text-left overflow-hidden">
-                          <span className="font-semibold text-slate-900 block truncate">{selectedFile.name}</span>
+                          <span className="font-semibold text-slate-900 block truncate">
+                            {selectedFile.name}
+                          </span>
                           <span className="text-[10px] text-slate-400">
                             {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
                           </span>
@@ -585,7 +637,12 @@ export function AdminModuleList() {
               </button>
               <button
                 type="submit"
-                disabled={isUploading || !selectedFile || !newModuleTitle.trim() || !newModuleCourseId}
+                disabled={
+                  isUploading ||
+                  !selectedFile ||
+                  !newModuleTitle.trim() ||
+                  !newModuleCourseId
+                }
                 className="px-5 py-2 bg-slate-900 text-white rounded-full text-xs font-semibold hover:bg-slate-800 shadow-xs disabled:opacity-50 flex items-center gap-1.5"
               >
                 {isUploading ? (
@@ -610,14 +667,18 @@ export function AdminModuleList() {
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             {/* Modal Header Banner */}
-            <div className="p-5 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-between">
+            <div className="p-5 bg-linear-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-white">
                   <FileText className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-sm text-white">Module Details</h3>
-                  <p className="text-[11px] text-slate-300 mt-0.5">Practicum learning file specifications</p>
+                  <h3 className="font-bold text-sm text-white">
+                    Module Details
+                  </h3>
+                  <p className="text-[11px] text-slate-300 mt-0.5">
+                    Practicum learning file specifications
+                  </p>
                 </div>
               </div>
               <button
@@ -645,7 +706,8 @@ export function AdminModuleList() {
                   Target Course
                 </span>
                 <span className="font-medium text-slate-800 block mt-0.5">
-                  {selectedModuleForDetail.course_id && courseMap.get(selectedModuleForDetail.course_id)
+                  {selectedModuleForDetail.course_id &&
+                  courseMap.get(selectedModuleForDetail.course_id)
                     ? `${courseMap.get(selectedModuleForDetail.course_id)?.code} - ${courseMap.get(selectedModuleForDetail.course_id)?.name}`
                     : "Unassigned"}
                 </span>
@@ -656,30 +718,47 @@ export function AdminModuleList() {
                   Description
                 </span>
                 <p className="text-slate-600 mt-0.5 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100">
-                  {selectedModuleForDetail.description || "No description provided."}
+                  {selectedModuleForDetail.description ||
+                    "No description provided."}
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-3 pt-2">
                 <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                  <span className="text-[10px] text-slate-400 uppercase font-semibold block">File Key</span>
-                  <span className="font-mono text-slate-800 truncate block mt-0.5" title={selectedModuleForDetail.file_key}>
+                  <span className="text-[10px] text-slate-400 uppercase font-semibold block">
+                    File Key
+                  </span>
+                  <span
+                    className="font-mono text-slate-800 truncate block mt-0.5"
+                    title={selectedModuleForDetail.file_key}
+                  >
                     {selectedModuleForDetail.file_key.split("/").pop()}
                   </span>
                 </div>
 
                 <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                  <span className="text-[10px] text-slate-400 uppercase font-semibold block">Status</span>
+                  <span className="text-[10px] text-slate-400 uppercase font-semibold block">
+                    Status
+                  </span>
                   <span className="font-semibold text-slate-900 flex items-center gap-1.5 mt-0.5">
-                    <span className={`w-2 h-2 rounded-full ${selectedModuleForDetail.is_published ? "bg-slate-900" : "bg-slate-400"}`} />
-                    {selectedModuleForDetail.is_published ? "Published to Students" : "Draft (Hidden)"}
+                    <span
+                      className={`w-2 h-2 rounded-full ${selectedModuleForDetail.is_published ? "bg-slate-900" : "bg-slate-400"}`}
+                    />
+                    {selectedModuleForDetail.is_published
+                      ? "Published to Students"
+                      : "Draft (Hidden)"}
                   </span>
                 </div>
               </div>
 
               <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                <span className="text-[10px] text-slate-400 uppercase font-semibold block">Storage Key (MinIO)</span>
-                <span className="font-mono text-[11px] text-slate-600 truncate block mt-0.5" title={selectedModuleForDetail.file_key}>
+                <span className="text-[10px] text-slate-400 uppercase font-semibold block">
+                  Storage Key (MinIO)
+                </span>
+                <span
+                  className="font-mono text-[11px] text-slate-600 truncate block mt-0.5"
+                  title={selectedModuleForDetail.file_key}
+                >
                   {selectedModuleForDetail.file_key}
                 </span>
               </div>
@@ -698,8 +777,11 @@ export function AdminModuleList() {
                           setPreviewDoc({
                             title: selectedModuleForDetail.title,
                             fileUrl: selectedModuleForDetail.download_url!,
-                            fileExtension: selectedModuleForDetail.file_key.split(".").pop() || "pdf",
-                            courseCode: course?.code,
+                            fileExtension:
+                              selectedModuleForDetail.file_key
+                                .split(".")
+                                .pop() || "pdf",
+                            courseCode: course?.code
                           });
                         }}
                         className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-full font-semibold flex items-center gap-1.5 transition-colors shadow-xs"
@@ -725,7 +807,9 @@ export function AdminModuleList() {
                     onClick={() => handleTogglePublish(selectedModuleForDetail)}
                     className="px-3.5 py-2 border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-full font-semibold transition-colors"
                   >
-                    {selectedModuleForDetail.is_published ? "Unpublish" : "Publish"}
+                    {selectedModuleForDetail.is_published
+                      ? "Unpublish"
+                      : "Publish"}
                   </button>
                 </div>
 

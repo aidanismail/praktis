@@ -14,15 +14,15 @@ import { CourseManagement } from "@/features/admin/components/course-management"
 type RoleDashboardProps = {
   user: User;
   activeItem: DashboardNavItem;
-  onNavigateToCourse?: (courseId: string) => void;
-  onNavigateToNavItem?: (itemId: string) => void;
+  onNavigateToCourse: (courseId: string) => void;
+  onNavigateToNavItem: (itemId: string) => void;
 };
 
 export function RoleDashboard({
   user,
   activeItem,
   onNavigateToCourse,
-  onNavigateToNavItem,
+  onNavigateToNavItem
 }: RoleDashboardProps) {
   const renderContent = () => {
     if (user.role === "superadmin") {
@@ -30,6 +30,7 @@ export function RoleDashboard({
         case "overview":
           return (
             <AdminOverview
+              userId={user.id}
               onNavigateToCourse={onNavigateToCourse}
               onNavigateToNavItem={onNavigateToNavItem}
             />
@@ -75,8 +76,6 @@ export function RoleDashboard({
   };
 
   return (
-    <section className="space-y-6 max-w-7xl mx-auto">
-      {renderContent()}
-    </section>
+    <section className="space-y-6 max-w-7xl mx-auto">{renderContent()}</section>
   );
 }
