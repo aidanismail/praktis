@@ -1,12 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import type { User } from "@/types/user.type";
 import type { Course } from "@/features/courses/types/course.type";
-import { useAuthStore } from "@/stores/auth-store";
-import { ROUTES } from "@/constants/routes";
-import { logout } from "@/features/auth/api/auth.api";
+import { useLogout } from "@/features/auth/hooks/use-logout";
 import { DASHBOARD_NAVIGATION } from "../constants/dashboard-navigation";
 import { DashboardHeader } from "./dashboard-header";
 import { DashboardSidebar } from "./dashboard-sidebar";
@@ -17,8 +14,7 @@ type DashboardShellProps = {
 };
 
 export function DashboardShell({ user }: DashboardShellProps) {
-  const router = useRouter();
-  const clearAuth = useAuthStore((state) => state.clearAuth);
+  const logoutMutation = useLogout();
   const navigationItems = DASHBOARD_NAVIGATION[user.role];
 
   const [activeItemId, setActiveItemId] = useState(navigationItems[0].id);
@@ -27,8 +23,12 @@ export function DashboardShell({ user }: DashboardShellProps) {
 
   // Active course & workspace tab state for Google Classroom top bar
   const [activeCourse, setActiveCourse] = useState<Course | null>(null);
-  const [activeAssignmentTitle, setActiveAssignmentTitle] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"stream" | "classwork" | "people" | "sessions">("stream");
+  const [activeAssignmentTitle, setActiveAssignmentTitle] = useState<
+    string | null
+  >(null);
+  const [activeTab, setActiveTab] = useState<
+    "stream" | "classwork" | "people" | "sessions"
+  >("stream");
 
   const activeItem =
     navigationItems.find((item) => item.id === activeItemId) ??
@@ -42,9 +42,13 @@ export function DashboardShell({ user }: DashboardShellProps) {
     }
   };
 
-  const handleSelectTab = (tab: "stream" | "classwork" | "people" | "sessions") => {
+  const handleSelectTab = (
+    tab: "stream" | "classwork" | "people" | "sessions"
+  ) => {
     setActiveTab(tab);
-    window.dispatchEvent(new CustomEvent("course-tab-change", { detail: { tab } }));
+    window.dispatchEvent(
+      new CustomEvent("course-tab-change", { detail: { tab } })
+    );
   };
 
   const handleBackToCourses = useCallback(() => {
@@ -57,6 +61,15 @@ export function DashboardShell({ user }: DashboardShellProps) {
     setActiveAssignmentTitle(null);
     window.dispatchEvent(new CustomEvent("assignment-submissions-back"));
   }, []);
+
+  const handleSelectNavigationItem = (id: string) => {
+    if (activeCourse) {
+      handleBackToCourses();
+    }
+
+    setActiveItemId(id);
+    setIsMobileSidebarOpen(false);
+  };
 
   const handleNavigateToCourse = (courseId: string) => {
     setActiveItemId("courses");
@@ -83,19 +96,15 @@ export function DashboardShell({ user }: DashboardShellProps) {
     };
 
     window.addEventListener("course-workspace-change", handleWorkspaceChange);
-    return () => window.removeEventListener("course-workspace-change", handleWorkspaceChange);
+    return () =>
+      window.removeEventListener(
+        "course-workspace-change",
+        handleWorkspaceChange
+      );
   }, []);
 
-  async function handleLogout() {
-    try {
-      await logout();
-    } catch {
-      // Still clear local auth state even if backend logout fails.
-    } finally {
-      clearAuth();
-      router.replace(ROUTES.login);
-      router.refresh();
-    }
+  function handleLogout() {
+    logoutMutation.mutate();
   }
 
   return (
@@ -118,17 +127,52 @@ export function DashboardShell({ user }: DashboardShellProps) {
         <DashboardSidebar
           items={navigationItems}
           activeItemId={activeItemId}
-          onSelectItem={(id) => {
-            if (activeCourse) handleBackToCourses();
-            setActiveItemId(id);
-          }}
+          onSelectItem={handleSelectNavigationItem}
           onLogout={handleLogout}
+          isLoggingOut={logoutMutation.isPending}
+          hasLogoutError={logoutMutation.isError}
           isCollapsed={isSidebarCollapsed}
           isMobileOpen={isMobileSidebarOpen}
           onCloseMobile={() => setIsMobileSidebarOpen(false)}
         />
 
         <main className="flex-1 min-w-0 p-3 sm:p-6 lg:p-8 max-w-5xl mx-auto w-full">
+          {logoutMutation.isError ? (
+            <div
+              id="logout-error-message"
+              role="alert"
+              className="mb-5 rounded-2xl border border-red-200 bg-red-50 p-4
+                text-red-950"
+            >
+              <h2 className="text-sm font-semibold">
+                Sign out could not be confirmed
+              </h2>
+
+              <p className="mt-1 text-sm leading-6 text-red-800">
+                Your server session is still active. Check your connection and
+                try signing out again.
+              </p>
+
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  disabled={logoutMutation.isPending}
+                  className="rounded-xl bg-red-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Try again
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => logoutMutation.reset()}
+                  className="rounded-xl border border-red-300 bg-white px-4 py-2 text-sm font-semibold text-red-900 transition hover:bg-red-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          ) : null}
           <div className="mb-5 sm:mb-6">
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
               {activeCourse ? activeCourse.name : activeItem.label}
@@ -144,6 +188,7 @@ export function DashboardShell({ user }: DashboardShellProps) {
             activeItem={activeItem}
             user={user}
             onNavigateToCourse={handleNavigateToCourse}
+            onNavigateToNavItem={handleSelectNavigationItem}
           />
         </main>
       </div>

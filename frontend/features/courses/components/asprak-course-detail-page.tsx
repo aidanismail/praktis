@@ -14,7 +14,7 @@ import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useAuthStore } from "@/stores/auth-store";
 import { useAssignedCourses } from "../hooks/use-assigned-courses";
-import { CourseRoster } from "./course-roster";
+import { CourseWorkspaceTabs } from "./course-workspace-tabs";
 import {
   getThemeConfig,
   getPatternConfig,
@@ -280,7 +280,7 @@ function AssignedCourseDetail({ userId, courseId }: AssignedCourseDetailProps) {
         </div>
       </header>
 
-      <CourseRoster userId={userId} courseId={courseId} />
+      <CourseWorkspaceTabs userId={userId} courseId={courseId} />
 
       {showCustomizeModal && (
         <CourseBannerCustomizerModal

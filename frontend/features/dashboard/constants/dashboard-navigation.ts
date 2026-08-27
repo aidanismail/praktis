@@ -11,7 +11,7 @@ export const DASHBOARD_NAVIGATION: Record<UserRole, DashboardNavItem[]> = {
     {
       id: "overview",
       label: "Overview",
-      description: "System summary and latest practicum activity."
+      description: "Course offerings, account coverage, and platform readiness."
     },
     {
       id: "courses",
@@ -55,27 +55,6 @@ export const DASHBOARD_NAVIGATION: Record<UserRole, DashboardNavItem[]> = {
       id: "classes",
       label: "My Practicum Classes",
       description: "View assigned classes and practicum groups."
-    },
-    {
-      id: "modules",
-      label: "Modules",
-      description: "Upload and manage practicum materials."
-    },
-    {
-      id: "attendance",
-      label: "Attendance",
-      description:
-        "Mark student attendance as present, sick, excused, or absent."
-    },
-    {
-      id: "grading",
-      label: "Grading",
-      description: "Input and manage practicum scores."
-    },
-    {
-      id: "reports",
-      label: "Reports",
-      description: "Review class progress and export records."
     }
   ],
 

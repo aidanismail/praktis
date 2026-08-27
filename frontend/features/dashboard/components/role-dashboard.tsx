@@ -2,6 +2,7 @@ import type { User } from "@/types/user.type";
 import type { DashboardNavItem } from "../constants/dashboard-navigation";
 import { DashboardPlaceholderCard } from "./dashboard-placeholder-card";
 import { AsprakCourseList } from "@/features/courses/components/asprak-course-list";
+import { AsprakCourseOverview } from "@/features/courses/components/asprak-course-overview";
 import { AdminOverview } from "@/features/admin/components/admin-overview";
 import { UserManagement } from "@/features/admin/components/user-management";
 import { BulkImportForm } from "@/features/admin/components/bulk-import-form";
@@ -13,15 +14,15 @@ import { CourseManagement } from "@/features/admin/components/course-management"
 type RoleDashboardProps = {
   user: User;
   activeItem: DashboardNavItem;
-  onNavigateToCourse?: (courseId: string) => void;
-  onNavigateToNavItem?: (itemId: string) => void;
+  onNavigateToCourse: (courseId: string) => void;
+  onNavigateToNavItem: (itemId: string) => void;
 };
 
 export function RoleDashboard({
   user,
   activeItem,
   onNavigateToCourse,
-  onNavigateToNavItem,
+  onNavigateToNavItem
 }: RoleDashboardProps) {
   const renderContent = () => {
     if (user.role === "superadmin") {
@@ -29,6 +30,7 @@ export function RoleDashboard({
         case "overview":
           return (
             <AdminOverview
+              userId={user.id}
               onNavigateToCourse={onNavigateToCourse}
               onNavigateToNavItem={onNavigateToNavItem}
             />
@@ -55,8 +57,14 @@ export function RoleDashboard({
       }
     }
 
-    if (user.role === "asprak" && activeItem.id === "classes") {
-      return <AsprakCourseList userId={user.id} />;
+    if (user.role === "asprak") {
+      if (activeItem.id === "overview") {
+        return <AsprakCourseOverview userId={user.id} />;
+      }
+
+      if (activeItem.id === "classes") {
+        return <AsprakCourseList userId={user.id} />;
+      }
     }
 
     return (
@@ -68,8 +76,6 @@ export function RoleDashboard({
   };
 
   return (
-    <section className="space-y-6 max-w-7xl mx-auto">
-      {renderContent()}
-    </section>
+    <section className="space-y-6 max-w-7xl mx-auto">{renderContent()}</section>
   );
 }
