@@ -9,8 +9,9 @@ from core.database import get_db
 from models.user import User, RoleEnum
 from models.grade import Grade
 from models.class_session import ClassSession
+from models.course import Course
 from models.enrollment import Enrollment
-from schemas.grade import BulkGradeRequest, GradeResponse
+from schemas.grade import BulkGradeRequest, GradeResponse, PersonalGradeHistoryItem
 from schemas.common import MessageResponse
 from api.dependencies import get_current_active_user
 from api.permissions import require_session_access, validate_enrolled_students
@@ -45,7 +46,15 @@ async def bulk_update_grades(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
-    session = await require_session_access(db, current_user, session_id, write=True)
+    await require_session_access(db, current_user, session_id, write=True)
+
+    # Acquire row-level lock on session to prevent concurrent publish races
+    sess_res = await db.execute(
+        select(ClassSession).where(ClassSession.id == session_id).with_for_update()
+    )
+    session = sess_res.scalars().first()
+    if not session:
+        raise HTTPException(status_code=404, detail="Class session not found")
 
     if session.grades_published:
         raise HTTPException(status_code=409, detail="Cannot edit grades for a published session. Unpublish first.")
@@ -154,9 +163,9 @@ async def unpublish_grades(
 
 @router.get(
     "/me",
-    response_model=list[GradeResponse],
+    response_model=list[PersonalGradeHistoryItem],
     summary="Get my own grade history",
-    description="Returns the caller's own grade records across all sessions. Available to any authenticated role.",
+    description="Returns the caller's own published grade records across all sessions with course metadata. Available to any authenticated role.",
     responses=UNAUTHENTICATED_401,  # type: ignore
 )
 async def my_grades(
@@ -164,8 +173,28 @@ async def my_grades(
     current_user: User = Depends(get_current_active_user),
 ):
     result = await db.execute(
-        select(Grade)
+        select(Grade, ClassSession, Course)
         .join(ClassSession, Grade.session_id == ClassSession.id)
-        .where(Grade.student_id == current_user.id, ClassSession.grades_published == True)
+        .join(Course, ClassSession.course_id == Course.id)
+        .where(Grade.student_id == current_user.id, ClassSession.grades_published.is_(True))
+        .order_by(Course.academic_year.desc(), Course.semester.desc(), ClassSession.date.asc())
     )
-    return result.scalars().all()
+    rows = result.all()
+    return [
+        PersonalGradeHistoryItem(
+            id=grade.id,
+            session_id=grade.session_id,
+            session_title=session.title,
+            session_date=session.date,
+            course_id=course.id,
+            course_code=course.code,
+            course_name=course.name,
+            academic_year=course.academic_year,
+            semester=course.semester,
+            score=grade.score,
+            created_at=grade.created_at,
+            updated_at=grade.updated_at,
+            recorded_by=grade.recorded_by,
+        )
+        for grade, session, course in rows
+    ]

@@ -479,7 +479,7 @@ async def remove_staff(
     "/{course_id}/students/{student_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Remove a student enrollment from a course",
-    description="Superadmin or assigned asprak.",
+    description="Superadmin only.",
     responses={
         **UNAUTHENTICATED_401,
         **FORBIDDEN_403,
@@ -490,9 +490,9 @@ async def remove_student_enrollment(
     course_id: uuid.UUID,
     student_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user),
+    _current_user: User = Depends(require_superadmin),
 ):
-    await require_course_access(db, current_user, course_id, write=True)
+    await _get_course_or_404(db, course_id)
 
     result = await db.execute(
         delete(Enrollment).where(

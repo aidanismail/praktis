@@ -4,7 +4,7 @@ from typing import Callable
 from fastapi import HTTPException, Request, status
 from redis.exceptions import RedisError
 
-from core.cache import redis_client
+from core import cache
 
 logger = logging.getLogger(__name__)
 
@@ -23,14 +23,14 @@ async def check_rate_limit(
     """
     rate_key = f"rate_limit:{key}"
 
-    if redis_client is not None:
+    if cache.redis_client is not None:
         try:
-            current = await redis_client.incr(rate_key)
+            current = await cache.redis_client.incr(rate_key)
             if current == 1:
-                await redis_client.expire(rate_key, window_seconds)
+                await cache.redis_client.expire(rate_key, window_seconds)
 
             if current > max_requests:
-                ttl = await redis_client.ttl(rate_key)
+                ttl = await cache.redis_client.ttl(rate_key)
                 retry_after = max(ttl, 1)
                 raise HTTPException(
                     status_code=status.HTTP_429_TOO_MANY_REQUESTS,
@@ -45,6 +45,13 @@ async def check_rate_limit(
 
     # In-memory fallback
     now = time.time()
+
+    # Periodic cleanup if fallback map grows large
+    if len(_in_memory_limits) > 5000:
+        expired_keys = [k for k, (_, exp) in _in_memory_limits.items() if now > exp]
+        for k in expired_keys:
+            _in_memory_limits.pop(k, None)
+
     count, reset_at = _in_memory_limits.get(rate_key, (0, now + window_seconds))
 
     if now > reset_at:
@@ -67,10 +74,17 @@ async def check_rate_limit(
 def rate_limiter(times: int = 10, seconds: int = 60, scope: str = "global") -> Callable:
     """FastAPI dependency factory for endpoint rate limiting."""
     async def _rate_limit_dependency(request: Request) -> None:
-        client_ip = request.client.host if request.client else "127.0.0.1"
-        forwarded = request.headers.get("X-Forwarded-For")
-        if forwarded:
-            client_ip = forwarded.split(",")[0].strip()
+        # Trust X-Real-IP set by Nginx reverse proxy, else fallback to request client host
+        client_ip = request.headers.get("X-Real-IP")
+        if not client_ip:
+            forwarded = request.headers.get("X-Forwarded-For")
+            if forwarded:
+                # Use the last proxy-added IP rather than spoofable client-supplied first entry
+                client_ip = forwarded.split(",")[-1].strip()
+            elif request.client:
+                client_ip = request.client.host
+            else:
+                client_ip = "127.0.0.1"
 
         key = f"{scope}:{client_ip}"
         await check_rate_limit(key=key, max_requests=times, window_seconds=seconds)

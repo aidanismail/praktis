@@ -1,16 +1,18 @@
 import uuid
 import datetime
 import os
+import asyncio
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 
 from core.database import get_db
-from api.dependencies import get_current_user
+from api.dependencies import get_current_active_user
 from api.permissions import require_course_access
 from models.user import User, RoleEnum
 from models.assignment import Assignment, Submission
+from models.class_session import ClassSession
 from schemas.assignment import (
     AssignmentCreate,
     AssignmentUpdate,
@@ -65,7 +67,7 @@ def _build_submission_response(sub: Submission, student: User | None) -> Submiss
 async def list_assignments(
     course_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_active_user),
 ):
     await require_course_access(db, current_user, course_id, write=False)
 
@@ -126,9 +128,22 @@ async def create_assignment(
     course_id: uuid.UUID,
     payload: AssignmentCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_active_user),
 ):
     await require_course_access(db, current_user, course_id, write=True)
+
+    if payload.session_id is not None:
+        sess_res = await db.execute(
+            select(ClassSession).where(
+                ClassSession.id == payload.session_id,
+                ClassSession.course_id == course_id,
+            )
+        )
+        if not sess_res.scalars().first():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Selected session does not belong to this course",
+            )
 
     new_assignment = Assignment(
         course_id=course_id,
@@ -172,7 +187,7 @@ async def get_assignment(
     course_id: uuid.UUID,
     assignment_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_active_user),
 ):
     await require_course_access(db, current_user, course_id, write=False)
 
@@ -183,6 +198,9 @@ async def get_assignment(
     )
     assignment = result.scalars().first()
     if not assignment:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Assignment not found")
+
+    if current_user.role == RoleEnum.PRAKTIKAN and not assignment.is_published:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Assignment not found")
 
     my_sub_resp = None
@@ -225,29 +243,22 @@ async def update_assignment(
     assignment_id: uuid.UUID,
     payload: AssignmentUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_active_user),
 ):
     await require_course_access(db, current_user, course_id, write=True)
 
     result = await db.execute(
-        select(Assignment).where(Assignment.id == assignment_id, Assignment.course_id == course_id)
+        select(Assignment)
+        .where(Assignment.id == assignment_id, Assignment.course_id == course_id)
+        .options(selectinload(Assignment.submissions))
     )
     assignment = result.scalars().first()
     if not assignment:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Assignment not found")
 
-    if payload.title is not None:
-        assignment.title = payload.title
-    if payload.description is not None:
-        assignment.description = payload.description
-    if payload.due_date is not None:
-        assignment.due_date = payload.due_date
-    if payload.max_points is not None:
-        assignment.max_points = payload.max_points
-    if payload.allowed_file_types is not None:
-        assignment.allowed_file_types = payload.allowed_file_types
-    if payload.is_published is not None:
-        assignment.is_published = payload.is_published
+    update_data = payload.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(assignment, field, value)
 
     await db.commit()
     await db.refresh(assignment)
@@ -263,7 +274,7 @@ async def update_assignment(
         allowed_file_types=assignment.allowed_file_types,
         is_published=assignment.is_published,
         created_at=assignment.created_at.isoformat(),
-        submissions_count=0,
+        submissions_count=len(assignment.submissions),
         my_submission=None,
     )
 
@@ -279,7 +290,7 @@ async def delete_assignment(
     course_id: uuid.UUID,
     assignment_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_active_user),
 ):
     await require_course_access(db, current_user, course_id, write=True)
 
@@ -289,6 +300,13 @@ async def delete_assignment(
     assignment = result.scalars().first()
     if not assignment:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Assignment not found")
+
+    sub_res = await db.execute(select(Submission).where(Submission.assignment_id == assignment.id))
+    for sub in sub_res.scalars().all():
+        try:
+            await storage_service.delete_object(sub.file_key)
+        except Exception:
+            pass
 
     await db.delete(assignment)
     await db.commit()
@@ -310,7 +328,7 @@ async def submit_assignment(
     assignment_id: uuid.UUID,
     file: UploadFile = File(..., description="Practicum assignment solution file (PDF/ZIP/DOCX up to 10MB)."),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_active_user),
 ):
     await require_course_access(db, current_user, course_id, write=False)
 
@@ -321,7 +339,7 @@ async def submit_assignment(
         select(Assignment).where(Assignment.id == assignment_id, Assignment.course_id == course_id)
     )
     assignment = result.scalars().first()
-    if not assignment:
+    if not assignment or not assignment.is_published:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Assignment not found")
 
     # Validate file extension
@@ -335,12 +353,15 @@ async def submit_assignment(
 
     # Read and validate size
     content = await file.read()
+    if len(content) == 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Uploaded file is empty")
     if len(content) > MAX_FILE_SIZE:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File exceeds maximum size of 10MB")
 
-    # Upload to MinIO
+    # Upload to MinIO offloaded to worker thread
     file_key = f"assignments/{assignment_id}/{current_user.id}/{uuid.uuid4()}_{file.filename}"
-    storage_service.internal.put_object(
+    await asyncio.to_thread(
+        storage_service.internal.put_object,
         Bucket=storage_service.bucket_name,
         Key=file_key,
         Body=content,
@@ -349,8 +370,12 @@ async def submit_assignment(
     # Check late status
     now = datetime.datetime.now(datetime.timezone.utc)
     is_late = False
-    if assignment.due_date and now > assignment.due_date:
-        is_late = True
+    if assignment.due_date:
+        due = assignment.due_date
+        if due.tzinfo is None:
+            due = due.replace(tzinfo=datetime.timezone.utc)
+        if now > due:
+            is_late = True
 
     # Check if existing submission exists
     sub_res = await db.execute(
@@ -360,18 +385,18 @@ async def submit_assignment(
         )
     )
     submission = sub_res.scalars().first()
+    old_file_key = None
     if submission:
-        # Delete old file from MinIO
-        try:
-            await storage_service.delete_object(submission.file_key)
-        except Exception:
-            pass
-
+        old_file_key = submission.file_key
         submission.file_key = file_key
         submission.file_name = file.filename or "file"
         submission.file_size = len(content)
         submission.submitted_at = now
         submission.is_late = is_late
+        submission.score = None
+        submission.feedback = None
+        submission.graded_by = None
+        submission.graded_at = None
         submission.status = "submitted"
     else:
         submission = Submission(
@@ -389,6 +414,13 @@ async def submit_assignment(
     await db.commit()
     await db.refresh(submission)
 
+    # Delete old file only after successful db commit
+    if old_file_key:
+        try:
+            await storage_service.delete_object(old_file_key)
+        except Exception:
+            pass
+
     return _build_submission_response(submission, current_user)
 
 
@@ -403,9 +435,16 @@ async def list_assignment_submissions(
     course_id: uuid.UUID,
     assignment_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_active_user),
 ):
     await require_course_access(db, current_user, course_id, write=True)
+
+    # Verify assignment belongs to authorized course_id
+    assign_res = await db.execute(
+        select(Assignment).where(Assignment.id == assignment_id, Assignment.course_id == course_id)
+    )
+    if not assign_res.scalars().first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Assignment not found")
 
     result = await db.execute(
         select(Submission).where(Submission.assignment_id == assignment_id).order_by(Submission.submitted_at.desc())
@@ -426,7 +465,7 @@ async def list_assignment_submissions(
     response_model=SubmissionResponse,
     summary="Grade student submission",
     description="Assigns numeric score points and text feedback to a student assignment submission. Requires Asprak or Superadmin.",
-    responses={**UNAUTHENTICATED_401, **FORBIDDEN_403, **NOT_FOUND_404},
+    responses={**UNAUTHENTICATED_401, **FORBIDDEN_403, **NOT_FOUND_404, **BAD_REQUEST_400},
 )
 async def grade_submission(
     course_id: uuid.UUID,
@@ -434,9 +473,23 @@ async def grade_submission(
     submission_id: uuid.UUID,
     payload: GradeSubmissionRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_active_user),
 ):
     await require_course_access(db, current_user, course_id, write=True)
+
+    # Verify assignment belongs to authorized course_id
+    assign_res = await db.execute(
+        select(Assignment).where(Assignment.id == assignment_id, Assignment.course_id == course_id)
+    )
+    assignment = assign_res.scalars().first()
+    if not assignment:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Assignment not found")
+
+    if payload.score < 0 or payload.score > assignment.max_points:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Score must be between 0 and {assignment.max_points}",
+        )
 
     result = await db.execute(
         select(Submission).where(

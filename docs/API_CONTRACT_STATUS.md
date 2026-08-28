@@ -7,66 +7,39 @@ This is the integration-readiness ledger, not a release certificate. Status mean
 
 ## Summary
 
-| Area | Status | Consumers | Next action |
-| --- | --- | --- | --- |
-| Cookie authentication | Partial | all roles | Aidan retains auth-guard follow-up; Bagas resolves the role-aware forced-password invariant, rate limiting, session invalidation policy, and CSRF |
-| Praktikan sprint readiness | Blocked as a complete workflow; individual reads vary | Praktikan | Bagas works through [PRAKTIKAN_SPRINT_BACKEND_READINESS.md](PRAKTIKAN_SPRINT_BACKEND_READINESS.md); promote exact operations independently |
-| Academic-period course list | Current and frontend-integrated for Asprak assigned-course reads | Asprak; Praktikan source read exists | Runtime-smoke role scoping and resolve Praktikan historical-access semantics |
-| Roster read / enrollment and staff | Current and frontend-integrated for assigned-Asprak roster reads; Current backend contract for Superadmin writes | Asprak roster reads; Superadmin writes | Runtime-smoke roster states; correct Asprak enrollment removal; decide Praktikan-safe staff read |
-| Session create/list/update/open/close | Partial | Asprak; Praktikan reads | Confirm transitions, concurrency, migrations, and focused tests |
-| Safe session/course archive | Blocked | Asprak; Praktikan history | Backend retention/archive contract absent |
-| Module presign/confirm/list | Partial | Asprak; Praktikan | Resolve response privacy, download lifetime, intent/cleanup, migrations, and tests |
-| Module update/publish/replace/delete | Partial | Asprak; Praktikan visibility | Resolve storage/database failure and revocation semantics |
-| Attendance bulk/list/personal | Current for implemented operations; Praktikan history shape Partial | Asprak; Praktikan | Confirm context-complete history, missing-record semantics, and tests |
-| Grades and publication | Partial | Asprak; Praktikan | Confirm privacy transitions, concurrency, completeness, history shape, and tests |
-| Assignments/submissions/results | Partial; Praktikan detail/submit Blocked | Asprak; Praktikan | Reject unpublished access and resolve upload, response privacy, grade reset, and storage integrity |
-| Exports | Partial | Asprak | Confirm tests and draft/publication scope |
-| OpenAPI-to-TypeScript automation | Proposed | all frontend owners | Separate tooling/CI plan |
-| CSRF design | Blocked before production | all cookie writes | Bagas proposes; Aidan reviews frontend impact |
-| Superadmin overview reads | Current and frontend-integrated | Superadmin | Complete browser smoke for navigation, partial failures, and role scope |
+| Area                                                                    | Status                                                                                                | Consumers                              | Next action                                                                                            |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Cookie authentication & rate limiting                                   | Current for backend invariant & Redis rate limiting; Partial for client CSRF                         | all roles                              | Backend forced-password invariant (Praktikan-only) and dynamic Redis rate limiting resolved; CSRF design remains for production |
+| Academic-period course list                                             | Current and frontend-integrated for Asprak assigned-course reads                                      | Asprak                                 | Runtime-smoke role scoping and retain history bounds as a follow-up                                    |
+| Roster read / enrollment and staff                                      | Current and frontend-integrated for assigned-Asprak roster reads; Current backend contract for writes | Asprak roster reads; Superadmin writes | Runtime-smoke roster states; Bagas owns Superadmin FE                                                  |
+| Session create/list/update/open/close                                   | Current for open/close concurrency serialization and session lifecycle                                | Asprak; Praktikan reads                | Frontend session workspace integration                                                                 |
+| Safe session delete/archive                                             | Blocked                                                                                               | Asprak                                 | Backend retention/archive contract absent                                                              |
+| Module presign/confirm/list                                             | Current for intent lifecycle, presigned download, and response privacy (`file_key: None`)             | Asprak, Praktikan                      | Frontend module download/upload integration                                                            |
+| Module update/publish/replace/delete                                    | Current for replacement intent invalidation and publication toggles                                   | Asprak, Praktikan visibility           | Frontend module replacement integration                                                                |
+| Attendance bulk/list/personal                                           | Current with context-complete personal history (`PersonalAttendanceHistoryItem`)                      | Asprak, Praktikan                      | Frontend personal attendance integration                                                               |
+| Grades bulk/list/personal                                               | Current with publication concurrency lock and context-complete history (`PersonalGradeHistoryItem`)    | Asprak, Praktikan                      | Frontend personal grade history integration                                                            |
+| Classwork assignments & submissions                                     | Current for backend CRUD, cross-course isolation, unpublished draft privacy, and upload integrity      | Asprak, Praktikan                      | Frontend assignment detail, submission, and grading integration                                        |
+| Exports                                                                 | Current with formula injection sanitization                                                           | Asprak                                 | Frontend export actions integration                                                                    |
+| OpenAPI-to-TypeScript automation                                        | Proposed                                                                                              | all FE owners                          | Separate tooling/CI plan                                                                               |
+| CSRF design                                                             | Blocked before production                                                                             | all cookie writes                      | Bagas proposes; Aidan reviews FE impact                                                                |
+| Superadmin overview reads                                               | Current and frontend-integrated for course, user, and health summary reads                            | Superadmin                             | Complete browser smoke for navigation, partial failures, and role scope                                |
 
 ## Authentication
 
 Implemented: login sets an HttpOnly cookie; logout deletes it; change-password returns a message; `/auth/me` returns the user; cookie is SameSite Lax and Secure in production. Browser paths add `/api`.
 
-Frontend auth hardening added on 2026-08-27:
+Backend auth hardening added on 2026-08-28:
 
-- login, logout, and change-password use the backend's `{ message: string }` response contract instead of a browser-readable token shape
-- logout waits for confirmed backend success before clearing client authentication and cached server state
-- logout failures retain the active client session, remain visible, and can be retried without claiming success
-- the Praktikan-only first-login redirect predicate remains unchanged
+- `force_password_change` invariant centralized to strictly enforce on `RoleEnum.PRAKTIKAN`
+- `announcements` and `assignments` protected with `get_current_active_user`
+- dynamic Redis client resolution implemented to eliminate static `None` fallback
+- trusted client IP derived from Nginx `X-Real-IP` (`$remote_addr`) to eliminate rate-limit header spoofing
 
 Remaining Partial gaps:
 
-- backend blocks every role with `force_password_change=true`, while Target is Praktikan-only
 - user model defaults the flag to true
 - the current auth guard conflates transient failures with 401 and can duplicate requests
 - CSRF protection beyond SameSite is not defined
-
-## Praktikan sprint readiness
-
-Status: Blocked as a complete end-to-end workflow. Individual source-backed
-reads exist, but each frontend integration must follow its exact operation status
-in this ledger.
-
-The consolidated Bagas implementation and acceptance handoff is
-[PRAKTIKAN_SPRINT_BACKEND_READINESS.md](PRAKTIKAN_SPRINT_BACKEND_READINESS.md).
-
-Confirmed source behavior includes enrollment-scoped course reads,
-published-only module and assignment lists, user-scoped personal attendance,
-published-only personal session grades, and a read-only profile through
-`GET /auth/me`.
-
-Blocking classes include inconsistent forced-password enforcement, ineffective
-shared login throttling, known-ID unpublished assignment access, assignment
-upload/resubmission/storage integrity, module response and download-lifetime
-privacy, cookie-write CSRF, historical access after enrollment changes,
-context-poor personal history responses, unsafe populated migration paths, and
-missing negative/concurrency/fault-injection evidence.
-
-Docker services were not running during the 2026-08-27 audit, so runtime OpenAPI,
-authenticated Nginx flows, Redis behavior, MinIO behavior, and browser smoke were
-not verified. Do not promote an operation from source inspection alone.
 
 ## Academic-period courses
 

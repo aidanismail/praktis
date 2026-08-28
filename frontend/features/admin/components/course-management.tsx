@@ -50,6 +50,7 @@ import {
   createCourseSession,
   fetchAdminModules,
   createAndUploadModule,
+  createAndUploadMultipleModules,
   enrollCourseStudents,
   assignCourseStaff,
   unenrollCourseStudent,
@@ -149,9 +150,15 @@ export function CourseManagement() {
 
   // Module upload in workspace
   const [showUploadModuleModal, setShowUploadModuleModal] = useState(false);
-  const [newModTitle, setNewModTitle] = useState("");
-  const [newModDesc, setNewModDesc] = useState("");
-  const [selectedModFile, setSelectedModFile] = useState<File | null>(null);
+  const [modUploadQueue, setModUploadQueue] = useState<
+    Array<{ file: File; title: string; description: string }>
+  >([]);
+  const [isDraggingMod, setIsDraggingMod] = useState(false);
+  const [modUploadProgress, setModUploadProgress] = useState<{
+    current: number;
+    total: number;
+    currentFileName: string;
+  } | null>(null);
   const [isUploadingMod, setIsUploadingMod] = useState(false);
 
   // Assignment composer & editor
@@ -768,33 +775,99 @@ export function CourseManagement() {
     }
   };
 
-  // Module Upload Handler in Workspace
+  // Module Queue & Upload Handler in Workspace
+  const addModFilesToQueue = (files: FileList | File[]) => {
+    const validFiles: File[] = [];
+    const validExts = [".pdf", ".docx"];
+
+    Array.from(files).forEach((file) => {
+      const ext = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
+      if (validExts.includes(ext)) {
+        if (file.size <= 20 * 1024 * 1024) {
+          validFiles.push(file);
+        } else {
+          setError(`File "${file.name}" exceeds maximum allowed size of 20MB.`);
+        }
+      } else {
+        setError(
+          `File "${file.name}" has unsupported format. Only .pdf and .docx are allowed.`
+        );
+      }
+    });
+
+    if (validFiles.length > 0) {
+      setModUploadQueue((prev) => [
+        ...prev,
+        ...validFiles.map((file) => {
+          const cleanTitle = file.name
+            .replace(/\.[^/.]+$/, "")
+            .replace(/[_-]/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+          return {
+            file,
+            title: cleanTitle.length > 0 ? cleanTitle : file.name,
+            description: "",
+          };
+        }),
+      ]);
+    }
+  };
+
   const handleUploadCourseModule = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedCourse || !newModTitle.trim() || !selectedModFile) return;
+    if (!selectedCourse || modUploadQueue.length === 0) return;
 
     setIsUploadingMod(true);
     setError(null);
     setActionSuccess(null);
+    setModUploadProgress(null);
 
     try {
-      const res = await createAndUploadModule(
+      const result = await createAndUploadMultipleModules(
         selectedCourse.id,
-        newModTitle.trim(),
-        newModDesc.trim(),
-        selectedModFile
+        modUploadQueue,
+        (current, total, currentFileName) => {
+          setModUploadProgress({ current, total, currentFileName });
+        }
       );
-      setActionSuccess(res.message || "Module uploaded successfully.");
-      setShowUploadModuleModal(false);
-      setNewModTitle("");
-      setNewModDesc("");
-      setSelectedModFile(null);
+
+      if (result.successCount > 0 && result.errors.length === 0) {
+        setActionSuccess(
+          `Successfully uploaded ${result.successCount} learning ${
+            result.successCount === 1 ? "module" : "modules"
+          }.`
+        );
+        setShowUploadModuleModal(false);
+        setModUploadQueue([]);
+      } else if (result.successCount > 0 && result.errors.length > 0) {
+        setActionSuccess(
+          `Partially uploaded ${result.successCount} of ${result.total} modules.`
+        );
+        const failedFilenames = new Set(result.errors.map((e) => e.filename));
+        setModUploadQueue((prev) =>
+          prev.filter((item) => failedFilenames.has(item.file.name))
+        );
+        setError(
+          result.errors.map((e) => `${e.filename}: ${e.error}`).join(" | ")
+        );
+      } else {
+        setError(
+          `Failed to upload modules: ${result.errors
+            .map((e) => e.error)
+            .join(", ")}`
+        );
+      }
+
       const allMods = await fetchAdminModules();
       setCourseModules(allMods.filter((m) => m.course_id === selectedCourse.id));
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to upload module.");
+      setError(
+        err instanceof Error ? err.message : "Failed to complete batch upload."
+      );
     } finally {
       setIsUploadingMod(false);
+      setModUploadProgress(null);
     }
   };
 
@@ -2532,117 +2605,237 @@ export function CourseManagement() {
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           <form
             onSubmit={handleUploadCourseModule}
-            className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150"
+            className="bg-white rounded-3xl p-6 w-full max-w-lg shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] flex flex-col"
           >
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
-                <h4 className="font-bold text-sm text-slate-900">Upload Learning Module</h4>
+                <h4 className="font-bold text-sm text-slate-900">
+                  Upload Learning Modules
+                </h4>
                 <p className="text-[11px] text-slate-400 mt-0.5">
-                  Course: {selectedCourse.code} - {selectedCourse.name}
+                  Course: {selectedCourse.code} - {selectedCourse.name} ({selectedCourse.academic_year} {selectedCourse.semester})
                 </p>
               </div>
               <button
                 type="button"
-                onClick={() => setShowUploadModuleModal(false)}
+                disabled={isUploadingMod}
+                onClick={() => {
+                  setShowUploadModuleModal(false);
+                  setModUploadQueue([]);
+                }}
                 className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center text-xs"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="space-y-3 text-xs">
+            <div className="space-y-4 text-xs overflow-y-auto flex-1 pr-1">
+              {/* Drag-and-drop / Multi-file Picker */}
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Module Title *</label>
-                <input
-                  type="text"
-                  value={newModTitle}
-                  onChange={(e) => setNewModTitle(e.target.value)}
-                  required
-                  placeholder="e.g. Modul 1: Pengenalan HTML & CSS Dasar"
-                  className="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-slate-900"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Description / Summary (Optional)</label>
-                <textarea
-                  value={newModDesc}
-                  onChange={(e) => setNewModDesc(e.target.value)}
-                  rows={2}
-                  placeholder="Overview of topics and exercises..."
-                  className="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-slate-900 resize-none"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Module File (.pdf, .docx) *</label>
-                <div className="border-2 border-dashed border-slate-200 hover:border-slate-400 rounded-2xl p-4 text-center bg-slate-50/50 transition-colors">
-                  {selectedModFile ? (
-                    <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-200">
-                      <div className="flex items-center gap-2.5 overflow-hidden">
-                        <FileCheck className="w-5 h-5 text-slate-800 shrink-0" />
-                        <div className="text-left overflow-hidden">
-                          <span className="font-semibold text-slate-900 block truncate">{selectedModFile.name}</span>
-                          <span className="text-[10px] text-slate-400">
-                            {(selectedModFile.size / (1024 * 1024)).toFixed(2)} MB
-                          </span>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedModFile(null)}
-                        className="p-1 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-700"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ) : (
-                    <label className="cursor-pointer flex flex-col items-center justify-center gap-2 py-2">
-                      <UploadCloud className="w-8 h-8 text-slate-400" />
-                      <span className="text-xs font-semibold text-slate-800">
-                        Click to browse or drag file here
-                      </span>
-                      <span className="text-[10px] text-slate-400">
-                        Supported formats: PDF, DOCX (Max 20MB)
-                      </span>
-                      <input
-                        type="file"
-                        accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                        onChange={(e) => {
-                          if (e.target.files && e.target.files[0]) {
-                            setSelectedModFile(e.target.files[0]);
-                          }
-                        }}
-                        className="hidden"
-                      />
-                    </label>
-                  )}
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Select Modules (.pdf, .docx up to 20MB) *
+                </label>
+                <div
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setIsDraggingMod(true);
+                  }}
+                  onDragLeave={(e) => {
+                    e.preventDefault();
+                    setIsDraggingMod(false);
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setIsDraggingMod(false);
+                    if (e.dataTransfer.files) {
+                      addModFilesToQueue(e.dataTransfer.files);
+                    }
+                  }}
+                  className={`border-2 border-dashed rounded-2xl p-4 text-center transition-colors ${
+                    isDraggingMod
+                      ? "border-slate-900 bg-slate-100"
+                      : "border-slate-200 hover:border-slate-400 bg-slate-50/50"
+                  }`}
+                >
+                  <label className="cursor-pointer flex flex-col items-center justify-center gap-1.5 py-2">
+                    <UploadCloud className="w-8 h-8 text-slate-400" />
+                    <span className="text-xs font-semibold text-slate-800">
+                      Click to browse or drag & drop multiple files
+                    </span>
+                    <span className="text-[10px] text-slate-400">
+                      Supports PDF and DOCX (hold Shift/Ctrl to select multiple)
+                    </span>
+                    <input
+                      type="file"
+                      multiple
+                      disabled={isUploadingMod}
+                      accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          addModFilesToQueue(e.target.files);
+                        }
+                      }}
+                      className="hidden"
+                    />
+                  </label>
                 </div>
               </div>
+
+              {/* Queued Modules List */}
+              {modUploadQueue.length > 0 && (
+                <div className="space-y-3 pt-1">
+                  <div className="flex items-center justify-between text-slate-700 font-semibold border-b border-slate-100 pb-1.5">
+                    <span>Queued Modules ({modUploadQueue.length})</span>
+                    <button
+                      type="button"
+                      disabled={isUploadingMod}
+                      onClick={() => setModUploadQueue([])}
+                      className="text-[11px] text-rose-600 hover:underline font-normal"
+                    >
+                      Clear All
+                    </button>
+                  </div>
+
+                  <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
+                    {modUploadQueue.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="bg-slate-50 border border-slate-200 rounded-2xl p-3 space-y-2 relative group"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 overflow-hidden">
+                            <FileCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <span className="font-semibold text-slate-900 text-xs truncate">
+                              {item.file.name}
+                            </span>
+                            <span className="text-[10px] text-slate-400 shrink-0">
+                              ({(item.file.size / (1024 * 1024)).toFixed(2)} MB)
+                            </span>
+                          </div>
+                          {!isUploadingMod && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setModUploadQueue((prev) =>
+                                  prev.filter((_, i) => i !== idx)
+                                );
+                              }}
+                              className="p-1 rounded-full text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="space-y-1.5 pt-1">
+                          <input
+                            type="text"
+                            required
+                            disabled={isUploadingMod}
+                            value={item.title}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setModUploadQueue((prev) =>
+                                prev.map((q, i) =>
+                                  i === idx ? { ...q, title: val } : q
+                                )
+                              );
+                            }}
+                            placeholder="Module Title *"
+                            className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium focus:ring-1 focus:ring-slate-900"
+                          />
+                          <input
+                            type="text"
+                            disabled={isUploadingMod}
+                            value={item.description}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setModUploadQueue((prev) =>
+                                prev.map((q, i) =>
+                                  i === idx ? { ...q, description: val } : q
+                                )
+                              );
+                            }}
+                            placeholder="Description / Summary (Optional)"
+                            className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-[11px] text-slate-600 focus:ring-1 focus:ring-slate-900"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Upload Progress Indicator */}
+              {isUploadingMod && modUploadProgress && (
+                <div className="space-y-1.5 bg-slate-900 text-white p-3 rounded-2xl">
+                  <div className="flex items-center justify-between text-xs font-medium">
+                    <span>
+                      Uploading {modUploadProgress.current} of{" "}
+                      {modUploadProgress.total}...
+                    </span>
+                    <span>
+                      {Math.round(
+                        (modUploadProgress.current / modUploadProgress.total) * 100
+                      )}
+                      %
+                    </span>
+                  </div>
+                  <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                    <div
+                      className="bg-emerald-400 h-full transition-all duration-200"
+                      style={{
+                        width: `${
+                          (modUploadProgress.current / modUploadProgress.total) *
+                          100
+                        }%`,
+                      }}
+                    />
+                  </div>
+                  <p className="text-[10px] text-slate-400 truncate">
+                    Current: {modUploadProgress.currentFileName}
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
               <button
                 type="button"
-                onClick={() => setShowUploadModuleModal(false)}
+                disabled={isUploadingMod}
+                onClick={() => {
+                  setShowUploadModuleModal(false);
+                  setModUploadQueue([]);
+                }}
                 className="px-4 py-2 border border-slate-200 rounded-full text-xs font-semibold text-slate-600 hover:bg-slate-50"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                disabled={isUploadingMod || !selectedModFile || !newModTitle.trim()}
-                className="px-5 py-2 bg-slate-900 text-white rounded-full text-xs font-semibold hover:bg-slate-800 shadow-xs disabled:opacity-50 flex items-center gap-1.5"
+                disabled={
+                  isUploadingMod ||
+                  modUploadQueue.length === 0 ||
+                  modUploadQueue.some((item) => !item.title.trim())
+                }
+                className="px-5 py-2 bg-slate-900 text-white rounded-full text-xs font-semibold hover:bg-slate-800 shadow-xs disabled:opacity-50 flex items-center gap-1.5 transition-all"
               >
                 {isUploadingMod ? (
                   <>
                     <span className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                    <span>Uploading...</span>
+                    <span>Uploading Queue...</span>
                   </>
                 ) : (
                   <>
                     <UploadCloud className="w-3.5 h-3.5" />
-                    <span>Upload Module</span>
+                    <span>
+                      Upload{" "}
+                      {modUploadQueue.length > 0
+                        ? `${modUploadQueue.length} ${
+                            modUploadQueue.length === 1 ? "Module" : "Modules"
+                          }`
+                        : "Modules"}
+                    </span>
                   </>
                 )}
               </button>
@@ -3036,25 +3229,75 @@ export function CourseManagement() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block font-semibold text-slate-600 mb-1">Max Points</label>
-                  <input
-                    type="number"
-                    value={assignMaxPoints}
-                    onChange={(e) => setAssignMaxPoints(Number(e.target.value))}
-                    required
-                    className="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-slate-900 transition-shadow duration-150"
-                  />
+              <div>
+                <label className="block font-semibold text-slate-600 mb-1">Max Points</label>
+                <input
+                  type="number"
+                  value={assignMaxPoints}
+                  onChange={(e) => setAssignMaxPoints(Number(e.target.value))}
+                  required
+                  min={1}
+                  max={1000}
+                  className="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-slate-900 transition-shadow duration-150"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1.5">
+                  Allowed Submission Formats *
+                </label>
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {[
+                    { id: "pdf", label: "PDF (.pdf)" },
+                    { id: "zip", label: "ZIP (.zip)" },
+                    { id: "rar", label: "RAR (.rar)" },
+                    { id: "docx", label: "Word (.docx)" },
+                    { id: "py", label: "Python (.py)" },
+                    { id: "java", label: "Java (.java)" },
+                    { id: "cpp", label: "C++ (.cpp)" },
+                    { id: "sql", label: "SQL (.sql)" },
+                    { id: "ipynb", label: "Jupyter (.ipynb)" },
+                  ].map((fmt) => {
+                    const activeTypes = assignAllowedTypes
+                      .split(",")
+                      .map((t) => t.trim().toLowerCase().replace(/^\./, ""))
+                      .filter(Boolean);
+                    const isSelected = activeTypes.includes(fmt.id);
+
+                    return (
+                      <button
+                        key={fmt.id}
+                        type="button"
+                        onClick={() => {
+                          const currentSet = new Set(activeTypes);
+                          if (isSelected) {
+                            currentSet.delete(fmt.id);
+                          } else {
+                            currentSet.add(fmt.id);
+                          }
+                          const newTypes = Array.from(currentSet);
+                          setAssignAllowedTypes(newTypes.length > 0 ? newTypes.join(",") : "pdf");
+                        }}
+                        className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer select-none ${
+                          isSelected
+                            ? "bg-slate-900 text-white shadow-xs"
+                            : "bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80"
+                        }`}
+                      >
+                        {isSelected}
+                        <span>{fmt.label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
-                <div>
-                  <label className="block font-semibold text-slate-600 mb-1">Allowed Types</label>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] text-slate-400 shrink-0">Selected / Custom:</span>
                   <input
                     type="text"
                     value={assignAllowedTypes}
                     onChange={(e) => setAssignAllowedTypes(e.target.value)}
-                    placeholder="pdf,zip"
-                    className="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-slate-900 transition-shadow duration-150"
+                    placeholder="e.g. pdf,zip,docx"
+                    className="flex-1 px-2.5 py-1 text-xs border border-slate-200 rounded-lg bg-slate-50 font-mono text-slate-700 focus:bg-white focus:ring-1 focus:ring-slate-900"
                   />
                 </div>
               </div>

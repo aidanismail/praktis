@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy import CursorResult
-from models.user import User
+from models.user import User, RoleEnum
 from schemas.user import UserCreate
 from core.security import get_password_hash
 
@@ -17,7 +17,8 @@ async def create_user(db: AsyncSession, user_in: UserCreate) -> User:
         email=user_in.email,
         username=user_in.username,
         role=user_in.role,
-        hashed_password=hashed_password
+        hashed_password=hashed_password,
+        force_password_change=(user_in.role == RoleEnum.PRAKTIKAN),
     )
     db.add(db_user)
     await db.commit()
