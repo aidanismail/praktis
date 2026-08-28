@@ -161,7 +161,8 @@ async def seed_data():
                 await db.flush()
                 print(f"[Courses] Created: {course.code} - {course.name}")
             else:
-                print(f"[Courses] Exists: {course.code}")
+                course.is_active = c_data["is_active"]
+                print(f"[Courses] Updated is_active={course.is_active}: {course.code}")
             course_map[c_data["code"]] = course
 
             # Assign Staff

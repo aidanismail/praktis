@@ -152,6 +152,7 @@ async def confirm_module_upload(
     )
     db.add(new_module)
     await db.commit()
+    await cache_delete_pattern(f"intent:{data.file_key}")
     await cache_delete_pattern("cache:modules:*")
     return {"message": "Module successfully saved", "id": new_module.id}
 
@@ -203,7 +204,7 @@ async def list_modules(
             "is_published": mod.is_published,
             "created_at": mod.created_at.isoformat(),
             "course_id": str(mod.course_id) if mod.course_id else None,
-            "file_key": mod.file_key,
+            "file_key": None if current_user.role == RoleEnum.PRAKTIKAN else mod.file_key,
         })
 
     await cache_set(cache_key, json.dumps(response), ttl=30)
@@ -390,6 +391,7 @@ async def confirm_replacement(
     
     await db.commit()
     await storage_service.delete_object(old_file_key)
+    await cache_delete_pattern(f"intent:{data.file_key}")
     await cache_delete_pattern("cache:modules:*")
 
     return {"message": "Module successfully replaced."}

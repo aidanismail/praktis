@@ -71,13 +71,13 @@ async def open_attendance(
     if session.attendance_status == "OPEN":
         raise HTTPException(status_code=400, detail="Attendance is already open for this session")
 
-    # Prevent opening if another session in the same course is currently OPEN
+    # Prevent opening if another session in the same course is currently OPEN (with row-level lock)
     result = await db.execute(
         select(ClassSession).where(
             ClassSession.course_id == session.course_id,
             ClassSession.attendance_status == "OPEN",
             ClassSession.id != session_id
-        )
+        ).with_for_update()
     )
     if result.scalars().first():
         raise HTTPException(status_code=409, detail="Another session in this course currently has an open attendance window")

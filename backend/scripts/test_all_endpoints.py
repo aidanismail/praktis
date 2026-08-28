@@ -206,6 +206,25 @@ def run_suite():
         print(f"18. GET /grades/sessions/{{id}}               -> Status {status} [Grades: {len(gr_data)}]")
         assert status == 200
 
+    # 18b. GET /attendance/me and /grades/me
+    status, my_att, _, _ = request("GET", "/attendance/me")
+    print(f"18b. GET /attendance/me                       -> Status {status} [Records: {len(my_att) if isinstance(my_att, list) else 0}]")
+    assert status == 200
+
+    status, my_gr, _, _ = request("GET", "/grades/me")
+    print(f"18c. GET /grades/me                           -> Status {status} [Records: {len(my_gr) if isinstance(my_gr, list) else 0}]")
+    assert status == 200
+
+    # 18d. Class Session Lifecycle (Open & Close attendance)
+    if session_id:
+        status, open_res, _, _ = request("POST", f"/class-sessions/{session_id}/open-attendance")
+        print(f"18d. POST /class-sessions/{{id}}/open-attendance -> Status {status}")
+        assert status in [200, 400] # 200 if opened, 400 if already open
+
+        status, close_res, _, _ = request("POST", f"/class-sessions/{session_id}/close-attendance")
+        print(f"18e. POST /class-sessions/{{id}}/close-attendance -> Status {status}")
+        assert status in [200, 400]
+
     # 19. GET /export/attendance/{session_id}?format=csv
     if session_id:
         status, _, raw_csv, _ = request("GET", f"/export/attendance/{session_id}?format=csv")
@@ -225,7 +244,7 @@ def run_suite():
 
     # 22. Rate Limit Verification (Spamming requests from simulated attacker IP)
     print("\n--- Rate Limiter Verification (Anti-Brute Force) ---")
-    spoofed_ip = "192.168.100.99"
+    spoofed_ip = f"192.168.200.{uuid.uuid4().int % 250 + 1}"
     rate_limited = False
     for attempt in range(1, 12):
         st, d, _, h = request(
@@ -241,7 +260,7 @@ def run_suite():
     assert rate_limited, "Rate limiter did not trigger 429 Too Many Requests"
 
     print("==================================================")
-    print("   ALL 22 API & SECURITY SUITES PASSED (100% OK)  ")
+    print("   ALL 25 COHERENT API & SECURITY SUITES PASSED!  ")
     print("==================================================")
 
 if __name__ == "__main__":

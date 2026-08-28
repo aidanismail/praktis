@@ -290,6 +290,52 @@ export async function createAndUploadModule(
   });
 }
 
+export type ModuleBatchUploadItem = {
+  file: File;
+  title: string;
+  description?: string;
+};
+
+export type ModuleBatchUploadResult = {
+  successCount: number;
+  total: number;
+  errors: Array<{ filename: string; error: string }>;
+};
+
+export async function createAndUploadMultipleModules(
+  courseId: string,
+  items: ModuleBatchUploadItem[],
+  onProgress?: (current: number, total: number, currentFileName: string) => void
+): Promise<ModuleBatchUploadResult> {
+  let successCount = 0;
+  const errors: Array<{ filename: string; error: string }> = [];
+
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    onProgress?.(i + 1, items.length, item.file.name);
+    try {
+      await createAndUploadModule(
+        courseId,
+        item.title,
+        item.description || "",
+        item.file
+      );
+      successCount++;
+    } catch (err: unknown) {
+      errors.push({
+        filename: item.file.name,
+        error: err instanceof Error ? err.message : "Upload failed",
+      });
+    }
+  }
+
+  return {
+    successCount,
+    total: items.length,
+    errors,
+  };
+}
+
 export async function publishModule(moduleId: string): Promise<{ message: string }> {
   return apiClient<{ message: string }>(API_ENDPOINTS.modules.publish(moduleId), {
     method: "POST",

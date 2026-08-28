@@ -9,7 +9,13 @@ from core.database import get_db
 from core.rate_limit import rate_limiter
 from models.user import User, RoleEnum
 from models.attendance import Attendance
-from schemas.attendance import BulkAttendanceRequest, AttendanceResponse
+from models.class_session import ClassSession
+from models.course import Course
+from schemas.attendance import (
+    BulkAttendanceRequest,
+    AttendanceResponse,
+    PersonalAttendanceHistoryItem,
+)
 from schemas.common import MessageResponse
 from api.dependencies import get_current_active_user
 from api.permissions import require_session_access, validate_enrolled_students
@@ -110,14 +116,38 @@ async def list_session_attendance(
 
 @router.get(
     "/me",
-    response_model=list[AttendanceResponse],
+    response_model=list[PersonalAttendanceHistoryItem],
     summary="Get my own attendance history",
-    description="Returns the caller's own attendance records across all sessions. Available to any authenticated role.",
+    description="Returns the caller's own attendance records across all sessions with course metadata. Available to any authenticated role.",
     responses=UNAUTHENTICATED_401,  # type: ignore
 )
 async def my_attendance(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
-    result = await db.execute(select(Attendance).where(Attendance.student_id == current_user.id))
-    return result.scalars().all()
+    result = await db.execute(
+        select(Attendance, ClassSession, Course)
+        .join(ClassSession, Attendance.session_id == ClassSession.id)
+        .join(Course, ClassSession.course_id == Course.id)
+        .where(Attendance.student_id == current_user.id)
+        .order_by(Course.academic_year.desc(), Course.semester.desc(), ClassSession.date.asc())
+    )
+    rows = result.all()
+    return [
+        PersonalAttendanceHistoryItem(
+            id=att.id,
+            session_id=att.session_id,
+            session_title=session.title,
+            session_date=session.date,
+            course_id=course.id,
+            course_code=course.code,
+            course_name=course.name,
+            academic_year=course.academic_year,
+            semester=course.semester,
+            status=att.status,
+            created_at=att.created_at,
+            updated_at=att.updated_at,
+            recorded_by=att.recorded_by,
+        )
+        for att, session, course in rows
+    ]

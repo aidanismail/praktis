@@ -22,7 +22,8 @@ import {
   publishModule,
   unpublishModule,
   deleteModule,
-  createAndUploadModule
+  createAndUploadModule,
+  createAndUploadMultipleModules
 } from "../api/admin.api";
 import type { AdminModuleItem } from "../types/admin.type";
 import type { Course } from "@/features/courses/types/course.type";
@@ -52,13 +53,19 @@ export function AdminModuleList() {
     courseCode?: string;
   } | null>(null);
 
-  // Upload Module Modal state
+  // Multi-Module Upload Queue state
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [newModuleCourseId, setNewModuleCourseId] = useState("");
-  const [newModuleTitle, setNewModuleTitle] = useState("");
-  const [newModuleDescription, setNewModuleDescription] = useState("");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadQueue, setUploadQueue] = useState<
+    Array<{ id: string; file: File; title: string; description: string }>
+  >([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{
+    current: number;
+    total: number;
+    filename: string;
+  } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   // Auto-dismiss notification banners
   useEffect(() => {
@@ -190,43 +197,134 @@ export function AdminModuleList() {
     }
   };
 
+  const addFilesToQueue = (files: FileList | File[]) => {
+    const validExtensions = [".pdf", ".docx"];
+    const maxBytes = 20 * 1024 * 1024;
+    const newItems: Array<{ id: string; file: File; title: string; description: string }> = [];
+    const rejectionErrors: string[] = [];
+
+    Array.from(files).forEach((file) => {
+      const ext = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
+      if (!validExtensions.includes(ext)) {
+        rejectionErrors.push(`"${file.name}" is not a PDF or DOCX file.`);
+        return;
+      }
+      if (file.size > maxBytes) {
+        rejectionErrors.push(`"${file.name}" exceeds the 20MB limit.`);
+        return;
+      }
+
+      // Generate a clean prefilled title from filename
+      const cleanTitle = file.name
+        .replace(/\.[^/.]+$/, "")
+        .replace(/[_-]+/g, " ")
+        .trim();
+
+      newItems.push({
+        id: `${file.name}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+        file,
+        title: cleanTitle.length > 0 ? cleanTitle : "Untitled Module",
+        description: "",
+      });
+    });
+
+    if (rejectionErrors.length > 0) {
+      setError(rejectionErrors.join(" "));
+    }
+
+    if (newItems.length > 0) {
+      setUploadQueue((prev) => [...prev, ...newItems]);
+    }
+  };
+
+  const updateQueueItem = (
+    id: string,
+    updates: Partial<{ title: string; description: string }>
+  ) => {
+    setUploadQueue((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, ...updates } : item))
+    );
+  };
+
+  const removeQueueItem = (id: string) => {
+    setUploadQueue((prev) => prev.filter((item) => item.id !== id));
+  };
+
   const handleUploadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newModuleCourseId) {
-      setError("Please select a target course for this module.");
+      setError("Please select a target course for the modules.");
       return;
     }
-    if (!newModuleTitle.trim()) {
-      setError("Please provide a module title.");
+    if (uploadQueue.length === 0) {
+      setError("Please select at least one PDF or DOCX file to upload.");
       return;
     }
-    if (!selectedFile) {
-      setError("Please select a PDF or DOCX file to upload.");
+
+    const missingTitle = uploadQueue.find((item) => !item.title.trim());
+    if (missingTitle) {
+      setError(`Please provide a module title for "${missingTitle.file.name}".`);
       return;
     }
 
     setIsUploading(true);
     setError(null);
     setActionSuccess(null);
+    setUploadProgress({
+      current: 1,
+      total: uploadQueue.length,
+      filename: uploadQueue[0].file.name,
+    });
 
     try {
-      const res = await createAndUploadModule(
+      const result = await createAndUploadMultipleModules(
         newModuleCourseId,
-        newModuleTitle.trim(),
-        newModuleDescription.trim(),
-        selectedFile
+        uploadQueue.map((item) => ({
+          file: item.file,
+          title: item.title.trim(),
+          description: item.description.trim(),
+        })),
+        (current, total, filename) => {
+          setUploadProgress({ current, total, filename });
+        }
       );
-      setActionSuccess(res.message || "Learning module uploaded successfully.");
-      setShowUploadModal(false);
-      setNewModuleTitle("");
-      setNewModuleDescription("");
-      setSelectedFile(null);
-      setNewModuleCourseId("");
+
+      if (result.errors.length === 0) {
+        setActionSuccess(
+          `Successfully uploaded ${result.successCount} module${
+            result.successCount > 1 ? "s" : ""
+          }!`
+        );
+        setShowUploadModal(false);
+        setUploadQueue([]);
+        setNewModuleCourseId("");
+      } else if (result.successCount > 0) {
+        setActionSuccess(
+          `Uploaded ${result.successCount} of ${result.total} modules. ${result.errors.length} failed.`
+        );
+        const failedFilenames = new Set(result.errors.map((e) => e.filename));
+        setUploadQueue((prev) =>
+          prev.filter((item) => failedFilenames.has(item.file.name))
+        );
+        setError(
+          result.errors.map((e) => `${e.filename}: ${e.error}`).join(" | ")
+        );
+      } else {
+        setError(
+          `Failed to upload modules: ${result.errors
+            .map((e) => e.error)
+            .join(", ")}`
+        );
+      }
+
       await loadData();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to upload module.");
+      setError(
+        err instanceof Error ? err.message : "Failed to complete batch upload."
+      );
     } finally {
       setIsUploading(false);
+      setUploadProgress(null);
     }
   };
 
@@ -234,11 +332,29 @@ export function AdminModuleList() {
   const courseMap = new Map<string, Course>();
   courses.forEach((c) => courseMap.set(c.id, c));
 
+  const activeCourses = courses.filter((c) => c.is_active);
+  const inactiveCourses = courses.filter((c) => !c.is_active);
+
   const filteredModules = modules.filter((m) => {
     const courseId = m.course_id || "";
     const course = courseMap.get(courseId);
-    const matchesCourse =
-      selectedCourseFilter === "all" || m.course_id === selectedCourseFilter;
+
+    // Active/Inactive filter
+    if (selectedCourseFilter === "active" && (!course || !course.is_active)) {
+      return false;
+    }
+    if (selectedCourseFilter === "inactive" && (!course || course.is_active)) {
+      return false;
+    }
+    if (
+      selectedCourseFilter !== "all" &&
+      selectedCourseFilter !== "active" &&
+      selectedCourseFilter !== "inactive" &&
+      m.course_id !== selectedCourseFilter
+    ) {
+      return false;
+    }
+
     const matchesSearch =
       m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (m.description &&
@@ -247,17 +363,27 @@ export function AdminModuleList() {
         course.code.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (course && course.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    return matchesCourse && matchesSearch;
+    return matchesSearch;
   });
 
-  // Group filtered modules by course
+  // Group filtered modules by course (sorted active courses first)
   const groupedModules = new Map<string, AdminModuleItem[]>();
-  filteredModules.forEach((m) => {
-    const key = m.course_id || "unassigned";
-    const list = groupedModules.get(key) || [];
-    list.push(m);
-    groupedModules.set(key, list);
+  const sortedCourses = [...courses].sort((a, b) => {
+    if (a.is_active !== b.is_active) return a.is_active ? -1 : 1;
+    return a.code.localeCompare(b.code);
   });
+
+  sortedCourses.forEach((c) => {
+    const mods = filteredModules.filter((m) => m.course_id === c.id);
+    if (mods.length > 0) {
+      groupedModules.set(c.id, mods);
+    }
+  });
+
+  const unassigned = filteredModules.filter((m) => !m.course_id);
+  if (unassigned.length > 0) {
+    groupedModules.set("unassigned", unassigned);
+  }
 
   return (
     <div className="space-y-6">
@@ -294,7 +420,7 @@ export function AdminModuleList() {
 
       {/* Header & Filter Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex flex-1 items-center gap-2 max-w-lg">
+        <div className="flex flex-1 items-center gap-2 max-w-xl">
           <div className="relative flex-1">
             <input
               type="text"
@@ -309,27 +435,32 @@ export function AdminModuleList() {
           <select
             value={selectedCourseFilter}
             onChange={(e) => setSelectedCourseFilter(e.target.value)}
-            className="text-xs px-3.5 py-2 border border-slate-200 rounded-full bg-white text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-slate-900 shadow-xs"
+            className="text-xs px-3.5 py-2 border border-slate-200 rounded-full bg-white text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-slate-900 shadow-xs max-w-[200px] truncate"
           >
             <option value="all">All Courses ({courses.length})</option>
-            {courses.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.code} - {c.name}
-              </option>
-            ))}
+            <option value="active">
+              Active Courses ({activeCourses.length})
+            </option>
+            <option value="inactive">
+              Inactive Courses ({inactiveCourses.length})
+            </option>
           </select>
         </div>
 
         <button
           type="button"
           onClick={() => {
-            if (courses.length > 0) setNewModuleCourseId(courses[0].id);
+            if (activeCourses.length > 0) {
+              setNewModuleCourseId(activeCourses[0].id);
+            } else if (courses.length > 0) {
+              setNewModuleCourseId(courses[0].id);
+            }
             setShowUploadModal(true);
           }}
           className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-full shadow-xs transition-all flex items-center gap-1.5 self-end sm:self-auto active:scale-[0.98]"
         >
           <Plus className="w-3.5 h-3.5" />
-          <span>Upload Module</span>
+          <span>Upload Modules</span>
         </button>
       </div>
 
@@ -353,27 +484,51 @@ export function AdminModuleList() {
               return (
                 <div
                   key={courseId}
-                  className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden transition-all"
+                  className={`bg-white rounded-3xl border shadow-xs overflow-hidden transition-all ${
+                    course && !course.is_active
+                      ? "border-slate-200 opacity-90"
+                      : "border-slate-200"
+                  }`}
                 >
-                  {/* Course Header */}
+                  {/* Course Header with Active / Inactive Badge */}
                   <div
                     onClick={() => toggleCourseCollapse(courseId)}
                     className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between cursor-pointer hover:bg-slate-100/70 transition-colors"
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-2.5">
                       <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-900 text-white px-2.5 py-0.5 rounded-full">
                         {course ? course.code : "N/A"}
                       </span>
                       <h3 className="font-bold text-xs text-slate-900">
                         {course ? course.name : "Unassigned Course"}
                       </h3>
+
+                      {course && (
+                        <span className="text-[10px] text-slate-500 font-medium">
+                          • {course.academic_year} {course.semester}
+                        </span>
+                      )}
+
+                      {/* Course Active Status Badge */}
+                      {course && (
+                        <span
+                          className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                            course.is_active
+                              ? "bg-emerald-100 text-emerald-700"
+                              : "bg-slate-200 text-slate-600"
+                          }`}
+                        >
+                          {course.is_active ? "Active" : "Archived"}
+                        </span>
+                      )}
+
                       <span className="text-[11px] text-slate-400">
                         ({courseModules.length} module
                         {courseModules.length > 1 ? "s" : ""})
                       </span>
                     </div>
 
-                    <span className="text-xs text-slate-400 font-semibold">
+                    <span className="text-xs text-slate-400 font-semibold shrink-0">
                       {isCollapsed ? "Expand +" : "Collapse −"}
                     </span>
                   </div>
@@ -502,32 +657,37 @@ export function AdminModuleList() {
         </div>
       )}
 
-      {/* Upload Module Modal */}
+      {/* Multi-Module Upload Modal */}
       {showUploadModal && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           <form
             onSubmit={handleUploadSubmit}
-            className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150"
+            className="bg-white rounded-3xl p-6 w-full max-w-xl shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] flex flex-col"
           >
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3 shrink-0">
               <div>
                 <h4 className="font-bold text-sm text-slate-900">
-                  Upload Learning Module
+                  Upload Learning Modules (Batch)
                 </h4>
                 <p className="text-[11px] text-slate-400 mt-0.5">
-                  Add course syllabus, lab guides, or lecture slides
+                  Select or drop one or more PDF / DOCX modules for your course
                 </p>
               </div>
               <button
                 type="button"
-                onClick={() => setShowUploadModal(false)}
+                disabled={isUploading}
+                onClick={() => {
+                  setShowUploadModal(false);
+                  setUploadQueue([]);
+                }}
                 className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center text-xs"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="space-y-3 text-xs">
+            <div className="space-y-4 text-xs overflow-y-auto flex-1 pr-1">
+              {/* Target Course Selector with Active/Inactive Groups */}
               <div>
                 <label className="block font-semibold text-slate-700 mb-1">
                   Target Course *
@@ -536,12 +696,13 @@ export function AdminModuleList() {
                   value={newModuleCourseId}
                   onChange={(e) => setNewModuleCourseId(e.target.value)}
                   required
-                  className="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-slate-900"
+                  disabled={isUploading}
+                  className="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-slate-900 font-medium"
                 >
                   <option value="" disabled>
                     Select Course
                   </option>
-                  {courses.map((c) => (
+                  {activeCourses.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.code} - {c.name}
                     </option>
@@ -549,88 +710,188 @@ export function AdminModuleList() {
                 </select>
               </div>
 
+              {/* Drag-and-drop / Multi-file Picker */}
               <div>
                 <label className="block font-semibold text-slate-700 mb-1">
-                  Module Title *
+                  Select Modules (.pdf, .docx up to 20MB) *
                 </label>
-                <input
-                  type="text"
-                  value={newModuleTitle}
-                  onChange={(e) => setNewModuleTitle(e.target.value)}
-                  required
-                  placeholder="e.g. Modul 1: Dasar-dasar HTML & CSS"
-                  className="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-slate-900"
-                />
+                <div
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setIsDragging(true);
+                  }}
+                  onDragLeave={(e) => {
+                    e.preventDefault();
+                    setIsDragging(false);
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setIsDragging(false);
+                    if (e.dataTransfer.files) {
+                      addFilesToQueue(e.dataTransfer.files);
+                    }
+                  }}
+                  className={`border-2 border-dashed rounded-2xl p-4 text-center transition-colors ${
+                    isDragging
+                      ? "border-slate-900 bg-slate-100"
+                      : "border-slate-200 hover:border-slate-400 bg-slate-50/50"
+                  }`}
+                >
+                  <label className="cursor-pointer flex flex-col items-center justify-center gap-1.5 py-2">
+                    <UploadCloud className="w-8 h-8 text-slate-400" />
+                    <span className="text-xs font-semibold text-slate-800">
+                      Click to browse or drag & drop multiple files
+                    </span>
+                    <span className="text-[10px] text-slate-400">
+                      Supports PDF and DOCX (hold Shift/Ctrl to select multiple)
+                    </span>
+                    <input
+                      type="file"
+                      multiple
+                      disabled={isUploading}
+                      accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          addFilesToQueue(e.target.files);
+                        }
+                      }}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
               </div>
 
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Description / Summary (Optional)
-                </label>
-                <textarea
-                  value={newModuleDescription}
-                  onChange={(e) => setNewModuleDescription(e.target.value)}
-                  rows={2}
-                  placeholder="Brief description of the topics..."
-                  className="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-slate-900 resize-none"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Module File (.pdf, .docx) *
-                </label>
-                <div className="border-2 border-dashed border-slate-200 hover:border-slate-400 rounded-2xl p-4 text-center bg-slate-50/50 transition-colors">
-                  {selectedFile ? (
-                    <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-200">
-                      <div className="flex items-center gap-2.5 overflow-hidden">
-                        <FileCheck className="w-5 h-5 text-slate-800 shrink-0" />
-                        <div className="text-left overflow-hidden">
-                          <span className="font-semibold text-slate-900 block truncate">
-                            {selectedFile.name}
-                          </span>
-                          <span className="text-[10px] text-slate-400">
-                            {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
-                          </span>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedFile(null)}
-                        className="p-1 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-700"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ) : (
-                    <label className="cursor-pointer flex flex-col items-center justify-center gap-2 py-2">
-                      <UploadCloud className="w-8 h-8 text-slate-400" />
-                      <span className="text-xs font-semibold text-slate-800">
-                        Click to browse or drag file here
-                      </span>
-                      <span className="text-[10px] text-slate-400">
-                        Supported formats: PDF, DOCX (Max 20MB)
-                      </span>
+              {/* Queued Modules List */}
+              {uploadQueue.length > 0 && (
+                <div className="space-y-3 pt-1">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-slate-900 text-xs">
+                      Files to Upload ({uploadQueue.length})
+                    </span>
+                    <label className="text-[11px] font-semibold text-slate-900 hover:underline cursor-pointer flex items-center gap-1">
+                      <Plus className="w-3 h-3" />
+                      <span>Add more</span>
                       <input
                         type="file"
+                        multiple
+                        disabled={isUploading}
                         accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                         onChange={(e) => {
-                          if (e.target.files && e.target.files[0]) {
-                            setSelectedFile(e.target.files[0]);
+                          if (e.target.files) {
+                            addFilesToQueue(e.target.files);
                           }
                         }}
                         className="hidden"
                       />
                     </label>
-                  )}
+                  </div>
+
+                  <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1">
+                    {uploadQueue.map((item, idx) => (
+                      <div
+                        key={item.id}
+                        className="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-2"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 overflow-hidden">
+                            <FileCheck className="w-4 h-4 text-slate-800 shrink-0" />
+                            <span className="font-semibold text-slate-900 truncate block text-[11px]">
+                              {item.file.name}
+                            </span>
+                            <span className="text-[10px] text-slate-400 shrink-0 font-mono">
+                              ({(item.file.size / (1024 * 1024)).toFixed(2)} MB)
+                            </span>
+                          </div>
+
+                          {!isUploading && (
+                            <button
+                              type="button"
+                              onClick={() => removeQueueItem(item.id)}
+                              className="p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 shrink-0"
+                              title="Remove file"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                          <div>
+                            <input
+                              type="text"
+                              value={item.title}
+                              disabled={isUploading}
+                              onChange={(e) =>
+                                updateQueueItem(item.id, {
+                                  title: e.target.value
+                                })
+                              }
+                              required
+                              placeholder="Module Title *"
+                              className="w-full p-2 text-xs border border-slate-200 rounded-xl bg-white focus:ring-1 focus:ring-slate-900 font-medium"
+                            />
+                          </div>
+                          <div>
+                            <input
+                              type="text"
+                              value={item.description}
+                              disabled={isUploading}
+                              onChange={(e) =>
+                                updateQueueItem(item.id, {
+                                  description: e.target.value
+                                })
+                              }
+                              placeholder="Summary (Optional)"
+                              className="w-full p-2 text-xs border border-slate-200 rounded-xl bg-white focus:ring-1 focus:ring-slate-900 text-slate-600"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Upload Progress Bar */}
+              {isUploading && uploadProgress && (
+                <div className="p-3 bg-slate-900 text-white rounded-2xl space-y-2">
+                  <div className="flex items-center justify-between text-xs font-semibold">
+                    <span>
+                      Uploading {uploadProgress.current} of{" "}
+                      {uploadProgress.total} modules...
+                    </span>
+                    <span>
+                      {Math.round(
+                        (uploadProgress.current / uploadProgress.total) * 100
+                      )}
+                      %
+                    </span>
+                  </div>
+                  <div className="w-full bg-slate-700 h-2 rounded-full overflow-hidden">
+                    <div
+                      className="bg-emerald-400 h-full transition-all duration-300 rounded-full"
+                      style={{
+                        width: `${
+                          (uploadProgress.current / uploadProgress.total) * 100
+                        }%`
+                      }}
+                    />
+                  </div>
+                  <p className="text-[10px] text-slate-300 truncate">
+                    Current file: {uploadProgress.filename}
+                  </p>
+                </div>
+              )}
             </div>
 
-            <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+            <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 shrink-0">
               <button
                 type="button"
-                onClick={() => setShowUploadModal(false)}
+                disabled={isUploading}
+                onClick={() => {
+                  setShowUploadModal(false);
+                  setUploadQueue([]);
+                }}
                 className="px-4 py-2 border border-slate-200 rounded-full text-xs font-semibold text-slate-600 hover:bg-slate-50"
               >
                 Cancel
@@ -639,21 +900,23 @@ export function AdminModuleList() {
                 type="submit"
                 disabled={
                   isUploading ||
-                  !selectedFile ||
-                  !newModuleTitle.trim() ||
+                  uploadQueue.length === 0 ||
                   !newModuleCourseId
                 }
-                className="px-5 py-2 bg-slate-900 text-white rounded-full text-xs font-semibold hover:bg-slate-800 shadow-xs disabled:opacity-50 flex items-center gap-1.5"
+                className="px-5 py-2 bg-slate-900 text-white rounded-full text-xs font-semibold hover:bg-slate-800 shadow-xs disabled:opacity-50 flex items-center gap-1.5 active:scale-[0.98]"
               >
                 {isUploading ? (
                   <>
                     <span className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                    <span>Uploading...</span>
+                    <span>Uploading Batch...</span>
                   </>
                 ) : (
                   <>
                     <UploadCloud className="w-3.5 h-3.5" />
-                    <span>Upload Module</span>
+                    <span>
+                      Upload {uploadQueue.length > 0 ? uploadQueue.length : ""}{" "}
+                      Module{uploadQueue.length !== 1 ? "s" : ""}
+                    </span>
                   </>
                 )}
               </button>
@@ -661,6 +924,8 @@ export function AdminModuleList() {
           </form>
         </div>
       )}
+
+      {/* Module Detail Modal */}
 
       {/* Module Detail Modal */}
       {selectedModuleForDetail && (

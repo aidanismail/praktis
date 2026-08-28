@@ -5,7 +5,7 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 
 from core.database import get_db
-from api.dependencies import get_current_user
+from api.dependencies import get_current_active_user
 from api.permissions import require_course_access
 from models.user import User, RoleEnum
 from models.announcement import Announcement, AnnouncementComment
@@ -38,7 +38,7 @@ NOT_FOUND_404 = {404: {"description": "Course or announcement not found."}}
 async def list_announcements(
     course_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_active_user),
 ):
     await require_course_access(db, current_user, course_id, write=False)
 
@@ -114,7 +114,7 @@ async def create_announcement(
     course_id: uuid.UUID,
     payload: AnnouncementCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_active_user),
 ):
     await require_course_access(db, current_user, course_id, write=True)
 
@@ -157,7 +157,7 @@ async def update_announcement(
     announcement_id: uuid.UUID,
     payload: AnnouncementUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_active_user),
 ):
     await require_course_access(db, current_user, course_id, write=True)
 
@@ -208,7 +208,7 @@ async def delete_announcement(
     course_id: uuid.UUID,
     announcement_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_active_user),
 ):
     await require_course_access(db, current_user, course_id, write=True)
 
@@ -239,7 +239,7 @@ async def add_comment(
     announcement_id: uuid.UUID,
     payload: AnnouncementCommentCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_active_user),
 ):
     await require_course_access(db, current_user, course_id, write=False)
 
@@ -282,9 +282,16 @@ async def delete_comment(
     announcement_id: uuid.UUID,
     comment_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_active_user),
 ):
     await require_course_access(db, current_user, course_id, write=False)
+
+    # Validate announcement belongs to course
+    ann_result = await db.execute(
+        select(Announcement).where(Announcement.id == announcement_id, Announcement.course_id == course_id)
+    )
+    if not ann_result.scalars().first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Announcement not found")
 
     result = await db.execute(
         select(AnnouncementComment).where(
