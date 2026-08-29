@@ -1,4 +1,6 @@
-import { CalendarClock, FileText, Gauge, Users } from "lucide-react";
+import { CalendarClock, FileText, Gauge, MoveRight, Users } from "lucide-react";
+import Link from "next/link";
+import { getAssignmentDetailRoute } from "@/constants/routes";
 import type { Assignment } from "../types/assignment.type";
 
 type AssignmentCardProps = {
@@ -139,6 +141,19 @@ export function AssignmentCard({ assignment }: AssignmentCardProps) {
           </dd>
         </div>
       </dl>
+
+      <div className="mt-5 border-t border-slate-100 pt-4">
+        <Link
+          href={getAssignmentDetailRoute(
+            assignment.course_id,
+            assignment.id
+          )}
+          className="inline-flex min-h-11 items-center gap-2 rounded-xl text-sm font-semibold text-emerald-700 underline-offset-4 transition hover:text-emerald-800 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
+        >
+          Open assignment
+          <MoveRight className="h-4 w-4" aria-hidden="true" />
+        </Link>
+      </div>
     </article>
   );
 }

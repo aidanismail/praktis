@@ -1,40 +1,57 @@
 "use client";
 
 import { BookOpen, MessageSquareText, Radio, Users } from "lucide-react";
-import { useRef, useState, type KeyboardEvent } from "react";
+import { useRef, type KeyboardEvent } from "react";
+import { useRouter } from "next/navigation";
 import { CourseStream } from "@/features/announcements/components/course-stream";
 import { CourseClasswork } from "@/features/assignments/components/course-classwork";
 import { CourseRoster } from "@/features/courses/components/course-roster";
 
+import {
+  COURSE_WORKSPACE_TABS,
+  getCourseDetailRoute,
+  type CourseWorkspaceTab
+} from "@/constants/routes";
+
 type CourseWorkspaceTabsProps = {
   userId: string;
   courseId: string;
+  initialTab: CourseWorkspaceTab;
 };
 
-type ActiveWorkspaceTab = "stream" | "classwork" | "people";
-
-const enabledTabs: ActiveWorkspaceTab[] = ["stream", "classwork", "people"];
+const enabledTabs = COURSE_WORKSPACE_TABS;
 
 export function CourseWorkspaceTabs({
   userId,
-  courseId
+  courseId,
+  initialTab
 }: CourseWorkspaceTabsProps) {
-  const [activeTab, setActiveTab] = useState<ActiveWorkspaceTab>("stream");
+  const router = useRouter();
+  const activeTab = initialTab;
 
-  const tabRefs = useRef<Record<ActiveWorkspaceTab, HTMLButtonElement | null>>({
+  const tabRefs = useRef<Record<CourseWorkspaceTab, HTMLButtonElement | null>>({
     stream: null,
     classwork: null,
     people: null
   });
 
-  function selectTab(tab: ActiveWorkspaceTab) {
-    setActiveTab(tab);
-    tabRefs.current[tab]?.focus();
+  function activateTab(tab: CourseWorkspaceTab) {
+    router.replace(getCourseDetailRoute(courseId, tab), {
+      scroll: false
+    });
+  }
+
+  function selectTab(tab: CourseWorkspaceTab) {
+    activateTab(tab);
+
+    requestAnimationFrame(() => {
+      tabRefs.current[tab]?.focus();
+    });
   }
 
   function onTabKeyDown(
     event: KeyboardEvent<HTMLButtonElement>,
-    currentTab: ActiveWorkspaceTab
+    currentTab: CourseWorkspaceTab
   ) {
     const currentIndex = enabledTabs.indexOf(currentTab);
     let nextIndex: number | null = null;
@@ -85,7 +102,7 @@ export function CourseWorkspaceTabs({
             aria-selected={activeTab === "stream"}
             aria-controls="course-panel-stream"
             tabIndex={activeTab === "stream" ? 0 : -1}
-            onClick={() => setActiveTab("stream")}
+            onClick={() => activateTab("stream")}
             onKeyDown={(event) => onTabKeyDown(event, "stream")}
             className={`${tabClass} ${
               activeTab === "stream" ? activeClass : idleClass
@@ -105,7 +122,7 @@ export function CourseWorkspaceTabs({
             aria-selected={activeTab === "classwork"}
             aria-controls="course-panel-classwork"
             tabIndex={activeTab === "classwork" ? 0 : -1}
-            onClick={() => setActiveTab("classwork")}
+            onClick={() => activateTab("classwork")}
             onKeyDown={(event) => onTabKeyDown(event, "classwork")}
             className={`${tabClass} ${
               activeTab === "classwork" ? activeClass : idleClass
@@ -125,7 +142,7 @@ export function CourseWorkspaceTabs({
             aria-selected={activeTab === "people"}
             aria-controls="course-panel-people"
             tabIndex={activeTab === "people" ? 0 : -1}
-            onClick={() => setActiveTab("people")}
+            onClick={() => activateTab("people")}
             onKeyDown={(event) => onTabKeyDown(event, "people")}
             className={`${tabClass} ${
               activeTab === "people" ? activeClass : idleClass

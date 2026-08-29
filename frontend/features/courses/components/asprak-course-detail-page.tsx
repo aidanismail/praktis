@@ -1,5 +1,7 @@
 "use client";
 
+import type { CourseWorkspaceTab } from "@/constants/routes";
+
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
@@ -8,7 +10,7 @@ import {
   CalendarDays,
   Loader2,
   RefreshCw,
-  Palette,
+  Palette
 } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
@@ -19,17 +21,19 @@ import {
   getThemeConfig,
   getPatternConfig,
   loadSavedCourseTheme,
-  type SavedCourseTheme,
+  type SavedCourseTheme
 } from "../constants/banner-themes";
 import { CourseBannerCustomizerModal } from "./course-banner-customizer-modal";
 
 type AsprakCourseDetailPageProps = {
   courseId: string;
+  initialTab: CourseWorkspaceTab;
 };
 
 type AssignedCourseDetailProps = {
   userId: string;
   courseId: string;
+  initialTab: CourseWorkspaceTab;
 };
 
 function DetailPageFrame({ children }: { children: React.ReactNode }) {
@@ -40,7 +44,11 @@ function DetailPageFrame({ children }: { children: React.ReactNode }) {
   );
 }
 
-function AssignedCourseDetail({ userId, courseId }: AssignedCourseDetailProps) {
+function AssignedCourseDetail({
+  userId,
+  courseId,
+  initialTab
+}: AssignedCourseDetailProps) {
   const {
     data: courses = [],
     error,
@@ -51,8 +59,11 @@ function AssignedCourseDetail({ userId, courseId }: AssignedCourseDetailProps) {
   } = useAssignedCourses(userId);
 
   const course = courses.find((item) => item.id === courseId);
-  const [overrideTheme, setOverrideTheme] = useState<SavedCourseTheme | null>(null);
-  const courseTheme = overrideTheme || loadSavedCourseTheme(courseId, course?.code);
+  const [overrideTheme, setOverrideTheme] = useState<SavedCourseTheme | null>(
+    null
+  );
+  const courseTheme =
+    overrideTheme || loadSavedCourseTheme(courseId, course?.code);
   const [showCustomizeModal, setShowCustomizeModal] = useState(false);
 
   useEffect(() => {
@@ -62,12 +73,13 @@ function AssignedCourseDetail({ userId, courseId }: AssignedCourseDetailProps) {
         setOverrideTheme({
           themeId: custom.detail.themeId,
           patternId: custom.detail.patternId,
-          imageUrl: custom.detail.imageUrl,
+          imageUrl: custom.detail.imageUrl
         });
       }
     };
     window.addEventListener("course-theme-updated", handleThemeUpdate);
-    return () => window.removeEventListener("course-theme-updated", handleThemeUpdate);
+    return () =>
+      window.removeEventListener("course-theme-updated", handleThemeUpdate);
   }, [courseId]);
 
   if (isPending) {
@@ -242,7 +254,9 @@ function AssignedCourseDetail({ userId, courseId }: AssignedCourseDetailProps) {
         )}
 
         {patternCfg.id !== "none" && (
-          <div className={`absolute inset-0 pointer-events-none ${patternCfg.overlayClass}`} />
+          <div
+            className={`absolute inset-0 pointer-events-none ${patternCfg.overlayClass}`}
+          />
         )}
 
         <div className="relative z-10 flex flex-wrap items-start justify-between gap-4">
@@ -261,9 +275,7 @@ function AssignedCourseDetail({ userId, courseId }: AssignedCourseDetailProps) {
             </h1>
           </div>
 
-          <span
-            className="rounded-full bg-white/15 px-3.5 py-1 text-xs font-semibold text-white border border-white/10 backdrop-blur-xs"
-          >
+          <span className="rounded-full bg-white/15 px-3.5 py-1 text-xs font-semibold text-white border border-white/10 backdrop-blur-xs">
             {statusLabel}
           </span>
         </div>
@@ -273,14 +285,21 @@ function AssignedCourseDetail({ userId, courseId }: AssignedCourseDetailProps) {
           border-t border-white/15 pt-5 text-sm text-slate-200 relative z-10"
         >
           <span className="inline-flex items-center gap-2">
-            <CalendarDays className="h-4 w-4 text-white/70" aria-hidden="true" />
+            <CalendarDays
+              className="h-4 w-4 text-white/70"
+              aria-hidden="true"
+            />
             Academic year {course.academic_year}
           </span>
           <span>Semester {course.semester}</span>
         </div>
       </header>
 
-      <CourseWorkspaceTabs userId={userId} courseId={courseId} />
+      <CourseWorkspaceTabs
+        userId={userId}
+        courseId={courseId}
+        initialTab={initialTab}
+      />
 
       {showCustomizeModal && (
         <CourseBannerCustomizerModal
@@ -297,7 +316,8 @@ function AssignedCourseDetail({ userId, courseId }: AssignedCourseDetailProps) {
 }
 
 export function AsprakCourseDetailPage({
-  courseId
+  courseId,
+  initialTab
 }: AsprakCourseDetailPageProps) {
   const user = useAuthStore((state) => state.user);
 
@@ -330,5 +350,11 @@ export function AsprakCourseDetailPage({
     );
   }
 
-  return <AssignedCourseDetail userId={user.id} courseId={courseId} />;
+  return (
+    <AssignedCourseDetail
+      userId={user.id}
+      courseId={courseId}
+      initialTab={initialTab}
+    />
+  );
 }

@@ -43,3 +43,17 @@ export type CreateAssignmentPayload = {
   allowed_file_types: string;
   is_published: boolean;
 };
+
+export type UpdateAssignmentPayload = {
+  title?: string;
+  description?: string | null;
+  due_date?: string | null;
+  max_points?: number;
+  allowed_file_types?: string;
+  is_published?: boolean;
+};
+
+export type GradeSubmissionPayload = {
+  score: number;
+  feedback: string | null;
+};

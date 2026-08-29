@@ -1,6 +1,6 @@
 # API Contract Status
 
-Last inspected: 2026-08-28
+Last inspected: 2026-08-29
 Branch: `feature/asprak-features`
 
 This is the integration-readiness ledger, not a release certificate. Status meanings are in [FULL_STACK_WORKFLOW.md](FULL_STACK_WORKFLOW.md).
@@ -18,7 +18,7 @@ This is the integration-readiness ledger, not a release certificate. Status mean
 | Module update/publish/replace/delete                                    | Current for replacement intent invalidation and publication toggles                                   | Asprak, Praktikan visibility           | Frontend module replacement integration                                                                |
 | Attendance bulk/list/personal                                           | Current with context-complete personal history (`PersonalAttendanceHistoryItem`)                      | Asprak, Praktikan                      | Frontend personal attendance integration                                                               |
 | Grades bulk/list/personal                                               | Current with publication concurrency lock and context-complete history (`PersonalGradeHistoryItem`)    | Asprak, Praktikan                      | Frontend personal grade history integration                                                            |
-| Classwork assignments & submissions                                     | Current for backend CRUD, cross-course isolation, unpublished draft privacy, and upload integrity      | Asprak, Praktikan                      | Frontend assignment detail, submission, and grading integration                                        |
+| Classwork assignments & submissions                                     | Current and frontend-integrated for assigned-Asprak list/create/detail/update/submission review/grading; Partial/Blocked for deletion and Praktikan upload | Asprak; Praktikan later                | Complete authenticated browser smoke; keep delete/upload controls excluded                              |
 | Exports                                                                 | Current with formula injection sanitization                                                           | Asprak                                 | Frontend export actions integration                                                                    |
 | OpenAPI-to-TypeScript automation                                        | Proposed                                                                                              | all FE owners                          | Separate tooling/CI plan                                                                               |
 | CSRF design                                                             | Blocked before production                                                                             | all cookie writes                      | Bagas proposes; Aidan reviews FE impact                                                                |
@@ -232,9 +232,9 @@ Limitations:
 
 ## Classwork Assignments & Submissions
 
-Status: Current and frontend-integrated only for assigned-Asprak assignment
-list/create. Remaining assignment-detail, update, delete, submission, and
-grading operations are Partial or Blocked.
+Status: Current and frontend-integrated for assigned-Asprak assignment
+list/create/detail/update, submission review, and grading. Assignment deletion
+and Praktikan submit/resubmit remain excluded from the frontend integration.
 
 Current and evidenced:
 
@@ -246,10 +246,24 @@ Current and evidenced:
   comma-separated allowed formats, and explicit publication state.
 - Both operations call the existing course-access permission dependency; write
   access requires assigned course staff.
-- The create response returns the confirmed assignment with `submissions_count:
-0` and `my_submission: null`.
+- The create response returns the confirmed assignment with
+  `submissions_count: 0` and `my_submission: null`.
 - Runtime OpenAPI and inspected Pydantic schemas confirm the request and
   response fields.
+- `GET /courses/{course_id}/assignments/{assignment_id}` binds the assignment
+  to the authorized course and returns 404 for an unpublished assignment read
+  by Praktikan.
+- `PATCH /courses/{course_id}/assignments/{assignment_id}` uses unset-aware
+  updates, supports explicit `null` for description and due date, and returns
+  the real submission count.
+- `GET /courses/{course_id}/assignments/{assignment_id}/submissions` proves the
+  assignment belongs to the authorized course before returning staff-only
+  submission metadata and time-limited download URLs.
+- `POST /courses/{course_id}/assignments/{assignment_id}/submissions/{submission_id}/grade`
+  binds course, assignment, and submission and enforces a score from zero
+  through the assignment's `max_points`.
+- These operations use the active-user dependency and assigned-course access
+  checks. Runtime OpenAPI exposed all four operations on 2026-08-29.
 
 Frontend integration added on 2026-08-27:
 
@@ -265,24 +279,53 @@ Frontend integration added on 2026-08-27:
 - Creation waits for confirmed server success and invalidates only the affected
   course assignment list.
 
+Frontend detail/review integration added on 2026-08-29:
+
+- assignment cards link to a thin, refresh-safe course/assignment route
+- course workspace tabs use a validated URL query so Back to Classwork restores
+  the intended tab without client-only search-param hydration
+- the detail read starts only after the authenticated Asprak's assigned-course
+  query proves the selected course; the submission read starts only after the
+  returned assignment is bound to that course
+- detail and submission caches are scoped by authenticated user, course, and
+  assignment IDs, with bounded read retry and no automatic mutation retry
+- create and edit reuse the same React Hook Form and Zod field controls; edit
+  supports explicit description/due-date clearing and server-confirmed
+  publication changes
+- submission review includes bounded local NPM/email search, graded/awaiting
+  filtering, time-limited download links, late/on-time state, private feedback,
+  and one expanded grade form at a time
+- grade validation accepts finite decimal scores from zero through the selected
+  assignment maximum; confirmed responses replace only the affected submission
+  cache row
+- loading, empty, unauthorized, forbidden, missing/invalid resource, transient
+  retry, validation, pending, success, responsive, keyboard, focus-return, and
+  non-color status behavior are represented in source
+- `pnpm typecheck`, `pnpm lint`, and the network-enabled production build passed
+  on 2026-08-29; lint retained only three pre-existing Superadmin warnings
+
 Integration boundaries and blockers:
 
-- Assignment detail, update, delete, Praktikan submission, Asprak submission
-  review, and grading are not integrated.
-- Praktikan detail and submission do not yet prove that unpublished assignments
-  are rejected when their IDs are known.
-- Submission-list and grading routes do not yet prove that the requested
-  assignment belongs to the authorized `course_id`.
-- Grade input is not yet bounded by the assignment's `max_points`.
-- Assignment update cannot explicitly clear optional description or due-date
-  values and does not return a proven accurate submission count.
 - Assignment deletion does not yet provide proven database/storage cleanup or
-  compensation semantics.
+  compensation semantics, so no delete control is rendered.
 - The Nginx `/api/` location does not yet align its request-body limit with the
   backend's advertised 10 MiB assignment upload limit.
+- Praktikan submit/resubmit still buffers the complete file, uses extension-only
+  validation and an original filename-derived key, and lacks complete
+  database/storage/concurrent-upload compensation, so no upload integration is
+  part of this Asprak batch.
+- Focused backend regression tests for cross-course isolation, explicit-null
+  update, grade bounds, upload failure, and storage cleanup were not found;
+  current integration evidence is route/schema/permission source plus runtime
+  OpenAPI and existing lifecycle coverage.
+- Production CSRF protection beyond the current SameSite-Lax cookie behavior is
+  unresolved and was not weakened by this integration.
 - Authenticated assigned-Asprak browser acceptance for assignment list/create,
   validation, draft/published creation, refresh persistence, responsive layout,
   and keyboard tab behavior was owner-reported PASS on 2026-08-27.
+- Authenticated browser acceptance for detail/edit/submission review/grading is
+  still pending; grading/download scenarios may be blocked when development
+  data contains no real submissions.
 
 ## Contract automation proposal
 
