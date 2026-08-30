@@ -6,14 +6,24 @@ export const ROUTES = {
   dashboard: "/dashboard"
 } as const;
 
-export const COURSE_WORKSPACE_TABS = ["stream", "classwork", "people"] as const;
+export const COURSE_WORKSPACE_TABS = [
+  "stream",
+  "classwork",
+  "people",
+  "sessions"
+] as const;
 
 export type CourseWorkspaceTab = (typeof COURSE_WORKSPACE_TABS)[number];
 
 export function parseCourseWorkspaceTab(
   value: string | undefined
 ): CourseWorkspaceTab {
-  if (value === "stream" || value === "classwork" || value === "people") {
+  if (
+    value === "stream" ||
+    value === "classwork" ||
+    value === "people" ||
+    value === "sessions"
+  ) {
     return value;
   }
 
@@ -49,4 +59,10 @@ export function getAssignmentDetailRoute(
   return `/dashboard/courses/${encodeURIComponent(
     courseId
   )}/assignments/${encodeURIComponent(assignmentId)}`;
+}
+
+export function getSessionDetailRoute(courseId: string, sessionId: string) {
+  return `/dashboard/courses/${encodeURIComponent(
+    courseId
+  )}/sessions/${encodeURIComponent(sessionId)}`;
 }

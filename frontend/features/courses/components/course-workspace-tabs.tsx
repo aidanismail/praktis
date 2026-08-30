@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { CourseStream } from "@/features/announcements/components/course-stream";
 import { CourseClasswork } from "@/features/assignments/components/course-classwork";
 import { CourseRoster } from "@/features/courses/components/course-roster";
+import { CourseModules } from "@/features/modules/components/course-modules";
+import { CourseSessions } from "@/features/sessions/components/course-sessions";
 
 import {
   COURSE_WORKSPACE_TABS,
@@ -32,7 +34,8 @@ export function CourseWorkspaceTabs({
   const tabRefs = useRef<Record<CourseWorkspaceTab, HTMLButtonElement | null>>({
     stream: null,
     classwork: null,
-    people: null
+    people: null,
+    sessions: null
   });
 
   function activateTab(tab: CourseWorkspaceTab) {
@@ -153,22 +156,23 @@ export function CourseWorkspaceTabs({
           </button>
 
           <button
+            ref={(node) => {
+              tabRefs.current.sessions = node;
+            }}
+            id="course-tab-sessions"
             type="button"
             role="tab"
-            aria-selected="false"
-            aria-disabled="true"
-            disabled
-            className="inline-flex min-h-11 cursor-not-allowed items-center gap-2 rounded-xl border border-transparent px-4 text-sm font-semibold
-              text-slate-400"
+            aria-selected={activeTab === "sessions"}
+            aria-controls="course-panel-sessions"
+            tabIndex={activeTab === "sessions" ? 0 : -1}
+            onClick={() => activateTab("sessions")}
+            onKeyDown={(event) => onTabKeyDown(event, "sessions")}
+            className={`${tabClass} ${
+              activeTab === "sessions" ? activeClass : idleClass
+            }`}
           >
             <Radio className="h-4 w-4" aria-hidden="true" />
             Sessions & Attendance
-            <span
-              className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px]
-              uppercase tracking-wide text-slate-500"
-            >
-              Later
-            </span>
           </button>
         </div>
       </div>
@@ -191,7 +195,10 @@ export function CourseWorkspaceTabs({
           aria-labelledby="course-tab-classwork"
           className="mt-6 focus:outline-none"
         >
-          <CourseClasswork userId={userId} courseId={courseId} />
+          <div className="space-y-10">
+            <CourseModules userId={userId} courseId={courseId} />
+            <CourseClasswork userId={userId} courseId={courseId} />
+          </div>
         </div>
       ) : null}
 
@@ -203,6 +210,17 @@ export function CourseWorkspaceTabs({
           className="focus:outline-none"
         >
           <CourseRoster userId={userId} courseId={courseId} />
+        </div>
+      ) : null}
+
+      {activeTab === "sessions" ? (
+        <div
+          id="course-panel-sessions"
+          role="tabpanel"
+          aria-labelledby="course-tab-sessions"
+          className="mt-6 focus:outline-none"
+        >
+          <CourseSessions userId={userId} courseId={courseId} />
         </div>
       ) : null}
     </section>

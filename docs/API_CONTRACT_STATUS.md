@@ -1,9 +1,16 @@
 # API Contract Status
 
-Last inspected: 2026-08-29
+Last inspected: 2026-08-31
 Branch: `feature/asprak-features`
 
 This is the integration-readiness ledger, not a release certificate. Status meanings are in [FULL_STACK_WORKFLOW.md](FULL_STACK_WORKFLOW.md).
+
+Final Asprak frontend automated audit on 2026-08-31: Batches 2.2 through 7 are
+implemented in source; typecheck, lint, the network-enabled production build,
+diff integrity, same-origin runtime health, scope, cache, privacy, performance,
+and accessibility-source reviews pass. Authenticated end-to-end, real-file,
+RBAC substitution, responsive, and keyboard browser acceptance remains pending
+and is not represented as completed by this ledger.
 
 ## Summary
 
@@ -12,14 +19,14 @@ This is the integration-readiness ledger, not a release certificate. Status mean
 | Cookie authentication & rate limiting                                   | Current for backend invariant & Redis rate limiting; Partial for client CSRF                         | all roles                              | Backend forced-password invariant (Praktikan-only) and dynamic Redis rate limiting resolved; CSRF design remains for production |
 | Academic-period course list                                             | Current and frontend-integrated for Asprak assigned-course reads                                      | Asprak                                 | Runtime-smoke role scoping and retain history bounds as a follow-up                                    |
 | Roster read / enrollment and staff                                      | Current and frontend-integrated for assigned-Asprak roster reads; Current backend contract for writes | Asprak roster reads; Superadmin writes | Runtime-smoke roster states; Bagas owns Superadmin FE                                                  |
-| Session create/list/update/open/close                                   | Current for open/close concurrency serialization and session lifecycle                                | Asprak; Praktikan reads                | Frontend session workspace integration                                                                 |
+| Session create/list/update/open/close                                   | Current and frontend-integrated for the assigned-Asprak session workspace                              | Asprak; Praktikan reads                | Complete authenticated lifecycle/browser smoke                                                         |
 | Safe session delete/archive                                             | Blocked                                                                                               | Asprak                                 | Backend retention/archive contract absent                                                              |
-| Module presign/confirm/list                                             | Current for intent lifecycle, presigned download, and response privacy (`file_key: None`)             | Asprak, Praktikan                      | Frontend module download/upload integration                                                            |
-| Module update/publish/replace/delete                                    | Current for replacement intent invalidation and publication toggles                                   | Asprak, Praktikan visibility           | Frontend module replacement integration                                                                |
-| Attendance bulk/list/personal                                           | Current with context-complete personal history (`PersonalAttendanceHistoryItem`)                      | Asprak, Praktikan                      | Frontend personal attendance integration                                                               |
-| Grades bulk/list/personal                                               | Current with publication concurrency lock and context-complete history (`PersonalGradeHistoryItem`)    | Asprak, Praktikan                      | Frontend personal grade history integration                                                            |
+| Module presign/confirm/list                                             | Current and frontend-integrated for assigned-Asprak course-scoped list/download/upload                  | Asprak, Praktikan                      | Complete authenticated real-file browser smoke                                                          |
+| Module update/publish/replace/delete                                    | Current backend contracts; metadata/publish are frontend-integrated for Asprak while replace/delete stay excluded | Asprak, Praktikan visibility | Complete authenticated metadata/publication smoke; keep replace/delete controls absent                  |
+| Attendance bulk/list/personal                                           | Current; assigned-Asprak session list/bulk is frontend-integrated and personal history is context-complete | Asprak, Praktikan                  | Complete Asprak authenticated register smoke; Praktikan personal integration remains later             |
+| Grades bulk/list/personal                                               | Current; assigned-Asprak session gradebook/publication is frontend-integrated and personal history is context-complete | Asprak, Praktikan             | Complete Asprak authenticated lifecycle smoke; Praktikan personal integration remains later            |
 | Classwork assignments & submissions                                     | Current and frontend-integrated for assigned-Asprak list/create/detail/update/submission review/grading; Partial/Blocked for deletion and Praktikan upload | Asprak; Praktikan later                | Complete authenticated browser smoke; keep delete/upload controls excluded                              |
-| Exports                                                                 | Current with formula injection sanitization                                                           | Asprak                                 | Frontend export actions integration                                                                    |
+| Exports                                                                 | Current and frontend-integrated for assigned-Asprak attendance/grade CSV/XLSX downloads                | Asprak                                 | Complete authenticated file-content/browser smoke                                                      |
 | OpenAPI-to-TypeScript automation                                        | Proposed                                                                                              | all FE owners                          | Separate tooling/CI plan                                                                               |
 | CSRF design                                                             | Blocked before production                                                                             | all cookie writes                      | Bagas proposes; Aidan reviews FE impact                                                                |
 | Superadmin overview reads                                               | Current and frontend-integrated for course, user, and health summary reads                            | Superadmin                             | Complete browser smoke for navigation, partial failures, and role scope                                |
@@ -133,63 +140,239 @@ Limitations:
 
 ## Class sessions
 
-Implemented:
+Status: Current and frontend-integrated for assigned-Asprak list, create,
+update, open, close, reopen, and verified session deep links. Safe
+delete/archive remains Blocked and absent from the frontend.
+
+Current and evidenced:
 
 - create/list under course routes
 - update by session ID
 - attendance open/close
 - response publication and attendance-status fields
 
-Partial/Blocked:
+Frontend integration added on 2026-08-31:
+
+- the fourth course workspace tab loads one authenticated, user/course-scoped
+  session query only while active and renders loading, empty, access, retry,
+  stale-refresh, create, edit, and attendance-transition states
+- create and update responses replace only the affected course-session cache;
+  open/close/reopen waits for server confirmation and then invalidates the
+  exact course query
+- all attendance-transition controls in the course are disabled while one
+  transition is pending, and 400/409 states remain explicit and non-destructive
+- a successful transition updates only the already-confirmed target session in
+  its scoped cache before the exact course-session background reconciliation,
+  preventing a stale control state if that refresh is interrupted
+- the encoded session route verifies the assigned course first and then finds
+  the session in that authorized course list before later attendance, grade,
+  or export requests may start
+- no delete/archive endpoint is wrapped or rendered
+- `pnpm typecheck`, `pnpm lint`, the network-enabled production build, and
+  `git diff --check` passed on 2026-08-31; lint retained only the three
+  pre-existing Superadmin warnings
+
+Limitations:
 
 - focused update/open/close tests were not found
 - repeated transition statuses are inconsistent
 - safe delete/archive is absent
 - new non-null state fields lack documented existing-row backfill
 
-The Asprak shell may list sessions. Do not build delete/archive UI.
+- authenticated create/edit/open/close/reopen, 409, responsive, and keyboard
+  browser acceptance remains pending
 
 ## Modules
 
-Implemented: presigned intent, confirmation, size/initial signature checks, role-scoped list, Praktikan published filter, metadata update, publish/unpublish, delete, and replacement.
+Status: Current and frontend-integrated for the approved assigned-Asprak
+course-scoped list, download, presign/direct-upload/confirm, metadata update,
+publish, and unpublish workflow. Replacement and deletion remain excluded
+from the locked frontend scope.
 
-Partial gaps:
+Current and evidenced:
 
-- `is_published` migration backfill is undocumented
-- lifecycle/visibility/replacement/delete/cleanup tests were not found
-- intent consumption/replay is not documented
-- ZIP magic alone does not prove DOCX structure
-- database/storage ordering can report failure after one side succeeded
-- abandoned/rejected/superseded/orphan cleanup requires validation
-- list response now includes `course_id`, but also exposes the internal
-  `file_key` to Praktikan and issues download URLs valid for up to one hour;
-  response minimization and unpublish revocation semantics remain unresolved
+- `GET /modules/?course_id={course_id}` validates course access, scopes Asprak
+  rows through `CourseStaff`, filters Praktikan rows to enrolled-course
+  published modules, and orders newest first.
+- The list returns `id`, `title`, optional `description`, a time-limited
+  `download_url`, `is_published`, `created_at`, `course_id`, and `file_key`.
+  Current source deliberately serializes `file_key: null` for Praktikan.
+- Assigned-course and enrollment permission tests cover unassigned/enrolled
+  list access plus assigned/unassigned Asprak presign access.
+- Presign intents are time-limited and bound to actor, course, extension, and
+  operation type. Confirmation validates the intent, object existence, the
+  25 MiB bound, initial PDF/DOCX signature, and file-key format.
+- Runtime OpenAPI exposes list, presign, confirm, metadata update,
+  publish/unpublish, replacement, and deletion operations. The locked frontend
+  integrates only the explicitly approved non-destructive subset.
 
-Plan list/upload separately. Treat replacement/delete as blocked for final integration until failure semantics are resolved.
+Frontend list/download integration added on 2026-08-31:
+
+- the Classwork tab starts a same-origin, authenticated, course-filtered module
+  read only after the assigned-course workspace gate succeeds
+- query state is scoped by authenticated user and course, remains fresh for
+  30 seconds, and retries only one transient failure
+- module loading, empty, unauthorized, forbidden, missing/invalid course,
+  transient retry, stale refresh, count, draft/published, and download states
+  are independent from assignment request state
+- presigned download URLs remain in TanStack Query memory and are exposed only
+  through native links; the internal `file_key` is typed but neither rendered
+  nor persisted
+- `pnpm typecheck`, `pnpm lint`, and the network-enabled production build
+  passed on 2026-08-31; lint retained only three pre-existing Superadmin
+  warnings
+
+Frontend upload/metadata/publication integration added on 2026-08-31:
+
+- the upload form validates a non-empty PDF/DOCX up to 25 MiB, requests a
+  same-origin presigned intent, uploads directly to storage without cookies,
+  and confirms through the backend before showing success
+- presign, storage PUT, and confirmation failures remain distinct; retry is
+  explicit and bounded to the same in-memory attempt for 55 minutes, with no
+  automatic duplicate write or browser persistence
+- metadata update, publish, and unpublish are server-confirmed mutations that
+  invalidate only the authenticated user/course module query
+- write controls are disabled while their operation is pending, recoverable
+  form input is preserved after failure, and status/focus behavior is exposed
+  for keyboard and assistive-technology use
+- replacement and deletion endpoints are not wrapped or rendered
+- `pnpm typecheck`, `pnpm lint`, the network-enabled production build, and
+  `git diff --check` passed on 2026-08-31; lint retained only the three
+  pre-existing Superadmin warnings
+
+Integration boundaries:
+
+- authenticated browser acceptance for real PDF/DOCX upload/download,
+  metadata/publication transitions, failure/retry states, responsive layout,
+  and keyboard use remains pending
+- `is_published` migration backfill remains undocumented
+- focused tests do not cover the complete visibility, update, publication,
+  replacement, deletion, and cleanup lifecycle
+- ZIP magic alone does not prove complete DOCX structure
+- download URLs remain usable until their expiry, including after unpublish;
+  the current expiration can be up to one hour
+- database/storage ordering and abandoned/rejected/superseded object cleanup
+  remain material for replacement/deletion, so those controls stay absent
+- the approved Batch 3.2 frontend integration does not expand backend or
+  Superadmin ownership
 
 ## Attendance
 
 Bulk upsert validates active enrolled Praktikan IDs. Session reads are staff-protected and personal history is user-scoped. Tests cover deduplication, invalid students, audit fields, role denial, and missing sessions.
 
-Status: Current for implemented bulk/list/personal operations. Open/close remains Partial under sessions.
+Status: Current and frontend-integrated for the assigned-Asprak session
+attendance list and full-roster bulk save. Personal history remains a Current
+backend contract for later Praktikan integration. Attendance-window lifecycle
+limitations remain documented under class sessions.
+
+Frontend integration added on 2026-08-31:
+
+- attendance starts only inside a course/session context already verified by
+  the assigned-course and course-session queries
+- roster and saved rows remain independent user/course/session-scoped queries;
+  missing rows display `Not recorded` and never become an academic status
+  implicitly
+- the form requires one explicit lowercase backend status for every enrolled
+  Praktikan, sends one deduplicated full-roster request, disables automatic
+  write retries, and invalidates only the selected session attendance query
+- Scheduled and Closed sessions remain readable but not editable; FastAPI also
+  rejects assigned-Asprak writes unless the server session state is `OPEN`
+- search preserves hidden values, counts are derived locally, and unmatched
+  saved records produce a visible data-mismatch warning
+- a 422 roster refresh preserves dirty values by student ID rather than row
+  position, and unsaved navigation/reset warnings avoid silent loss
+- deterministic student ordering plus dirty-form refresh isolation prevents a
+  background roster reorder from attaching an academic status to another row
+- `pnpm typecheck`, `pnpm lint`, the network-enabled production build, and
+  `git diff --check` passed on 2026-08-31; lint retained only the three
+  pre-existing Superadmin warnings
+
+Limitations:
+
+- authenticated full-roster save/reload, error simulation, long-roster,
+  responsive, and keyboard browser acceptance remains pending
+- the 30 requests/minute backend bulk rate limit remains authoritative
+- attendance contains sensitive academic data and remains only in query/form
+  memory
 
 ## Grades
 
 Implemented: bulk upsert, score validation, edit rejection while published, staff session list, publish/unpublish, and personal filtering to published sessions.
 
-Partial gaps:
+Status: Current and frontend-integrated for assigned-Asprak session list,
+finite-score bulk save, publish, and unpublish. Personal published history is
+a Current backend contract for later Praktikan integration.
+
+Frontend integration added on 2026-08-31:
+
+- grade reads and writes start only in an assigned-course/session context and
+  use user/course/session-scoped query keys separate from assignment grading
+- blank rows remain ungraded and are omitted; numeric zero remains a real
+  score, while finite decimal validation enforces 0 through 100
+- the frontend does not imply deletion when a saved score is cleared because
+  the current backend has no grade-record delete operation
+- all grade writes disable automatic retry; a server 409 preserves local
+  input and refreshes the exact session list so publication remains
+  server-authoritative
+- successful publication updates only the confirmed session's boolean in its
+  scoped cache before exact background reconciliation; no pre-response
+  optimistic publication is used
+- publication is never optimistic, is disabled when zero saved rows exist,
+  discloses `saved / roster` completeness, and requires explicit confirmation
+  for partial publication and unpublication
+- published sessions are read-only until server-confirmed unpublication;
+  copy states that draft data is staff-only and each Praktikan sees only their
+  own published saved result
+- deterministic student ordering plus dirty-form refresh isolation keeps score
+  input bound to student ID across background roster changes
+- `pnpm typecheck`, `pnpm lint`, the network-enabled production build, and
+  `git diff --check` passed on 2026-08-31; lint retained only the three
+  pre-existing Superadmin warnings
+
+Limitations:
 
 - no focused publication/privacy-transition tests found
 - repeated transitions use 400 while lifecycle conflict may require 409
 - route text says Asprak-only while shared permission code allows Superadmin
-- complete-roster publication is undecided
+- backend intentionally permits partial-roster publication; the frontend
+  exposes this rather than implying completeness
 - pre-publication tests require reconciliation
-
-Plan draft grade entry separately. Do not build final publication controls until Bagas confirms roles, transitions, completeness, and tests.
+- authenticated save/publish/unpublish/correct/republish, conflict, responsive,
+  and keyboard browser acceptance remains pending
+- the non-null grade-publication migration backfill remains undocumented
 
 ## Exports
 
-Attendance and grade CSV/XLSX routes exist for staff. Confirm tests and whether grade exports intentionally include drafts before final Asprak integration.
+Status: Current and frontend-integrated for assigned-Asprak attendance and
+session-grade CSV/XLSX downloads.
+
+Current and integrated behavior:
+
+- `GET /export/attendance/{session_id}?format=csv|xlsx` returns saved
+  attendance rows with `username`, `email`, and `status`; unrecorded roster
+  members are omitted
+- `GET /export/grades/{session_id}?format=csv|xlsx` returns saved grade rows
+  with `username`, `email`, and `score` regardless of publication state
+- both routes authorize through the session's course, deny Praktikan, return
+  404 for zero saved rows, and sanitize spreadsheet formula prefixes
+- the verified session UI discloses saved-row/roster counts and labels grade
+  files as draft or published before the deliberate download action
+- the frontend validates a strict format union, fetches same-origin with the
+  HttpOnly cookie, uses a safe generated filename, parses errors without raw
+  navigation or internal details, prevents repeat clicks, and revokes each
+  temporary object URL in success and cleanup paths
+- blobs, filenames, and downloaded academic rows are not cached in TanStack
+  Query, Zustand, or browser storage
+- `pnpm typecheck`, `pnpm lint`, the network-enabled production build, and
+  `git diff --check` passed on 2026-08-31; lint retained only the three
+  pre-existing Superadmin warnings
+
+Limitations:
+
+- authenticated CSV/XLSX content, Unicode, row-count, filename, empty/error,
+  responsive, and keyboard browser acceptance remains pending
+- grade exports intentionally contain saved draft rows while unpublished; the
+  publication-aware frontend copy must remain visible
 
 ## Migration readiness
 
