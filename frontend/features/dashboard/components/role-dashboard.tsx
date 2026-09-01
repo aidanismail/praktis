@@ -10,6 +10,11 @@ import { AdminModuleList } from "@/features/admin/components/admin-module-list";
 import { AttendanceReportsView } from "@/features/admin/components/attendance-reports-view";
 import { GradeExportsView } from "@/features/admin/components/grade-exports-view";
 import { CourseManagement } from "@/features/admin/components/course-management";
+import { PraktikanCourseList } from "@/features/courses/components/praktikan-course-list";
+import { PraktikanCourseOverview } from "@/features/courses/components/praktikan-course-overview";
+import { PraktikanAttendanceHistory } from "@/features/attendance/components/praktikan-attendance-history";
+import { PraktikanGradeHistory } from "@/features/grades/components/praktikan-grade-history";
+import { PraktikanProfile } from "@/features/profile/components/praktikan-profile";
 
 type RoleDashboardProps = {
   user: User;
@@ -64,6 +69,33 @@ export function RoleDashboard({
 
       if (activeItem.id === "classes") {
         return <AsprakCourseList userId={user.id} />;
+      }
+    }
+
+    if (user.role === "praktikan") {
+      if (activeItem.id === "overview") {
+        return (
+          <PraktikanCourseOverview
+            userId={user.id}
+            onViewClasses={() => onNavigateToNavItem("classes")}
+          />
+        );
+      }
+
+      if (activeItem.id === "classes") {
+        return <PraktikanCourseList userId={user.id} />;
+      }
+
+      if (activeItem.id === "attendance") {
+        return <PraktikanAttendanceHistory userId={user.id} />;
+      }
+
+      if (activeItem.id === "grades") {
+        return <PraktikanGradeHistory userId={user.id} />;
+      }
+
+      if (activeItem.id === "profile") {
+        return <PraktikanProfile user={user} />;
       }
     }
 

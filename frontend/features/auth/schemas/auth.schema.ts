@@ -12,7 +12,11 @@ export const changePasswordSchema = z
     current_password: z.string().min(1, "Current password is required"),
     new_password: z
       .string()
-      .min(8, "New password must be at least 8 characters"),
+      .min(8, "New password must be at least 8 characters")
+      .refine(
+        (value) => new TextEncoder().encode(value).length <= 72,
+        "New password must be 72 bytes or fewer"
+      ),
     confirm_password: z.string().min(1, "Please confirm your new password"),
   })
   .refine((data) => data.new_password === data.confirm_password, {

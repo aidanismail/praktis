@@ -3,8 +3,15 @@ import { API_ENDPOINTS } from "@/lib/api/endpoints";
 import type {
   BulkGradePayload,
   GradeMessageResponse,
+  PersonalGradeHistoryItem,
   SessionGrade
 } from "../types/grade.type";
+
+export function listMyGrades() {
+  return apiClient<PersonalGradeHistoryItem[]>(API_ENDPOINTS.grades.me, {
+    method: "GET"
+  });
+}
 
 export function listSessionGrades(sessionId: string) {
   return apiClient<SessionGrade[]>(

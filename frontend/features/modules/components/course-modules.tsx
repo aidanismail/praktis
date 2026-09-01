@@ -10,9 +10,10 @@ import { ModuleUploadForm } from "./module-upload-form";
 type CourseModulesProps = {
   userId: string;
   courseId: string;
+  accessMode: "manage" | "read-only";
 };
 
-export function CourseModules({ userId, courseId }: CourseModulesProps) {
+export function CourseModules({ userId, courseId, accessMode }: CourseModulesProps) {
   const { data, error, isError, isFetching, isPending, refetch } =
     useCourseModules({
       userId,
@@ -20,7 +21,9 @@ export function CourseModules({ userId, courseId }: CourseModulesProps) {
       enabled: true
     });
 
-  const modules = data ?? [];
+  const modules = (data ?? []).filter(
+    (module) => accessMode === "manage" || module.is_published
+  );
   const hasLoadedData = data !== undefined;
 
   const isUnauthorized = error instanceof ApiError && error.status === 401;
@@ -72,7 +75,9 @@ export function CourseModules({ userId, courseId }: CourseModulesProps) {
           </h2>
 
           <p className="mt-1 text-sm leading-6 text-slate-600">
-            Draft and published materials for this practicum course.
+            {accessMode === "manage"
+              ? "Draft and published materials for this practicum course."
+              : "Published learning materials for this practicum course."}
           </p>
         </div>
 
@@ -107,7 +112,7 @@ export function CourseModules({ userId, courseId }: CourseModulesProps) {
           </div>
         ) : null}
       </div>
-      {hasLoadedData && !isAccessError ? (
+      {hasLoadedData && !isAccessError && accessMode === "manage" ? (
         <ModuleUploadForm userId={userId} courseId={courseId} />
       ) : null}
       {isPending ? (
@@ -278,6 +283,7 @@ export function CourseModules({ userId, courseId }: CourseModulesProps) {
                   userId={userId}
                   courseId={courseId}
                   module={module}
+                  accessMode={accessMode}
                 />
               ))}
             </div>

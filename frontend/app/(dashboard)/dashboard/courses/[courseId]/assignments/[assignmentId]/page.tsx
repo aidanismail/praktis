@@ -1,4 +1,4 @@
-import { AsprakAssignmentDetailPage } from "@/features/assignments/components/asprak-assignment-detail-page";
+import { AssignmentDetailPage } from "@/features/assignments/components/assignment-detail-page";
 
 type AssignmentDetailRouteProps = {
   params: Promise<{
@@ -13,7 +13,7 @@ export default async function AssignmentDetailRoute({
   const { courseId, assignmentId } = await params;
 
   return (
-    <AsprakAssignmentDetailPage
+    <AssignmentDetailPage
       courseId={courseId}
       assignmentId={assignmentId}
     />

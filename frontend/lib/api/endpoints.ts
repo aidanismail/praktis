@@ -92,6 +92,7 @@ export const API_ENDPOINTS = {
   },
 
   attendance: {
+    me: "/api/attendance/me",
     listBySession: (sessionId: string) =>
       `/api/attendance/sessions/${encodeURIComponent(sessionId)}`,
     record: (sessionId: string) =>
@@ -101,6 +102,7 @@ export const API_ENDPOINTS = {
   },
 
   grades: {
+    me: "/api/grades/me",
     listBySession: (sessionId: string) =>
       `/api/grades/sessions/${encodeURIComponent(sessionId)}`,
     bulkUpdate: (sessionId: string) =>

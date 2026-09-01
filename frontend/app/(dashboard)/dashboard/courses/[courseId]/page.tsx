@@ -1,5 +1,5 @@
 import { parseCourseWorkspaceTab } from "@/constants/routes";
-import { AsprakCourseDetailPage } from "@/features/courses/components/asprak-course-detail-page";
+import { CourseDetailPage } from "@/features/courses/components/course-detail-page";
 
 type CourseDetailRouteProps = {
   params: Promise<{
@@ -24,7 +24,7 @@ export default async function CourseDetailRoute({
     : resolvedSearchParams.tab;
 
   return (
-    <AsprakCourseDetailPage
+    <CourseDetailPage
       courseId={courseId}
       initialTab={parseCourseWorkspaceTab(rawTab)}
     />

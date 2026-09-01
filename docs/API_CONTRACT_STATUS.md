@@ -1,7 +1,7 @@
 # API Contract Status
 
-Last inspected: 2026-08-31
-Branch: `feature/asprak-features`
+Last inspected: 2026-09-02
+Branch: `feature/praktikan-features`
 
 This is the integration-readiness ledger, not a release certificate. Status meanings are in [FULL_STACK_WORKFLOW.md](FULL_STACK_WORKFLOW.md).
 
@@ -12,20 +12,29 @@ and accessibility-source reviews pass. Authenticated end-to-end, real-file,
 RBAC substitution, responsive, and keyboard browser acceptance remains pending
 and is not represented as completed by this ledger.
 
+Praktikan frontend integration audit on 2026-09-02: the approved read-only
+course, Stream/comment, published-module, published-assignment/personal-result,
+session/attendance, published-grade, profile, and password workflows are
+implemented in source. Type checking, linting with only the three pre-existing
+Superadmin warnings, a network-enabled production build, diff integrity,
+same-origin runtime health/protected-route probes, and static scope/privacy
+reviews passed. Authenticated end-to-end, representative-data, responsive, and
+keyboard browser acceptance remains pending and is not reported as completed.
+
 ## Summary
 
 | Area                                                                    | Status                                                                                                | Consumers                              | Next action                                                                                            |
 | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| Cookie authentication & rate limiting                                   | Current for backend invariant & Redis rate limiting; Partial for client CSRF                         | all roles                              | Backend forced-password invariant (Praktikan-only) and dynamic Redis rate limiting resolved; CSRF design remains for production |
-| Academic-period course list                                             | Current and frontend-integrated for Asprak assigned-course reads                                      | Asprak                                 | Runtime-smoke role scoping and retain history bounds as a follow-up                                    |
+| Cookie authentication & rate limiting                                   | Current and frontend-integrated for session identity/forced-password routing; Partial for client CSRF | all roles                              | Complete authenticated cross-role smoke; CSRF design remains for production                            |
+| Academic-period course list                                             | Current and frontend-integrated for Asprak assignment and Praktikan enrollment reads                  | Asprak; Praktikan                      | Complete authenticated role-scoping smoke                                                              |
 | Roster read / enrollment and staff                                      | Current and frontend-integrated for assigned-Asprak roster reads; Current backend contract for writes | Asprak roster reads; Superadmin writes | Runtime-smoke roster states; Bagas owns Superadmin FE                                                  |
 | Session create/list/update/open/close                                   | Current and frontend-integrated for the assigned-Asprak session workspace                              | Asprak; Praktikan reads                | Complete authenticated lifecycle/browser smoke                                                         |
 | Safe session delete/archive                                             | Blocked                                                                                               | Asprak                                 | Backend retention/archive contract absent                                                              |
-| Module presign/confirm/list                                             | Current and frontend-integrated for assigned-Asprak course-scoped list/download/upload                  | Asprak, Praktikan                      | Complete authenticated real-file browser smoke                                                          |
+| Module presign/confirm/list                                             | Current and frontend-integrated for Asprak management and Praktikan published-only list/download       | Asprak; Praktikan                      | Complete authenticated real-file browser smoke                                                          |
 | Module update/publish/replace/delete                                    | Current backend contracts; metadata/publish are frontend-integrated for Asprak while replace/delete stay excluded | Asprak, Praktikan visibility | Complete authenticated metadata/publication smoke; keep replace/delete controls absent                  |
-| Attendance bulk/list/personal                                           | Current; assigned-Asprak session list/bulk is frontend-integrated and personal history is context-complete | Asprak, Praktikan                  | Complete Asprak authenticated register smoke; Praktikan personal integration remains later             |
-| Grades bulk/list/personal                                               | Current; assigned-Asprak session gradebook/publication is frontend-integrated and personal history is context-complete | Asprak, Praktikan             | Complete Asprak authenticated lifecycle smoke; Praktikan personal integration remains later            |
-| Classwork assignments & submissions                                     | Current and frontend-integrated for assigned-Asprak list/create/detail/update/submission review/grading; Partial/Blocked for deletion and Praktikan upload | Asprak; Praktikan later                | Complete authenticated browser smoke; keep delete/upload controls excluded                              |
+| Attendance bulk/list/personal                                           | Current and frontend-integrated for Asprak session management and Praktikan personal read-only history | Asprak; Praktikan                      | Complete authenticated record/privacy browser smoke                                                     |
+| Grades bulk/list/personal                                               | Current and frontend-integrated for Asprak gradebook/publication and Praktikan published personal reads | Asprak; Praktikan                     | Complete authenticated publication/privacy browser smoke                                                |
+| Classwork assignments & submissions                                     | Current and frontend-integrated for Asprak management/review and Praktikan published/own-result reads; Partial/Blocked for deletion and Praktikan upload | Asprak; Praktikan | Complete authenticated browser smoke; keep delete/upload controls excluded                              |
 | Exports                                                                 | Current and frontend-integrated for assigned-Asprak attendance/grade CSV/XLSX downloads                | Asprak                                 | Complete authenticated file-content/browser smoke                                                      |
 | OpenAPI-to-TypeScript automation                                        | Proposed                                                                                              | all FE owners                          | Separate tooling/CI plan                                                                               |
 | CSRF design                                                             | Blocked before production                                                                             | all cookie writes                      | Bagas proposes; Aidan reviews FE impact                                                                |
@@ -42,15 +51,26 @@ Backend auth hardening added on 2026-08-28:
 - dynamic Redis client resolution implemented to eliminate static `None` fallback
 - trusted client IP derived from Nginx `X-Real-IP` (`$remote_addr`) to eliminate rate-limit header spoofing
 
+Frontend session integration added on 2026-09-02:
+
+- one stable TanStack Query key resolves `/auth/me` and supplies confirmed user
+  presentation state to all protected roles
+- 401 cancels/removes cached role data and redirects to sign in, while a
+  transient identity failure preserves session presentation and exposes Retry
+- only a forced Praktikan is redirected to change password; onboarded users may
+  deliberately use the same route for a voluntary password change
+- confirmed login/password responses seed the identity cache, and confirmed
+  logout removes all cached academic data before redirecting
+
 Remaining Partial gaps:
 
 - user model defaults the flag to true
-- the current auth guard conflates transient failures with 401 and can duplicate requests
 - CSRF protection beyond SameSite is not defined
 
 ## Academic-period courses
 
-Status: Current for the Asprak assigned-course read.
+Status: Current and frontend-integrated for Asprak assigned-course and
+Praktikan enrolled-course reads.
 
 Implemented and confirmed:
 
@@ -66,6 +86,11 @@ Bagas confirmed the response and migration/auth readiness through Aidan on 2026-
 Frontend integration added on 2026-08-13: the Asprak `My Practicum Classes` dashboard item uses a typed same-origin API wrapper, user-scoped TanStack Query key, bounded retry, and active/history request-state UI. Browser runtime smoke remains a manual validation item.
 
 Frontend course-centric Overview integration added on 2026-08-20: the real Asprak Overview reuses the same user-scoped query to derive assigned, active, and historical counts and renders bounded active-course shortcuts. Global Asprak Modules, Attendance, Grading, and Reports placeholders are removed; those operations remain inside a selected course workspace and follow their individual readiness entries below.
+
+Praktikan integration added on 2026-09-02: Overview and My Practicum Classes
+use an authenticated-user-scoped enrollment query, expose active/history
+academic periods in grid and table views, and gate every direct course child
+request until the selected course is present in that enrollment result.
 
 Integration boundaries:
 
@@ -185,9 +210,9 @@ Limitations:
 ## Modules
 
 Status: Current and frontend-integrated for the approved assigned-Asprak
-course-scoped list, download, presign/direct-upload/confirm, metadata update,
-publish, and unpublish workflow. Replacement and deletion remain excluded
-from the locked frontend scope.
+management workflow and Praktikan enrolled-course published-only list and
+download. Replacement and deletion remain excluded from the locked frontend
+scope.
 
 Current and evidenced:
 
@@ -221,6 +246,11 @@ Frontend list/download integration added on 2026-08-31:
 - `pnpm typecheck`, `pnpm lint`, and the network-enabled production build
   passed on 2026-08-31; lint retained only three pre-existing Superadmin
   warnings
+
+Praktikan module presentation added on 2026-09-02 uses explicit read-only
+access mode, defensively omits unpublished rows, and mounts no upload, editor,
+publication, replacement, deletion, or storage-key control. A deliberate
+Refresh links action renews the user/course-scoped in-memory list.
 
 Frontend upload/metadata/publication integration added on 2026-08-31:
 
@@ -261,9 +291,8 @@ Integration boundaries:
 Bulk upsert validates active enrolled Praktikan IDs. Session reads are staff-protected and personal history is user-scoped. Tests cover deduplication, invalid students, audit fields, role denial, and missing sessions.
 
 Status: Current and frontend-integrated for the assigned-Asprak session
-attendance list and full-roster bulk save. Personal history remains a Current
-backend contract for later Praktikan integration. Attendance-window lifecycle
-limitations remain documented under class sessions.
+attendance list/full-roster bulk save and Praktikan personal read-only history.
+Attendance-window lifecycle limitations remain documented under class sessions.
 
 Frontend integration added on 2026-08-31:
 
@@ -287,6 +316,15 @@ Frontend integration added on 2026-08-31:
   `git diff --check` passed on 2026-08-31; lint retained only the three
   pre-existing Superadmin warnings
 
+Praktikan integration added on 2026-09-02:
+
+- `/attendance/me` uses a separate authenticated-user query key and feeds a
+  grouped, filtered, bounded personal history
+- the course session panel merges records only by `session_id`; a missing row
+  is labeled `Not recorded` and never inferred as an attendance status
+- no staff roster/list/write, attendance-window mutation, export, or student
+  check-in control is mounted in the Praktikan tree
+
 Limitations:
 
 - authenticated full-roster save/reload, error simulation, long-roster,
@@ -300,8 +338,8 @@ Limitations:
 Implemented: bulk upsert, score validation, edit rejection while published, staff session list, publish/unpublish, and personal filtering to published sessions.
 
 Status: Current and frontend-integrated for assigned-Asprak session list,
-finite-score bulk save, publish, and unpublish. Personal published history is
-a Current backend contract for later Praktikan integration.
+finite-score bulk save, publish/unpublish, and Praktikan personal published
+history.
 
 Frontend integration added on 2026-08-31:
 
@@ -328,6 +366,16 @@ Frontend integration added on 2026-08-31:
 - `pnpm typecheck`, `pnpm lint`, the network-enabled production build, and
   `git diff --check` passed on 2026-08-31; lint retained only the three
   pre-existing Superadmin warnings
+
+Praktikan integration added on 2026-09-02:
+
+- `/grades/me` uses a separate authenticated-user query key and feeds grouped,
+  filtered, bounded personal history plus cached Overview metrics
+- course context matches personal results to readable sessions by `session_id`
+  and distinguishes `Not released`, no published score, numeric zero, and
+  finite decimal results
+- no staff grade read/write/publication, roster, or export operation is mounted
+  in the Praktikan tree
 
 Limitations:
 
@@ -387,7 +435,8 @@ Bagas evidence required:
 
 ## Course Stream & Announcements
 
-Status: Current and frontend-integrated for the Asprak course Stream.
+Status: Current and frontend-integrated for Asprak management and Praktikan
+enrolled-course read/comment workflows.
 
 Implemented and evidenced:
 
@@ -407,6 +456,12 @@ Frontend integration added on 2026-08-20:
 - writes wait for confirmed server success and invalidate only the affected course Stream instead of using optimistic destructive updates
 - loading, empty, 401, 403, 404, transient-error/retry, validation, pending, confirmation, and success states are represented
 
+Praktikan integration added on 2026-09-02 uses an explicit viewer role: it
+mounts no announcement composer or announcement-management mutation, while
+retaining enrollment-scoped reads, comment creation, and own-comment deletion.
+The People tab displays only the current user's identity and never calls roster
+or staff endpoints.
+
 Limitations:
 
 - authenticated browser lifecycle smoke remains pending
@@ -417,7 +472,8 @@ Limitations:
 
 Status: Current and frontend-integrated for assigned-Asprak assignment
 list/create/detail/update, submission review, and grading. Assignment deletion
-and Praktikan submit/resubmit remain excluded from the frontend integration.
+and Praktikan submit/resubmit remain excluded. Praktikan published assignment
+list/detail and own historical `my_submission` result reads are integrated.
 
 Current and evidenced:
 
@@ -486,6 +542,15 @@ Frontend detail/review integration added on 2026-08-29:
   non-color status behavior are represented in source
 - `pnpm typecheck`, `pnpm lint`, and the network-enabled production build passed
   on 2026-08-29; lint retained only three pre-existing Superadmin warnings
+
+Praktikan integration added on 2026-09-02:
+
+- Classwork mounts no assignment composer and displays no class-wide submission
+  count or staff controls
+- the refresh-safe detail route verifies enrollment before its assignment read,
+  treats unpublished/missing results neutrally, and renders only the caller's
+  `my_submission`, score, feedback, and time-limited download link
+- no submit/resubmit endpoint constant, wrapper, hook, form, or button was added
 
 Integration boundaries and blockers:
 

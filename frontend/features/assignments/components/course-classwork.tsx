@@ -11,9 +11,10 @@ import { AssignmentComposer } from "./assignment-composer";
 type CourseClassworkProps = {
   userId: string;
   courseId: string;
+  viewerRole: "asprak" | "praktikan";
 };
 
-export function CourseClasswork({ userId, courseId }: CourseClassworkProps) {
+export function CourseClasswork({ userId, courseId, viewerRole }: CourseClassworkProps) {
   const {
     data: assignments = [],
     error,
@@ -129,7 +130,9 @@ export function CourseClasswork({ userId, courseId }: CourseClassworkProps) {
 
   return (
     <div aria-busy={isFetching}>
-      <AssignmentComposer userId={userId} courseId={courseId} />
+      {viewerRole === "asprak" ? (
+        <AssignmentComposer userId={userId} courseId={courseId} />
+      ) : null}
 
       <div className="mt-6 flex flex-wrap items-end justify-between gap-3">
         <div>
@@ -137,7 +140,9 @@ export function CourseClasswork({ userId, courseId }: CourseClassworkProps) {
             Classwork assignments
           </h2>
           <p className="mt-1 text-sm text-slate-600">
-            Drafts and published assignments are ordered from newest to oldest.
+            {viewerRole === "asprak"
+              ? "Drafts and published assignments are ordered from newest to oldest."
+              : "Published instructions and your personal submission results."}
           </p>
         </div>
 
@@ -171,13 +176,19 @@ export function CourseClasswork({ userId, courseId }: CourseClassworkProps) {
             No assignments yet
           </h3>
           <p className="mt-1 text-sm text-slate-600">
-            Create the first draft or published assignment for this course.
+            {viewerRole === "asprak"
+              ? "Create the first draft or published assignment for this course."
+              : "Published assignments will appear here."}
           </p>
         </div>
       ) : (
         <div className="mt-5 space-y-5">
           {assignments.map((assignment) => (
-            <AssignmentCard key={assignment.id} assignment={assignment} />
+            <AssignmentCard
+              key={assignment.id}
+              assignment={assignment}
+              viewerRole={viewerRole}
+            />
           ))}
         </div>
       )}
