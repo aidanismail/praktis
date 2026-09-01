@@ -16,7 +16,7 @@ export const API_ENDPOINTS = {
     create: "/api/courses/",
     detail: (courseId: string) =>
       `/api/courses/${encodeURIComponent(courseId)}`,
-    students: (courseId: string) => 
+    students: (courseId: string) =>
       `/api/courses/${encodeURIComponent(courseId)}/students`,
     sessions: (courseId: string) =>
       `/api/courses/${encodeURIComponent(courseId)}/sessions`,
@@ -70,6 +70,8 @@ export const API_ENDPOINTS = {
     list: "/api/modules/",
     presignedUrl: "/api/modules/presigned-url",
     confirm: "/api/modules/confirm",
+    update: (moduleId: string) =>
+      `/api/modules/${encodeURIComponent(moduleId)}`,
     publish: (moduleId: string) =>
       `/api/modules/${encodeURIComponent(moduleId)}/publish`,
     unpublish: (moduleId: string) =>
@@ -81,6 +83,8 @@ export const API_ENDPOINTS = {
   classSessions: {
     create: (courseId: string) =>
       `/api/courses/${encodeURIComponent(courseId)}/sessions`,
+    update: (sessionId: string) =>
+      `/api/class-sessions/${encodeURIComponent(sessionId)}`,
     openAttendance: (sessionId: string) =>
       `/api/class-sessions/${encodeURIComponent(sessionId)}/open-attendance`,
     closeAttendance: (sessionId: string) =>
@@ -99,6 +103,8 @@ export const API_ENDPOINTS = {
   grades: {
     listBySession: (sessionId: string) =>
       `/api/grades/sessions/${encodeURIComponent(sessionId)}`,
+    bulkUpdate: (sessionId: string) =>
+      `/api/grades/sessions/${encodeURIComponent(sessionId)}/bulk`,
     publish: (sessionId: string) =>
       `/api/grades/sessions/${encodeURIComponent(sessionId)}/publish`,
     unpublish: (sessionId: string) =>
@@ -106,10 +112,10 @@ export const API_ENDPOINTS = {
   },
 
   export: {
-    attendance: (sessionId: string, format: string = "csv") =>
-      `/api/export/attendance/${encodeURIComponent(sessionId)}?format=${format}`,
-    grades: (sessionId: string, format: string = "csv") =>
-      `/api/export/grades/${encodeURIComponent(sessionId)}?format=${format}`
+    attendance: (sessionId: string, format: "csv" | "xlsx" = "csv") =>
+      `/api/export/attendance/${encodeURIComponent(sessionId)}?format=${encodeURIComponent(format)}`,
+    grades: (sessionId: string, format: "csv" | "xlsx" = "csv") =>
+      `/api/export/grades/${encodeURIComponent(sessionId)}?format=${encodeURIComponent(format)}`
   },
 
   health: "/api/health"

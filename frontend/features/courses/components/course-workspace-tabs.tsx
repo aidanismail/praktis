@@ -1,40 +1,60 @@
 "use client";
 
 import { BookOpen, MessageSquareText, Radio, Users } from "lucide-react";
-import { useRef, useState, type KeyboardEvent } from "react";
+import { useRef, type KeyboardEvent } from "react";
+import { useRouter } from "next/navigation";
 import { CourseStream } from "@/features/announcements/components/course-stream";
 import { CourseClasswork } from "@/features/assignments/components/course-classwork";
 import { CourseRoster } from "@/features/courses/components/course-roster";
+import { CourseModules } from "@/features/modules/components/course-modules";
+import { CourseSessions } from "@/features/sessions/components/course-sessions";
+
+import {
+  COURSE_WORKSPACE_TABS,
+  getCourseDetailRoute,
+  type CourseWorkspaceTab
+} from "@/constants/routes";
 
 type CourseWorkspaceTabsProps = {
   userId: string;
   courseId: string;
+  initialTab: CourseWorkspaceTab;
 };
 
-type ActiveWorkspaceTab = "stream" | "classwork" | "people";
-
-const enabledTabs: ActiveWorkspaceTab[] = ["stream", "classwork", "people"];
+const enabledTabs = COURSE_WORKSPACE_TABS;
 
 export function CourseWorkspaceTabs({
   userId,
-  courseId
+  courseId,
+  initialTab
 }: CourseWorkspaceTabsProps) {
-  const [activeTab, setActiveTab] = useState<ActiveWorkspaceTab>("stream");
+  const router = useRouter();
+  const activeTab = initialTab;
 
-  const tabRefs = useRef<Record<ActiveWorkspaceTab, HTMLButtonElement | null>>({
+  const tabRefs = useRef<Record<CourseWorkspaceTab, HTMLButtonElement | null>>({
     stream: null,
     classwork: null,
-    people: null
+    people: null,
+    sessions: null
   });
 
-  function selectTab(tab: ActiveWorkspaceTab) {
-    setActiveTab(tab);
-    tabRefs.current[tab]?.focus();
+  function activateTab(tab: CourseWorkspaceTab) {
+    router.replace(getCourseDetailRoute(courseId, tab), {
+      scroll: false
+    });
+  }
+
+  function selectTab(tab: CourseWorkspaceTab) {
+    activateTab(tab);
+
+    requestAnimationFrame(() => {
+      tabRefs.current[tab]?.focus();
+    });
   }
 
   function onTabKeyDown(
     event: KeyboardEvent<HTMLButtonElement>,
-    currentTab: ActiveWorkspaceTab
+    currentTab: CourseWorkspaceTab
   ) {
     const currentIndex = enabledTabs.indexOf(currentTab);
     let nextIndex: number | null = null;
@@ -85,7 +105,7 @@ export function CourseWorkspaceTabs({
             aria-selected={activeTab === "stream"}
             aria-controls="course-panel-stream"
             tabIndex={activeTab === "stream" ? 0 : -1}
-            onClick={() => setActiveTab("stream")}
+            onClick={() => activateTab("stream")}
             onKeyDown={(event) => onTabKeyDown(event, "stream")}
             className={`${tabClass} ${
               activeTab === "stream" ? activeClass : idleClass
@@ -105,7 +125,7 @@ export function CourseWorkspaceTabs({
             aria-selected={activeTab === "classwork"}
             aria-controls="course-panel-classwork"
             tabIndex={activeTab === "classwork" ? 0 : -1}
-            onClick={() => setActiveTab("classwork")}
+            onClick={() => activateTab("classwork")}
             onKeyDown={(event) => onTabKeyDown(event, "classwork")}
             className={`${tabClass} ${
               activeTab === "classwork" ? activeClass : idleClass
@@ -125,7 +145,7 @@ export function CourseWorkspaceTabs({
             aria-selected={activeTab === "people"}
             aria-controls="course-panel-people"
             tabIndex={activeTab === "people" ? 0 : -1}
-            onClick={() => setActiveTab("people")}
+            onClick={() => activateTab("people")}
             onKeyDown={(event) => onTabKeyDown(event, "people")}
             className={`${tabClass} ${
               activeTab === "people" ? activeClass : idleClass
@@ -136,22 +156,23 @@ export function CourseWorkspaceTabs({
           </button>
 
           <button
+            ref={(node) => {
+              tabRefs.current.sessions = node;
+            }}
+            id="course-tab-sessions"
             type="button"
             role="tab"
-            aria-selected="false"
-            aria-disabled="true"
-            disabled
-            className="inline-flex min-h-11 cursor-not-allowed items-center gap-2 rounded-xl border border-transparent px-4 text-sm font-semibold
-              text-slate-400"
+            aria-selected={activeTab === "sessions"}
+            aria-controls="course-panel-sessions"
+            tabIndex={activeTab === "sessions" ? 0 : -1}
+            onClick={() => activateTab("sessions")}
+            onKeyDown={(event) => onTabKeyDown(event, "sessions")}
+            className={`${tabClass} ${
+              activeTab === "sessions" ? activeClass : idleClass
+            }`}
           >
             <Radio className="h-4 w-4" aria-hidden="true" />
             Sessions & Attendance
-            <span
-              className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px]
-              uppercase tracking-wide text-slate-500"
-            >
-              Later
-            </span>
           </button>
         </div>
       </div>
@@ -174,7 +195,10 @@ export function CourseWorkspaceTabs({
           aria-labelledby="course-tab-classwork"
           className="mt-6 focus:outline-none"
         >
-          <CourseClasswork userId={userId} courseId={courseId} />
+          <div className="space-y-10">
+            <CourseModules userId={userId} courseId={courseId} />
+            <CourseClasswork userId={userId} courseId={courseId} />
+          </div>
         </div>
       ) : null}
 
@@ -186,6 +210,17 @@ export function CourseWorkspaceTabs({
           className="focus:outline-none"
         >
           <CourseRoster userId={userId} courseId={courseId} />
+        </div>
+      ) : null}
+
+      {activeTab === "sessions" ? (
+        <div
+          id="course-panel-sessions"
+          role="tabpanel"
+          aria-labelledby="course-tab-sessions"
+          className="mt-6 focus:outline-none"
+        >
+          <CourseSessions userId={userId} courseId={courseId} />
         </div>
       ) : null}
     </section>
