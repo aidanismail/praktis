@@ -7,13 +7,15 @@ import { ApiError } from "@/lib/api/client";
 import { useCourseAnnouncements } from "../hooks/use-course-announcements";
 import { AnnouncementCard } from "./announcement-card";
 import { AnnouncementComposer } from "./announcement-composer";
+import { PraktikanAnnouncementCard } from "./praktikan-announcement-card";
 
 type CourseStreamProps = {
   userId: string;
   courseId: string;
+  viewerRole: "asprak" | "praktikan";
 };
 
-export function CourseStream({ userId, courseId }: CourseStreamProps) {
+export function CourseStream({ userId, courseId, viewerRole }: CourseStreamProps) {
   const {
     data: announcements = [],
     error,
@@ -100,13 +102,17 @@ export function CourseStream({ userId, courseId }: CourseStreamProps) {
 
   return (
     <div aria-busy={isFetching}>
-      <AnnouncementComposer userId={userId} courseId={courseId} />
+      {viewerRole === "asprak" ? (
+        <AnnouncementComposer userId={userId} courseId={courseId} />
+      ) : null}
 
       <div className="mt-6 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className="text-xl font-semibold text-slate-950">Course Stream</h2>
           <p className="mt-1 text-sm text-slate-600">
-            Pinned updates appear first, followed by the latest announcements.
+            {viewerRole === "asprak"
+              ? "Pinned updates appear first, followed by the latest announcements."
+              : "Read course updates and use comments to ask questions."}
           </p>
         </div>
         <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700" aria-live="polite">
@@ -125,18 +131,29 @@ export function CourseStream({ userId, courseId }: CourseStreamProps) {
           <Megaphone className="mx-auto h-9 w-9 text-slate-400" aria-hidden="true" />
           <h3 className="mt-3 font-semibold text-slate-950">No announcements yet</h3>
           <p className="mt-1 text-sm text-slate-600">
-            Post the first update for this practicum course.
+            {viewerRole === "asprak"
+              ? "Post the first update for this practicum course."
+              : "Course announcements will appear here when they are published."}
           </p>
         </div>
       ) : (
         <div className="mt-5 space-y-5">
           {announcements.map((announcement) => (
-            <AnnouncementCard
-              key={announcement.id}
-              userId={userId}
-              courseId={courseId}
-              announcement={announcement}
-            />
+            viewerRole === "asprak" ? (
+              <AnnouncementCard
+                key={announcement.id}
+                userId={userId}
+                courseId={courseId}
+                announcement={announcement}
+              />
+            ) : (
+              <PraktikanAnnouncementCard
+                key={announcement.id}
+                userId={userId}
+                courseId={courseId}
+                announcement={announcement}
+              />
+            )
           ))}
         </div>
       )}

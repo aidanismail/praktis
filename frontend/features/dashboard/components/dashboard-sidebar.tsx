@@ -7,6 +7,7 @@ import {
   UploadCloud,
   FileText,
   ClipboardCheck,
+  GraduationCap,
   FileSpreadsheet,
   LogOut,
   Loader2,
@@ -35,6 +36,8 @@ const NAV_ICONS: Record<string, React.ElementType> = {
   "bulk-import": UploadCloud,
   modules: FileText,
   "attendance-reports": ClipboardCheck,
+  attendance: ClipboardCheck,
+  grades: GraduationCap,
   "grade-exports": FileSpreadsheet,
   profile: Users
 };

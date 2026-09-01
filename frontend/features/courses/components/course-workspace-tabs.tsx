@@ -184,7 +184,7 @@ export function CourseWorkspaceTabs({
           aria-labelledby="course-tab-stream"
           className="mt-6 focus:outline-none"
         >
-          <CourseStream userId={userId} courseId={courseId} />
+          <CourseStream userId={userId} courseId={courseId} viewerRole="asprak" />
         </div>
       ) : null}
 
@@ -196,8 +196,8 @@ export function CourseWorkspaceTabs({
           className="mt-6 focus:outline-none"
         >
           <div className="space-y-10">
-            <CourseModules userId={userId} courseId={courseId} />
-            <CourseClasswork userId={userId} courseId={courseId} />
+            <CourseModules userId={userId} courseId={courseId} accessMode="manage" />
+            <CourseClasswork userId={userId} courseId={courseId} viewerRole="asprak" />
           </div>
         </div>
       ) : null}

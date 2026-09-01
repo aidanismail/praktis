@@ -65,9 +65,9 @@ export const DASHBOARD_NAVIGATION: Record<UserRole, DashboardNavItem[]> = {
       description: "Summary of your practicum progress."
     },
     {
-      id: "modules",
-      label: "My Modules",
-      description: "Access practicum modules and files."
+      id: "classes",
+      label: "My Practicum Classes",
+      description: "Open enrolled classes, modules, and assignments."
     },
     {
       id: "attendance",

@@ -5,18 +5,16 @@ import {
   Download,
   FileText,
   Globe,
-  Loader2,
   Lock
 } from "lucide-react";
-import { ApiError } from "@/lib/api/client";
-import { useSetCourseModulePublication } from "../hooks/use-course-modules";
 import type { CourseModule } from "../types/module.type";
-import { ModuleEditor } from "./module-editor";
+import { ModuleManagementControls } from "./module-management-controls";
 
 type ModuleCardProps = {
   userId: string;
   courseId: string;
   module: CourseModule;
+  accessMode: "manage" | "read-only";
 };
 
 const moduleDateFormatter = new Intl.DateTimeFormat("en", {
@@ -32,45 +30,7 @@ function formatModuleDate(value: string) {
     : moduleDateFormatter.format(date);
 }
 
-function getPublicationErrorMessage(error: Error) {
-  if (!(error instanceof ApiError)) {
-    return "The module visibility could not be changed.";
-  }
-
-  if (error.status === 401) {
-    return "Your session has expired. Sign in again to continue.";
-  }
-
-  if (error.status === 403) {
-    return "You are not allowed to change this module's visibility.";
-  }
-
-  if (error.status === 404) {
-    return "This module no longer exists.";
-  }
-
-  if (error.status === 400 || error.status === 422) {
-    return "The visibility change was rejected.";
-  }
-
-  return "A network or server problem prevented the visibility change.";
-}
-
-export function ModuleCard({ userId, courseId, module }: ModuleCardProps) {
-  const publicationMutation = useSetCourseModulePublication({
-    userId,
-    courseId
-  });
-
-  function changePublication() {
-    publicationMutation.reset();
-
-    publicationMutation.mutate({
-      moduleId: module.id,
-      publish: !module.is_published
-    });
-  }
-
+export function ModuleCard({ userId, courseId, module, accessMode }: ModuleCardProps) {
   return (
     <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -88,7 +48,7 @@ export function ModuleCard({ userId, courseId, module }: ModuleCardProps) {
               <Lock className="h-3.5 w-3.5" aria-hidden="true" />
             )}
 
-            {module.is_published ? "Published" : "Draft"}
+            {accessMode === "read-only" ? "Available" : module.is_published ? "Published" : "Draft"}
           </span>
 
           <h3 className="mt-3 wrap-break-word text-lg font-semibold text-slate-950">
@@ -147,53 +107,7 @@ export function ModuleCard({ userId, courseId, module }: ModuleCardProps) {
         </a>
       </div>
 
-      {publicationMutation.isError ? (
-        <p
-          role="alert"
-          className="mt-4 rounded-xl bg-red-50 px-4 py-3
-              text-sm text-red-700"
-        >
-          {getPublicationErrorMessage(publicationMutation.error)}
-        </p>
-      ) : null}
-      {publicationMutation.isSuccess ? (
-        <p
-          role="status"
-          className="mt-4 rounded-xl bg-emerald-50
-              px-4 py-3 text-sm text-emerald-800"
-        >
-          {publicationMutation.data.message}
-        </p>
-      ) : null}
-
-      <div className="mt-4 flex flex-wrap gap-3">
-        <button
-          type="button"
-          onClick={changePublication}
-          disabled={publicationMutation.isPending}
-          className={
-            module.is_published
-              ? "inline-flex min-h-11 items-center justify-center rounded-xl border border-amber-300 bg-white px-4 text-sm font-semibold text-amber-900 transition hover:bg-amber-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 disabled:cursor-not-allowed disabled:opacity-60"
-              : "inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
-          }
-        >
-          {publicationMutation.isPending ? (
-            <>
-              <Loader2
-                className="mr-2 h-4 w-4 animate-spin"
-                aria-hidden="true"
-              />
-              Updating...
-            </>
-          ) : module.is_published ? (
-            "Unpublish module"
-          ) : (
-            "Publish module"
-          )}
-        </button>
-      </div>
-
-      <ModuleEditor userId={userId} courseId={courseId} module={module} />
+      {accessMode === "manage" ? <ModuleManagementControls userId={userId} courseId={courseId} module={module} /> : null}
     </article>
   );
 }

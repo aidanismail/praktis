@@ -4,6 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import Link from "next/link";
+import { ROUTES } from "@/constants/routes";
+import { ApiError } from "@/lib/api/client";
 
 import {
   changePasswordSchema,
@@ -11,7 +14,18 @@ import {
 } from "../schemas/auth.schema";
 import { useChangePassword } from "../hooks/use-change-password";
 
-export function ChangePasswordForm() {
+type ChangePasswordFormProps = { isForced: boolean };
+
+function getChangePasswordError(error: Error) {
+  if (!(error instanceof ApiError)) return "A network or server problem prevented the password change.";
+  if (error.status === 400) return "The current password is incorrect or the new password cannot be used.";
+  if (error.status === 401) return "Your session has expired. Sign in again to continue.";
+  if (error.status === 422) return "Check the password requirements and try again.";
+  if (error.status === 429) return "Too many attempts. Wait a moment before trying again.";
+  return "The password could not be changed. Try again.";
+}
+
+export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const changePasswordMutation = useChangePassword();
 
@@ -25,10 +39,13 @@ export function ChangePasswordForm() {
   });
 
   function onSubmit(values: ChangePasswordFormValues) {
-    changePasswordMutation.mutate({
-      old_password: values.current_password,
-      new_password: values.new_password
-    });
+    changePasswordMutation.mutate(
+      {
+        old_password: values.current_password,
+        new_password: values.new_password
+      },
+      { onSuccess: () => form.reset() }
+    );
   }
 
   return (
@@ -39,21 +56,20 @@ export function ChangePasswordForm() {
         </div>
 
         <h1 className="text-2xl font-semibold tracking-tight text-slate-950">
-          Ganti Passwordmu
+          {isForced ? "Secure your account" : "Change your password"}
         </h1>
 
         <p className="mt-2 text-sm leading-6 text-slate-500">
-          Demi keamanan akun, pengguna baru wajib mengganti kata sandi yang
-          telah dibuatkan sebelum mengakses Praktis.
+          {isForced
+            ? "Before continuing to Praktis, replace the temporary password created for your account."
+            : "Enter your current password and choose a new password for your Praktis account."}
         </p>
       </div>
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
         {changePasswordMutation.isError ? (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {changePasswordMutation.error instanceof Error
-              ? changePasswordMutation.error.message
-              : "Failed to change password."}
+          <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {getChangePasswordError(changePasswordMutation.error)}
           </div>
         ) : null}
 
@@ -62,7 +78,7 @@ export function ChangePasswordForm() {
             htmlFor="current_password"
             className="text-sm font-medium text-slate-800"
           >
-            Password lama
+            Current password
           </label>
 
           <input
@@ -70,12 +86,19 @@ export function ChangePasswordForm() {
             type="password"
             placeholder="Enter your current password"
             autoComplete="current-password"
+            disabled={changePasswordMutation.isPending}
+            aria-invalid={Boolean(form.formState.errors.current_password)}
+            aria-describedby={
+              form.formState.errors.current_password
+                ? "current-password-error"
+                : undefined
+            }
             className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
             {...form.register("current_password")}
           />
 
           {form.formState.errors.current_password ? (
-            <p className="text-sm text-red-600">
+            <p id="current-password-error" className="text-sm text-red-600">
               {form.formState.errors.current_password.message}
             </p>
           ) : null}
@@ -86,7 +109,7 @@ export function ChangePasswordForm() {
             htmlFor="new_password"
             className="text-sm font-medium text-slate-800"
           >
-            Password baru
+            New password
           </label>
 
           <div className="relative">
@@ -95,6 +118,9 @@ export function ChangePasswordForm() {
               type={showPassword ? "text" : "password"}
               placeholder="Minimum 8 characters"
               autoComplete="new-password"
+              disabled={changePasswordMutation.isPending}
+              aria-invalid={Boolean(form.formState.errors.new_password)}
+              aria-describedby={form.formState.errors.new_password ? "new-password-error" : undefined}
               className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 pr-10 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
               {...form.register("new_password")}
             />
@@ -102,7 +128,8 @@ export function ChangePasswordForm() {
             <button
               type="button"
               onClick={() => setShowPassword((value) => !value)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md text-slate-400 transition hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-300"
+              disabled={changePasswordMutation.isPending}
+              className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-300 disabled:opacity-60"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? (
@@ -114,7 +141,7 @@ export function ChangePasswordForm() {
           </div>
 
           {form.formState.errors.new_password ? (
-            <p className="text-sm text-red-600">
+            <p id="new-password-error" className="text-sm text-red-600">
               {form.formState.errors.new_password.message}
             </p>
           ) : null}
@@ -125,7 +152,7 @@ export function ChangePasswordForm() {
             htmlFor="confirm_password"
             className="text-sm font-medium text-slate-800"
           >
-            Confirm password baru
+            Confirm new password
           </label>
 
           <input
@@ -133,12 +160,15 @@ export function ChangePasswordForm() {
             type={showPassword ? "text" : "password"}
             placeholder="Repeat your new password"
             autoComplete="new-password"
+            disabled={changePasswordMutation.isPending}
+            aria-invalid={Boolean(form.formState.errors.confirm_password)}
+            aria-describedby={form.formState.errors.confirm_password ? "confirm-password-error" : undefined}
             className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
             {...form.register("confirm_password")}
           />
 
           {form.formState.errors.confirm_password ? (
-            <p className="text-sm text-red-600">
+            <p id="confirm-password-error" className="text-sm text-red-600">
               {form.formState.errors.confirm_password.message}
             </p>
           ) : null}
@@ -159,10 +189,15 @@ export function ChangePasswordForm() {
           )}
         </button>
 
+        {!isForced ? (
+          <Link href={ROUTES.dashboard} className="flex min-h-11 w-full items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-800">
+            Cancel and return to dashboard
+          </Link>
+        ) : null}
+
         <div className="rounded-2xl bg-slate-50 px-4 py-3">
           <p className="text-center text-xs leading-5 text-slate-500">
-            Anda akan diarahkan ke dasbor setelah kata sandi Anda berhasil
-            diperbarui.
+            You will return to the dashboard after the password is updated.
           </p>
         </div>
       </form>

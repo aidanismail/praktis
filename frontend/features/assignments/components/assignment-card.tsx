@@ -5,6 +5,7 @@ import type { Assignment } from "../types/assignment.type";
 
 type AssignmentCardProps = {
   assignment: Assignment;
+  viewerRole: "asprak" | "praktikan";
 };
 
 const assignmentDateFormatter = new Intl.DateTimeFormat("en", {
@@ -27,7 +28,7 @@ function getAllowedFileTypes(value: string) {
     .filter((fileType) => fileType.length > 0);
 }
 
-export function AssignmentCard({ assignment }: AssignmentCardProps) {
+export function AssignmentCard({ assignment, viewerRole }: AssignmentCardProps) {
   const allowedFileTypes = getAllowedFileTypes(assignment.allowed_file_types);
 
   return (
@@ -60,14 +61,21 @@ export function AssignmentCard({ assignment }: AssignmentCardProps) {
           </h3>
         </div>
 
-        <div
-          className="inline-flex items-center gap-2 rounded-xl bg-slate-50
-          px-3 py-2 text-sm font-medium text-slate-700"
-        >
-          <Users className="h-4 w-4" aria-hidden="true" />
-          {assignment.submissions_count}{" "}
-          {assignment.submissions_count === 1 ? "submission" : "submissions"}
-        </div>
+        {viewerRole === "asprak" ? (
+          <div className="inline-flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700">
+            <Users className="h-4 w-4" aria-hidden="true" />
+            {assignment.submissions_count}{" "}
+            {assignment.submissions_count === 1 ? "submission" : "submissions"}
+          </div>
+        ) : (
+          <span className={assignment.my_submission ? "rounded-full bg-sky-50 px-3 py-2 text-sm font-semibold text-sky-800" : "rounded-full bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700"}>
+            {assignment.my_submission
+              ? assignment.my_submission.score === null
+                ? "Submitted · Awaiting grade"
+                : "Submitted · Graded"
+              : "No recorded submission"}
+          </span>
+        )}
       </div>
 
       {assignment.description ? (

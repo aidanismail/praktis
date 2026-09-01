@@ -25,3 +25,19 @@ export type BulkAttendancePayload = {
 export type AttendanceMessageResponse = {
   message: string;
 };
+
+export type PersonalAttendanceHistoryItem = {
+  id: string;
+  session_id: string;
+  session_title: string;
+  session_date: string | null;
+  course_id: string;
+  course_code: string;
+  course_name: string;
+  academic_year: string;
+  semester: string;
+  status: AttendanceStatus;
+  created_at: string;
+  updated_at: string;
+  recorded_by: string | null;
+};
