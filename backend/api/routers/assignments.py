@@ -1,12 +1,18 @@
+import io
 import uuid
 import datetime
+import logging
 import os
+import re
 import asyncio
+import unicodedata
+import zipfile
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
-
+from core.config import settings
 from core.database import get_db
 from api.dependencies import get_current_active_user
 from api.permissions import require_course_access
@@ -22,14 +28,69 @@ from schemas.assignment import (
 )
 from services.storage_service import storage_service
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/courses/{course_id}/assignments", tags=["Assignments"])
 
-MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+MAGIC_SIGNATURES: dict[str, bytes] = {
+    "pdf": b"%PDF-",
+    "docx": b"PK\x03\x04",
+    "zip": b"PK\x03\x04",
+}
+
+ZIP_MAX_ENTRIES = 100
+ZIP_MAX_UNCOMPRESSED_BYTES = 50 * 1024 * 1024
+
+_SAFE_FILENAME_RE = re.compile(r"[^a-zA-Z0-9._-]")
+_MAX_DISPLAY_FILENAME_LEN = 200
 
 UNAUTHENTICATED_401 = {401: {"description": "Missing or invalid session cookie."}}
 FORBIDDEN_403 = {403: {"description": "Caller lacks enrollment or assignment permissions for this course."}}
 NOT_FOUND_404 = {404: {"description": "Course or assignment not found."}}
 BAD_REQUEST_400 = {400: {"description": "Invalid file format, excessive file size, or submission validation error."}}
+CONFLICT_409 = {409: {"description": "Concurrent submission conflict."}}
+
+def _sanitize_filename(raw: str, ext: str) -> str:
+    """Normalize an uploaded filename: basename only, safe chars, bounded."""
+    name = os.path.basename(raw)
+    stem = os.path.splitext(name)[0]
+    stem = unicodedata.normalize("NFKD", stem)
+    stem = _SAFE_FILENAME_RE.sub("_", stem)
+    stem = stem.strip("_") or "submission"
+    max_stem = _MAX_DISPLAY_FILENAME_LEN - len(ext) - 1
+    stem = stem[:max_stem]
+    return f"{stem}.{ext}"
+
+
+def _validate_zip_safety(content: bytes) -> None:
+    """Check a ZIP archive for entry count, path traversal, and size."""
+    try:
+        with zipfile.ZipFile(io.BytesIO(content)) as zf:
+            entries = zf.infolist()
+            if len(entries) > ZIP_MAX_ENTRIES:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"ZIP archive exceeds {ZIP_MAX_ENTRIES} entries",
+                )
+            total_uncompressed = 0
+            for entry in entries:
+                if ".." in entry.filename or entry.filename.startswith("/"):
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="ZIP archive contains unsafe path",
+                    )
+                total_uncompressed += entry.file_size
+                if total_uncompressed > ZIP_MAX_UNCOMPRESSED_BYTES:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="ZIP archive uncompressed size exceeds limit",
+                    )
+    except zipfile.BadZipFile:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid ZIP archive",
+        )
+
 
 
 def _build_submission_response(sub: Submission, student: User | None) -> SubmissionResponse:
@@ -318,18 +379,35 @@ async def delete_assignment(
     summary="Submit assignment solution file",
     description=(
         "Enrolled student (Praktikan) upload for assignment tasks. "
-        "Directly streams file to MinIO object storage, verifies allowed file format and 10MB size limit, "
-        "and automatically calculates `is_late` based on assignment due date."
+        "Reads the file with a bounded buffer (stops at the configured limit), "
+        "validates file content via magic-byte signatures and archive safety checks, "
+        "sanitizes the filename, and stores the object in MinIO with a generated key. "
+        "Automatically calculates `is_late` based on assignment due date. "
+        "Resubmission replaces the existing submission and clears all grading state."
     ),
-    responses={**UNAUTHENTICATED_401, **FORBIDDEN_403, **NOT_FOUND_404, **BAD_REQUEST_400},
+    responses={
+        **UNAUTHENTICATED_401,
+        **FORBIDDEN_403,
+        **NOT_FOUND_404,
+        **BAD_REQUEST_400,
+        **CONFLICT_409,
+    },
 )
 async def submit_assignment(
     course_id: uuid.UUID,
     assignment_id: uuid.UUID,
-    file: UploadFile = File(..., description="Practicum assignment solution file (PDF/ZIP/DOCX up to 10MB)."),
+    file: UploadFile = File(
+        ...,
+        description=(
+            "Practicum assignment solution file (PDF/ZIP/DOCX). "
+            f"Maximum size is configured via ASSIGNMENT_MAX_UPLOAD_BYTES."
+        ),
+    ),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
+    max_bytes = settings.ASSIGNMENT_MAX_UPLOAD_BYTES
+
     await require_course_access(db, current_user, course_id, write=False)
 
     if current_user.role != RoleEnum.PRAKTIKAN:
@@ -342,7 +420,6 @@ async def submit_assignment(
     if not assignment or not assignment.is_published:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Assignment not found")
 
-    # Validate file extension
     ext = os.path.splitext(file.filename or "")[1].lower().lstrip(".")
     allowed = [t.strip().lower().lstrip(".") for t in assignment.allowed_file_types.split(",")]
     if ext not in allowed:
@@ -351,15 +428,42 @@ async def submit_assignment(
             detail=f"File extension .{ext} not allowed. Allowed types: {assignment.allowed_file_types}",
         )
 
-    # Read and validate size
-    content = await file.read()
+    chunks: list[bytes] = []
+    total = 0
+    while True:
+        chunk = await file.read(64 * 1024)
+        if not chunk:
+            break
+        total += len(chunk)
+        if total > max_bytes:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"File exceeds maximum size of {max_bytes // (1024 * 1024)}MB",
+            )
+        chunks.append(chunk)
+    content = b"".join(chunks)
     if len(content) == 0:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Uploaded file is empty")
-    if len(content) > MAX_FILE_SIZE:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File exceeds maximum size of 10MB")
 
-    # Upload to MinIO offloaded to worker thread
-    file_key = f"assignments/{assignment_id}/{current_user.id}/{uuid.uuid4()}_{file.filename}"
+    expected_magic = MAGIC_SIGNATURES.get(ext)
+    if expected_magic and not content.startswith(expected_magic):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"File content does not match .{ext} format",
+        )
+
+    if ext in ("zip", "docx"):
+        _validate_zip_safety(content)
+
+    display_name = _sanitize_filename(file.filename or "submission", ext)
+
+    file_key = f"assignments/{assignment_id}/{current_user.id}/{uuid.uuid4()}.{ext}"
+    if len(file_key) > 500:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Generated file key exceeds storage limit",
+        )
+
     await asyncio.to_thread(
         storage_service.internal.put_object,
         Bucket=storage_service.bucket_name,
@@ -367,7 +471,6 @@ async def submit_assignment(
         Body=content,
     )
 
-    # Check late status
     now = datetime.datetime.now(datetime.timezone.utc)
     is_late = False
     if assignment.due_date:
@@ -377,51 +480,98 @@ async def submit_assignment(
         if now > due:
             is_late = True
 
-    # Check if existing submission exists
-    sub_res = await db.execute(
-        select(Submission).where(
-            Submission.assignment_id == assignment.id,
-            Submission.student_id == current_user.id,
+    try:
+        sub_res = await db.execute(
+            select(Submission)
+            .where(
+                Submission.assignment_id == assignment.id,
+                Submission.student_id == current_user.id,
+            )
+            .with_for_update()
         )
-    )
-    submission = sub_res.scalars().first()
-    old_file_key = None
-    if submission:
-        old_file_key = submission.file_key
-        submission.file_key = file_key
-        submission.file_name = file.filename or "file"
-        submission.file_size = len(content)
-        submission.submitted_at = now
-        submission.is_late = is_late
-        submission.score = None
-        submission.feedback = None
-        submission.graded_by = None
-        submission.graded_at = None
-        submission.status = "submitted"
-    else:
-        submission = Submission(
-            assignment_id=assignment.id,
-            student_id=current_user.id,
-            file_key=file_key,
-            file_name=file.filename or "file",
-            file_size=len(content),
-            submitted_at=now,
-            is_late=is_late,
-            status="submitted",
+        submission = sub_res.scalars().first()
+        old_file_key = None
+
+        if submission:
+            old_file_key = submission.file_key
+            submission.file_key = file_key
+            submission.file_name = display_name
+            submission.file_size = len(content)
+            submission.submitted_at = now
+            submission.is_late = is_late
+            submission.score = None
+            submission.feedback = None
+            submission.graded_by = None
+            submission.graded_at = None
+            submission.status = "submitted"
+        else:
+            submission = Submission(
+                assignment_id=assignment.id,
+                student_id=current_user.id,
+                file_key=file_key,
+                file_name=display_name,
+                file_size=len(content),
+                submitted_at=now,
+                is_late=is_late,
+                status="submitted",
+            )
+            db.add(submission)
+
+        await db.commit()
+        await db.refresh(submission)
+
+    except IntegrityError:
+        await db.rollback()
+        try:
+            await asyncio.to_thread(
+                storage_service.internal.delete_object,
+                Bucket=storage_service.bucket_name,
+                Key=file_key,
+            )
+        except Exception:
+            logger.warning("Failed to clean up orphan object %s after conflict", file_key)
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Concurrent submission conflict; please retry",
         )
-        db.add(submission)
+    except Exception:
+        try:
+            await asyncio.to_thread(
+                storage_service.internal.delete_object,
+                Bucket=storage_service.bucket_name,
+                Key=file_key,
+            )
+        except Exception:
+            logger.warning("Failed to clean up object %s after DB failure", file_key)
+        raise
 
-    await db.commit()
-    await db.refresh(submission)
-
-    # Delete old file only after successful db commit
     if old_file_key:
         try:
             await storage_service.delete_object(old_file_key)
         except Exception:
-            pass
+            logger.warning("Failed to delete replaced submission object: %s", old_file_key)
 
-    return _build_submission_response(submission, current_user)
+    try:
+        return _build_submission_response(submission, current_user)
+    except Exception:
+        logger.warning("Presigned URL generation failed for submission %s", submission.id)
+        return SubmissionResponse(
+            id=str(submission.id),
+            assignment_id=str(submission.assignment_id),
+            student_id=str(submission.student_id),
+            student_username=current_user.username,
+            student_email=current_user.email,
+            file_name=submission.file_name,
+            file_size=submission.file_size,
+            download_url="",
+            submitted_at=submission.submitted_at.isoformat() if submission.submitted_at else "",
+            is_late=submission.is_late,
+            score=submission.score,
+            feedback=submission.feedback,
+            graded_by=str(submission.graded_by) if submission.graded_by else None,
+            graded_at=submission.graded_at.isoformat() if submission.graded_at else None,
+            status=submission.status,
+        )
 
 
 @router.get(
@@ -439,7 +589,6 @@ async def list_assignment_submissions(
 ):
     await require_course_access(db, current_user, course_id, write=True)
 
-    # Verify assignment belongs to authorized course_id
     assign_res = await db.execute(
         select(Assignment).where(Assignment.id == assignment_id, Assignment.course_id == course_id)
     )
@@ -477,7 +626,6 @@ async def grade_submission(
 ):
     await require_course_access(db, current_user, course_id, write=True)
 
-    # Verify assignment belongs to authorized course_id
     assign_res = await db.execute(
         select(Assignment).where(Assignment.id == assignment_id, Assignment.course_id == course_id)
     )
@@ -510,7 +658,6 @@ async def grade_submission(
     await db.commit()
     await db.refresh(submission)
 
-    # Get student info
     st_res = await db.execute(select(User).where(User.id == submission.student_id))
     student = st_res.scalars().first()
 

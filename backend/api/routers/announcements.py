@@ -1,10 +1,15 @@
+import hashlib
+import logging
+import time
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 
+from core import cache
 from core.database import get_db
+from core.rate_limit import check_rate_limit
 from api.dependencies import get_current_active_user
 from api.permissions import require_course_access
 from models.user import User, RoleEnum
@@ -17,11 +22,33 @@ from schemas.announcement import (
     AnnouncementCommentResponse,
 )
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/courses/{course_id}/announcements", tags=["Announcements"])
 
 UNAUTHENTICATED_401 = {401: {"description": "Missing or invalid session cookie."}}
 FORBIDDEN_403 = {403: {"description": "Caller is not enrolled or assigned to this course, or lacks write permissions."}}
 NOT_FOUND_404 = {404: {"description": "Course or announcement not found."}}
+BAD_REQUEST_400 = {400: {"description": "Duplicate comment, invalid payload, or validation error."}}
+TOO_MANY_REQUESTS_429 = {429: {"description": "Comment rate limit or cooldown exceeded."}}
+
+_in_memory_dup_cache: dict[str, tuple[str, float]] = {}
+
+
+def _check_in_memory_duplicate(key: str, content_hash: str) -> None:
+    now = time.time()
+    if len(_in_memory_dup_cache) > 2000:
+        expired = [k for k, (_, exp) in _in_memory_dup_cache.items() if now > exp]
+        for k in expired:
+            _in_memory_dup_cache.pop(k, None)
+
+    last_hash, exp_at = _in_memory_dup_cache.get(key, ("", 0.0))
+    if now <= exp_at and last_hash == content_hash:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Duplicate comment detected. Please avoid posting identical messages.",
+        )
+    _in_memory_dup_cache[key] = (content_hash, now + 60.0)
 
 
 @router.get(
@@ -231,8 +258,18 @@ async def delete_announcement(
     response_model=AnnouncementCommentResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Add comment to announcement",
-    description="Adds a comment or question to the announcement discussion thread. Enrolled students and staff can comment.",
-    responses={**UNAUTHENTICATED_401, **FORBIDDEN_403, **NOT_FOUND_404},
+    description=(
+        "Adds a comment or question to the announcement discussion thread. "
+        "Enrolled students and staff can comment. Protected against spam via "
+        "user-scoped rate limiting (5/min), cooldown (3s), and in-memory/Redis SHA-256 duplicate detection."
+    ),
+    responses={
+        **UNAUTHENTICATED_401,
+        **FORBIDDEN_403,
+        **NOT_FOUND_404,
+        **BAD_REQUEST_400,
+        **TOO_MANY_REQUESTS_429,
+    },
 )
 async def add_comment(
     course_id: uuid.UUID,
@@ -242,6 +279,30 @@ async def add_comment(
     current_user: User = Depends(get_current_active_user),
 ):
     await require_course_access(db, current_user, course_id, write=False)
+
+    await check_rate_limit(key=f"comment_burst:{current_user.id}", max_requests=5, window_seconds=60)
+
+    await check_rate_limit(key=f"comment_cooldown:{current_user.id}:{announcement_id}", max_requests=1, window_seconds=3)
+
+    content_hash = hashlib.sha256(payload.content.lower().encode("utf-8")).hexdigest()
+    dup_key = f"comment_hash:{current_user.id}:{announcement_id}"
+
+    if cache.redis_client is not None:
+        try:
+            last_hash = await cache.redis_client.get(dup_key)
+            if last_hash == content_hash:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Duplicate comment detected. Please avoid posting identical messages.",
+                )
+            await cache.redis_client.set(dup_key, content_hash, ex=60)
+        except HTTPException:
+            raise
+        except Exception as exc:
+            logger.warning("Redis duplicate check failed: %s, falling back to in-memory", exc)
+            _check_in_memory_duplicate(dup_key, content_hash)
+    else:
+        _check_in_memory_duplicate(dup_key, content_hash)
 
     result = await db.execute(
         select(Announcement).where(Announcement.id == announcement_id, Announcement.course_id == course_id)
@@ -286,7 +347,6 @@ async def delete_comment(
 ):
     await require_course_access(db, current_user, course_id, write=False)
 
-    # Validate announcement belongs to course
     ann_result = await db.execute(
         select(Announcement).where(Announcement.id == announcement_id, Announcement.course_id == course_id)
     )

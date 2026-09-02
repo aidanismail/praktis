@@ -3,17 +3,19 @@ from pathlib import Path
 
 # Settings are instantiated at import time, so the environment must be
 # prepared before anything from the app is imported.
-TEST_DATABASE_URL = os.environ.get(
-    "TEST_DATABASE_URL", "postgresql://praktis:praktis@localhost:5432/praktis_test"
-)
+user = os.environ.get("POSTGRES_USER", "praktis_admin")
+password = os.environ.get("POSTGRES_PASSWORD", "PunyaAidanBagas123")
+default_test_url = f"postgresql://{user}:{password}@localhost:5432/praktis_test"
+
+TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL", default_test_url)
 os.environ["DATABASE_URL"] = TEST_DATABASE_URL
-os.environ.setdefault("POSTGRES_USER", "praktis")
-os.environ.setdefault("POSTGRES_PASSWORD", "praktis")
+os.environ.setdefault("POSTGRES_USER", user)
+os.environ.setdefault("POSTGRES_PASSWORD", password)
 os.environ.setdefault("POSTGRES_DB", "praktis_test")
-os.environ.setdefault("JWT_SECRET", "test-secret")
+os.environ.setdefault("JWT_SECRET", "supersecret_jwt_key_that_is_at_least_32_bytes_long")
 os.environ.setdefault("MINIO_ENDPOINT", "localhost:9000")
-os.environ.setdefault("MINIO_ROOT_USER", "test")
-os.environ.setdefault("MINIO_ROOT_PASSWORD", "test")
+os.environ.setdefault("MINIO_ROOT_USER", os.environ.get("MINIO_ROOT_USER", "admin"))
+os.environ.setdefault("MINIO_ROOT_PASSWORD", os.environ.get("MINIO_ROOT_PASSWORD", "SuperSecretMinio123"))
 
 import asyncio
 

@@ -23,7 +23,6 @@ async def test_announcement_lifecycle(client, db):
     student = await create_user(db, RoleEnum.PRAKTIKAN)
     await enroll_student(db, course, student)
 
-    # 1. Asprak creates an announcement
     set_auth(client, asprak)
     create_resp = await client.post(
         f"/courses/{course.id}/announcements",
@@ -38,14 +37,12 @@ async def test_announcement_lifecycle(client, db):
     assert create_resp.json()["title"] == "Welcome to Practicum 2025/2026"
     assert create_resp.json()["is_pinned"] is True
 
-    # 2. Student lists announcements
     set_auth(client, student)
     list_resp = await client.get(f"/courses/{course.id}/announcements")
     assert list_resp.status_code == 200
     assert len(list_resp.json()) >= 1
     assert list_resp.json()[0]["id"] == ann_id
 
-    # 3. Student adds a comment
     comment_resp = await client.post(
         f"/courses/{course.id}/announcements/{ann_id}/comments",
         json={"content": "Thank you, noted!"},
@@ -54,13 +51,11 @@ async def test_announcement_lifecycle(client, db):
     comment_id = comment_resp.json()["id"]
     assert comment_resp.json()["content"] == "Thank you, noted!"
 
-    # 4. Student deletes their own comment
     del_comment_resp = await client.delete(
         f"/courses/{course.id}/announcements/{ann_id}/comments/{comment_id}"
     )
     assert del_comment_resp.status_code == 204
 
-    # 5. Asprak deletes announcement
     set_auth(client, asprak)
     del_ann_resp = await client.delete(f"/courses/{course.id}/announcements/{ann_id}")
     assert del_ann_resp.status_code == 204
@@ -75,7 +70,6 @@ async def test_assignment_lifecycle_and_grading(client, db):
     student = await create_user(db, RoleEnum.PRAKTIKAN)
     await enroll_student(db, course, student)
 
-    # 1. Asprak creates an assignment
     set_auth(client, asprak)
     create_resp = await client.post(
         f"/courses/{course.id}/assignments",
@@ -91,14 +85,12 @@ async def test_assignment_lifecycle_and_grading(client, db):
     assign_id = create_resp.json()["id"]
     assert create_resp.json()["title"] == "Tugas 1: Pointer & Memory"
 
-    # 2. Student lists assignments
     set_auth(client, student)
     list_resp = await client.get(f"/courses/{course.id}/assignments")
     assert list_resp.status_code == 200
     assert len(list_resp.json()) >= 1
     assert list_resp.json()[0]["id"] == assign_id
 
-    # 3. Simulate submission in DB
     submission = Submission(
         assignment_id=uuid.UUID(assign_id),
         student_id=student.id,
@@ -112,14 +104,12 @@ async def test_assignment_lifecycle_and_grading(client, db):
     await db.commit()
     await db.refresh(submission)
 
-    # 4. Asprak lists submissions
     set_auth(client, asprak)
     sub_list_resp = await client.get(f"/courses/{course.id}/assignments/{assign_id}/submissions")
     assert sub_list_resp.status_code == 200
     assert len(sub_list_resp.json()) == 1
     assert sub_list_resp.json()[0]["student_username"] == student.username
 
-    # 5. Asprak grades submission
     grade_resp = await client.post(
         f"/courses/{course.id}/assignments/{assign_id}/submissions/{submission.id}/grade",
         json={"score": 95.5, "feedback": "Excellent clean implementation!"},
@@ -128,3 +118,46 @@ async def test_assignment_lifecycle_and_grading(client, db):
     assert grade_resp.json()["score"] == 95.5
     assert grade_resp.json()["feedback"] == "Excellent clean implementation!"
     assert grade_resp.json()["status"] == "graded"
+
+
+@pytest.mark.asyncio
+async def test_announcement_comment_anti_spam(client, db):
+    course = await create_course(db)
+    asprak = await create_user(db, RoleEnum.ASPRAK)
+    await assign_course_staff(db, course, asprak)
+    student = await create_user(db, RoleEnum.PRAKTIKAN)
+    await enroll_student(db, course, student)
+
+    set_auth(client, asprak)
+    ann_res = await client.post(
+        f"/courses/{course.id}/announcements",
+        json={"title": "Anti-Spam Verification", "content": "Post comments here"},
+    )
+    assert ann_res.status_code == 201
+    ann_id = ann_res.json()["id"]
+
+    set_auth(client, student)
+    valid_res = await client.post(
+        f"/courses/{course.id}/announcements/{ann_id}/comments",
+        json={"content": "First valid comment"},
+    )
+    assert valid_res.status_code == 201
+
+    dup_res = await client.post(
+        f"/courses/{course.id}/announcements/{ann_id}/comments",
+        json={"content": "First valid comment"},
+    )
+    assert dup_res.status_code == 400
+    assert "Duplicate comment detected" in dup_res.json()["detail"]
+
+    oversized_res = await client.post(
+        f"/courses/{course.id}/announcements/{ann_id}/comments",
+        json={"content": "A" * 1001},
+    )
+    assert oversized_res.status_code == 422
+
+    empty_res = await client.post(
+        f"/courses/{course.id}/announcements/{ann_id}/comments",
+        json={"content": "   \n\t  "},
+    )
+    assert empty_res.status_code == 422

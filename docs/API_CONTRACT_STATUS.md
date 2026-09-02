@@ -34,7 +34,7 @@ keyboard browser acceptance remains pending and is not reported as completed.
 | Module update/publish/replace/delete                                    | Current backend contracts; metadata/publish are frontend-integrated for Asprak while replace/delete stay excluded | Asprak, Praktikan visibility | Complete authenticated metadata/publication smoke; keep replace/delete controls absent                  |
 | Attendance bulk/list/personal                                           | Current and frontend-integrated for Asprak session management and Praktikan personal read-only history | Asprak; Praktikan                      | Complete authenticated record/privacy browser smoke                                                     |
 | Grades bulk/list/personal                                               | Current and frontend-integrated for Asprak gradebook/publication and Praktikan published personal reads | Asprak; Praktikan                     | Complete authenticated publication/privacy browser smoke                                                |
-| Classwork assignments & submissions                                     | Current and frontend-integrated for Asprak management/review and Praktikan published/own-result reads; Partial/Blocked for deletion and Praktikan upload | Asprak; Praktikan | Complete authenticated browser smoke; keep delete/upload controls excluded                              |
+| Classwork assignments & submissions                                     | Current and frontend-integrated for Asprak management/review and Praktikan published/own-result reads; Praktikan upload Current with limitations; deletion excluded | Asprak; Praktikan | Complete authenticated browser smoke; keep delete controls excluded; build Praktikan upload frontend    |
 | Exports                                                                 | Current and frontend-integrated for assigned-Asprak attendance/grade CSV/XLSX downloads                | Asprak                                 | Complete authenticated file-content/browser smoke                                                      |
 | OpenAPI-to-TypeScript automation                                        | Proposed                                                                                              | all FE owners                          | Separate tooling/CI plan                                                                               |
 | CSRF design                                                             | Blocked before production                                                                             | all cookie writes                      | Bagas proposes; Aidan reviews FE impact                                                                |
@@ -471,9 +471,10 @@ Limitations:
 ## Classwork Assignments & Submissions
 
 Status: Current and frontend-integrated for assigned-Asprak assignment
-list/create/detail/update, submission review, and grading. Assignment deletion
-and Praktikan submit/resubmit remain excluded. Praktikan published assignment
-list/detail and own historical `my_submission` result reads are integrated.
+list/create/detail/update, submission review, and grading. Praktikan
+submit/resubmit is Current with limitations. Assignment deletion remains
+excluded. Praktikan published assignment list/detail and own historical
+`my_submission` result reads are integrated.
 
 Current and evidenced:
 
@@ -503,6 +504,37 @@ Current and evidenced:
   through the assignment's `max_points`.
 - These operations use the active-user dependency and assigned-course access
   checks. Runtime OpenAPI exposed all four operations on 2026-08-29.
+
+Praktikan submit/resubmit backend fix added on 2026-09-02:
+
+- `POST /courses/{course_id}/assignments/{assignment_id}/submit` is now Current
+  with the following fixes applied:
+- Nginx `/api/` location sets `client_max_body_size 11m` to align with the
+  backend's 10 MiB limit plus multipart framing overhead.
+- The route uses bounded chunked reads (64 KiB iterations, stops at the
+  configured `ASSIGNMENT_MAX_UPLOAD_BYTES`) instead of buffering the entire file.
+- File content is validated via magic-byte signatures (`%PDF-` for PDF,
+  `PK\x03\x04` for ZIP/DOCX), consistent with the modules router pattern.
+- ZIP and DOCX archives are checked for entry count (max 100), path traversal
+  (`../`), and total uncompressed size (max 50 MiB) using stdlib `zipfile`.
+- Uploaded filenames are sanitized to basename-only, ASCII-safe, bounded to
+  200 characters. Storage keys are generated independently of user input using
+  `assignments/{assignment_id}/{student_id}/{uuid4}.{ext}`.
+- Database and storage changes use compensation: if the DB commit fails after
+  object upload, the orphan object is deleted. Old-object cleanup failures are
+  logged rather than silently swallowed.
+- Concurrent submissions use `SELECT ... FOR UPDATE` to serialize access.
+  `IntegrityError` from a unique-constraint race returns HTTP 409 and
+  compensates by deleting the orphan object.
+- Presigned URL generation failure after a successful commit returns a response
+  with an empty `download_url` rather than failing the committed submission.
+- Resubmission continues to clear score, feedback, grader, grading timestamp,
+  and restore `status="submitted"`.
+- Focused test suite in `tests/test_assignment_submit.py` covers: valid
+  PDF/ZIP/DOCX, empty file, over-limit, wrong extension, extension-content
+  mismatch, malformed ZIP, path traversal, unsafe filename, wrong role,
+  unenrolled caller, draft assignment, wrong course, resubmission grade reset,
+  late submission, and on-time submission.
 
 Frontend integration added on 2026-08-27:
 
@@ -550,30 +582,37 @@ Praktikan integration added on 2026-09-02:
 - the refresh-safe detail route verifies enrollment before its assignment read,
   treats unpublished/missing results neutrally, and renders only the caller's
   `my_submission`, score, feedback, and time-limited download link
-- no submit/resubmit endpoint constant, wrapper, hook, form, or button was added
+- no submit/resubmit frontend UI was added yet; the backend contract is now
+  Current and ready for frontend integration
 
-Integration boundaries and blockers:
+Integration boundaries and remaining limitations:
 
 - Assignment deletion does not yet provide proven database/storage cleanup or
   compensation semantics, so no delete control is rendered.
-- The Nginx `/api/` location does not yet align its request-body limit with the
-  backend's advertised 10 MiB assignment upload limit.
-- Praktikan submit/resubmit still buffers the complete file, uses extension-only
-  validation and an original filename-derived key, and lacks complete
-  database/storage/concurrent-upload compensation, so no upload integration is
-  part of this Asprak batch.
+- Content is still held in memory (up to 10 MiB per request) after the bounded
+  read. True streaming to MinIO would require a presigned-upload architecture
+  change. This is acceptable for the initial scale (~200 users).
+- The `allowed_file_types` column accepts an unrestricted comma-separated
+  string. Extension validation is restricted to the approved PDF/ZIP/DOCX set
+  by content checks, but other extensions could be configured without
+  corresponding magic-byte validation.
+- ZIP magic bytes alone do not prove complete DOCX structure (shared limitation
+  with the modules router).
 - Focused backend regression tests for cross-course isolation, explicit-null
-  update, grade bounds, upload failure, and storage cleanup were not found;
-  current integration evidence is route/schema/permission source plus runtime
-  OpenAPI and existing lifecycle coverage.
+  update, grade bounds, and storage cleanup for non-upload operations were not
+  found; current integration evidence is route/schema/permission source plus
+  runtime OpenAPI and existing lifecycle coverage.
 - Production CSRF protection beyond the current SameSite-Lax cookie behavior is
-  unresolved and was not weakened by this integration.
+  unresolved and was not weakened by this integration. CSRF remains a shared
+  production release gate for all cookie-authenticated writes.
 - Authenticated assigned-Asprak browser acceptance for assignment list/create,
   validation, draft/published creation, refresh persistence, responsive layout,
   and keyboard tab behavior was owner-reported PASS on 2026-08-27.
 - Authenticated browser acceptance for detail/edit/submission review/grading is
   still pending; grading/download scenarios may be blocked when development
   data contains no real submissions.
+- Authenticated Praktikan browser acceptance for submit/resubmit through
+  `http://localhost:8080` remains pending until the frontend upload UI is built.
 
 ## Contract automation proposal
 

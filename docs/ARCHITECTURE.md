@@ -55,7 +55,7 @@ location /api/ {
 
 A browser request to `/api/auth/me` is forwarded as `/auth/me`. Frontend constants retain `/api/`; Nginx owns prefix removal.
 
-The MinIO location sets `client_max_body_size 30m`, supporting the 25 MiB module and 10 MiB assignment upload policies.
+The MinIO location sets `client_max_body_size 30m` for direct-to-storage module uploads (25 MiB policy). The `/api/` location sets `client_max_body_size 11m` for backend-proxied requests including the 10 MiB assignment upload policy, with headroom for multipart framing.
 
 ## Frontend architecture
 

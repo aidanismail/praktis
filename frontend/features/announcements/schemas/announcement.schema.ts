@@ -13,7 +13,11 @@ export const announcementSchema = z.object({
 export type AnnouncementFormValues = z.infer<typeof announcementSchema>;
 
 export const announcementCommentSchema = z.object({
-  content: z.string().trim().min(1, "Comment cannot be empty")
+  content: z
+    .string()
+    .trim()
+    .min(1, "Comment cannot be empty")
+    .max(1000, "Comment cannot exceed 1000 characters")
 });
 
 export type AnnouncementCommentFormValues = z.infer<

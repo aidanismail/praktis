@@ -1,5 +1,5 @@
 import uuid
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class AnnouncementCreate(BaseModel):
@@ -15,7 +15,20 @@ class AnnouncementUpdate(BaseModel):
 
 
 class AnnouncementCommentCreate(BaseModel):
-    content: str = Field(..., min_length=1, description="Comment message content.")
+    content: str = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="Comment message content (1-1000 characters).",
+    )
+
+    @field_validator("content")
+    @classmethod
+    def validate_content(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("Comment cannot be empty or only whitespace")
+        return v
 
 
 class AnnouncementCommentResponse(BaseModel):

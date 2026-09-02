@@ -1,16 +1,25 @@
+import os
 import json
 import uuid
 import urllib.request
-import urllib.parse
 import http.cookiejar
+try:
+    import pytest
+except ImportError:
+    pytest = None
 
-BASE_URL = "http://nginx:80/api"
+def get_base_url() -> str:
+    if "BASE_URL" in os.environ:
+        return os.environ["BASE_URL"]
+    # If running inside docker container
+    if os.path.exists("/.dockerenv"):
+        return "http://nginx:80/api"
+    # If running on local host machine
+    return "http://localhost:8080/api"
+
+BASE_URL = get_base_url()
 
 def run_suite():
-    print("==================================================")
-    print("   PRAKTIS PRODUCTION-GRADE API & SECURITY SUITE  ")
-    print("==================================================")
-
     cookie_jar = http.cookiejar.CookieJar()
     opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookie_jar))
 
@@ -258,10 +267,10 @@ def run_suite():
             rate_limited = True
             break
     assert rate_limited, "Rate limiter did not trigger 429 Too Many Requests"
-
-    print("==================================================")
-    print("   ALL 25 COHERENT API & SECURITY SUITES PASSED!  ")
-    print("==================================================")
+    
+def test_live_api_suite():
+    """Pytest entrypoint for running the live integration test suite."""
+    run_suite()
 
 if __name__ == "__main__":
     run_suite()

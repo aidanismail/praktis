@@ -148,19 +148,23 @@ export function AnnouncementComments({
       ) : null}
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4">
-        <label htmlFor={formId} className="text-sm font-medium text-slate-800">
-          Add a comment
-        </label>
+        <div className="flex items-center justify-between text-sm font-medium text-slate-800">
+          <label htmlFor={formId}>Add a comment</label>
+          <span className="text-[11px] font-normal text-slate-400">
+            {(form.watch("content") || "").length} / 1000
+          </span>
+        </div>
         <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-start">
           <div className="min-w-0 flex-1">
             <textarea
               id={formId}
               rows={2}
+              maxLength={1000}
               disabled={addMutation.isPending}
               aria-invalid={Boolean(form.formState.errors.content)}
               aria-describedby={form.formState.errors.content ? `${formId}-error` : undefined}
               className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 disabled:bg-slate-100"
-              placeholder="Ask a question or add context..."
+              placeholder="Ask a question or add context (max 1000 characters)..."
               {...form.register("content")}
             />
             {form.formState.errors.content ? (
