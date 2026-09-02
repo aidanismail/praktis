@@ -118,7 +118,7 @@ function SessionHeader({ session }: { session: CourseSession }) {
           : "Unknown attendance state";
 
   return (
-    <header className="rounded-3xl bg-slate-950 p-6 text-white shadow-sm sm:p-8">
+    <header className="rounded-3xl bg-brand p-6 text-white shadow-sm sm:p-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-wider text-emerald-300">

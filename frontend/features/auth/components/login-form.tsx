@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2, LockKeyhole, UserRound } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { ProductLogo } from "@/components/branding/product-logo";
 
 import { loginSchema, type LoginFormValues } from "../schemas/auth.schema";
 import { useLogin } from "../hooks/use-login";
@@ -27,12 +28,15 @@ export function LoginForm() {
   return (
     <div className="mx-auto w-full max-w-md rounded-3xl border border-white/10 bg-white/95 p-7 shadow-2xl shadow-black/20 backdrop-blur">
       <div className="mb-7">
-        <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-sm">
-          <LockKeyhole className="h-6 w-6" />
-        </div>
+        <ProductLogo
+          size={48}
+          alt="Praktis"
+          priority
+          className="mb-5 rounded-full shadow-sm"
+        />
 
         <h1 className="text-2xl font-semibold tracking-tight text-slate-950">
-          Sign in to praktis
+          Sign in to Praktis
         </h1>
 
         <p className="mt-2 text-sm leading-6 text-slate-500">
@@ -121,7 +125,7 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={loginMutation.isPending}
-          className="flex h-11 w-full items-center justify-center rounded-xl bg-slate-950 px-4 text-sm font-medium text-white transition cursor-pointer hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
+          className="flex h-11 w-full cursor-pointer items-center justify-center rounded-xl bg-brand px-4 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {loginMutation.isPending ? (
             <>

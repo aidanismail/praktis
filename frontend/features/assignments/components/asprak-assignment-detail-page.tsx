@@ -346,8 +346,8 @@ function AssignedAssignmentDetail({
       <DetailPageFrame>
         <RequestErrorPanel
           error={assignmentQuery.error}
-          fallbackHref={getCourseDetailRoute(courseId, "classwork")}
-          fallbackLabel="Back to Classwork"
+          fallbackHref={getCourseDetailRoute(courseId, "assignments")}
+          fallbackLabel="Back to Assignments"
           onRetry={() => void assignmentQuery.refetch()}
           isRetrying={assignmentQuery.isFetching}
         />
@@ -371,11 +371,11 @@ function AssignedAssignmentDetail({
             The assignment does not belong to the selected course.
           </p>
           <Link
-            href={getCourseDetailRoute(courseId, "classwork")}
+            href={getCourseDetailRoute(courseId, "assignments")}
             className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-amber-900 underline underline-offset-4"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            Back to Classwork
+            Back to Assignments
           </Link>
         </div>
       </DetailPageFrame>
@@ -385,11 +385,11 @@ function AssignedAssignmentDetail({
   return (
     <DetailPageFrame>
       <Link
-        href={getCourseDetailRoute(courseId, "classwork")}
+        href={getCourseDetailRoute(courseId, "assignments")}
         className="inline-flex min-h-11 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        Back to Classwork
+        Back to Assignments
       </Link>
 
       <p className="mt-5 text-sm font-medium text-emerald-700">

@@ -34,6 +34,23 @@ export function getCourseAssignment(courseId: string, assignmentId: string) {
   );
 }
 
+export function submitCourseAssignment(
+  courseId: string,
+  assignmentId: string,
+  file: File
+) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return apiClient<AssignmentSubmission>(
+    API_ENDPOINTS.assignments.submit(courseId, assignmentId),
+    {
+      method: "POST",
+      body: formData
+    }
+  );
+}
+
 export function updateCourseAssignment(
   courseId: string,
   assignmentId: string,

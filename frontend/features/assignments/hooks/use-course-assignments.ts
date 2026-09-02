@@ -8,6 +8,7 @@ import {
   gradeAssignmentSubmission,
   listAssignmentSubmissions,
   listCourseAssignments,
+  submitCourseAssignment,
   updateCourseAssignment
 } from "../api/assignments.api";
 import { assignmentQueryKeys } from "../constants/assignment-query-keys";
@@ -142,6 +143,39 @@ export function useUpdateCourseAssignment({
         queryKey: assignmentQueryKeys.course(userId, courseId),
         exact: true
       });
+    },
+    retry: false
+  });
+}
+
+export function useSubmitAssignment({
+  userId,
+  courseId,
+  assignmentId
+}: AssignmentScope) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (file: File) =>
+      submitCourseAssignment(courseId, assignmentId, file),
+    onSuccess: (submission) => {
+      queryClient.setQueryData<Assignment>(
+        assignmentQueryKeys.detail(userId, courseId, assignmentId),
+        (currentAssignment) =>
+          currentAssignment
+            ? { ...currentAssignment, my_submission: submission }
+            : currentAssignment
+      );
+
+      queryClient.setQueryData<Assignment[]>(
+        assignmentQueryKeys.course(userId, courseId),
+        (currentAssignments) =>
+          currentAssignments?.map((assignment) =>
+            assignment.id === assignmentId
+              ? { ...assignment, my_submission: submission }
+              : assignment
+          )
+      );
     },
     retry: false
   });

@@ -75,11 +75,12 @@ Actual repository paths:
 ### UI Design Architecture
 - **Information Hierarchy**: Google Classroom inspired academic operations.
 - **Dual Presentation**: Smooth switch between visual **Classroom Card Grid** (with semester banners and quick access) and **High-Density Data Table**.
-- **Course Workspace (4-Tab Modal/Drawer)**:
+- **Asprak/Praktikan Course Workspace (5 Tabs)**:
   1. **Stream**: Course metadata, academic period, and recent activity.
-  2. **Classwork**: Learning modules and assignment submissions with PDF download links and publish toggles.
-  3. **People**: Teaching Assistants (Asprak) and Enrolled Students (Praktikan) rosters with avatar initials.
-  4. **Sessions & Attendance**: Class session meeting log with quiet live status indicators.
+  2. **Modules**: Learning materials with role-appropriate downloads and publication controls.
+  3. **Assignments**: Assignment tasks, student submissions, and role-appropriate grading or personal results.
+  4. **People**: Teaching Assistants (Asprak) and Enrolled Students (Praktikan) rosters with avatar initials.
+  5. **Sessions & Attendance**: Class session meeting log with quiet live status indicators.
 
 ## Backend architecture
 
@@ -89,7 +90,7 @@ Actual repository paths:
   - `class_sessions.py`: Meeting sessions and attendance windows
   - `modules.py`: Practicum learning materials uploaded to MinIO
   - `announcements.py`: Course stream broadcasts and discussion comments
-  - `assignments.py`: Classwork tasks, student solution file uploads to MinIO, and grading
+  - `assignments.py`: Assignment tasks, student solution file uploads to MinIO, and grading
   - `attendance.py`: Per-session student attendance logging
   - `grades.py`: Session score entry and publication
   - `export.py`: CSV/XLSX reporting
@@ -112,7 +113,7 @@ Actual repository paths:
 - **Class Sessions**: Scheduled practicum meetings with `open`/`closed` attendance status.
 - **Modules**: Learning materials with presigned uploads to MinIO, publish/unpublish toggles, and direct downloads.
 - **Course Stream & Announcements**: Broadcasts with pin-to-top capability and threaded Q&A comments.
-- **Assignments & Submissions**: Classwork tasks with due dates, multipart file uploads to MinIO, late submission tracking, and numeric scoring with feedback.
+- **Assignments & Submissions**: Assignment tasks with due dates, multipart file uploads to MinIO, late submission tracking, and numeric scoring with feedback.
 - **Attendance**: Per-session presence logging (*hadir/sakit/izin/alfa*).
 - **Grades**: Numeric score recording and publication controls.
 - **Exports**: Filtered data exports in `.csv` and `.xlsx` formats.
@@ -131,6 +132,6 @@ Actual repository paths:
 - Bucket: `praktis-modules`
 - Object layout:
   - Modules: `modules/{uuid}.pdf`
-  - Assignments: `assignments/{assignment_id}/{student_id}/{uuid}_{filename}`
+  - Assignments: `assignments/{assignment_id}/{student_id}/{uuid}.{ext}`
 - Module maximum: 25 MiB; Assignment submission maximum: 10 MiB
 - Nginx proxies `/praktis-modules/` to MinIO

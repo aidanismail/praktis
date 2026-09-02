@@ -10,7 +10,7 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "praktis",
+  title: "Praktis",
   description: "Secure Praktikum TI Unpad Management System"
 };
 

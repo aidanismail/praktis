@@ -74,7 +74,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
 
   if (currentUserQuery.isPending || (!user && !currentUserQuery.isError)) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
+      <div className="flex min-h-screen items-center justify-center bg-brand text-white">
         <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur">
           <Loader2 className="h-5 w-5 animate-spin" />
           <span className="text-sm text-slate-200">Checking session...</span>
@@ -90,7 +90,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
 
     if (isUnauthorized) {
       return (
-        <div className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
+        <div className="flex min-h-screen items-center justify-center bg-brand text-white">
           <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur">
             <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
             <span className="text-sm text-slate-200">

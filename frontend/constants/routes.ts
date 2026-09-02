@@ -8,7 +8,8 @@ export const ROUTES = {
 
 export const COURSE_WORKSPACE_TABS = [
   "stream",
-  "classwork",
+  "modules",
+  "assignments",
   "people",
   "sessions"
 ] as const;
@@ -18,9 +19,14 @@ export type CourseWorkspaceTab = (typeof COURSE_WORKSPACE_TABS)[number];
 export function parseCourseWorkspaceTab(
   value: string | undefined
 ): CourseWorkspaceTab {
+  if (value === "classwork") {
+    return "assignments";
+  }
+
   if (
     value === "stream" ||
-    value === "classwork" ||
+    value === "modules" ||
+    value === "assignments" ||
     value === "people" ||
     value === "sessions"
   ) {

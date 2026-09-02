@@ -14,6 +14,7 @@ import {
   Layers,
   X
 } from "lucide-react";
+import { ProductLogo } from "@/components/branding/product-logo";
 import type { DashboardNavItem } from "../constants/dashboard-navigation";
 
 type DashboardSidebarProps = {
@@ -144,9 +145,7 @@ export function DashboardSidebar({
             {/* Drawer Header */}
             <div className="h-16 flex items-center justify-between px-5 border-b border-slate-100">
               <div className="flex items-center gap-2.5 font-bold text-slate-900">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-900 text-xs font-bold text-white shadow-xs">
-                  P
-                </div>
+                <ProductLogo size={28} className="rounded-full shadow-xs" />
                 <span className="text-base tracking-tight">Praktis</span>
               </div>
               <button

@@ -1,12 +1,13 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
+import { ProductLogo } from "@/components/branding/product-logo";
 
 import {
   changePasswordSchema,
@@ -51,9 +52,12 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
   return (
     <div className="w-full rounded-3xl border border-white/10 bg-white/95 p-7 shadow-2xl shadow-black/20 backdrop-blur">
       <div className="mb-7">
-        <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-xs">
-          <ShieldCheck className="h-6 w-6" />
-        </div>
+        <ProductLogo
+          size={48}
+          alt="Praktis"
+          priority
+          className="mb-5 rounded-full shadow-xs"
+        />
 
         <h1 className="text-2xl font-semibold tracking-tight text-slate-950">
           {isForced ? "Secure your account" : "Change your password"}

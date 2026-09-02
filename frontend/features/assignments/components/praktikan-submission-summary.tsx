@@ -19,7 +19,7 @@ function formatFileSize(value: number) {
 
 export function PraktikanSubmissionSummary({ submission, maxPoints }: PraktikanSubmissionSummaryProps) {
   if (!submission) {
-    return <section aria-labelledby="my-submission-heading" className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"><h2 id="my-submission-heading" className="text-lg font-semibold text-slate-950">My submission</h2><div role="status" className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center"><FileText className="mx-auto h-8 w-8 text-slate-400" aria-hidden="true" /><p className="mt-3 font-semibold text-slate-900">No recorded submission</p><p className="mt-1 text-sm text-slate-600">This page shows existing submission history only.</p></div></section>;
+    return <section aria-labelledby="my-submission-heading" className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"><h2 id="my-submission-heading" className="text-lg font-semibold text-slate-950">My submission</h2><div role="status" className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center"><FileText className="mx-auto h-8 w-8 text-slate-400" aria-hidden="true" /><p className="mt-3 font-semibold text-slate-900">No recorded submission</p><p className="mt-1 text-sm text-slate-600">Use the submission form below to upload your work.</p></div></section>;
   }
 
   return (
@@ -32,7 +32,7 @@ export function PraktikanSubmissionSummary({ submission, maxPoints }: PraktikanS
         <div className="rounded-2xl bg-slate-50 p-4"><dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Graded</dt><dd className="mt-2 text-sm font-medium text-slate-950">{submission.graded_at ? <time dateTime={submission.graded_at}>{formatDate(submission.graded_at)}</time> : "Not graded"}</dd></div>
       </dl>
       {submission.feedback ? <div className="mt-4 rounded-2xl border border-slate-200 p-4"><p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500"><MessageSquareText className="h-4 w-4" aria-hidden="true" />Private feedback</p><p className="mt-2 whitespace-pre-wrap wrap-break-word text-sm leading-6 text-slate-700">{submission.feedback}</p></div> : null}
-      {submission.download_url ? <a href={submission.download_url} target="_blank" rel="noreferrer" className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 px-4 text-sm font-semibold text-slate-800 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700"><Download className="h-4 w-4" aria-hidden="true" />Open my submitted file</a> : null}
+      {submission.download_url ? <a href={submission.download_url} target="_blank" rel="noreferrer" className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 px-4 text-sm font-semibold text-slate-800 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700"><Download className="h-4 w-4" aria-hidden="true" />Open my submitted file</a> : <p role="status" className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800">Your submission is saved, but its download link is temporarily unavailable. Refresh later to try again.</p>}
     </section>
   );
 }

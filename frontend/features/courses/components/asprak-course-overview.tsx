@@ -240,8 +240,8 @@ export function AsprakCourseOverview({
           Continue with an active class
         </h3>
         <p className="mt-1 text-sm text-slate-500">
-          Choose a course before managing its Stream, Classwork, People, or
-          Sessions & Attendance.
+          Choose a course before managing its Stream, Modules, Assignments,
+          People, or Sessions & Attendance.
         </p>
 
         {visibleCourses.length > 0 ? (

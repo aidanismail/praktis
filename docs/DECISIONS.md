@@ -1,6 +1,6 @@
 # Durable Project Decisions
 
-Last updated: August 17, 2026
+Last updated: September 2, 2026
 
 ## Product and roles
 
@@ -19,11 +19,13 @@ Last updated: August 17, 2026
 
 - The user experience follows the Google Classroom academic operation model.
 - **Dual Course Presentation**: Users can toggle seamlessly between a visual **Classroom Card Grid** (with semester banners, quick stats, and direct links) and a **Compact Data Table**.
-- **4-Tab Course Workspace**: Every course detail view is structured into four standard tabs:
+- **5-Tab Asprak/Praktikan Course Workspace**: Aidan-owned course detail views use five standard tabs:
   1. `Stream`: General course overview, academic period metadata, and broadcast announcements.
-  2. `Classwork`: Learning modules (PDF downloads and publish toggles) and assignments.
-  3. `People`: Segmented rosters for Teaching Assistants (*Asprak*) and Enrolled Students (*Praktikan*).
-  4. `Sessions & Attendance`: Meeting logs with attendance window status controls.
+  2. `Modules`: Learning materials, downloads, and role-appropriate publication controls.
+  3. `Assignments`: Assignment instructions, submissions, and role-appropriate management or personal results.
+  4. `People`: Segmented rosters for Teaching Assistants (*Asprak*) and Enrolled Students (*Praktikan*).
+  5. `Sessions & Attendance`: Meeting logs with attendance window status controls.
+- This five-tab decision applies to Asprak and Praktikan. It does not silently modify Bagas-owned Superadmin course-management UI.
 
 ## Stream announcements and discussions
 
@@ -31,7 +33,7 @@ Last updated: August 17, 2026
 - Enrolled students and staff can participate in threaded Q&A comments below each announcement.
 - Deletions are restricted to the author or Superadmin.
 
-## Classwork assignments and submissions
+## Assignments and submissions
 
 - Aspraks and Superadmins can create assignment tasks with title, instructions, due date, max rubric points, and allowed extensions.
 - Praktikan submit solution files directly to MinIO (up to 10MB) with automatic late-status calculation.

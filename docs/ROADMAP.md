@@ -1,6 +1,6 @@
 # Product Roadmap
 
-Last updated: August 17, 2026
+Last updated: September 2, 2026
 
 Roadmap labels distinguish implemented foundations from product requirements and blocked contracts. A listed feature is not complete merely because a placeholder screen or partial endpoint exists.
 
@@ -13,11 +13,11 @@ Roadmap labels distinguish implemented foundations from product requirements and
 - Backend-managed cookie login/logout/current-user/password-change endpoints
 - **Google Classroom Information Architecture**:
   - Dual course presentation (`Card Grid` & `Compact Table` toggle)
-  - 4-Tab Course Workspace (`Stream`, `Classwork`, `People`, `Sessions & Attendance`)
+  - 5-Tab Asprak/Praktikan Course Workspace (`Stream`, `Modules`, `Assignments`, `People`, `Sessions & Attendance`)
 - **Course Stream & Announcements**:
   - Pinned announcement broadcasts
   - Threaded Q&A discussion comments for students and staff
-- **Classwork Assignments & Student Submissions**:
+- **Assignments & Student Submissions**:
   - Assignment creation with instructions, due dates, max points, and allowed formats
   - Direct student file submission to MinIO with automatic late-status calculation
   - Asprak grading interface with numeric scores and written feedback
@@ -33,9 +33,9 @@ Roadmap labels distinguish implemented foundations from product requirements and
 Each implementation slice requires a current owner-approved `PLANS.MD` and a confirmed backend contract.
 
 1. ✅ Assigned academic-period course list (Classroom Grid & Table)
-2. ✅ Course detail shell and roster context (4-Tab Workspace)
+2. ✅ Course detail shell and roster context (5-Tab Workspace)
 3. ✅ Stream announcements and discussion comments
-4. ✅ Classwork assignments and student submission review
+4. ✅ Assignments and student submission review
 5. ✅ Module list/upload and publish toggles
 6. ✅ Class-session create/list/edit and attendance window controls
 7. ✅ Attendance roster, local interaction, explicit save, and quiet live indicator

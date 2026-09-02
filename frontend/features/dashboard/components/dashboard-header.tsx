@@ -3,6 +3,7 @@
 import { Menu, ChevronRight } from "lucide-react";
 import type { User } from "@/types/user.type";
 import type { Course } from "@/features/courses/types/course.type";
+import { ProductLogo } from "@/components/branding/product-logo";
 
 type DashboardHeaderProps = {
   user: User;
@@ -49,9 +50,7 @@ export function DashboardHeader({
               onClick={onBackToCourses}
               className="flex items-center gap-2 font-bold text-slate-900 hover:text-slate-700 apple-press transition-colors shrink-0"
             >
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-900 text-xs font-bold text-white shadow-xs">
-                P
-              </div>
+              <ProductLogo size={28} className="rounded-full shadow-xs" />
               <span className="text-base tracking-tight hidden xs:inline">Praktis</span>
             </button>
 

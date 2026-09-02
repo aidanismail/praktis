@@ -297,7 +297,7 @@ function GradebookForm({
         <span className="text-sm font-semibold text-slate-800">Search by NPM or email</span>
         <span className="relative mt-1.5 block">
           <Search className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-slate-400" aria-hidden="true" />
-          <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} className="min-h-11 w-full rounded-xl border border-slate-300 bg-white pl-9 pr-3 text-sm outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100" placeholder="Search roster" />
+          <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} className="min-h-11 w-full rounded-xl border border-slate-300 bg-white pl-9 pr-3 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-slate-100" placeholder="Search roster" />
         </span>
       </label>
 
@@ -331,7 +331,7 @@ function GradebookForm({
                       saveMutation.reset();
                       onDirtyChange?.(true);
                     }}
-                    className="min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 disabled:cursor-not-allowed disabled:bg-slate-100"
+                    className="min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-brand focus:ring-2 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100"
                   />
                   {rowError ? <p role="alert" className="mt-1 text-xs text-red-700">{rowError.message}</p> : null}
                 </div>
@@ -352,7 +352,7 @@ function GradebookForm({
 
       {!isReadOnly ? (
         <div className="mt-5 flex flex-wrap gap-2">
-          <button type="submit" disabled={saveMutation.isPending || !form.formState.isDirty || enteredCount === 0 || hasClearedSavedGrade} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-indigo-700 px-4 text-sm font-semibold text-white transition hover:bg-indigo-800 disabled:cursor-not-allowed disabled:opacity-60">
+          <button type="submit" disabled={saveMutation.isPending || !form.formState.isDirty || enteredCount === 0 || hasClearedSavedGrade} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-brand px-4 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60">
             {saveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
             {saveMutation.isPending ? "Saving..." : "Save draft grades"}
           </button>

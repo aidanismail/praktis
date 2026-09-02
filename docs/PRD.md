@@ -9,7 +9,7 @@
 - Target release: TBD
 - Product lead and Asprak/Praktikan frontend integration: Aidan
 - Backend and Superadmin frontend integration: Bagas
-- Last product-decision update: August 17, 2026
+- Last product-decision update: September 2, 2026
 
 This document defines intended product behavior. It does not imply every requirement is implemented. `docs/API_CONTRACT_STATUS.md` records current operation-level readiness, and `docs/FULL_STACK_WORKFLOW.md` defines the integration process. Later explicit owner decisions override earlier requirements when they conflict.
 
@@ -52,7 +52,7 @@ For assigned practicum courses, Asprak may:
 
 - view course offerings, roster, and assignments
 - create, edit, pin, and delete course stream announcements
-- create, edit, publish, and delete learning modules and classwork assignments
+- create, edit, publish, and delete learning modules and assignments
 - grade student assignment submissions with numeric scores and written feedback
 - create, edit/reschedule, and manage class sessions and live attendance windows
 - record attendance using `Hadir`, `Sakit`, `Izin`, and `Alfa`
@@ -79,17 +79,18 @@ For assigned practicum courses, Asprak may:
 
 ### 1. Google Classroom Information Architecture
 - **Dual Course Presentation**: Toggle between visual **Classroom Card Grid** (with semester banners, assistant info, and direct links) and **Compact Data Table**.
-- **Course Workspace (4-Tab Modal/Drawer)**:
+- **Asprak/Praktikan Course Workspace (5 Tabs)**:
   1. **Stream**: Course metadata, academic period, status, and broadcast announcements.
-  2. **Classwork**: Grouped learning modules (PDF download links and publish toggles) and assignments.
-  3. **People**: Teaching Assistants (*Asprak*) and Enrolled Students (*Praktikan*) rosters with avatar initials.
-  4. **Sessions & Attendance**: Meeting logs with attendance window status controls.
+  2. **Modules**: Learning materials, download links, and role-appropriate publication controls.
+  3. **Assignments**: Instructions, submissions, and role-appropriate management or personal results.
+  4. **People**: Teaching Assistants (*Asprak*) and Enrolled Students (*Praktikan*) rosters with avatar initials.
+  5. **Sessions & Attendance**: Meeting logs with attendance window status controls.
 
 ### 2. Stream Announcements & Discussions
 - Broadcast updates to the course stream with pin-to-top capability.
 - Threaded discussion comments below each post for interactive student Q&A.
 
-### 3. Classwork Assignments & Student Submissions
+### 3. Assignments & Student Submissions
 - Assignments with instructions, due date, max points, and allowed extensions.
 - Direct multipart file uploads (up to 10MB) to MinIO object storage.
 - Automatic late calculation when `submitted_at > due_date`.

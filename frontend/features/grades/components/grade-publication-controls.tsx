@@ -102,7 +102,7 @@ export function GradePublicationControls({
             type="button"
             onClick={() => changePublication(true)}
             disabled={publicationMutation.isPending || savedGradeCount === 0 || hasUnsavedChanges}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-indigo-700 px-4 text-sm font-semibold text-white transition hover:bg-indigo-800 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-brand px-4 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {publicationMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
             {publicationMutation.isPending ? "Publishing..." : "Publish grades"}

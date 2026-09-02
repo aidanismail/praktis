@@ -1,5 +1,75 @@
 import { z } from "zod";
-import { ASSIGNMENT_FILE_TYPES } from "../types/assignment.type";
+import {
+  ASSIGNMENT_FILE_TYPES,
+  type AssignmentFileType
+} from "../types/assignment.type";
+
+export const ASSIGNMENT_MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+
+export function getAllowedAssignmentFileTypes(
+  value: string
+): AssignmentFileType[] {
+  const configuredTypes = new Set(
+    value
+      .split(",")
+      .map((fileType) => fileType.trim().toLowerCase().replace(/^\./, ""))
+      .filter(Boolean)
+  );
+
+  return ASSIGNMENT_FILE_TYPES.filter((fileType) =>
+    configuredTypes.has(fileType)
+  );
+}
+
+export function getAssignmentFileType(
+  fileName: string
+): AssignmentFileType | null {
+  const extension = fileName.split(".").pop()?.trim().toLowerCase();
+
+  return ASSIGNMENT_FILE_TYPES.find((fileType) => fileType === extension) ?? null;
+}
+
+export function createAssignmentSubmissionSchema(
+  allowedFileTypes: readonly AssignmentFileType[]
+) {
+  const allowedLabel = allowedFileTypes
+    .map((fileType) => fileType.toUpperCase())
+    .join(", ");
+
+  return z.object({
+    file: z
+      .custom<File>(
+        (value) => typeof File !== "undefined" && value instanceof File,
+        "Select a file to upload"
+      )
+      .refine(
+        (file) =>
+          typeof File !== "undefined" &&
+          file instanceof File &&
+          file.size > 0,
+        "The selected file is empty"
+      )
+      .refine(
+        (file) =>
+          typeof File !== "undefined" &&
+          file instanceof File &&
+          file.size <= ASSIGNMENT_MAX_UPLOAD_BYTES,
+        "The selected file must be 10 MiB or smaller"
+      )
+      .refine((file) => {
+        if (typeof File === "undefined" || !(file instanceof File)) {
+          return false;
+        }
+
+        const fileType = getAssignmentFileType(file.name);
+        return fileType !== null && allowedFileTypes.includes(fileType);
+      }, `Choose an allowed file type: ${allowedLabel}`)
+  });
+}
+
+export type AssignmentSubmissionFormValues = z.infer<
+  ReturnType<typeof createAssignmentSubmissionSchema>
+>;
 
 export const assignmentSchema = z.object({
   title: z

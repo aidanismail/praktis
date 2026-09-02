@@ -29,7 +29,7 @@ praktikan
 | **Enrollment & Staffing** | Enroll / Assign Staff | ✅ Full Access | ❌ Forbidden | ❌ Forbidden |
 | **Course Stream** | Post / Pin / Delete Announcements | ✅ Full Access | ✅ Assigned Courses | ❌ Read-Only |
 | **Course Stream** | Post / Delete Comments | ✅ Full Access | ✅ Assigned Courses | ✅ Enrolled (Own Comments) |
-| **Classwork Modules** | Upload / Publish / Unpublish | ✅ Full Access | ✅ Assigned Courses | ❌ Read Published Only |
+| **Course Modules** | Upload / Publish / Unpublish | ✅ Full Access | ✅ Assigned Courses | ❌ Read Published Only |
 | **Assignments** | Create / Update / Delete / Publish | ✅ Full Access | ✅ Assigned Courses | ❌ Read Published Only |
 | **Assignments** | Submit Solution File (MinIO) | ❌ Read Submissions | ❌ Read Submissions | ✅ Enrolled Students Only |
 | **Assignments** | Grade Submission & Feedback | ✅ Full Access | ✅ Assigned Courses | ❌ Read Own Grade Only |

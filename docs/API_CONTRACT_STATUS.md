@@ -1,7 +1,7 @@
 # API Contract Status
 
 Last inspected: 2026-09-02
-Branch: `feature/praktikan-features`
+Branch: `dev`
 
 This is the integration-readiness ledger, not a release certificate. Status meanings are in [FULL_STACK_WORKFLOW.md](FULL_STACK_WORKFLOW.md).
 
@@ -21,6 +21,15 @@ same-origin runtime health/protected-route probes, and static scope/privacy
 reviews passed. Authenticated end-to-end, representative-data, responsive, and
 keyboard browser acceptance remains pending and is not reported as completed.
 
+Asprak and Praktikan course workspace navigation was aligned on 2026-09-02 to
+five URL-backed tabs: Stream, Modules, Assignments, People, and Sessions &
+Attendance. Both roles use the same keyboard-accessible tab navigator while
+retaining role-specific panels and permissions. Only the selected Modules or
+Assignments panel mounts, and the legacy `?tab=classwork` value resolves to
+Assignments for bookmark compatibility. Frontend typecheck, focused lint, full
+lint, the network-enabled production build, and diff integrity passed; full lint
+retained four warnings in unchanged Admin and announcement files.
+
 ## Summary
 
 | Area                                                                    | Status                                                                                                | Consumers                              | Next action                                                                                            |
@@ -34,7 +43,7 @@ keyboard browser acceptance remains pending and is not reported as completed.
 | Module update/publish/replace/delete                                    | Current backend contracts; metadata/publish are frontend-integrated for Asprak while replace/delete stay excluded | Asprak, Praktikan visibility | Complete authenticated metadata/publication smoke; keep replace/delete controls absent                  |
 | Attendance bulk/list/personal                                           | Current and frontend-integrated for Asprak session management and Praktikan personal read-only history | Asprak; Praktikan                      | Complete authenticated record/privacy browser smoke                                                     |
 | Grades bulk/list/personal                                               | Current and frontend-integrated for Asprak gradebook/publication and Praktikan published personal reads | Asprak; Praktikan                     | Complete authenticated publication/privacy browser smoke                                                |
-| Classwork assignments & submissions                                     | Current and frontend-integrated for Asprak management/review and Praktikan published/own-result reads; Praktikan upload Current with limitations; deletion excluded | Asprak; Praktikan | Complete authenticated browser smoke; keep delete controls excluded; build Praktikan upload frontend    |
+| Assignments & submissions                                               | Current and frontend-integrated for Asprak management/review and Praktikan published/own-result reads plus upload/resubmit; deletion excluded | Asprak; Praktikan | Complete authenticated upload/resubmit browser smoke; keep delete controls excluded                      |
 | Exports                                                                 | Current and frontend-integrated for assigned-Asprak attendance/grade CSV/XLSX downloads                | Asprak                                 | Complete authenticated file-content/browser smoke                                                      |
 | OpenAPI-to-TypeScript automation                                        | Proposed                                                                                              | all FE owners                          | Separate tooling/CI plan                                                                               |
 | CSRF design                                                             | Blocked before production                                                                             | all cookie writes                      | Bagas proposes; Aidan reviews FE impact                                                                |
@@ -233,7 +242,7 @@ Current and evidenced:
 
 Frontend list/download integration added on 2026-08-31:
 
-- the Classwork tab starts a same-origin, authenticated, course-filtered module
+- the Modules tab starts a same-origin, authenticated, course-filtered module
   read only after the assigned-course workspace gate succeeds
 - query state is scoped by authenticated user and course, remains fresh for
   30 seconds, and retries only one transient failure
@@ -450,7 +459,7 @@ Implemented and evidenced:
 
 Frontend integration added on 2026-08-20:
 
-- the assigned-Asprak course workspace exposes active Stream and People tabs while leaving Classwork and Sessions & Attendance visibly unavailable
+- the initial assigned-Asprak course workspace slice exposed Stream and People before the later Modules, Assignments, and Sessions & Attendance integrations
 - the Stream uses exact response/payload types, Zod forms, same-origin wrappers, and user-and-course-scoped TanStack Query state
 - Asprak can list and create announcements, manage only their own announcement controls, add comments, and manage only their own comment controls; FastAPI remains authoritative
 - writes wait for confirmed server success and invalidate only the affected course Stream instead of using optimistic destructive updates
@@ -468,13 +477,13 @@ Limitations:
 - the list contract is unpaginated and needs a future bound for long-lived course streams
 - cookie-write CSRF design remains blocked before production even though local same-origin integration is Current
 
-## Classwork Assignments & Submissions
+## Assignments & Submissions
 
 Status: Current and frontend-integrated for assigned-Asprak assignment
 list/create/detail/update, submission review, and grading. Praktikan
-submit/resubmit is Current with limitations. Assignment deletion remains
-excluded. Praktikan published assignment list/detail and own historical
-`my_submission` result reads are integrated.
+submit/resubmit is Current and frontend-integrated with the limitations below.
+Assignment deletion remains excluded. Praktikan published assignment
+list/detail and own `my_submission` result reads are integrated.
 
 Current and evidenced:
 
@@ -538,7 +547,7 @@ Praktikan submit/resubmit backend fix added on 2026-09-02:
 
 Frontend integration added on 2026-08-27:
 
-- Classwork loads only after the assigned Asprak selects the Classwork tab.
+- Assignments load only after the assigned Asprak selects the Assignments tab.
 - The list and create operations use same-origin `/api/` paths, HttpOnly-cookie
   authentication, typed payloads, Zod validation, React Hook Form, and a user-and-
   course-scoped TanStack Query key.
@@ -553,7 +562,7 @@ Frontend integration added on 2026-08-27:
 Frontend detail/review integration added on 2026-08-29:
 
 - assignment cards link to a thin, refresh-safe course/assignment route
-- course workspace tabs use a validated URL query so Back to Classwork restores
+- course workspace tabs use a validated URL query so Back to Assignments restores
   the intended tab without client-only search-param hydration
 - the detail read starts only after the authenticated Asprak's assigned-course
   query proves the selected course; the submission read starts only after the
@@ -577,13 +586,29 @@ Frontend detail/review integration added on 2026-08-29:
 
 Praktikan integration added on 2026-09-02:
 
-- Classwork mounts no assignment composer and displays no class-wide submission
+- the Praktikan Assignments tab mounts no assignment composer and displays no class-wide submission
   count or staff controls
 - the refresh-safe detail route verifies enrollment before its assignment read,
   treats unpublished/missing results neutrally, and renders only the caller's
   `my_submission`, score, feedback, and time-limited download link
-- no submit/resubmit frontend UI was added yet; the backend contract is now
-  Current and ready for frontend integration
+- the detail page accepts one assignment-configured PDF, ZIP, or DOCX file,
+  performs convenience validation for non-empty content, the 10 MiB limit, and
+  the allowed extension, and leaves content validation authoritative on FastAPI
+- submission uses same-origin multipart `POST /api/courses/{courseId}/assignments/{assignmentId}/submit`
+  through the shared HttpOnly-cookie client without overriding the browser's
+  multipart content type
+- the mutation has no automatic retry, represents validation/pending/error/
+  success states, preserves the selected file after failure, and requires
+  confirmation before replacement
+- a confirmed response updates only the authenticated user's assignment detail
+  and selected-course assignment-list caches with the returned `my_submission`
+- resubmission messaging states that the previous file, grade, and feedback are
+  replaced; an empty post-commit `download_url` is represented as saved with a
+  temporarily unavailable link rather than as a failed submission
+- frontend `pnpm typecheck`, focused assignment/branding lint, full lint, and
+  the network-enabled production build passed after this integration on
+  2026-09-02; full lint retained four warnings in unchanged Admin and
+  announcement files and reported no errors or warnings in the changed files
 
 Integration boundaries and remaining limitations:
 
@@ -611,8 +636,9 @@ Integration boundaries and remaining limitations:
 - Authenticated browser acceptance for detail/edit/submission review/grading is
   still pending; grading/download scenarios may be blocked when development
   data contains no real submissions.
-- Authenticated Praktikan browser acceptance for submit/resubmit through
-  `http://localhost:8080` remains pending until the frontend upload UI is built.
+- Authenticated Praktikan browser acceptance for valid PDF/ZIP/DOCX upload,
+  resubmission grade reset, failure/retry states, and the effective limit through
+  `http://localhost:8080` remains pending.
 
 ## Contract automation proposal
 

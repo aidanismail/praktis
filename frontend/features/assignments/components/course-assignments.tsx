@@ -1,20 +1,24 @@
 "use client";
 
-import Link from "next/link";
 import { AlertCircle, ClipboardList, Loader2, RefreshCw } from "lucide-react";
+import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useCourseAssignments } from "../hooks/use-course-assignments";
 import { AssignmentCard } from "./assignment-card";
 import { AssignmentComposer } from "./assignment-composer";
 
-type CourseClassworkProps = {
-  userId: string;
+type CourseAssignmentsProps = {
   courseId: string;
+  userId: string;
   viewerRole: "asprak" | "praktikan";
 };
 
-export function CourseClasswork({ userId, courseId, viewerRole }: CourseClassworkProps) {
+export function CourseAssignments({
+  userId,
+  courseId,
+  viewerRole
+}: CourseAssignmentsProps) {
   const {
     data: assignments = [],
     error,
@@ -37,33 +41,32 @@ export function CourseClasswork({ userId, courseId, viewerRole }: CourseClasswor
       <div
         role="status"
         aria-live="polite"
-        className="flex min-h-56 items-center justify-center rounded-3xl border
-          border-slate-200 bg-white"
+        className="flex min-h-56 items-center justify-center rounded-3xl border border-slate-200 bg-white"
       >
         <Loader2
           className="h-5 w-5 animate-spin text-slate-900"
           aria-hidden="true"
         />
         <span className="ml-3 text-sm text-slate-600">
-          Loading course Classwork...
+          Loading assignments...
         </span>
       </div>
     );
   }
 
   if (isError) {
-    let title = "Classwork could not be loaded";
+    let title = "Assignments could not be loaded";
     let description = "A network or server problem interrupted the request.";
 
     if (isUnauthorized) {
       title = "Your session has expired";
       description = "Sign in again to continue.";
     } else if (isForbidden) {
-      title = "Classwork access is unavailable";
+      title = "Assignment access is unavailable";
       description =
         "Your account is not allowed to access assignments for this course.";
     } else if (isNotFound) {
-      title = "Course Classwork was not found";
+      title = "Course assignments were not found";
       description = "This course may no longer exist or be assigned to you.";
     }
 
@@ -85,9 +88,7 @@ export function CourseClasswork({ userId, courseId, viewerRole }: CourseClasswor
             {isUnauthorized ? (
               <Link
                 href={ROUTES.login}
-                className="mt-4 inline-flex rounded-xl bg-red-700 px-4 py-2
-                  text-sm font-semibold text-white focus-visible:outline-2
-                  focus-visible:outline-offset-2 focus-visible:outline-red-700"
+                className="mt-4 inline-flex rounded-xl bg-red-700 px-4 py-2 text-sm font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
               >
                 Go to sign in
               </Link>
@@ -96,9 +97,7 @@ export function CourseClasswork({ userId, courseId, viewerRole }: CourseClasswor
             {isForbidden || isNotFound ? (
               <Link
                 href={ROUTES.dashboard}
-                className="mt-4 inline-flex text-sm font-semibold text-red-900
-                  underline underline-offset-4 focus-visible:outline-2
-                  focus-visible:outline-offset-2 focus-visible:outline-red-700"
+                className="mt-4 inline-flex text-sm font-semibold text-red-900 underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
               >
                 Return to dashboard
               </Link>
@@ -109,11 +108,7 @@ export function CourseClasswork({ userId, courseId, viewerRole }: CourseClasswor
                 type="button"
                 onClick={() => void refetch()}
                 disabled={isFetching}
-                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-red-700
-                  px-4 py-2 text-sm font-semibold text-white
-                  focus-visible:outline-2 focus-visible:outline-offset-2
-                  focus-visible:outline-red-700 disabled:cursor-not-allowed
-                  disabled:opacity-60"
+                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-red-700 px-4 py-2 text-sm font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <RefreshCw
                   className={isFetching ? "h-4 w-4 animate-spin" : "h-4 w-4"}
@@ -134,11 +129,11 @@ export function CourseClasswork({ userId, courseId, viewerRole }: CourseClasswor
         <AssignmentComposer userId={userId} courseId={courseId} />
       ) : null}
 
-      <div className="mt-6 flex flex-wrap items-end justify-between gap-3">
+      <div
+        className={`${viewerRole === "asprak" ? "mt-6 " : ""}flex flex-wrap items-end justify-between gap-3`}
+      >
         <div>
-          <h2 className="text-xl font-semibold text-slate-950">
-            Classwork assignments
-          </h2>
+          <h2 className="text-xl font-semibold text-slate-950">Assignments</h2>
           <p className="mt-1 text-sm text-slate-600">
             {viewerRole === "asprak"
               ? "Drafts and published assignments are ordered from newest to oldest."
@@ -148,25 +143,22 @@ export function CourseClasswork({ userId, courseId, viewerRole }: CourseClasswor
 
         <span
           aria-live="polite"
-          className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium
-            text-slate-700"
+          className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700"
         >
-          {assignments.length}{" "}
-          {assignments.length === 1 ? "assignment" : "assignments"}
+          {assignments.length} {assignments.length === 1 ? "assignment" : "assignments"}
         </span>
       </div>
 
       {isFetching ? (
         <p role="status" className="mt-3 text-sm text-slate-500">
-          Refreshing Classwork...
+          Refreshing assignments...
         </p>
       ) : null}
 
       {assignments.length === 0 ? (
         <div
           role="status"
-          className="mt-5 rounded-3xl border border-dashed border-slate-300
-            bg-white px-6 py-12 text-center"
+          className="mt-5 rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center"
         >
           <ClipboardList
             className="mx-auto h-9 w-9 text-slate-400"
