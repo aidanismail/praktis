@@ -13,6 +13,9 @@ from tests.helpers import (
     enroll_student,
     set_auth,
 )
+from core.rate_limit import _in_memory_limits
+from core import cache
+
 
 def _valid_pdf(size: int = 1024) -> bytes:
     header = b"%PDF-1.4 test content\n"
@@ -54,6 +57,27 @@ def _mock_storage():
             return_value="https://storage.example.com/presigned"
         )
         yield mock_svc
+
+
+@pytest.fixture(autouse=True)
+async def _reset_rate_limit():
+    _in_memory_limits.clear()
+    if cache.redis_client is not None:
+        try:
+            keys = await cache.redis_client.keys("rate_limit:assignment_submit:*")
+            if keys:
+                await cache.redis_client.delete(*keys)
+        except Exception:
+            pass
+    yield
+    _in_memory_limits.clear()
+    if cache.redis_client is not None:
+        try:
+            keys = await cache.redis_client.keys("rate_limit:assignment_submit:*")
+            if keys:
+                await cache.redis_client.delete(*keys)
+        except Exception:
+            pass
 
 
 @pytest.fixture
@@ -381,3 +405,25 @@ async def test_submit_on_time(client, db, _setup):
 
     assert resp.status_code == 200
     assert resp.json()["is_late"] is False
+
+
+@pytest.mark.asyncio
+async def test_submit_rate_limiter_triggers_429(client, db, _setup):
+    s = _setup
+    set_auth(client, s["student"])
+    content = _valid_pdf(256)
+
+    for i in range(5):
+        resp = await client.post(
+            _submit_url(s["course"].id, s["assignment"].id),
+            files={"file": (f"attempt_{i}.pdf", content, "application/pdf")},
+        )
+        assert resp.status_code == 200
+
+    blocked_resp = await client.post(
+        _submit_url(s["course"].id, s["assignment"].id),
+        files={"file": ("attempt_6.pdf", content, "application/pdf")},
+    )
+    assert blocked_resp.status_code == 429
+    assert "Too many requests" in blocked_resp.json()["detail"]
+

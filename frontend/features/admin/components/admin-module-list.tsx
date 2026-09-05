@@ -22,12 +22,12 @@ import {
   publishModule,
   unpublishModule,
   deleteModule,
-  createAndUploadModule,
   createAndUploadMultipleModules
 } from "../api/admin.api";
 import type { AdminModuleItem } from "../types/admin.type";
 import type { Course } from "@/features/courses/types/course.type";
 import { DocumentPreviewModal } from "@/components/ui/document-preview-modal";
+import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
 
 export function AdminModuleList() {
   const [modules, setModules] = useState<AdminModuleItem[]>([]);
@@ -66,6 +66,22 @@ export function AdminModuleList() {
     filename: string;
   } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+
+  const uploadModalRef = useModalFocusTrap<HTMLDivElement>({
+    isOpen: showUploadModal,
+    onClose: () => {
+      if (!isUploading) {
+        setShowUploadModal(false);
+        setUploadQueue([]);
+        setNewModuleCourseId("");
+      }
+    },
+  });
+
+  const detailModalRef = useModalFocusTrap<HTMLDivElement>({
+    isOpen: Boolean(selectedModuleForDetail),
+    onClose: () => setSelectedModuleForDetail(null),
+  });
 
   // Auto-dismiss notification banners
   useEffect(() => {
@@ -388,35 +404,45 @@ export function AdminModuleList() {
   return (
     <div className="space-y-6">
       {/* Alert Notifications */}
-      {actionSuccess && (
-        <div className="rounded-2xl bg-slate-900 border border-slate-200 px-4 py-3 text-xs font-medium text-white flex items-center justify-between shadow-xs">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-slate-300 shrink-0" />
-            <span>{actionSuccess}</span>
-          </div>
-          <button
-            onClick={() => setActionSuccess(null)}
-            className="text-slate-400 hover:text-white"
+      <div aria-live="polite" aria-atomic="true" className="space-y-2">
+        {actionSuccess && (
+          <div
+            role="status"
+            className="rounded-2xl bg-slate-900 border border-slate-200 px-4 py-3 text-xs font-medium text-white flex items-center justify-between shadow-xs"
           >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-slate-300 shrink-0" />
+              <span>{actionSuccess}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActionSuccess(null)}
+              className="text-slate-400 hover:text-white"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
-      {error && (
-        <div className="rounded-2xl bg-rose-50 border border-rose-200 px-4 py-3 text-xs font-medium text-rose-800 flex items-center justify-between shadow-xs">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-            <span>{error}</span>
-          </div>
-          <button
-            onClick={() => setError(null)}
-            className="text-rose-600 hover:text-rose-900"
+        {error && (
+          <div
+            role="alert"
+            className="rounded-2xl bg-rose-50 border border-rose-200 px-4 py-3 text-xs font-medium text-rose-800 flex items-center justify-between shadow-xs"
           >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              <span>{error}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setError(null)}
+              className="text-rose-600 hover:text-rose-900"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Header & Filter Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -659,14 +685,20 @@ export function AdminModuleList() {
 
       {/* Multi-Module Upload Modal */}
       {showUploadModal && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div
+          ref={uploadModalRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="admin-upload-module-title"
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4"
+        >
           <form
             onSubmit={handleUploadSubmit}
             className="bg-white rounded-3xl p-6 w-full max-w-xl shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] flex flex-col"
           >
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 shrink-0">
               <div>
-                <h4 className="font-bold text-sm text-slate-900">
+                <h4 id="admin-upload-module-title" className="font-bold text-sm text-slate-900">
                   Upload Learning Modules (Batch)
                 </h4>
                 <p className="text-[11px] text-slate-400 mt-0.5">
@@ -787,7 +819,7 @@ export function AdminModuleList() {
                   </div>
 
                   <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1">
-                    {uploadQueue.map((item, idx) => (
+                    {uploadQueue.map((item) => (
                       <div
                         key={item.id}
                         className="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-2"
@@ -926,10 +958,14 @@ export function AdminModuleList() {
       )}
 
       {/* Module Detail Modal */}
-
-      {/* Module Detail Modal */}
       {selectedModuleForDetail && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div
+          ref={detailModalRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="admin-module-detail-title"
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4"
+        >
           <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             {/* Modal Header Banner */}
             <div className="p-5 bg-linear-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-between">
@@ -938,7 +974,7 @@ export function AdminModuleList() {
                   <FileText className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-sm text-white">
+                  <h3 id="admin-module-detail-title" className="font-bold text-sm text-white">
                     Module Details
                   </h3>
                   <p className="text-[11px] text-slate-300 mt-0.5">

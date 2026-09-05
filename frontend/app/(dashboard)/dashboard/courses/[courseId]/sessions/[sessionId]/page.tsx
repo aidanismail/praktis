@@ -1,4 +1,4 @@
-import { AsprakSessionDetailPage } from "@/features/sessions/components/asprak-session-detail-page";
+import { SessionDetailRouteClient } from "@/features/sessions/components/session-detail-route-client";
 
 type SessionDetailRouteProps = {
   params: Promise<{
@@ -12,7 +12,6 @@ export default async function SessionDetailRoute({
 }: SessionDetailRouteProps) {
   const { courseId, sessionId } = await params;
 
-  return (
-    <AsprakSessionDetailPage courseId={courseId} sessionId={sessionId} />
-  );
+  return <SessionDetailRouteClient courseId={courseId} sessionId={sessionId} />;
 }
+

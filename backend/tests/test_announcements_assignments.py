@@ -16,7 +16,6 @@ from tests.helpers import (
 
 @pytest.mark.asyncio
 async def test_announcement_lifecycle(client, db):
-    # Setup
     course = await create_course(db)
     asprak = await create_user(db, RoleEnum.ASPRAK)
     await assign_course_staff(db, course, asprak)
@@ -63,7 +62,6 @@ async def test_announcement_lifecycle(client, db):
 
 @pytest.mark.asyncio
 async def test_assignment_lifecycle_and_grading(client, db):
-    # Setup
     course = await create_course(db)
     asprak = await create_user(db, RoleEnum.ASPRAK)
     await assign_course_staff(db, course, asprak)
@@ -137,6 +135,19 @@ async def test_announcement_comment_anti_spam(client, db):
     ann_id = ann_res.json()["id"]
 
     set_auth(client, student)
+
+    oversized_res = await client.post(
+        f"/courses/{course.id}/announcements/{ann_id}/comments",
+        json={"content": "A" * 1001},
+    )
+    assert oversized_res.status_code == 422
+
+    empty_res = await client.post(
+        f"/courses/{course.id}/announcements/{ann_id}/comments",
+        json={"content": "   \n\t  "},
+    )
+    assert empty_res.status_code == 422
+
     valid_res = await client.post(
         f"/courses/{course.id}/announcements/{ann_id}/comments",
         json={"content": "First valid comment"},
@@ -150,14 +161,48 @@ async def test_announcement_comment_anti_spam(client, db):
     assert dup_res.status_code == 400
     assert "Duplicate comment detected" in dup_res.json()["detail"]
 
-    oversized_res = await client.post(
+    cooldown_res = await client.post(
         f"/courses/{course.id}/announcements/{ann_id}/comments",
-        json={"content": "A" * 1001},
+        json={"content": "Second different comment"},
     )
-    assert oversized_res.status_code == 422
+    assert cooldown_res.status_code == 429
 
-    empty_res = await client.post(
-        f"/courses/{course.id}/announcements/{ann_id}/comments",
-        json={"content": "   \n\t  "},
+
+@pytest.mark.asyncio
+async def test_asprak_can_moderate_comments(client, db):
+    course = await create_course(db)
+    asprak = await create_user(db, RoleEnum.ASPRAK)
+    await assign_course_staff(db, course, asprak)
+    student1 = await create_user(db, RoleEnum.PRAKTIKAN)
+    await enroll_student(db, course, student1)
+    student2 = await create_user(db, RoleEnum.PRAKTIKAN)
+    await enroll_student(db, course, student2)
+
+    set_auth(client, asprak)
+    ann_resp = await client.post(
+        f"/courses/{course.id}/announcements",
+        json={"title": "Important Notice", "content": "Notice details"},
     )
-    assert empty_res.status_code == 422
+    assert ann_resp.status_code == 201
+    ann_id = ann_resp.json()["id"]
+
+    set_auth(client, student1)
+    comm_resp = await client.post(
+        f"/courses/{course.id}/announcements/{ann_id}/comments",
+        json={"content": "Spam message here"},
+    )
+    assert comm_resp.status_code == 201
+    comm_id = comm_resp.json()["id"]
+
+    set_auth(client, student2)
+    unauthorized_del = await client.delete(
+        f"/courses/{course.id}/announcements/{ann_id}/comments/{comm_id}"
+    )
+    assert unauthorized_del.status_code == 403
+
+    set_auth(client, asprak)
+    mod_del = await client.delete(
+        f"/courses/{course.id}/announcements/{ann_id}/comments/{comm_id}"
+    )
+    assert mod_del.status_code == 204
+

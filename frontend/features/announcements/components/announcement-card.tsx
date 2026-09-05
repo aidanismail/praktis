@@ -249,6 +249,7 @@ export function AnnouncementCard({
           courseId={courseId}
           announcementId={announcement.id}
           comments={announcement.comments}
+          viewerRole="asprak"
         />
       ) : null}
     </article>

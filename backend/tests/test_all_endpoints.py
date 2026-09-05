@@ -141,6 +141,15 @@ def run_suite():
     print(f"11. POST /announcements/{{id}}/comments          -> Status {status} (Created)")
     assert status == 201
 
+    # 11b. DELETE /courses/{id}/announcements/{ann_id}/comments/{comment_id}
+    if new_comment and "id" in new_comment:
+        status, _, _, _ = request(
+            "DELETE",
+            f"/courses/{course_id}/announcements/{created_ann_id}/comments/{new_comment['id']}"
+        )
+        print(f"11b. DELETE /announcements/{{id}}/comments/{{id}} -> Status {status} (Deleted)")
+        assert status == 204
+
     # 12. GET /courses/{id}/assignments
     status, assignments, _, _ = request("GET", f"/courses/{course_id}/assignments")
     print(f"12. GET /courses/{{id}}/assignments            -> Status {status} [Assignments: {len(assignments)}]")
@@ -234,6 +243,18 @@ def run_suite():
         print(f"18e. POST /class-sessions/{{id}}/close-attendance -> Status {status}")
         assert status in [200, 400]
 
+        # 18f. DELETE /class-sessions/{session_id} (Create disposable session and delete it)
+        status, temp_sess, _, _ = request(
+            "POST",
+            f"/courses/{course_id}/sessions",
+            {"title": "Temporary Disposable Session", "date": "2026-09-01"},
+        )
+        if status in [200, 201]:
+            temp_sess_id = temp_sess["id"]
+            del_st, _, _, _ = request("DELETE", f"/class-sessions/{temp_sess_id}")
+            print(f"18f. DELETE /class-sessions/{{id}}            -> Status {del_st} (Deleted)")
+            assert del_st == 204
+
     # 19. GET /export/attendance/{session_id}?format=csv
     if session_id:
         status, _, raw_csv, _ = request("GET", f"/export/attendance/{session_id}?format=csv")
@@ -267,6 +288,18 @@ def run_suite():
             rate_limited = True
             break
     assert rate_limited, "Rate limiter did not trigger 429 Too Many Requests"
+
+    try:
+        import redis
+        redis_host = "cache" if os.path.exists("/.dockerenv") else "localhost"
+        r = redis.Redis(host=redis_host, port=6379, db=0, socket_timeout=2)
+        keys = r.keys("rate_limit:login:*")
+        if keys:
+            r.delete(*keys)
+        print("    ↳ [Cleaned] Flushed login rate limit test keys in Redis.")
+    except Exception:
+        pass
+
     
 def test_live_api_suite():
     """Pytest entrypoint for running the live integration test suite."""

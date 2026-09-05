@@ -21,6 +21,7 @@ import {
 } from "../api/admin.api";
 import type { User } from "@/types/user.type";
 import type { Course } from "@/features/courses/types/course.type";
+import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
 
 export function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
@@ -63,6 +64,17 @@ export function UserManagement() {
       return () => clearTimeout(timer);
     }
   }, [error]);
+
+  const createUserModalRef = useModalFocusTrap<HTMLDivElement>({
+    isOpen: showCreateUserModal,
+    onClose: () => setShowCreateUserModal(false),
+  });
+
+  const bulkAssignModalRef = useModalFocusTrap<HTMLDivElement>({
+    isOpen: showEditModal,
+    onClose: () => setShowEditModal(false),
+  });
+
 
   const loadData = async () => {
     try {
@@ -236,29 +248,45 @@ export function UserManagement() {
   return (
     <div className="space-y-4">
       {/* Alert Messages */}
-      {actionSuccess && (
-        <div className="rounded-xl bg-slate-900 border border-slate-200 px-4 py-3 text-xs font-medium text-white flex items-center justify-between shadow-xs">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-slate-300 shrink-0" />
-            <span>{actionSuccess}</span>
+      <div aria-live="polite" aria-atomic="true" className="space-y-2">
+        {actionSuccess && (
+          <div
+            role="status"
+            className="rounded-xl bg-slate-900 border border-slate-200 px-4 py-3 text-xs font-medium text-white flex items-center justify-between shadow-xs"
+          >
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-slate-300 shrink-0" />
+              <span>{actionSuccess}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActionSuccess(null)}
+              className="text-slate-400 hover:text-white"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
-          <button onClick={() => setActionSuccess(null)} className="text-slate-400 hover:text-white">
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
+        )}
 
-      {error && (
-        <div className="rounded-xl bg-rose-50 border border-rose-200 px-4 py-3 text-xs font-medium text-rose-800 flex items-center justify-between shadow-xs">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-            <span>{error}</span>
+        {error && (
+          <div
+            role="alert"
+            className="rounded-xl bg-rose-50 border border-rose-200 px-4 py-3 text-xs font-medium text-rose-800 flex items-center justify-between shadow-xs"
+          >
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              <span>{error}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setError(null)}
+              className="text-rose-600 hover:text-rose-900"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
-          <button onClick={() => setError(null)} className="text-rose-600 hover:text-rose-900">
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Google Admin Style Filter Chips & Search / Add User Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -432,11 +460,20 @@ export function UserManagement() {
 
       {/* Create New User Modal */}
       {showCreateUserModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 transition-opacity animate-in fade-in duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]">
+        <div
+          ref={createUserModalRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="create-user-modal-title"
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 transition-opacity animate-in fade-in duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        >
           <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4 animate-apple-modal">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
-                <h4 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                <h4
+                  id="create-user-modal-title"
+                  className="font-bold text-sm text-slate-900 flex items-center gap-2"
+                >
                   <UserPlus className="w-4 h-4 text-slate-800" />
                   <span>Create New User Account</span>
                 </h4>
@@ -562,10 +599,16 @@ export function UserManagement() {
 
       {/* Bulk Assign Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 transition-opacity animate-in fade-in duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]">
+        <div
+          ref={bulkAssignModalRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="bulk-assign-modal-title"
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 transition-opacity animate-in fade-in duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        >
           <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4 animate-apple-modal">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h4 className="font-bold text-sm text-slate-900">
+              <h4 id="bulk-assign-modal-title" className="font-bold text-sm text-slate-900">
                 Assign {selectedUserIds.size} User(s) to Course
               </h4>
               <button

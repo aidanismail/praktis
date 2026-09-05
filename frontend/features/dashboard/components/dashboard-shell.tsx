@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import type { User } from "@/types/user.type";
-import type { Course } from "@/features/courses/types/course.type";
 import { useLogout } from "@/features/auth/hooks/use-logout";
+import { useAdminCourses } from "@/features/admin/hooks/use-admin-courses";
+import { useCourseWorkspace } from "@/features/admin/hooks/use-admin-course-workspace";
 import { DASHBOARD_NAVIGATION } from "../constants/dashboard-navigation";
 import { DashboardHeader } from "./dashboard-header";
 import { DashboardSidebar } from "./dashboard-sidebar";
@@ -14,21 +16,53 @@ type DashboardShellProps = {
 };
 
 export function DashboardShell({ user }: DashboardShellProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const logoutMutation = useLogout();
   const navigationItems = DASHBOARD_NAVIGATION[user.role];
 
-  const [activeItemId, setActiveItemId] = useState(navigationItems[0].id);
+  // Active dashboard sidebar tab from URL
+  const tabParam = searchParams.get("tab");
+  const activeItemId =
+    tabParam && navigationItems.some((item) => item.id === tabParam)
+      ? tabParam
+      : navigationItems[0].id;
+
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
-  // Active course & workspace tab state for Google Classroom top bar
-  const [activeCourse, setActiveCourse] = useState<Course | null>(null);
-  const [activeAssignmentTitle, setActiveAssignmentTitle] = useState<
-    string | null
-  >(null);
-  const [activeTab, setActiveTab] = useState<
-    "stream" | "classwork" | "people" | "sessions"
-  >("stream");
+  // Declarative URL parameters for course workspace
+  const isSuperadmin = user.role === "superadmin";
+  const courseIdParam = searchParams.get("courseId");
+  const workspaceTabParam = searchParams.get("workspaceTab");
+  const assignmentIdParam = searchParams.get("assignmentId");
+
+  // Fetch admin courses for breadcrumb & active course resolution
+  const { courses } = useAdminCourses();
+  const { assignments } = useCourseWorkspace(isSuperadmin ? courseIdParam : null);
+
+  const activeCourse = useMemo(
+    () =>
+      isSuperadmin && courseIdParam
+        ? courses.find((c) => c.id === courseIdParam) ?? null
+        : null,
+    [isSuperadmin, courseIdParam, courses]
+  );
+
+  const activeTab = useMemo(
+    () =>
+      (workspaceTabParam as "stream" | "classwork" | "people" | "sessions") ||
+      "stream",
+    [workspaceTabParam]
+  );
+
+  const activeAssignmentTitle = useMemo(() => {
+    if (!isSuperadmin || !assignmentIdParam) return null;
+    const found = assignments.find((a) => a.id === assignmentIdParam);
+    return found ? found.title : "Submissions";
+  }, [isSuperadmin, assignmentIdParam, assignments]);
 
   const activeItem =
     navigationItems.find((item) => item.id === activeItemId) ??
@@ -42,66 +76,51 @@ export function DashboardShell({ user }: DashboardShellProps) {
     }
   };
 
-  const handleSelectTab = (
-    tab: "stream" | "classwork" | "people" | "sessions"
-  ) => {
-    setActiveTab(tab);
-    window.dispatchEvent(
-      new CustomEvent("course-tab-change", { detail: { tab } })
-    );
-  };
+  const handleSelectTab = useCallback(
+    (tab: "stream" | "classwork" | "people" | "sessions") => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("workspaceTab", tab);
+      params.delete("assignmentId");
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [pathname, router, searchParams]
+  );
 
   const handleBackToCourses = useCallback(() => {
-    setActiveCourse(null);
-    setActiveAssignmentTitle(null);
-    window.dispatchEvent(new CustomEvent("course-workspace-back"));
-  }, []);
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("courseId");
+    params.delete("workspaceTab");
+    params.delete("assignmentId");
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  }, [pathname, router, searchParams]);
 
   const handleBackToCourseRoot = useCallback(() => {
-    setActiveAssignmentTitle(null);
-    window.dispatchEvent(new CustomEvent("assignment-submissions-back"));
-  }, []);
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("assignmentId");
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  }, [pathname, router, searchParams]);
 
-  const handleSelectNavigationItem = (id: string) => {
-    if (activeCourse) {
-      handleBackToCourses();
-    }
+  const handleSelectNavigationItem = useCallback(
+    (id: string) => {
+      setIsMobileSidebarOpen(false);
+      const params = new URLSearchParams();
+      params.set("tab", id);
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [pathname, router]
+  );
 
-    setActiveItemId(id);
-    setIsMobileSidebarOpen(false);
-  };
-
-  const handleNavigateToCourse = (courseId: string) => {
-    setActiveItemId("courses");
-    const params = new URLSearchParams(window.location.search);
-    params.set("tab", "courses");
-    params.set("courseId", courseId);
-    window.history.pushState({}, "", `?${params.toString()}`);
-  };
-
-  useEffect(() => {
-    const handleWorkspaceChange = (e: Event) => {
-      const customEvent = e as CustomEvent<{
-        course: Course | null;
-        tab?: "stream" | "classwork" | "people" | "sessions";
-        assignmentTitle?: string | null;
-      }>;
-      if (customEvent.detail) {
-        setActiveCourse(customEvent.detail.course);
-        if (customEvent.detail.tab) {
-          setActiveTab(customEvent.detail.tab);
-        }
-        setActiveAssignmentTitle(customEvent.detail.assignmentTitle || null);
-      }
-    };
-
-    window.addEventListener("course-workspace-change", handleWorkspaceChange);
-    return () =>
-      window.removeEventListener(
-        "course-workspace-change",
-        handleWorkspaceChange
-      );
-  }, []);
+  const handleNavigateToCourse = useCallback(
+    (courseId: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("tab", "courses");
+      params.set("courseId", courseId);
+      params.set("workspaceTab", "stream");
+      params.delete("assignmentId");
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [pathname, router, searchParams]
+  );
 
   function handleLogout() {
     logoutMutation.mutate();
@@ -173,16 +192,17 @@ export function DashboardShell({ user }: DashboardShellProps) {
               </div>
             </div>
           ) : null}
-          <div className="mb-5 sm:mb-6">
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
-              {activeCourse ? activeCourse.name : activeItem.label}
-            </h2>
-            <p className="text-xs text-slate-500 mt-1">
-              {activeCourse
-                ? `${activeCourse.code} • Academic Year ${activeCourse.academic_year} (${activeCourse.semester})`
-                : activeItem.description}
-            </p>
-          </div>
+
+          {!activeCourse && (
+            <div className="mb-5 sm:mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
+                {activeItem.label}
+              </h2>
+              <p className="text-xs text-slate-500 mt-1">
+                {activeItem.description}
+              </p>
+            </div>
+          )}
 
           <RoleDashboard
             activeItem={activeItem}

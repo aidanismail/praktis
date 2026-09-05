@@ -114,18 +114,18 @@ app.add_middleware(
 
 @app.middleware("http")
 async def add_correlation_and_security_headers(request: Request, call_next):
-    # 1. Attach Request ID
     request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
     request.state.request_id = request_id
 
-    # 2. Process request
     response = await call_next(request)
-
-    # 3. Attach Response Headers
     response.headers["X-Request-ID"] = request_id
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; img-src 'self' data: blob:; "
+        "script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; frame-ancestors 'none';"
+    )
 
     return response
 

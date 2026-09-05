@@ -9,6 +9,7 @@ import {
   Trash2,
   AlertCircle,
 } from "lucide-react";
+import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
 import type { Course } from "../types/course.type";
 import {
   BANNER_THEMES,
@@ -43,6 +44,11 @@ export function CourseBannerCustomizerModal({
   const [customImageUrl, setCustomImageUrl] = useState<string | null>(initial.imageUrl || null);
   const [isProcessingImage, setIsProcessingImage] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const modalRef = useModalFocusTrap<HTMLDivElement>({
+    isOpen,
+    onClose,
+  });
 
   if (!isOpen) return null;
 
@@ -84,12 +90,18 @@ export function CourseBannerCustomizerModal({
   const patternCfg = getPatternConfig(selectedPatternId);
 
   return (
-    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 transition-opacity animate-in fade-in duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]">
+    <div
+      ref={modalRef}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="banner-customizer-title"
+      className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 transition-opacity animate-in fade-in duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+    >
       <div className="bg-white rounded-3xl p-5 sm:p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl space-y-5 animate-apple-modal">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <div>
-            <h4 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+            <h4 id="banner-customizer-title" className="font-bold text-sm text-slate-900 flex items-center gap-2">
               <Palette className="w-4 h-4 text-slate-800" />
               <span>Customize Course Banner</span>
             </h4>
@@ -100,6 +112,7 @@ export function CourseBannerCustomizerModal({
           <button
             type="button"
             onClick={onClose}
+            aria-label="Close modal"
             className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center text-xs apple-press transition-colors"
           >
             <X className="w-4 h-4" />

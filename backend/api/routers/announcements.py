@@ -77,7 +77,6 @@ async def list_announcements(
     )
     announcements = result.scalars().all()
 
-    # Pre-fetch author usernames
     author_ids = {a.author_id for a in announcements}
     for a in announcements:
         for c in a.comments:
@@ -280,10 +279,7 @@ async def add_comment(
 ):
     await require_course_access(db, current_user, course_id, write=False)
 
-    await check_rate_limit(key=f"comment_burst:{current_user.id}", max_requests=5, window_seconds=60)
-
-    await check_rate_limit(key=f"comment_cooldown:{current_user.id}:{announcement_id}", max_requests=1, window_seconds=3)
-
+    # 1. Anti-Spam: In-memory/Redis SHA-256 duplicate detection (60-second window)
     content_hash = hashlib.sha256(payload.content.lower().encode("utf-8")).hexdigest()
     dup_key = f"comment_hash:{current_user.id}:{announcement_id}"
 
@@ -303,6 +299,9 @@ async def add_comment(
             _check_in_memory_duplicate(dup_key, content_hash)
     else:
         _check_in_memory_duplicate(dup_key, content_hash)
+
+    await check_rate_limit(key=f"comment_burst:{current_user.id}", max_requests=5, window_seconds=60)
+    await check_rate_limit(key=f"comment_cooldown:{current_user.id}:{announcement_id}", max_requests=1, window_seconds=3)
 
     result = await db.execute(
         select(Announcement).where(Announcement.id == announcement_id, Announcement.course_id == course_id)
@@ -335,7 +334,7 @@ async def add_comment(
     "/{announcement_id}/comments/{comment_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete discussion comment",
-    description="Deletes a specific comment from an announcement thread. Only comment author or Superadmin can delete.",
+    description="Deletes a specific comment from an announcement thread. Allowed for comment author, assigned course Asprak, or Superadmin.",
     responses={**UNAUTHENTICATED_401, **FORBIDDEN_403, **NOT_FOUND_404},
 )
 async def delete_comment(
@@ -363,8 +362,23 @@ async def delete_comment(
     if not comment:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Comment not found")
 
-    if current_user.role != RoleEnum.SUPERADMIN and comment.author_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You can only delete your own comments")
+    is_course_staff = False
+    if current_user.role == RoleEnum.ASPRAK:
+        try:
+            await require_course_access(db, current_user, course_id, write=True)
+            is_course_staff = True
+        except HTTPException:
+            is_course_staff = False
+
+    if (
+        current_user.role != RoleEnum.SUPERADMIN
+        and comment.author_id != current_user.id
+        and not is_course_staff
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to delete this comment",
+        )
 
     await db.delete(comment)
     await db.commit()

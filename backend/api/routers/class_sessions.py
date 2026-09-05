@@ -1,5 +1,5 @@
 import uuid
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -110,3 +110,36 @@ async def close_attendance(
     session.attendance_status = "CLOSED"
     await db.commit()
     return {"message": "Successfully closed attendance window for this session."}
+
+
+@router.delete(
+    "/{session_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a class session",
+    description=(
+        "Superadmin or assigned asprak. Deletes a class session, associated attendance records, "
+        "and unlinks assignments. Cannot delete if grades for the session are currently published."
+    ),
+    responses={
+        **UNAUTHENTICATED_401,
+        **FORBIDDEN_403,
+        **SESSION_NOT_FOUND_404,
+        400: {"description": "Cannot delete session with published grades."},
+    },
+)
+async def delete_session(
+    session_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    session = await require_session_access(db, current_user, session_id, write=True)
+
+    if session.grades_published:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot delete session with published grades. Unpublish grades first.",
+        )
+
+    await db.delete(session)
+    await db.commit()
+

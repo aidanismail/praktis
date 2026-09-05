@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { DashboardShell } from "@/features/dashboard/components/dashboard-shell";
 import { useAuthStore } from "@/stores/auth-store";
 
@@ -10,5 +11,9 @@ export default function DashboardPage() {
     return null;
   }
 
-  return <DashboardShell user={user} />;
+  return (
+    <Suspense fallback={null}>
+      <DashboardShell user={user} />
+    </Suspense>
+  );
 }

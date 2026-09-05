@@ -156,3 +156,27 @@ async def test_praktikan_cannot_read_session_grades(client, db):
 
     resp = await client.get(f"/grades/sessions/{session.id}")
     assert resp.status_code == 403
+
+
+async def test_delete_session_lifecycle_and_guards(client, db):
+    course, session, asprak, student = await _setup_session(db)
+    set_auth(client, asprak)
+
+    await client.post(
+        f"/grades/sessions/{session.id}/bulk",
+        json={"records": [{"student_id": str(student.id), "score": 90}]},
+    )
+    await client.post(f"/grades/sessions/{session.id}/publish")
+
+    del_blocked = await client.delete(f"/class-sessions/{session.id}")
+    assert del_blocked.status_code == 400
+    assert "Cannot delete session with published grades" in del_blocked.json()["detail"]
+
+    await client.post(f"/grades/sessions/{session.id}/unpublish")
+
+    del_ok = await client.delete(f"/class-sessions/{session.id}")
+    assert del_ok.status_code == 204
+
+    del_verify = await client.get(f"/attendance/sessions/{session.id}")
+    assert del_verify.status_code == 404
+

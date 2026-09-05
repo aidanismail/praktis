@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FileText, Download, ExternalLink, X, Loader2 } from "lucide-react";
+import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
 
 type DocumentPreviewModalProps = {
   isOpen: boolean;
@@ -22,15 +23,10 @@ export function DocumentPreviewModal({
 }: DocumentPreviewModalProps) {
   const [loadedUrl, setLoadedUrl] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (isOpen) {
-      const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key === "Escape") onClose();
-      };
-      window.addEventListener("keydown", handleKeyDown);
-      return () => window.removeEventListener("keydown", handleKeyDown);
-    }
-  }, [isOpen, onClose]);
+  const modalRef = useModalFocusTrap<HTMLDivElement>({
+    isOpen: isOpen && Boolean(fileUrl),
+    onClose,
+  });
 
   if (!isOpen || !fileUrl) return null;
 
@@ -41,7 +37,13 @@ export function DocumentPreviewModal({
   const isFrameLoading = loadedUrl !== fileUrl;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-3 sm:p-6 animate-in fade-in duration-150">
+    <div
+      ref={modalRef}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="document-preview-title"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-3 sm:p-6 animate-in fade-in duration-150"
+    >
       <div className="relative flex h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl border border-slate-200">
         {/* Top Header Toolbar */}
         <div className="flex items-center justify-between border-b border-slate-200 bg-white px-5 py-3.5 shrink-0">
@@ -51,7 +53,10 @@ export function DocumentPreviewModal({
             </div>
             <div className="overflow-hidden">
               <div className="flex items-center gap-2">
-                <h3 className="truncate text-xs sm:text-sm font-bold text-slate-900">
+                <h3
+                  id="document-preview-title"
+                  className="truncate text-xs sm:text-sm font-bold text-slate-900"
+                >
                   {title}
                 </h3>
                 {courseCode && (

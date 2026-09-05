@@ -19,6 +19,7 @@ type AnnouncementCommentsProps = {
   courseId: string;
   announcementId: string;
   comments: AnnouncementComment[];
+  viewerRole?: "asprak" | "praktikan" | "superadmin";
 };
 
 const commentDateFormatter = new Intl.DateTimeFormat("en", {
@@ -37,7 +38,8 @@ export function AnnouncementComments({
   userId,
   courseId,
   announcementId,
-  comments
+  comments,
+  viewerRole
 }: AnnouncementCommentsProps) {
   const [confirmingCommentId, setConfirmingCommentId] = useState<string | null>(null);
   const addMutation = useAddAnnouncementComment({ userId, courseId });
@@ -74,7 +76,10 @@ export function AnnouncementComments({
       {comments.length > 0 ? (
         <ul className="mt-4 space-y-3" aria-label="Announcement comments">
           {comments.map((comment) => {
-            const canDelete = comment.author_id === userId;
+            const canDelete =
+              comment.author_id === userId ||
+              viewerRole === "asprak" ||
+              viewerRole === "superadmin";
             const isConfirming = confirmingCommentId === comment.id;
             const isDeleting =
               deleteMutation.isPending &&
@@ -148,12 +153,9 @@ export function AnnouncementComments({
       ) : null}
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4">
-        <div className="flex items-center justify-between text-sm font-medium text-slate-800">
-          <label htmlFor={formId}>Add a comment</label>
-          <span className="text-[11px] font-normal text-slate-400">
-            {(form.watch("content") || "").length} / 1000
-          </span>
-        </div>
+        <label htmlFor={formId} className="text-sm font-medium text-slate-800">
+          Add a comment
+        </label>
         <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-start">
           <div className="min-w-0 flex-1">
             <textarea

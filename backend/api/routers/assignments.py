@@ -8,12 +8,13 @@ import asyncio
 import unicodedata
 import zipfile
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy.orm import selectinload
 from core.config import settings
 from core.database import get_db
+from core.rate_limit import rate_limiter
 from api.dependencies import get_current_active_user
 from api.permissions import require_course_access
 from models.user import User, RoleEnum
@@ -49,6 +50,7 @@ FORBIDDEN_403 = {403: {"description": "Caller lacks enrollment or assignment per
 NOT_FOUND_404 = {404: {"description": "Course or assignment not found."}}
 BAD_REQUEST_400 = {400: {"description": "Invalid file format, excessive file size, or submission validation error."}}
 CONFLICT_409 = {409: {"description": "Concurrent submission conflict."}}
+TOO_MANY_REQUESTS_429 = {429: {"description": "Too many submission attempts; try again later."}}
 
 def _sanitize_filename(raw: str, ext: str) -> str:
     """Normalize an uploaded filename: basename only, safe chars, bounded."""
@@ -132,7 +134,7 @@ async def list_assignments(
 ):
     await require_course_access(db, current_user, course_id, write=False)
 
-    query = select(Assignment).where(Assignment.course_id == course_id).options(selectinload(Assignment.submissions))
+    query = select(Assignment).where(Assignment.course_id == course_id)
     if current_user.role == RoleEnum.PRAKTIKAN:
         query = query.where(Assignment.is_published.is_(True))
 
@@ -140,9 +142,18 @@ async def list_assignments(
     result = await db.execute(query)
     assignments = result.scalars().all()
 
-    # If praktikan, find their own submission
+    sub_counts: dict[uuid.UUID, int] = {}
+    if assignments:
+        assign_ids = [a.id for a in assignments]
+        count_res = await db.execute(
+            select(Submission.assignment_id, func.count(Submission.id))
+            .where(Submission.assignment_id.in_(assign_ids))
+            .group_by(Submission.assignment_id)
+        )
+        sub_counts = dict(count_res.all())
+
     my_submissions_map = {}
-    if current_user.role == RoleEnum.PRAKTIKAN:
+    if current_user.role == RoleEnum.PRAKTIKAN and assignments:
         sub_res = await db.execute(
             select(Submission).where(
                 Submission.assignment_id.in_([a.id for a in assignments]),
@@ -169,7 +180,7 @@ async def list_assignments(
                 allowed_file_types=a.allowed_file_types,
                 is_published=a.is_published,
                 created_at=a.created_at.isoformat(),
-                submissions_count=len(a.submissions),
+                submissions_count=sub_counts.get(a.id, 0),
                 my_submission=my_sub_resp,
             )
         )
@@ -253,9 +264,7 @@ async def get_assignment(
     await require_course_access(db, current_user, course_id, write=False)
 
     result = await db.execute(
-        select(Assignment)
-        .where(Assignment.id == assignment_id, Assignment.course_id == course_id)
-        .options(selectinload(Assignment.submissions))
+        select(Assignment).where(Assignment.id == assignment_id, Assignment.course_id == course_id)
     )
     assignment = result.scalars().first()
     if not assignment:
@@ -263,6 +272,11 @@ async def get_assignment(
 
     if current_user.role == RoleEnum.PRAKTIKAN and not assignment.is_published:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Assignment not found")
+
+    count_res = await db.execute(
+        select(func.count(Submission.id)).where(Submission.assignment_id == assignment.id)
+    )
+    submissions_count = count_res.scalar_one()
 
     my_sub_resp = None
     if current_user.role == RoleEnum.PRAKTIKAN:
@@ -287,7 +301,7 @@ async def get_assignment(
         allowed_file_types=assignment.allowed_file_types,
         is_published=assignment.is_published,
         created_at=assignment.created_at.isoformat(),
-        submissions_count=len(assignment.submissions),
+        submissions_count=submissions_count,
         my_submission=my_sub_resp,
     )
 
@@ -309,9 +323,7 @@ async def update_assignment(
     await require_course_access(db, current_user, course_id, write=True)
 
     result = await db.execute(
-        select(Assignment)
-        .where(Assignment.id == assignment_id, Assignment.course_id == course_id)
-        .options(selectinload(Assignment.submissions))
+        select(Assignment).where(Assignment.id == assignment_id, Assignment.course_id == course_id)
     )
     assignment = result.scalars().first()
     if not assignment:
@@ -324,6 +336,11 @@ async def update_assignment(
     await db.commit()
     await db.refresh(assignment)
 
+    count_res = await db.execute(
+        select(func.count(Submission.id)).where(Submission.assignment_id == assignment.id)
+    )
+    submissions_count = count_res.scalar_one()
+
     return AssignmentResponse(
         id=str(assignment.id),
         course_id=str(assignment.course_id),
@@ -335,7 +352,7 @@ async def update_assignment(
         allowed_file_types=assignment.allowed_file_types,
         is_published=assignment.is_published,
         created_at=assignment.created_at.isoformat(),
-        submissions_count=len(assignment.submissions),
+        submissions_count=submissions_count,
         my_submission=None,
     )
 
@@ -385,12 +402,14 @@ async def delete_assignment(
         "Automatically calculates `is_late` based on assignment due date. "
         "Resubmission replaces the existing submission and clears all grading state."
     ),
+    dependencies=[Depends(rate_limiter(times=5, seconds=60, scope="assignment_submit"))],
     responses={
         **UNAUTHENTICATED_401,
         **FORBIDDEN_403,
         **NOT_FOUND_404,
         **BAD_REQUEST_400,
         **CONFLICT_409,
+        **TOO_MANY_REQUESTS_429,
     },
 )
 async def submit_assignment(

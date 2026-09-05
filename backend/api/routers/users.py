@@ -101,29 +101,37 @@ async def logout(response: Response):
     description=(
         "Verifies the old password, rejects a new password identical to the old one, and "
         "clears `force_password_change`. This is the one write endpoint a user with "
-        "`force_password_change=True` is always allowed to call."
+        "`force_password_change=True` is always allowed to call. Rate-limited to 10 attempts "
+        "per minute per client IP to prevent brute-force attacks against existing sessions."
     ),
     responses={
         **UNAUTHENTICATED_401,
         400: {"description": "Incorrect old password, or new password same as old."},
+        429: {"description": "Too many password change attempts; try again later."},
     },
+    dependencies=[Depends(rate_limiter(times=10, seconds=60, scope="change_password"))],
 )
 async def change_password(
     data: ChangePasswordRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)):
-
-    if not verify_password(data.old_password, current_user.hashed_password):
+    current_user: User = Depends(get_current_user),
+):
+    is_old_valid = await asyncio.to_thread(verify_password, data.old_password, current_user.hashed_password)
+    if not is_old_valid:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Incorrect old password")
+            detail="Incorrect old password",
+        )
 
-    if verify_password(data.new_password, current_user.hashed_password):
+    is_same = await asyncio.to_thread(verify_password, data.new_password, current_user.hashed_password)
+    if is_same:
         raise HTTPException(
-        status_code=400,
-        detail="New password must be different from current password")
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="New password must be different from current password",
+        )
 
-    current_user.hashed_password = get_password_hash(data.new_password)
+    new_hash = await asyncio.to_thread(get_password_hash, data.new_password)
+    current_user.hashed_password = new_hash
     current_user.force_password_change = False
 
     db.add(current_user)
@@ -224,8 +232,8 @@ async def reset_user_password(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    new_pass = data.new_password if data and data.new_password else f"Praktis{user.username}"
-    user.hashed_password = get_password_hash(new_pass)
+    new_pass = data.new_password if data and data.new_password else f"{user.username}"
+    user.hashed_password = await asyncio.to_thread(get_password_hash, new_pass)
     user.force_password_change = True
 
     db.add(user)

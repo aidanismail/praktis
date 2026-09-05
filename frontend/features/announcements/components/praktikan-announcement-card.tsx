@@ -29,7 +29,13 @@ export function PraktikanAnnouncementCard({ userId, courseId, announcement }: Pr
       <p className="mt-2 text-xs text-slate-500"><time dateTime={announcement.created_at}>{formatDate(announcement.created_at)}</time></p>
       <h3 className="mt-5 wrap-break-word text-lg font-semibold text-slate-950">{announcement.title}</h3>
       <p className="mt-3 whitespace-pre-wrap wrap-break-word text-sm leading-7 text-slate-700">{announcement.content}</p>
-      <AnnouncementComments userId={userId} courseId={courseId} announcementId={announcement.id} comments={announcement.comments} />
+      <AnnouncementComments
+        userId={userId}
+        courseId={courseId}
+        announcementId={announcement.id}
+        comments={announcement.comments}
+        viewerRole="praktikan"
+      />
     </article>
   );
 }

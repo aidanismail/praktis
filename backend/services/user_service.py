@@ -1,3 +1,4 @@
+import asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
@@ -12,7 +13,7 @@ async def get_user_by_username(db: AsyncSession, username: str) -> User | None:
     return result.scalars().first()
 
 async def create_user(db: AsyncSession, user_in: UserCreate) -> User:
-    hashed_password = get_password_hash(user_in.password)
+    hashed_password = await asyncio.to_thread(get_password_hash, user_in.password)
     db_user = User(
         email=user_in.email,
         username=user_in.username,
