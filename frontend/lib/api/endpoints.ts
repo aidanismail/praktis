@@ -31,7 +31,11 @@ export const API_ENDPOINTS = {
     update: (courseId: string) =>
       `/api/courses/${encodeURIComponent(courseId)}`,
     delete: (courseId: string) =>
-      `/api/courses/${encodeURIComponent(courseId)}`
+      `/api/courses/${encodeURIComponent(courseId)}`,
+    banner: (courseId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}/banner`,
+    bannerImage: (courseId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}/banner-image`
   },
 
   announcements: {

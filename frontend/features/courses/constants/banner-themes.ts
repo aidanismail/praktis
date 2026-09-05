@@ -122,7 +122,57 @@ export function getPatternConfig(patternId?: string | null): BannerPattern {
 
 const STORAGE_KEY_PREFIX = "praktis_course_theme_";
 
-export function loadSavedCourseTheme(courseId: string, courseCode?: string): SavedCourseTheme {
+export function getCourseBannerTheme(course?: {
+  id?: string;
+  code?: string;
+  banner_theme_id?: string | null;
+  banner_pattern_id?: string | null;
+  banner_image_url?: string | null;
+} | null): SavedCourseTheme {
+  if (!course) {
+    return {
+      themeId: BANNER_THEMES[0].id,
+      patternId: "none",
+      imageUrl: null,
+    };
+  }
+
+  if (course.banner_theme_id || course.banner_pattern_id || course.banner_image_url) {
+    return {
+      themeId: course.banner_theme_id || (course.code ? getDeterministicThemeId(course.code) : BANNER_THEMES[0].id),
+      patternId: course.banner_pattern_id || "none",
+      imageUrl: course.banner_image_url || null,
+    };
+  }
+
+  if (course.id) {
+    return loadSavedCourseTheme(course.id, course.code);
+  }
+
+  return {
+    themeId: course.code ? getDeterministicThemeId(course.code) : BANNER_THEMES[0].id,
+    patternId: "none",
+    imageUrl: null,
+  };
+}
+
+export function loadSavedCourseTheme(
+  courseId: string,
+  courseCode?: string,
+  courseData?: {
+    banner_theme_id?: string | null;
+    banner_pattern_id?: string | null;
+    banner_image_url?: string | null;
+  }
+): SavedCourseTheme {
+  if (courseData && (courseData.banner_theme_id || courseData.banner_pattern_id || courseData.banner_image_url)) {
+    return {
+      themeId: courseData.banner_theme_id || (courseCode ? getDeterministicThemeId(courseCode) : BANNER_THEMES[0].id),
+      patternId: courseData.banner_pattern_id || "none",
+      imageUrl: courseData.banner_image_url || null,
+    };
+  }
+
   if (typeof window === "undefined") {
     return {
       themeId: courseCode ? getDeterministicThemeId(courseCode) : BANNER_THEMES[0].id,

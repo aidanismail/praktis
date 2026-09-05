@@ -84,14 +84,24 @@ export async function apiClient<T>(
 ): Promise<T> {
   const isFormData = options.body instanceof FormData;
 
-  const response = await fetch(endpoint, {
-    ...options,
-    credentials: "include",
-    headers: {
-      ...(isFormData ? {} : { "Content-Type": "application/json" }),
-      ...options.headers
-    }
-  });
+  let response: Response;
+  try {
+    response = await fetch(endpoint, {
+      ...options,
+      credentials: "include",
+      headers: {
+        ...(isFormData ? {} : { "Content-Type": "application/json" }),
+        ...options.headers,
+      },
+    });
+  } catch (err: unknown) {
+    if (err instanceof ApiError) throw err;
+    const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+    const message = isOffline
+      ? "You appear to be offline. Please check your internet connection."
+      : "Unable to connect to the server. Please verify your network connection or try again.";
+    throw new ApiError(message, 0, { originalError: err });
+  }
 
   const contentType = response.headers.get("content-type");
   const isJson = contentType?.includes("application/json");

@@ -9,7 +9,7 @@ import type {
   AnnouncementItem,
 } from "@/features/admin/types";
 import {
-  loadSavedCourseTheme,
+  getCourseBannerTheme,
   type SavedCourseTheme,
 } from "@/features/courses/constants/banner-themes";
 import { CourseBannerCustomizerModal } from "@/features/courses/components/course-banner-customizer-modal";
@@ -151,7 +151,7 @@ export function CourseManagement() {
     const themes: Record<string, SavedCourseTheme> = {};
     courses.forEach((c) => {
       themes[c.id] =
-        themeOverrides[c.id] || loadSavedCourseTheme(c.id, c.code);
+        themeOverrides[c.id] || getCourseBannerTheme(c);
     });
     return themes;
   }, [courses, themeOverrides]);
@@ -257,15 +257,15 @@ export function CourseManagement() {
     try {
       if (editingCourse) {
         await updateCourse({ id: editingCourse.id, payload: data });
-        setActionSuccess(`Course ${data.code} updated successfully.`);
+        setActionSuccess(`Course ${data.code} updated.`);
       } else {
         await createCourse(data);
-        setActionSuccess(`Course ${data.code} created successfully.`);
+        setActionSuccess(`Course ${data.code} created.`);
       }
       setShowCreateCourseModal(false);
       setEditingCourse(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save course.");
+      setError(err instanceof Error ? err.message : "Couldn't save course.");
     }
   };
 
@@ -273,13 +273,13 @@ export function CourseManagement() {
     if (!courseToDelete) return;
     try {
       await deleteCourse(courseToDelete.id);
-      setActionSuccess(`Course ${courseToDelete.code} deleted successfully.`);
+      setActionSuccess(`Course ${courseToDelete.code} deleted.`);
       setCourseToDelete(null);
       if (selectedCourse?.id === courseToDelete.id) {
         handleBackToCourses();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete course.");
+      setError(err instanceof Error ? err.message : "Couldn't delete course.");
     }
   };
 
@@ -301,20 +301,20 @@ export function CourseManagement() {
             is_published: true,
           },
         });
-        setActionSuccess(`Assignment "${data.title}" updated successfully.`);
+        setActionSuccess(`Assignment "${data.title}" updated.`);
       } else {
         await createAssignment({
           ...data,
           due_date: data.due_date || null,
           is_published: true,
         });
-        setActionSuccess(`Assignment "${data.title}" created successfully.`);
+        setActionSuccess(`Assignment "${data.title}" created.`);
       }
       setShowCreateAssignmentModal(false);
       setEditingAssignment(null);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to save assignment."
+        err instanceof Error ? err.message : "Couldn't save assignment."
       );
     }
   };
@@ -322,10 +322,10 @@ export function CourseManagement() {
   const handleDeleteAssignment = async (assignmentId: string) => {
     try {
       await deleteAssignment(assignmentId);
-      setActionSuccess("Assignment deleted successfully.");
+      setActionSuccess("Assignment deleted.");
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to delete assignment."
+        err instanceof Error ? err.message : "Couldn't delete assignment."
       );
     }
   };
@@ -341,7 +341,7 @@ export function CourseManagement() {
       setActionSuccess("Announcement published.");
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to publish announcement."
+        err instanceof Error ? err.message : "Couldn't publish announcement."
       );
     }
   };
@@ -356,7 +356,7 @@ export function CourseManagement() {
         ann.is_pinned ? "Announcement unpinned." : "Announcement pinned."
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update pin.");
+      setError(err instanceof Error ? err.message : "Couldn't update pin status.");
     }
   };
 
@@ -366,7 +366,7 @@ export function CourseManagement() {
       setActionSuccess("Announcement deleted.");
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to delete announcement."
+        err instanceof Error ? err.message : "Couldn't delete announcement."
       );
     }
   };
@@ -376,7 +376,7 @@ export function CourseManagement() {
       await addComment({ announcementId, content });
       setActionSuccess("Comment added.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to add comment.");
+      setError(err instanceof Error ? err.message : "Couldn't add comment.");
     }
   };
 
@@ -389,7 +389,7 @@ export function CourseManagement() {
       setActionSuccess("Comment deleted.");
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to delete comment."
+        err instanceof Error ? err.message : "Couldn't delete comment."
       );
     }
   };
@@ -401,7 +401,7 @@ export function CourseManagement() {
       setActionSuccess(`Session "${data.title}" created.`);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to create session."
+        err instanceof Error ? err.message : "Couldn't create session."
       );
     }
   };
@@ -412,7 +412,7 @@ export function CourseManagement() {
       await deleteModule(moduleId);
       setActionSuccess("Module removed.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete module.");
+      setError(err instanceof Error ? err.message : "Couldn't remove module.");
     }
   };
 
@@ -456,7 +456,26 @@ export function CourseManagement() {
       </div>
 
       {/* Main Content: Course Catalog vs. Course Workspace */}
-      {!selectedCourse ? (
+      {courseId && !isLoadingCourses && !selectedCourse ? (
+        <div className="p-8 sm:p-12 bg-white rounded-3xl border border-slate-200 shadow-xs text-center space-y-4 max-w-lg mx-auto mt-4">
+          <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto shadow-xs">
+            <AlertCircle className="w-6 h-6" />
+          </div>
+          <div className="space-y-1">
+            <h3 className="font-bold text-sm text-slate-900">Course not found</h3>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              This practicum course doesn&apos;t exist or may have been deleted.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleBackToCourses}
+            className="px-5 py-2 bg-slate-900 text-white text-xs font-semibold rounded-full hover:bg-slate-800 transition-colors shadow-xs cursor-pointer"
+          >
+            Back to courses
+          </button>
+        </div>
+      ) : !selectedCourse ? (
         <CourseListView
           courses={courses}
           isLoading={isLoadingCourses}
@@ -477,7 +496,7 @@ export function CourseManagement() {
             course={selectedCourse}
             theme={
               courseThemes[selectedCourse.id] ||
-              loadSavedCourseTheme(selectedCourse.id, selectedCourse.code)
+              getCourseBannerTheme(selectedCourse)
             }
             enrolledCount={students.length}
             staffCount={staff.length}
@@ -490,17 +509,38 @@ export function CourseManagement() {
           />
 
           {/* Submissions View vs. Workspace Tabs */}
-          {assignmentId && selectedAssignment ? (
-            <CourseSubmissionsView
-              course={selectedCourse}
-              assignment={selectedAssignment}
-              students={students}
-              onBack={handleBackToClasswork}
-              onOpenEditAssignment={(assignment) =>
-                setEditingAssignment(assignment)
-              }
-              onPreviewDoc={handlePreviewDoc}
-            />
+          {assignmentId ? (
+            selectedAssignment ? (
+              <CourseSubmissionsView
+                course={selectedCourse}
+                assignment={selectedAssignment}
+                students={students}
+                onBack={handleBackToClasswork}
+                onOpenEditAssignment={(assignment) =>
+                  setEditingAssignment(assignment)
+                }
+                onPreviewDoc={handlePreviewDoc}
+              />
+            ) : (
+              <div className="p-8 sm:p-12 bg-white rounded-3xl border border-slate-200 shadow-xs text-center space-y-4 max-w-lg mx-auto">
+                <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto shadow-xs">
+                  <AlertCircle className="w-6 h-6" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="font-bold text-sm text-slate-900">Assignment not found</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    This assignment doesn&apos;t exist in this course.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleBackToClasswork}
+                  className="px-5 py-2 bg-slate-900 text-white text-xs font-semibold rounded-full hover:bg-slate-800 transition-colors shadow-xs cursor-pointer"
+                >
+                  Back to classwork
+                </button>
+              </div>
+            )
           ) : (
             <>
               {workspaceTab === "stream" && (
@@ -600,13 +640,13 @@ export function CourseManagement() {
                 <Trash2 className="w-5 h-5" />
               </div>
               <h4 className="font-bold text-sm text-slate-900">
-                Delete Course
+                Delete course
               </h4>
             </div>
             <p className="text-xs text-slate-600 leading-relaxed">
               Are you sure you want to delete{" "}
               <strong className="text-slate-900">{courseToDelete.code}</strong>{" "}
-              ({courseToDelete.name})? This action will permanently remove all
+              ({courseToDelete.name})? This will permanently remove its
               modules, sessions, announcements, and student enrollments.
             </p>
             <div className="flex justify-end gap-2 pt-2">
@@ -622,7 +662,7 @@ export function CourseManagement() {
                 onClick={handleDeleteCourseConfirmed}
                 className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-colors"
               >
-                Delete Course
+                Delete course
               </button>
             </div>
           </div>

@@ -3,8 +3,7 @@ import type { Course } from "../types/course.type";
 import {
   getThemeConfig,
   getPatternConfig,
-  loadSavedCourseTheme,
-  getDeterministicThemeId,
+  getCourseBannerTheme,
 } from "../constants/banner-themes";
 
 type AsprakCourseCardProps = {
@@ -16,8 +15,8 @@ export function AsprakCourseCard({ course }: AsprakCourseCardProps) {
     ? "Active offering"
     : "Historical offering";
 
-  const cTheme = loadSavedCourseTheme(course.id, course.code);
-  const themeCfg = getThemeConfig(cTheme.themeId || getDeterministicThemeId(course.code));
+  const cTheme = getCourseBannerTheme(course);
+  const themeCfg = getThemeConfig(cTheme.themeId);
   const patternCfg = getPatternConfig(cTheme.patternId);
 
   return (

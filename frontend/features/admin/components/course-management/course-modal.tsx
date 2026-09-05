@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { AlertCircle } from "lucide-react";
 import type { Course } from "@/features/admin/types";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
 
@@ -32,18 +33,24 @@ function CourseFormInner({
     (initialCourse?.semester as "Ganjil" | "Genap") ?? "Ganjil"
   );
   const [isActiveCourse, setIsActiveCourse] = useState(initialCourse?.is_active ?? true);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!code.trim() || !name.trim()) return;
+    setFormError(null);
 
-    await onSubmit({
-      code: code.trim(),
-      name: name.trim(),
-      academic_year: academicYear.trim(),
-      semester,
-      is_active: isActiveCourse,
-    });
+    try {
+      await onSubmit({
+        code: code.trim(),
+        name: name.trim(),
+        academic_year: academicYear.trim(),
+        semester,
+        is_active: isActiveCourse,
+      });
+    } catch (err: unknown) {
+      setFormError(err instanceof Error ? err.message : "Couldn't save course. Please try again.");
+    }
   };
 
   return (
@@ -52,13 +59,24 @@ function CourseFormInner({
       className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4 animate-apple-modal"
     >
       <h4 id="course-modal-title" className="font-bold text-sm text-slate-900">
-        {isEdit ? "Edit Course Offering" : "Create Practicum Course"}
+        {isEdit ? "Edit Course" : "New Course"}
       </h4>
+
+      {formError && (
+        <div
+          role="alert"
+          aria-live="polite"
+          className="flex items-center gap-2 p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs font-medium"
+        >
+          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+          <span className="flex-1">{formError}</span>
+        </div>
+      )}
 
       <div className="space-y-3 text-xs">
         <div>
           <label className="block font-semibold text-slate-600 mb-1">
-            Course Code (e.g. IF2101)
+            Course Code
           </label>
           <input
             type="text"
@@ -123,13 +141,13 @@ function CourseFormInner({
                     }`}
                   />
                   <span className="font-bold text-slate-900 text-xs">
-                    {isActiveCourse ? "Active Offering" : "Archived (Historical)"}
+                    {isActiveCourse ? "Active Offering" : "Archived"}
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500 mt-0.5">
                   {isActiveCourse
-                    ? "Active course for the current academic semester."
-                    : "Archived. Read-only historical record for previous semesters."}
+                    ? "Visible and active for the current semester."
+                    : "Archived as a read-only historical record."}
                 </p>
               </div>
 
@@ -199,4 +217,3 @@ export function CourseModal(props: CourseModalProps) {
     </div>
   );
 }
-

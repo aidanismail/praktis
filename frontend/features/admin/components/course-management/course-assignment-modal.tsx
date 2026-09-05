@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { AlertCircle } from "lucide-react";
 import type { Assignment } from "@/features/admin/types";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
 
@@ -57,18 +58,26 @@ function AssignmentFormInner({
     editingAssignment?.allowed_file_types ?? "pdf,zip"
   );
   const [dueDate, setDueDate] = useState(formatDatetimeLocal(editingAssignment?.due_date));
+  const [formError, setFormError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
+    setFormError(null);
 
-    await onSubmit({
-      title: title.trim(),
-      description: description.trim(),
-      max_points: maxPoints,
-      allowed_file_types: allowedTypes,
-      due_date: dueDate ? new Date(dueDate).toISOString() : null,
-    });
+    try {
+      await onSubmit({
+        title: title.trim(),
+        description: description.trim(),
+        max_points: maxPoints,
+        allowed_file_types: allowedTypes,
+        due_date: dueDate ? new Date(dueDate).toISOString() : null,
+      });
+    } catch (err: unknown) {
+      setFormError(
+        err instanceof Error ? err.message : "Couldn't save assignment. Please try again."
+      );
+    }
   };
 
   const activeTypesList = allowedTypes
@@ -94,14 +103,25 @@ function AssignmentFormInner({
     >
       <div>
         <h4 id="assignment-modal-title" className="font-bold text-sm text-slate-900">
-          {editingAssignment ? "Edit Assignment Task" : "Create New Assignment"}
+          {editingAssignment ? "Edit Assignment" : "New Assignment"}
         </h4>
         <p className="text-[11px] text-slate-400 mt-0.5">
           {editingAssignment
-            ? `Update coursework specifications for ${courseCode}.`
-            : `Assign a new lab coursework or task for ${courseCode}.`}
+            ? `Update details and deadlines for ${courseCode}.`
+            : `Create coursework or a lab task for ${courseCode}.`}
         </p>
       </div>
+
+      {formError && (
+        <div
+          role="alert"
+          aria-live="polite"
+          className="flex items-center gap-2 p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs font-medium"
+        >
+          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+          <span className="flex-1">{formError}</span>
+        </div>
+      )}
 
       <div className="space-y-3 text-xs">
         <div>
@@ -111,7 +131,7 @@ function AssignmentFormInner({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
-            placeholder="Tugas 1 - Layouting Dashboard"
+            placeholder="e.g. Assignment 1 - Responsive Layout"
             className="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-slate-900 transition-shadow duration-150"
           />
         </div>
@@ -123,7 +143,7 @@ function AssignmentFormInner({
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
             className="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-slate-900 resize-none transition-shadow duration-150"
-            placeholder="Task guidelines..."
+            placeholder="Add instructions, guidelines, or requirements..."
           />
         </div>
 
@@ -200,7 +220,7 @@ function AssignmentFormInner({
           disabled={isSubmitting}
           className="px-5 py-2 bg-slate-900 text-white rounded-full text-xs font-semibold hover:bg-slate-800 shadow-xs apple-press transition-all"
         >
-          {isSubmitting ? "Saving..." : editingAssignment ? "Save Changes" : "Publish Assignment"}
+          {isSubmitting ? "Saving..." : editingAssignment ? "Save Changes" : "Create Assignment"}
         </button>
       </div>
     </form>

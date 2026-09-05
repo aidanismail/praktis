@@ -12,6 +12,9 @@ class CourseCreate(BaseModel):
     academic_year: str = Field(..., description="Academic year of the offering.", examples=["2025/2026"])
     semester: Literal["Ganjil", "Genap"] = Field(..., description="Semester of the offering.")
     is_active: bool = Field(True, description="Whether this offering is currently active.")
+    banner_theme_id: str | None = Field(None, max_length=50, description="Preset theme ID for banner.")
+    banner_pattern_id: str | None = Field(None, max_length=50, description="Preset pattern ID for banner.")
+    banner_image_url: str | None = Field(None, max_length=500, description="Custom banner image URL.")
 
 class CourseUpdate(BaseModel):
     code: str | None = Field(None, description="Updated course code.")
@@ -19,6 +22,14 @@ class CourseUpdate(BaseModel):
     academic_year: str | None = Field(None, description="Updated academic year.")
     semester: Literal["Ganjil", "Genap"] | None = Field(None, description="Updated semester.")
     is_active: bool | None = Field(None, description="Updated active status.")
+    banner_theme_id: str | None = Field(None, max_length=50, description="Preset theme ID for banner.")
+    banner_pattern_id: str | None = Field(None, max_length=50, description="Preset pattern ID for banner.")
+    banner_image_url: str | None = Field(None, max_length=500, description="Custom banner image URL.")
+
+class CourseBannerUpdate(BaseModel):
+    banner_theme_id: str | None = Field(None, max_length=50, description="Preset theme ID for banner.")
+    banner_pattern_id: str | None = Field(None, max_length=50, description="Preset pattern ID for banner.")
+    banner_image_url: str | None = Field(None, max_length=500, description="Custom banner image URL.")
 
 class CourseResponse(BaseModel):
     id: uuid.UUID = Field(..., description="Unique course identifier.")
@@ -27,8 +38,12 @@ class CourseResponse(BaseModel):
     academic_year: str = Field(..., description="Academic year of the offering.", examples=["2025/2026"])
     semester: str = Field(..., description="Semester of the offering.")
     is_active: bool = Field(..., description="Whether this offering is currently active.")
+    banner_theme_id: str | None = Field(None, description="Preset theme ID for banner.")
+    banner_pattern_id: str | None = Field(None, description="Preset pattern ID for banner.")
+    banner_image_url: str | None = Field(None, description="Custom banner image URL.")
 
     model_config = ConfigDict(from_attributes=True)
+
 
 class EnrollRequest(BaseModel):
     usernames: list[str] = Field(

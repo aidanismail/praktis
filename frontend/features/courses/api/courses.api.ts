@@ -17,3 +17,35 @@ export function listCourseStudents(courseId: string) {
     }
   );
 }
+
+export type UpdateCourseBannerPayload = {
+  banner_theme_id?: string | null;
+  banner_pattern_id?: string | null;
+  banner_image_url?: string | null;
+};
+
+export function updateCourseBanner(
+  courseId: string,
+  payload: UpdateCourseBannerPayload
+) {
+  return apiClient<Course>(API_ENDPOINTS.courses.banner(courseId), {
+    method: "PATCH",
+    body: JSON.stringify(payload)
+  });
+}
+
+export function uploadCourseBannerImage(courseId: string, file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+  return apiClient<Course>(API_ENDPOINTS.courses.bannerImage(courseId), {
+    method: "POST",
+    body: formData
+  });
+}
+
+export function deleteCourseBannerImage(courseId: string) {
+  return apiClient<Course>(API_ENDPOINTS.courses.bannerImage(courseId), {
+    method: "DELETE"
+  });
+}
+

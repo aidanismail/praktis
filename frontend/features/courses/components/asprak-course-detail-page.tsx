@@ -20,7 +20,7 @@ import { CourseWorkspaceTabs } from "./course-workspace-tabs";
 import {
   getThemeConfig,
   getPatternConfig,
-  loadSavedCourseTheme,
+  getCourseBannerTheme,
   type SavedCourseTheme
 } from "../constants/banner-themes";
 import { CourseBannerCustomizerModal } from "./course-banner-customizer-modal";
@@ -63,7 +63,7 @@ function AssignedCourseDetail({
     null
   );
   const courseTheme =
-    overrideTheme || loadSavedCourseTheme(courseId, course?.code);
+    overrideTheme || getCourseBannerTheme(course);
   const [showCustomizeModal, setShowCustomizeModal] = useState(false);
 
   useEffect(() => {
@@ -96,7 +96,7 @@ function AssignedCourseDetail({
             aria-hidden="true"
           />
           <span className="ml-3 text-sm text-slate-600">
-            Loading course details...
+            Getting course details ready...
           </span>
         </div>
       </DetailPageFrame>
@@ -122,18 +122,18 @@ function AssignedCourseDetail({
             <div>
               <h1 className="text-lg font-semibold text-red-950">
                 {isUnauthorized
-                  ? "Your session has expired"
+                  ? "You've been signed out"
                   : isForbidden
-                    ? "Course access is unavailable"
-                    : "Course details could not be loaded"}
+                    ? "Access restricted"
+                    : "Couldn't load course details"}
               </h1>
 
               <p className="mt-2 text-sm leading-6 text-red-800">
                 {isUnauthorized
-                  ? "Sign in again to continue."
+                  ? "Please sign in again to continue."
                   : isForbidden
-                    ? "Your account cannot access this assigned-course view."
-                    : "A network or server problem interrupted the request."}
+                    ? "You don't have instructor access to view this course."
+                    : "Couldn't reach the server. Let's try that again."}
               </p>
 
               {isUnauthorized ? (
@@ -189,10 +189,10 @@ function AssignedCourseDetail({
           className="rounded-3xl border border-amber-200 bg-amber-50 p-6"
         >
           <h1 className="text-lg font-semibold text-amber-950">
-            Course is unavailable
+            Course not found
           </h1>
           <p className="mt-2 text-sm leading-6 text-amber-800">
-            This course does not exist in your assigned practicum classes.
+            We couldn&apos;t find this course in your assigned classes. It may have been removed or reassigned.
           </p>
           <Link
             href={ROUTES.dashboard}
@@ -209,8 +209,8 @@ function AssignedCourseDetail({
   }
 
   const statusLabel = course.is_active
-    ? "Active offering"
-    : "Historical offering";
+    ? "Active"
+    : "Archived";
 
   const themeCfg = getThemeConfig(courseTheme.themeId);
   const patternCfg = getPatternConfig(courseTheme.patternId);
@@ -333,10 +333,10 @@ export function AsprakCourseDetailPage({
           className="rounded-3xl border border-amber-200 bg-amber-50 p-6"
         >
           <h1 className="text-lg font-semibold text-amber-950">
-            Asprak access required
+            Instructor access required
           </h1>
           <p className="mt-2 text-sm leading-6 text-amber-800">
-            This course workspace is available only to Asprak accounts.
+            This workspace is reserved for teaching assistants and lab instructors.
           </p>
           <Link
             href={ROUTES.dashboard}

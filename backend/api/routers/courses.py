@@ -1,6 +1,8 @@
 import json
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
+import asyncio
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Response
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -16,10 +18,12 @@ from models.course_staff import CourseStaff
 from models.enrollment import Enrollment
 from api.dependencies import get_current_active_user, RoleChecker
 from api.permissions import require_course_access
+from services.storage_service import storage_service
 from schemas.common import MessageResponse
 from schemas.course import (
     CourseCreate,
     CourseUpdate,
+    CourseBannerUpdate,
     CourseResponse,
     EnrollRequest,
     EnrollResponse,
@@ -67,7 +71,10 @@ async def create_course(
         name=data.name,
         academic_year=data.academic_year,
         semester=data.semester,
-        is_active=data.is_active
+        is_active=data.is_active,
+        banner_theme_id=data.banner_theme_id,
+        banner_pattern_id=data.banner_pattern_id,
+        banner_image_url=data.banner_image_url,
     )
     db.add(course)
     try:
@@ -105,6 +112,12 @@ async def update_course(
         course.semester = data.semester
     if data.is_active is not None:
         course.is_active = data.is_active
+    if data.banner_theme_id is not None:
+        course.banner_theme_id = data.banner_theme_id
+    if data.banner_pattern_id is not None:
+        course.banner_pattern_id = data.banner_pattern_id
+    if data.banner_image_url is not None:
+        course.banner_image_url = data.banner_image_url
 
     try:
         await db.commit()
@@ -112,6 +125,174 @@ async def update_course(
         await db.rollback()
         raise HTTPException(status_code=409, detail="A course offering with these details already exists")
 
+    await db.refresh(course)
+    await cache_delete_pattern("cache:courses:*")
+    return course
+
+
+@router.patch(
+    "/{course_id}/banner",
+    response_model=CourseResponse,
+    summary="Update course banner styling",
+    description="Superadmin, or an asprak assigned to this course.",
+    responses={**UNAUTHENTICATED_401, **FORBIDDEN_403, **COURSE_NOT_FOUND_404},
+)
+async def update_course_banner(
+    course_id: uuid.UUID,
+    data: CourseBannerUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    course = await require_course_access(db, current_user, course_id, write=True)
+
+    if data.banner_theme_id is not None:
+        course.banner_theme_id = data.banner_theme_id
+    if data.banner_pattern_id is not None:
+        course.banner_pattern_id = data.banner_pattern_id
+    if data.banner_image_url is not None:
+        course.banner_image_url = data.banner_image_url
+
+    await db.commit()
+    await db.refresh(course)
+    await cache_delete_pattern("cache:courses:*")
+    return course
+
+
+@router.post(
+    "/{course_id}/banner-image",
+    response_model=CourseResponse,
+    summary="Upload custom course banner image",
+    description="Superadmin, or an asprak assigned to this course. Max 5MB, JPG/PNG/WebP.",
+    responses={
+        **UNAUTHENTICATED_401,
+        **FORBIDDEN_403,
+        **COURSE_NOT_FOUND_404,
+        400: {"description": "Invalid image format or size exceeds 5MB."},
+    },
+)
+async def upload_course_banner_image(
+    course_id: uuid.UUID,
+    file: UploadFile = File(...),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    course = await require_course_access(db, current_user, course_id, write=True)
+
+    allowed_types = {
+        "image/jpeg": ".jpg",
+        "image/jpg": ".jpg",
+        "image/png": ".png",
+        "image/webp": ".webp",
+    }
+    content_type = file.content_type or ""
+    if content_type not in allowed_types:
+        raise HTTPException(
+            status_code=400,
+            detail="Only JPEG, PNG, and WebP images are allowed for course banners.",
+        )
+
+    contents = await file.read()
+    if len(contents) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Banner image must be 5MB or smaller.")
+
+    ext = allowed_types[content_type]
+    object_name = f"banners/{course_id}/{uuid.uuid4().hex}{ext}"
+
+    await asyncio.to_thread(
+        storage_service.internal.put_object,
+        Bucket=storage_service.bucket_name,
+        Key=object_name,
+        Body=contents,
+        ContentType=content_type,
+    )
+
+    course.banner_image_url = f"/api/courses/{course_id}/banner-image"
+    await db.commit()
+    await db.refresh(course)
+    await cache_delete_pattern("cache:courses:*")
+    return course
+
+
+@router.get(
+    "/{course_id}/banner-image",
+    summary="Get course banner image",
+    description="Streams course banner image. Accessible by enrolled students, assigned staff, and superadmins.",
+    responses={**UNAUTHENTICATED_401, **FORBIDDEN_403, **COURSE_NOT_FOUND_404},
+)
+async def get_course_banner_image(
+    course_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    course = await require_course_access(db, current_user, course_id, write=False)
+    if not course.banner_image_url:
+        raise HTTPException(status_code=404, detail="Course has no custom banner image")
+
+    prefix = f"banners/{course_id}/"
+
+    def _list_banner_objects():
+        return storage_service.internal.list_objects_v2(
+            Bucket=storage_service.bucket_name,
+            Prefix=prefix,
+        )
+
+    resp = await asyncio.to_thread(_list_banner_objects)
+    contents = resp.get("Contents", [])
+    if not contents:
+        raise HTTPException(status_code=404, detail="Banner image not found in storage")
+
+    latest_key = sorted(contents, key=lambda x: x["LastModified"], reverse=True)[0]["Key"]
+
+    def _fetch_banner_object():
+        return storage_service.internal.get_object(
+            Bucket=storage_service.bucket_name,
+            Key=latest_key,
+        )
+
+    obj = await asyncio.to_thread(_fetch_banner_object)
+    data = obj["Body"].read()
+    content_type = obj.get("ContentType", "image/jpeg")
+
+    return Response(
+        content=data,
+        media_type=content_type,
+        headers={
+            "Cache-Control": "public, max-age=86400, stale-while-revalidate=3600"
+        },
+    )
+
+
+@router.delete(
+    "/{course_id}/banner-image",
+    response_model=CourseResponse,
+    summary="Delete course custom banner image",
+    description="Superadmin, or an asprak assigned to this course.",
+    responses={**UNAUTHENTICATED_401, **FORBIDDEN_403, **COURSE_NOT_FOUND_404},
+)
+async def delete_course_banner_image(
+    course_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    course = await require_course_access(db, current_user, course_id, write=True)
+
+    prefix = f"banners/{course_id}/"
+
+    def _delete_all_banners():
+        resp = storage_service.internal.list_objects_v2(
+            Bucket=storage_service.bucket_name,
+            Prefix=prefix,
+        )
+        for item in resp.get("Contents", []):
+            storage_service.internal.delete_object(
+                Bucket=storage_service.bucket_name,
+                Key=item["Key"],
+            )
+
+    await asyncio.to_thread(_delete_all_banners)
+
+    course.banner_image_url = None
+    await db.commit()
     await db.refresh(course)
     await cache_delete_pattern("cache:courses:*")
     return course
@@ -130,10 +311,31 @@ async def delete_course(
     _current_user: User = Depends(require_superadmin),
 ):
     course = await _get_course_or_404(db, course_id)
+
+    # Clean up banner files in storage
+    prefix = f"banners/{course_id}/"
+
+    def _cleanup_banners():
+        try:
+            resp = storage_service.internal.list_objects_v2(
+                Bucket=storage_service.bucket_name,
+                Prefix=prefix,
+            )
+            for item in resp.get("Contents", []):
+                storage_service.internal.delete_object(
+                    Bucket=storage_service.bucket_name,
+                    Key=item["Key"],
+                )
+        except Exception:
+            pass
+
+    await asyncio.to_thread(_cleanup_banners)
+
     await db.delete(course)
     await db.commit()
     await cache_delete_pattern("cache:courses:*")
     return {"message": f"Successfully deleted course '{course.code}'"}
+
 
 
 

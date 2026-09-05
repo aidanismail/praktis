@@ -20,3 +20,6 @@ class Course(Base):
     semester: Mapped[str] = mapped_column(String(20))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
+    banner_theme_id: Mapped[str | None] = mapped_column(String(50), nullable=True, default=None)
+    banner_pattern_id: Mapped[str | None] = mapped_column(String(50), nullable=True, default=None)
+    banner_image_url: Mapped[str | None] = mapped_column(String(500), nullable=True, default=None)

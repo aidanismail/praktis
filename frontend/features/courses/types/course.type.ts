@@ -7,4 +7,7 @@ export type Course = {
   academic_year: string;
   semester: Semester;
   is_active: boolean;
+  banner_theme_id?: string | null;
+  banner_pattern_id?: string | null;
+  banner_image_url?: string | null;
 };

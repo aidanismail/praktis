@@ -13,10 +13,10 @@ import {
 } from "lucide-react";
 import type { Course } from "@/features/admin/types";
 import {
-  loadSavedCourseTheme,
   getThemeConfig,
   getPatternConfig,
   getDeterministicThemeId,
+  getCourseBannerTheme,
   type SavedCourseTheme,
 } from "@/features/courses/constants/banner-themes";
 
@@ -63,7 +63,7 @@ export function CourseListView({
           <div className="relative w-full">
             <input
               type="text"
-              placeholder="Search course code, name, or academic year..."
+              placeholder="Search courses by code, name, or year..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 shadow-xs"
@@ -106,7 +106,7 @@ export function CourseListView({
             className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-full shadow-xs transition-all flex items-center gap-1.5 active:scale-[0.98] cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>Create Course</span>
+            <span>Create course</span>
           </button>
         </div>
       </div>
@@ -114,17 +114,17 @@ export function CourseListView({
       {/* Courses Catalog Display */}
       {isLoading ? (
         <div className="p-16 text-center text-xs text-slate-400 bg-white rounded-3xl border border-slate-200 shadow-xs">
-          Loading courses catalog...
+          Loading courses...
         </div>
       ) : filteredCourses.length === 0 ? (
         <div className="p-16 text-center text-xs text-slate-400 bg-white rounded-3xl border border-slate-200 shadow-xs">
-          No practicum courses found matching your criteria.
+          No courses match your search.
         </div>
       ) : viewMode === "grid" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredCourses.map((course) => {
             const cTheme =
-              courseThemes[course.id] || loadSavedCourseTheme(course.id, course.code);
+              courseThemes[course.id] || getCourseBannerTheme(course);
             const themeCfg = getThemeConfig(
               cTheme.themeId || getDeterministicThemeId(course.code)
             );
@@ -186,7 +186,7 @@ export function CourseListView({
                     </div>
                     <div className="bg-slate-50 p-2.5 rounded-2xl border border-slate-100">
                       <span className="text-[10px] text-slate-400 uppercase font-semibold block">
-                        Offering Status
+                        Status
                       </span>
                       <span className="font-medium text-slate-800 flex items-center gap-1.5">
                         <span
@@ -201,7 +201,7 @@ export function CourseListView({
 
                   <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
                     <span className="text-slate-900 font-semibold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
-                      <span>Open Workspace</span>
+                      <span>Open course</span>
                       <ChevronRight className="w-3.5 h-3.5" />
                     </span>
                     <div
@@ -215,7 +215,7 @@ export function CourseListView({
                           onCustomizeBanner(course);
                         }}
                         className="p-1.5 hover:bg-slate-100 text-slate-500 rounded-lg text-xs transition-colors cursor-pointer"
-                        title="Customize Banner"
+                        title="Customize banner"
                       >
                         <Palette className="w-3.5 h-3.5" />
                       </button>
@@ -288,7 +288,7 @@ export function CourseListView({
                         onClick={() => onOpenWorkspace(c)}
                         className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium rounded-lg text-xs cursor-pointer"
                       >
-                        Workspace
+                        Open
                       </button>
                       <button
                         type="button"

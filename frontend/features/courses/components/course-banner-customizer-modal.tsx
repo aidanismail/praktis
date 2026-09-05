@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   X,
   Palette,
@@ -8,8 +9,16 @@ import {
   Check,
   Trash2,
   AlertCircle,
+  Loader2,
 } from "lucide-react";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
+import { courseQueryKeys } from "../constants/course-query-keys";
+import { adminQueryKeys } from "@/features/admin/constants/admin-query-keys";
+import {
+  updateCourseBanner,
+  uploadCourseBannerImage,
+  deleteCourseBannerImage,
+} from "../api/courses.api";
 import type { Course } from "../types/course.type";
 import {
   BANNER_THEMES,
@@ -17,7 +26,7 @@ import {
   getThemeConfig,
   getPatternConfig,
   getDeterministicThemeId,
-  loadSavedCourseTheme,
+  getCourseBannerTheme,
   saveCourseTheme,
   readFileAsDataUrl,
   type SavedCourseTheme,
@@ -36,13 +45,16 @@ export function CourseBannerCustomizerModal({
   onClose,
   onSaved,
 }: CourseBannerCustomizerModalProps) {
-  const initial = loadSavedCourseTheme(course.id, course.code);
+  const queryClient = useQueryClient();
+  const initial = getCourseBannerTheme(course);
 
   const [activeTab, setActiveTab] = useState<"presets" | "upload">("presets");
   const [selectedThemeId, setSelectedThemeId] = useState<string>(initial.themeId);
   const [selectedPatternId, setSelectedPatternId] = useState<string>(initial.patternId);
   const [customImageUrl, setCustomImageUrl] = useState<string | null>(initial.imageUrl || null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isProcessingImage, setIsProcessingImage] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   const modalRef = useModalFocusTrap<HTMLDivElement>({
@@ -61,6 +73,7 @@ export function CourseBannerCustomizerModal({
     try {
       const dataUrl = await readFileAsDataUrl(file);
       setCustomImageUrl(dataUrl);
+      setUploadedFile(file);
     } catch (err: unknown) {
       setUploadError(err instanceof Error ? err.message : "Failed to load image.");
     } finally {
@@ -68,14 +81,43 @@ export function CourseBannerCustomizerModal({
     }
   };
 
-  const handleApply = () => {
-    saveCourseTheme(course.id, selectedThemeId, selectedPatternId, customImageUrl);
-    onSaved?.({
-      themeId: selectedThemeId,
-      patternId: selectedPatternId,
-      imageUrl: customImageUrl,
-    });
-    onClose();
+  const handleApply = async () => {
+    setIsSubmitting(true);
+    setUploadError(null);
+
+    try {
+      let finalImageUrl = customImageUrl;
+
+      if (uploadedFile) {
+        const res = await uploadCourseBannerImage(course.id, uploadedFile);
+        finalImageUrl = res.banner_image_url || null;
+      } else if (customImageUrl === null && course.banner_image_url) {
+        await deleteCourseBannerImage(course.id);
+        finalImageUrl = null;
+      }
+
+      await updateCourseBanner(course.id, {
+        banner_theme_id: selectedThemeId,
+        banner_pattern_id: selectedPatternId,
+        banner_image_url: finalImageUrl,
+      });
+
+      saveCourseTheme(course.id, selectedThemeId, selectedPatternId, finalImageUrl);
+
+      await queryClient.invalidateQueries({ queryKey: courseQueryKeys.all });
+      await queryClient.invalidateQueries({ queryKey: adminQueryKeys.all });
+
+      onSaved?.({
+        themeId: selectedThemeId,
+        patternId: selectedPatternId,
+        imageUrl: finalImageUrl,
+      });
+      onClose();
+    } catch (err: unknown) {
+      setUploadError(err instanceof Error ? err.message : "Failed to save banner theme.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleResetDefault = () => {
@@ -83,6 +125,7 @@ export function CourseBannerCustomizerModal({
     setSelectedThemeId(defaultTheme);
     setSelectedPatternId("none");
     setCustomImageUrl(null);
+    setUploadedFile(null);
     setUploadError(null);
   };
 
@@ -163,7 +206,10 @@ export function CourseBannerCustomizerModal({
                 {customImageUrl && (
                   <button
                     type="button"
-                    onClick={() => setCustomImageUrl(null)}
+                    onClick={() => {
+                      setCustomImageUrl(null);
+                      setUploadedFile(null);
+                    }}
                     className="p-1 rounded-lg bg-black/40 hover:bg-rose-600/90 text-white/80 hover:text-white backdrop-blur-xs transition-colors shadow-xs border border-white/10"
                     title="Remove custom banner image"
                   >
@@ -330,9 +376,11 @@ export function CourseBannerCustomizerModal({
             <button
               type="button"
               onClick={handleApply}
-              className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-full text-xs font-semibold shadow-xs transition-colors"
+              disabled={isSubmitting || isProcessingImage}
+              className="px-5 py-2 bg-slate-900 hover:bg-slate-800 disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-full text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5"
             >
-              Apply Theme
+              {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+              <span>{isSubmitting ? "Applying..." : "Apply Theme"}</span>
             </button>
           </div>
         </div>

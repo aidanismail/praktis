@@ -34,13 +34,11 @@ export function LoginForm() {
           priority
           className="mb-5 rounded-full shadow-sm"
         />
-
         <h1 className="text-2xl font-semibold tracking-tight text-slate-950">
           Sign in to Praktis
         </h1>
-
-        <p className="mt-2 text-sm leading-6 text-slate-500">
-          Gunakan akun yang telah dibuat untuk melanjutkan.
+        <p className="mt-1.5 text-sm text-slate-500">
+          Welcome back! Enter your details to jump into your labs.
         </p>
       </div>
 
@@ -49,7 +47,7 @@ export function LoginForm() {
           <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {loginMutation.error instanceof Error
               ? loginMutation.error.message
-              : "Login failed. Please check your credentials."}
+              : "Couldn't sign you in. Double-check your username and password."}
           </div>
         ) : null}
 
@@ -136,13 +134,6 @@ export function LoginForm() {
             "Sign in"
           )}
         </button>
-
-        <div className="rounded-2xl bg-slate-50 px-4 py-3">
-          <p className="text-center text-xs leading-5 text-slate-500">
-            Pengguna baru akan diminta untuk mengubah kata sandi yang telah
-            dibuatkan untuk mereka sebelum mengakses dasbor.
-          </p>
-        </div>
       </form>
     </div>
   );
