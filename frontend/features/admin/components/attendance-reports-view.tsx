@@ -341,9 +341,6 @@ export function AttendanceReportsView() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl bg-slate-50 border border-slate-200/80 p-4">
             <div className="flex items-center gap-2.5">
               <span
-                className={`h-2.5 w-2.5 rounded-full ${
-                  currentSession.attendance_status === "OPEN" ? "bg-slate-900" : "bg-slate-400"
-                }`}
               />
 
               <div>

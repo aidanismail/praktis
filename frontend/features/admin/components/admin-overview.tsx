@@ -67,8 +67,8 @@ const ADMIN_AREAS = [
   },
   {
     id: "bulk-import",
-    label: "Bulk import",
-    description: "Import student accounts in bulk via CSV or Excel",
+    label: "import",
+    description: "Import student accounts in batch via CSV or Excel",
     icon: UploadCloud
   },
   {
@@ -627,15 +627,7 @@ export function AdminOverview({
               >
                 Platform status
               </h3>
-              <p className="mt-1 text-sm leading-6 text-slate-500">
-                Real-time service health and connection status.
-              </p>
             </div>
-
-            <Activity
-              className="mt-1 h-5 w-5 text-slate-500"
-              aria-hidden="true"
-            />
           </div>
 
           {healthQuery.isPending ? (
@@ -645,11 +637,11 @@ export function AdminOverview({
               className="mt-6 space-y-4"
             >
               <div
-                className="h-8 w-32 animate-pulse rounded bg-slate-200"
+                className="h-8 w-32 rounded bg-slate-200"
                 aria-hidden="true"
               />
               <div
-                className="h-28 animate-pulse rounded-lg bg-slate-100"
+                className="h-28 rounded-lg bg-slate-100"
                 aria-hidden="true"
               />
             </div>
