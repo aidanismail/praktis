@@ -59,7 +59,7 @@ function CourseStat({ label, value, helper, icon: Icon }: CourseStatProps) {
 function CourseOverviewLoading() {
   return (
     <div role="status" aria-live="polite" className="space-y-8">
-      <span className="sr-only">Loading your practicum overview...</span>
+      <span className="sr-only">Getting your classes ready...</span>
       <div className="grid gap-4 sm:grid-cols-3" aria-hidden="true">
         {[0, 1, 2].map((item) => (
           <div
@@ -113,17 +113,17 @@ export function AsprakCourseOverview({
           <div>
             <h3 className="font-semibold text-red-950">
               {isUnauthorized
-                ? "Your session has expired"
+                ? "You've been signed out"
                 : isForbidden
-                  ? "Course access is unavailable"
-                  : "Your practicum overview could not be loaded"}
+                  ? "Access restricted"
+                  : "Couldn't load your teaching overview"}
             </h3>
             <p className="mt-2 text-sm leading-6 text-red-800">
               {isUnauthorized
-                ? "Sign in again to continue."
+                ? "Please sign in again to continue."
                 : isForbidden
-                  ? "Ask a Superadmin to verify your role and course assignments."
-                  : "A network or server problem interrupted the request."}
+                  ? "You don't have instructor access to these classes yet. Check in with your admin."
+                  : "Couldn't reach the server. Let's try that again."}
             </p>
             {isUnauthorized ? (
               <Link
@@ -164,11 +164,10 @@ export function AsprakCourseOverview({
           aria-hidden="true"
         />
         <h3 className="mt-4 font-semibold text-slate-950">
-          No assigned practicum classes
+          No classes assigned yet
         </h3>
         <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-500">
-          Ask a Superadmin to verify that your Asprak account is assigned to
-          the correct course offerings.
+          When an administrator assigns you to lead or assist a class, it&apos;ll appear right here.
         </p>
       </div>
     );
@@ -190,10 +189,10 @@ export function AsprakCourseOverview({
               id="course-summary-heading"
               className="text-lg font-semibold text-slate-950"
             >
-              Course summary
+              Overview
             </h3>
             <p className="mt-1 text-sm text-slate-500">
-              Your assigned practicum offerings across academic periods.
+              A quick snapshot of your active and past teaching assignments.
             </p>
           </div>
           {isFetching ? (
@@ -214,19 +213,19 @@ export function AsprakCourseOverview({
           <CourseStat
             label="Assigned classes"
             value={courses.length}
-            helper="All academic periods"
+            helper="All time"
             icon={Layers3}
           />
           <CourseStat
             label="Active classes"
             value={activeCourses.length}
-            helper="Ready for current work"
+            helper="Current term"
             icon={BookOpen}
           />
           <CourseStat
             label="Historical classes"
             value={historicalCount}
-            helper="Retained for reference"
+            helper="Past terms"
             icon={History}
           />
         </div>
@@ -237,11 +236,10 @@ export function AsprakCourseOverview({
           id="active-course-heading"
           className="text-lg font-semibold text-slate-950"
         >
-          Continue with an active class
+          Jump back in
         </h3>
         <p className="mt-1 text-sm text-slate-500">
-          Choose a course before managing its Stream, Modules, Assignments,
-          People, or Sessions & Attendance.
+          Select a class to manage announcements, modules, assignments, and sessions.
         </p>
 
         {visibleCourses.length > 0 ? (
@@ -262,8 +260,8 @@ export function AsprakCourseOverview({
             {remainingCount > 0 ? (
               <p className="mt-4 text-sm text-slate-500">
                 {remainingCount} more active{" "}
-                {remainingCount === 1 ? "class" : "classes"} available under My
-                Practicum Classes.
+                {remainingCount === 1 ? "class" : "classes"} waiting in My
+                Classes.
               </p>
             ) : null}
           </>
@@ -273,11 +271,10 @@ export function AsprakCourseOverview({
             className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6"
           >
             <h4 className="font-semibold text-slate-950">
-              No active course offerings
+              No active classes right now
             </h4>
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              Your historical assignments remain available under My Practicum
-              Classes.
+              You can still review previous terms under My Classes.
             </p>
           </div>
         )}

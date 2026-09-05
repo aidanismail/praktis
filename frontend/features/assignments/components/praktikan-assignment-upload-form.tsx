@@ -29,26 +29,26 @@ const ACCEPTED_FILE_TYPES: Record<AssignmentFileType, string> = {
 
 function getSubmissionErrorMessage(error: Error) {
   if (!(error instanceof ApiError)) {
-    return "A network or server problem interrupted the upload. Your selected file is still available to retry.";
+    return "Couldn't upload your file due to a connection issue. Your file is still selected—try submitting again.";
   }
 
   switch (error.status) {
     case 400:
-      return "The backend rejected this file. Check that its real contents match its PDF, ZIP, or DOCX extension.";
+      return "This file format seems corrupted or unsupported. Please check that it's a valid PDF, ZIP, or DOCX document.";
     case 401:
-      return "Your session has expired. Sign in again before uploading.";
+      return "You've been signed out. Please sign in again before uploading.";
     case 403:
-      return "You no longer have permission to submit this assignment.";
+      return "You don't have permission to submit to this assignment.";
     case 404:
-      return "This published assignment is no longer available in the selected course.";
+      return "This assignment is no longer active or was removed.";
     case 409:
-      return "Another submission update conflicted with this upload. Review the latest submission and try again.";
+      return "A newer submission was saved recently. Refresh to review before trying again.";
     case 413:
-      return "The upload is larger than the server limit. Choose a file no larger than 10 MiB.";
+      return "That file is too large. Please keep your upload under 10 MB.";
     case 422:
-      return "The upload request was invalid. Re-select an allowed file and try again.";
+      return "The upload couldn't be processed. Make sure the file isn't empty or damaged.";
     default:
-      return "The server could not save this upload. Your selected file is still available to retry.";
+      return "Upload didn't go through. Your file is still selected—give it another try.";
   }
 }
 
@@ -107,7 +107,7 @@ export function PraktikanAssignmentUploadForm({
     if (
       hasSubmission &&
       !window.confirm(
-        "Replace your current submission? The previous file, score, and feedback will be cleared."
+        "Turn in a new version? This replaces your current file and resets any previous score."
       )
     ) {
       return;
@@ -118,8 +118,8 @@ export function PraktikanAssignmentUploadForm({
       onSuccess: () => {
         setSuccessMessage(
           hasSubmission
-            ? "Your replacement submission was saved. Any previous grade and feedback were cleared."
-            : "Your assignment submission was saved."
+            ? "New version turned in! Your updated file has been saved."
+            : "You're all set! Your assignment has been turned in."
         );
         form.reset();
         setInputKey((currentKey) => currentKey + 1);
@@ -142,12 +142,12 @@ export function PraktikanAssignmentUploadForm({
         </span>
         <div>
           <h2 id="assignment-upload-heading" className="text-lg font-semibold text-slate-950">
-            {hasSubmission ? "Replace submission" : "Submit assignment"}
+            {hasSubmission ? "Turn in a new version" : "Turn in assignment"}
           </h2>
           <p className="mt-1 text-sm leading-6 text-slate-600">
             {hasSubmission
-              ? "Uploading again replaces the saved file and clears its previous grade and feedback."
-              : "Upload one file for this assignment."}
+              ? "Uploading a new file replaces your current submission and clears previous feedback."
+              : "Select your assignment file and click turn in."}
           </p>
         </div>
       </div>
@@ -225,10 +225,10 @@ export function PraktikanAssignmentUploadForm({
             <FileUp className="h-4 w-4" aria-hidden="true" />
           )}
           {submissionMutation.isPending
-            ? "Uploading..."
+            ? "Turning in..."
             : hasSubmission
-              ? "Replace submission"
-              : "Submit assignment"}
+              ? "Turn in new version"
+              : "Turn in"}
         </button>
       </form>
     </section>

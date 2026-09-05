@@ -11,37 +11,37 @@ export const DASHBOARD_NAVIGATION: Record<UserRole, DashboardNavItem[]> = {
     {
       id: "overview",
       label: "Overview",
-      description: "Course offerings, account coverage, and platform readiness."
+      description: "Platform stats, active courses, and quick actions."
     },
     {
       id: "courses",
       label: "Course Management",
-      description: "Create and manage practicum courses and academic periods."
+      description: "Set up practicum offerings, terms, and course staff."
     },
     {
       id: "users",
       label: "User Management",
-      description: "Manage praktikan, asprak, and admin accounts."
+      description: "Manage student, assistant, and admin accounts."
     },
     {
       id: "bulk-import",
-      label: "Bulk Import",
-      description: "Import student accounts from CSV files."
+      label: "Import",
+      description: "Batch-create student accounts with a simple CSV."
     },
     {
       id: "modules",
       label: "Module Management",
-      description: "Manage practicum modules and learning files."
+      description: "Organize lab guides, lecture slides, and references."
     },
     {
       id: "attendance-reports",
       label: "Attendance Reports",
-      description: "Monitor attendance records across practicum classes."
+      description: "Track attendance across all active practicum classes."
     },
     {
       id: "grade-exports",
       label: "Grade Exports",
-      description: "Export grading data to XLSX or CSV."
+      description: "Export final grades and spreadsheets anytime."
     }
   ],
 
@@ -49,12 +49,12 @@ export const DASHBOARD_NAVIGATION: Record<UserRole, DashboardNavItem[]> = {
     {
       id: "overview",
       label: "Overview",
-      description: "Summary of assigned practicum classes."
+      description: "What's happening across your assigned classes."
     },
     {
       id: "classes",
       label: "My Practicum Classes",
-      description: "View assigned classes and practicum groups."
+      description: "Your practicum classes, lab sessions, and rosters."
     }
   ],
 
@@ -62,27 +62,27 @@ export const DASHBOARD_NAVIGATION: Record<UserRole, DashboardNavItem[]> = {
     {
       id: "overview",
       label: "Overview",
-      description: "Summary of your practicum progress."
+      description: "Your current classes, upcoming deadlines, and progress."
     },
     {
       id: "classes",
       label: "My Practicum Classes",
-      description: "Open enrolled classes, modules, and assignments."
+      description: "Course materials, assignments, and announcements."
     },
     {
       id: "attendance",
       label: "Attendance Status",
-      description: "View your attendance history."
+      description: "Your attendance record across all lab sessions."
     },
     {
       id: "grades",
       label: "Grades",
-      description: "View released practicum scores."
+      description: "Scores and feedback released by your assistants."
     },
     {
       id: "profile",
       label: "Profile",
-      description: "View your account and practicum identity."
+      description: "Your student identity and password security."
     }
   ]
 };

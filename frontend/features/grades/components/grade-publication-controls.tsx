@@ -19,18 +19,18 @@ function getPublicationError(error: Error | null) {
 
   if (error instanceof ApiError) {
     if (error.status === 400)
-      return "Grades are already in that publication state. Refresh before retrying.";
+      return "Grades are already in that state. Try refreshing the page.";
     if (error.status === 401)
-      return "Your session expired. Sign in again before changing publication.";
+      return "Your session expired. Please sign in again before changing publication.";
     if (error.status === 403)
-      return "You are not allowed to publish grades for this course.";
+      return "You don't have permission to publish grades for this course.";
     if (error.status === 404)
-      return "The session no longer exists. Return to the session list.";
+      return "This session doesn't seem to exist anymore.";
     if (error.status === 409)
-      return "The grade publication state changed elsewhere. Refresh before retrying.";
+      return "Publication state changed elsewhere. Refresh before trying again.";
   }
 
-  return "The publication state could not be changed because of a network or server problem.";
+  return "Couldn't update publication state. Please check your connection and try again.";
 }
 
 export function GradePublicationControls({
@@ -54,9 +54,9 @@ export function GradePublicationControls({
 
     const confirmation = publish
       ? incomplete
-        ? `Publish ${savedGradeCount} saved grades for ${rosterCount} enrolled Praktikan? Students without a saved grade will not see a result.`
-        : `Publish all ${savedGradeCount} saved session grades to Praktikan?`
-      : "Unpublish these session grades? Praktikan will no longer be able to see their current results.";
+        ? `Publish ${savedGradeCount} saved grades for ${rosterCount} enrolled students? Students without a saved grade won't see a score yet.`
+        : `Publish all ${savedGradeCount} saved session grades to students?`
+      : "Unpublish these session grades? Students will no longer see their scores until you publish again.";
 
     if (!window.confirm(confirmation)) {
       return;
@@ -74,15 +74,15 @@ export function GradePublicationControls({
           </h3>
           <p className="mt-1 text-sm leading-6 text-slate-600">
             {session.grades_published
-              ? "Published grades are visible only to each Praktikan who has a saved result."
-              : "Draft grades are staff-only and are not visible to Praktikan."}
+              ? "Published grades are visible to each student who has a saved score."
+              : "Draft grades are private to instructors and hidden from students."}
           </p>
           <p className="mt-2 text-sm font-medium text-slate-700">
             {savedGradeCount} saved of {rosterCount} enrolled
           </p>
           {hasUnsavedChanges ? (
             <p className="mt-2 text-sm text-amber-800">
-              Save or reset local grade changes before changing publication.
+              Save or discard local grade changes before changing publication.
             </p>
           ) : null}
         </div>

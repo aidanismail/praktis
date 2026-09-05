@@ -48,26 +48,26 @@ export function CourseAssignments({
           aria-hidden="true"
         />
         <span className="ml-3 text-sm text-slate-600">
-          Loading assignments...
+          Getting assignments ready...
         </span>
       </div>
     );
   }
 
   if (isError) {
-    let title = "Assignments could not be loaded";
-    let description = "A network or server problem interrupted the request.";
+    let title = "Couldn't load assignments";
+    let description = "Couldn't reach the server. Let's try that again.";
 
     if (isUnauthorized) {
-      title = "Your session has expired";
-      description = "Sign in again to continue.";
+      title = "You've been signed out";
+      description = "Please sign in again to continue.";
     } else if (isForbidden) {
-      title = "Assignment access is unavailable";
+      title = "Access restricted";
       description =
-        "Your account is not allowed to access assignments for this course.";
+        "You don't have permission to access assignments in this course.";
     } else if (isNotFound) {
-      title = "Course assignments were not found";
-      description = "This course may no longer exist or be assigned to you.";
+      title = "Course not found";
+      description = "This course may no longer be available.";
     }
 
     return (
@@ -136,8 +136,8 @@ export function CourseAssignments({
           <h2 className="text-xl font-semibold text-slate-950">Assignments</h2>
           <p className="mt-1 text-sm text-slate-600">
             {viewerRole === "asprak"
-              ? "Drafts and published assignments are ordered from newest to oldest."
-              : "Published instructions and your personal submission results."}
+              ? "Manage drafts, deadlines, and submissions across the class."
+              : "Track upcoming tasks, instructions, and your submission progress."}
           </p>
         </div>
 
@@ -169,8 +169,8 @@ export function CourseAssignments({
           </h3>
           <p className="mt-1 text-sm text-slate-600">
             {viewerRole === "asprak"
-              ? "Create the first draft or published assignment for this course."
-              : "Published assignments will appear here."}
+              ? "Ready to create a task? Use the form above to add an assignment."
+              : "No assignments posted yet. You're all caught up!"}
           </p>
         </div>
       ) : (

@@ -44,7 +44,7 @@ export function CourseWorkspaceHeader({
         </button>
 
         <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-          Course Catalog / {course.code}
+          Courses / {course.code}
         </span>
       </div>
 
@@ -100,7 +100,7 @@ export function CourseWorkspaceHeader({
               <span>{course.is_active ? "Active" : "Archived"}</span>
               <span>•</span>
               <span>
-                {enrolledCount} Enrolled • {staffCount} Asprak
+                {enrolledCount} {enrolledCount === 1 ? "student" : "students"} • {staffCount} {staffCount === 1 ? "assistant" : "assistants"}
               </span>
             </span>
 
@@ -108,7 +108,7 @@ export function CourseWorkspaceHeader({
               type="button"
               onClick={onCustomizeBanner}
               className="rounded-full border border-white/20 bg-white/10 hover:bg-white/20 px-3.5 py-1.5 text-xs font-semibold text-white transition-colors flex items-center gap-1.5 backdrop-blur-xs shadow-xs"
-              title="Customize Course Banner Theme"
+              title="Customize course banner"
             >
               <Palette className="w-3.5 h-3.5" />
               <span>Customize</span>

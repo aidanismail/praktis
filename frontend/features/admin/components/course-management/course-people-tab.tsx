@@ -203,7 +203,7 @@ export function CoursePeopleTab({
     }
 
     if (currentTags.length === 0) {
-      setEnrollModalError("Please add at least one username / student NPM.");
+      setEnrollModalError("Add at least one username or student NPM.");
       return;
     }
 
@@ -213,17 +213,17 @@ export function CoursePeopleTab({
     try {
       if (enrollType === "student") {
         const res = await onEnrollStudents(currentTags);
-        onSuccess(res.message || `Successfully enrolled ${currentTags.length} student(s).`);
+        onSuccess(res.message || `Enrolled ${currentTags.length} ${currentTags.length === 1 ? "student" : "students"}.`);
       } else {
         const res = await onAssignStaff(currentTags);
-        onSuccess(res.message || `Successfully assigned ${currentTags.length} assistant(s).`);
+        onSuccess(res.message || `Assigned ${currentTags.length} ${currentTags.length === 1 ? "assistant" : "assistants"}.`);
       }
       setShowEnrollModal(false);
       setTags([]);
       setTagInput("");
       setEnrollModalError(null);
     } catch (err: unknown) {
-      const errorMsg = err instanceof Error ? err.message : "Failed to process enrollment.";
+      const errorMsg = err instanceof Error ? err.message : "Couldn't complete enrollment. Please try again.";
       setEnrollModalError(errorMsg);
     } finally {
       setIsSubmitting(false);
@@ -231,23 +231,23 @@ export function CoursePeopleTab({
   };
 
   const handleUnenroll = async (student: CourseStudent) => {
-    if (!confirm(`Unenroll student ${student.username} from this course?`)) return;
+    if (!confirm(`Unenroll ${student.username} from ${course.code}?`)) return;
     try {
       await onUnenrollStudent(student.id);
-      onSuccess(`Unenrolled student ${student.username} from this course.`);
+      onSuccess(`Unenrolled ${student.username}.`);
     } catch (err: unknown) {
-      onError(err instanceof Error ? err.message : "Failed to unenroll student.");
+      onError(err instanceof Error ? err.message : "Couldn't unenroll student. Please try again.");
     }
   };
 
   const handleRemoveAssistant = async (staffMember: CourseStaff) => {
-    if (!confirm(`Remove teaching assistant ${staffMember.username} from ${course.code}?`))
+    if (!confirm(`Remove assistant ${staffMember.username} from ${course.code}?`))
       return;
     try {
       await onRemoveStaff(staffMember.id);
-      onSuccess(`Removed assistant ${staffMember.username} from this course.`);
+      onSuccess(`Removed ${staffMember.username} from ${course.code}.`);
     } catch (err: unknown) {
-      onError(err instanceof Error ? err.message : "Failed to remove assistant.");
+      onError(err instanceof Error ? err.message : "Couldn't remove assistant. Please try again.");
     }
   };
 
@@ -258,7 +258,7 @@ export function CoursePeopleTab({
         <div className="relative flex-1 max-w-sm">
           <input
             type="text"
-            placeholder="Search student NPM or assistant username..."
+            placeholder="Search by NPM, username, or name..."
             value={peopleSearch}
             onChange={(e) => setPeopleSearch(e.target.value)}
             className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 shadow-xs"
@@ -307,7 +307,7 @@ export function CoursePeopleTab({
           </h3>
         </div>
         {filteredStaff.length === 0 ? (
-          <p className="text-xs text-slate-400 italic py-2">No assistants matching criteria.</p>
+          <p className="text-xs text-slate-400 italic py-2">No assistants found matching your search.</p>
         ) : (
           <div className="divide-y divide-slate-100 bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
             {filteredStaff.map((s) => (
@@ -354,7 +354,7 @@ export function CoursePeopleTab({
         </div>
         {filteredStudents.length === 0 ? (
           <p className="text-xs text-slate-400 italic py-2">
-            No students enrolled matching criteria.
+            No enrolled students found matching your search.
           </p>
         ) : (
           <div className="divide-y divide-slate-100 bg-white rounded-3xl border border-slate-200 max-h-96 overflow-y-auto shadow-xs">
@@ -408,8 +408,8 @@ export function CoursePeopleTab({
               <div>
                 <h4 id="enroll-modal-title" className="font-bold text-sm text-slate-900">
                   {enrollType === "student"
-                    ? "Enroll Students (Praktikan)"
-                    : "Assign Teaching Assistants (Asprak)"}
+                    ? "Enroll Students"
+                    : "Assign Teaching Assistants"}
                 </h4>
                 <p className="text-[11px] text-slate-400 mt-0.5">
                   Course: {course.code} - {course.name}
@@ -448,8 +448,8 @@ export function CoursePeopleTab({
             <div className="space-y-2 relative">
               <label className="block text-xs font-semibold text-slate-700">
                 {enrollType === "student"
-                  ? "Student NPM / Username"
-                  : "Assistant Username / Email"}
+                  ? "Student NPM or username"
+                  : "Assistant username or email"}
               </label>
 
               {/* Tag Chip Container with Embedded Input */}
@@ -483,8 +483,8 @@ export function CoursePeopleTab({
                   placeholder={
                     tags.length === 0
                       ? enrollType === "student"
-                        ? "Type NPM / username and select from list..."
-                        : "Type username / email and select from list..."
+                        ? "Type NPM or username and pick from list..."
+                        : "Type username or email and pick from list..."
                       : "Add more..."
                   }
                   className="flex-1 min-w-[160px] text-xs bg-transparent border-none outline-none p-1 text-slate-900 placeholder:text-slate-400"
@@ -539,7 +539,7 @@ export function CoursePeopleTab({
               )}
 
               <p className="text-[11px] text-slate-400 pt-1">
-                Tip: Type character matching NPM or email, or paste multiple usernames separated by commas.
+                Tip: Type an NPM or email to search, or paste multiple usernames separated by commas.
               </p>
             </div>
 
@@ -559,7 +559,7 @@ export function CoursePeopleTab({
                 disabled={isSubmitting || (tags.length === 0 && !tagInput.trim())}
                 className="px-5 py-2 bg-slate-900 text-white rounded-full text-xs font-semibold hover:bg-slate-800 shadow-xs disabled:opacity-50 cursor-pointer"
               >
-                {isSubmitting ? "Processing..." : "Confirm Enrollment"}
+                {isSubmitting ? "Saving..." : enrollType === "student" ? "Enroll Students" : "Assign Assistants"}
               </button>
             </div>
           </form>

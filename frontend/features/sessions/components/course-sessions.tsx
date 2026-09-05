@@ -42,31 +42,31 @@ function getTransitionError(error: Error | null) {
 
   if (error instanceof ApiError) {
     if (error.status === 400) {
-      return "This attendance window is already in that state. Refresh the session list.";
+      return "This attendance window is already in that state. Refreshing list...";
     }
 
     if (error.status === 401) {
-      return "Your session expired. Sign in again before changing attendance.";
+      return "You've been signed out. Please sign in again.";
     }
 
     if (error.status === 403) {
-      return "You are not allowed to change attendance for this course.";
+      return "You don't have permission to change attendance for this course.";
     }
 
     if (error.status === 404) {
-      return "The session no longer exists. Refresh the list before retrying.";
+      return "This session couldn't be found. Try refreshing the page.";
     }
 
     if (error.status === 409) {
-      return "Another session in this course already has an open attendance window. Close it before opening this one.";
+      return "Another session currently has an open attendance window. Close it before opening this one.";
     }
 
     if (error.status === 422) {
-      return "The selected session link is invalid. Refresh before retrying.";
+      return "Invalid session link. Please refresh and try again.";
     }
   }
 
-  return "The attendance window could not be changed because of a network or server problem.";
+  return "Couldn't update attendance window. Let's try that again.";
 }
 
 export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
@@ -109,21 +109,21 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
     transitionMutation.mutate({ sessionId, action });
   }
 
-  let errorTitle = "Sessions could not be loaded";
-  let errorDescription = "A network or server problem interrupted the request.";
+  let errorTitle = "Couldn't load class sessions";
+  let errorDescription = "Couldn't reach the server. Let's try that again.";
 
   if (status === 401) {
-    errorTitle = "Your session has expired";
-    errorDescription = "Sign in again to continue.";
+    errorTitle = "You've been signed out";
+    errorDescription = "Please sign in again to continue.";
   } else if (status === 403) {
-    errorTitle = "Session access is unavailable";
-    errorDescription = "You are not assigned to manage this course.";
+    errorTitle = "Access restricted";
+    errorDescription = "You aren't assigned to manage this course.";
   } else if (status === 404) {
-    errorTitle = "Course not found";
-    errorDescription = "This course may no longer exist or be assigned to you.";
+    errorTitle = "Class not found";
+    errorDescription = "This class might have been removed or reassigned.";
   } else if (status === 422) {
-    errorTitle = "The course link is invalid";
-    errorDescription = "Return to the dashboard and open the course again.";
+    errorTitle = "Invalid course link";
+    errorDescription = "Return to dashboard and try again.";
   }
 
   return (
@@ -131,7 +131,7 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
-            Meetings and attendance windows
+            Schedule &amp; attendance
           </p>
           <h2
             id="course-sessions-heading"
@@ -140,7 +140,7 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
             Sessions &amp; Attendance
           </h2>
           <p className="mt-1 text-sm leading-6 text-slate-600">
-            Schedule meetings and control one attendance window at a time.
+            Schedule meetings, manage attendance windows, and record grades.
           </p>
         </div>
 
@@ -170,14 +170,14 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
           className="mt-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
         >
           <h3 id="create-session-heading" className="font-semibold text-slate-950">
-            Add a session
+            Schedule a session
           </h3>
           <p className="mt-1 mb-4 text-sm text-slate-600">
-            Past, current, and future calendar dates are supported.
+            Set up a lab date, title, and topic for your students.
           </p>
           <SessionForm
-            submitLabel="Create session"
-            pendingLabel="Creating..."
+            submitLabel="Schedule session"
+            pendingLabel="Scheduling..."
             isPending={createMutation.isPending}
             error={createMutation.error}
             onSubmit={createSession}
@@ -185,7 +185,7 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
           />
           {createMutation.isSuccess ? (
             <p role="status" aria-live="polite" className="mt-3 text-sm text-emerald-700">
-              Session created successfully.
+              Session scheduled!
             </p>
           ) : null}
         </section>
@@ -198,7 +198,7 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
           className="mt-5 flex min-h-48 items-center justify-center rounded-3xl border border-slate-200 bg-white"
         >
           <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
-          <span className="ml-3 text-sm text-slate-600">Loading sessions...</span>
+          <span className="ml-3 text-sm text-slate-600">Loading class sessions...</span>
         </div>
       ) : null}
 
@@ -243,7 +243,7 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
         <>
           {refreshError ? (
             <div role="alert" className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-              The latest sessions could not be refreshed. Existing results remain visible.
+              Couldn&apos;t refresh sessions right now. Showing previous schedule.
             </div>
           ) : null}
 
@@ -262,9 +262,9 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
           {sessions.length === 0 ? (
             <div role="status" className="mt-5 rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
               <CalendarRange className="mx-auto h-9 w-9 text-slate-400" aria-hidden="true" />
-              <h3 className="mt-3 font-semibold text-slate-950">No sessions yet</h3>
+              <h3 className="mt-3 font-semibold text-slate-950">No sessions scheduled yet</h3>
               <p className="mt-1 text-sm text-slate-600">
-                Create the first meeting for this course above.
+                Add your first lab session using the form above.
               </p>
             </div>
           ) : (

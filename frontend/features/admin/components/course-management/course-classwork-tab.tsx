@@ -86,10 +86,10 @@ export function CourseClassworkTab({
         if (file.size <= 20 * 1024 * 1024) {
           validFiles.push(file);
         } else {
-          onError?.(`File "${file.name}" exceeds maximum allowed size of 20MB.`);
+          onError?.(`"${file.name}" is over 20 MB. Try compressing it or picking a smaller file.`);
         }
       } else {
-        onError?.(`File "${file.name}" has unsupported format. Only .pdf and .docx are allowed.`);
+        onError?.(`"${file.name}" must be a .pdf or .docx file.`);
       }
     });
 
@@ -130,7 +130,7 @@ export function CourseClassworkTab({
 
       if (result.successCount > 0 && result.errors.length === 0) {
         onSuccess?.(
-          `Successfully uploaded ${result.successCount} learning ${
+          `Uploaded ${result.successCount} learning ${
             result.successCount === 1 ? "module" : "modules"
           }.`
         );
@@ -138,7 +138,7 @@ export function CourseClassworkTab({
         setModUploadQueue([]);
         onUploadModulesSuccess();
       } else if (result.successCount > 0 && result.errors.length > 0) {
-        onSuccess?.(`Partially uploaded ${result.successCount} of ${result.total} modules.`);
+        onSuccess?.(`Uploaded ${result.successCount} of ${result.total} modules.`);
         const failedFilenames = new Set(result.errors.map((err) => err.filename));
         setModUploadQueue((prev) =>
           prev.filter((item) => failedFilenames.has(item.file.name))
@@ -146,10 +146,10 @@ export function CourseClassworkTab({
         onError?.(result.errors.map((err) => `${err.filename}: ${err.error}`).join(" | "));
         onUploadModulesSuccess();
       } else {
-        onError?.(`Failed to upload modules: ${result.errors.map((err) => err.error).join(", ")}`);
+        onError?.(`Couldn't upload modules: ${result.errors.map((err) => err.error).join(", ")}`);
       }
     } catch (err: unknown) {
-      onError?.(err instanceof Error ? err.message : "Failed to complete batch upload.");
+      onError?.(err instanceof Error ? err.message : "Couldn't complete the batch upload. Please try again.");
     } finally {
       setIsUploadingMod(false);
       setModUploadProgress(null);
@@ -163,7 +163,7 @@ export function CourseClassworkTab({
         <div>
           <h3 className="text-base font-bold text-slate-900">Classwork & Materials</h3>
           <p className="text-xs text-slate-500">
-            Assignments, laboratory tasks, and downloadable modules
+            Assignments, lab tasks, and downloadable modules
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -197,7 +197,7 @@ export function CourseClassworkTab({
 
         {assignments.length === 0 ? (
           <div className="text-center p-8 bg-white border border-dashed border-slate-200 rounded-3xl text-xs text-slate-400">
-            No assignments assigned yet. Click &quot;Create Assignment&quot; to assign coursework.
+            No assignments yet. Click &quot;Create Assignment&quot; to post coursework.
           </div>
         ) : (
           <div className="space-y-2.5">
@@ -263,7 +263,7 @@ export function CourseClassworkTab({
 
         {modules.length === 0 ? (
           <div className="text-center p-8 bg-white border border-dashed border-slate-200 rounded-3xl text-xs text-slate-400">
-            No learning modules uploaded for this course yet. Click &quot;Upload Module&quot; to add guides.
+            No learning modules uploaded yet. Click &quot;Upload Module&quot; to add guides and docs.
           </div>
         ) : (
           <div className="space-y-2.5">
@@ -279,7 +279,7 @@ export function CourseClassworkTab({
                   <div>
                     <h4 className="font-bold text-xs text-slate-900">{m.title}</h4>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                      {m.description || "No description provided."}
+                      {m.description || "No description yet."}
                     </p>
                   </div>
                 </div>
@@ -405,10 +405,10 @@ export function CourseClassworkTab({
                   <label className="cursor-pointer flex flex-col items-center justify-center gap-1.5 py-2">
                     <UploadCloud className="w-8 h-8 text-slate-400" />
                     <span className="text-xs font-semibold text-slate-800">
-                      Click to browse or drag & drop multiple files
+                      Click to browse or drag and drop files here
                     </span>
                     <span className="text-[10px] text-slate-400">
-                      Supports PDF and DOCX (hold Shift/Ctrl to select multiple)
+                      PDF and DOCX supported (hold Shift or Ctrl to select multiple)
                     </span>
                     <input
                       type="file"
@@ -482,7 +482,7 @@ export function CourseClassworkTab({
                                 prev.map((q, i) => (i === idx ? { ...q, title: val } : q))
                               );
                             }}
-                            placeholder="Module Title *"
+                            placeholder="Module title *"
                             className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium focus:ring-1 focus:ring-slate-900"
                           />
                           <input
@@ -497,7 +497,7 @@ export function CourseClassworkTab({
                                 )
                               );
                             }}
-                            placeholder="Description / Summary (Optional)"
+                            placeholder="Brief description or notes (optional)"
                             className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-[11px] text-slate-600 focus:ring-1 focus:ring-slate-900"
                           />
                         </div>
@@ -559,12 +559,12 @@ export function CourseClassworkTab({
                 {isUploadingMod ? (
                   <>
                     <span className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                    <span>Uploading Queue...</span>
+                    <span>Uploading...</span>
                   </>
                 ) : (
                   <>
                     <UploadCloud className="w-3.5 h-3.5" />
-                    <span>Upload {modUploadQueue.length} Module(s)</span>
+                    <span>Upload {modUploadQueue.length} {modUploadQueue.length === 1 ? "module" : "modules"}</span>
                   </>
                 )}
               </button>

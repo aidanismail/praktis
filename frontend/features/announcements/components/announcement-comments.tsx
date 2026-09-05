@@ -70,7 +70,7 @@ export function AnnouncementComments({
     <div className="mt-5 border-t border-slate-200 pt-5">
       <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
         <MessageCircle className="h-4 w-4" aria-hidden="true" />
-        Discussion ({comments.length})
+        Comments ({comments.length})
       </div>
 
       {comments.length > 0 ? (
@@ -117,7 +117,7 @@ export function AnnouncementComments({
                           disabled={isDeleting}
                           className="inline-flex items-center rounded-lg bg-red-700 px-2 py-1 text-xs font-medium text-white hover:bg-red-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:opacity-60"
                         >
-                          {isDeleting ? "Deleting..." : "Confirm delete"}
+                          {isDeleting ? "Deleting..." : "Delete"}
                         </button>
                       </div>
                     ) : (
@@ -143,7 +143,7 @@ export function AnnouncementComments({
           })}
         </ul>
       ) : (
-        <p className="mt-3 text-sm text-slate-500">No comments yet.</p>
+        <p className="mt-3 text-sm text-slate-500">No comments yet. Start the conversation!</p>
       )}
 
       {deleteMutation.isError ? (
@@ -154,7 +154,7 @@ export function AnnouncementComments({
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4">
         <label htmlFor={formId} className="text-sm font-medium text-slate-800">
-          Add a comment
+          Leave a comment
         </label>
         <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-start">
           <div className="min-w-0 flex-1">
@@ -166,7 +166,7 @@ export function AnnouncementComments({
               aria-invalid={Boolean(form.formState.errors.content)}
               aria-describedby={form.formState.errors.content ? `${formId}-error` : undefined}
               className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 disabled:bg-slate-100"
-              placeholder="Ask a question or add context (max 1000 characters)..."
+              placeholder="Ask a question, add notes, or share feedback..."
               {...form.register("content")}
             />
             {form.formState.errors.content ? (
@@ -185,7 +185,7 @@ export function AnnouncementComments({
             ) : (
               <Send className="h-4 w-4" aria-hidden="true" />
             )}
-            {addMutation.isPending ? "Sending..." : "Comment"}
+            {addMutation.isPending ? "Posting..." : "Post"}
           </button>
         </div>
         {addMutation.isError ? (
@@ -195,7 +195,7 @@ export function AnnouncementComments({
         ) : null}
         {addMutation.isSuccess ? (
           <p role="status" className="mt-2 text-sm text-emerald-700">
-            Comment added successfully.
+            Comment posted!
           </p>
         ) : null}
       </form>

@@ -38,22 +38,22 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
 
   const showRefreshError = isError && !isAccessError && hasLoadedData;
 
-  let errorTitle = "Modules could not be loaded";
-  let errorDescription = "A network or server problem interrupted the request.";
+  let errorTitle = "Couldn't load course modules";
+  let errorDescription = "Couldn't reach the server. Let's try that again.";
 
   if (isUnauthorized) {
-    errorTitle = "Your session has expired";
-    errorDescription = "Sign in again to continue.";
+    errorTitle = "You've been signed out";
+    errorDescription = "Please sign in again to continue.";
   } else if (isForbidden) {
-    errorTitle = "Module access is unavailable";
+    errorTitle = "Access restricted";
     errorDescription =
-      "Your account is not allowed to access modules for this course.";
+      "You don't have access to course modules for this class.";
   } else if (isNotFound) {
-    errorTitle = "Course modules were not found";
-    errorDescription = "This course may no longer exist or be assigned to you.";
+    errorTitle = "Class not found";
+    errorDescription = "This course may no longer be available.";
   } else if (isValidationError) {
-    errorTitle = "The course link is invalid";
-    errorDescription = "Return to the dashboard and open the course again.";
+    errorTitle = "Invalid course link";
+    errorDescription = "Head back to the dashboard and open the course again.";
   }
 
   return (
@@ -76,8 +76,8 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
 
           <p className="mt-1 text-sm leading-6 text-slate-600">
             {accessMode === "manage"
-              ? "Draft and published materials for this practicum course."
-              : "Published learning materials for this practicum course."}
+              ? "Upload, publish, and organize reading materials and lab manuals."
+              : "Download lab manuals, guides, and reading materials."}
           </p>
         </div>
 
@@ -127,7 +127,7 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
             aria-hidden="true"
           />
           <span className="ml-3 text-sm text-slate-600">
-            Loading course modules...
+            Loading learning materials...
           </span>
         </div>
       ) : null}
@@ -220,8 +220,7 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
                 />
 
                 <p className="text-sm text-amber-900">
-                  The latest module links could not be refreshed. Existing
-                  results remain visible.
+                  Couldn&apos;t refresh download links right now. Existing links remain available.
                 </p>
               </div>
 
@@ -268,11 +267,11 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
               />
 
               <h3 className="mt-3 font-semibold text-slate-950">
-                No modules yet
+                No modules uploaded yet
               </h3>
 
               <p className="mt-1 text-sm text-slate-600">
-                Learning materials uploaded for this course will appear here.
+                Lab manuals and reference guides will show up here once uploaded.
               </p>
             </div>
           ) : (

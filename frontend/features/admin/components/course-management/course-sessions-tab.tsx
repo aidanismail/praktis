@@ -78,9 +78,9 @@ export function CourseSessionsTab({
       setShowCreateModal(false);
       setSessionTitle("");
       setSessionDate("");
-      onSuccess("Class session created successfully.");
+      onSuccess("Session scheduled.");
     } catch (err: unknown) {
-      onError(err instanceof Error ? err.message : "Failed to create session.");
+      onError(err instanceof Error ? err.message : "Couldn't create session. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -92,12 +92,12 @@ export function CourseSessionsTab({
       await toggleAttendance(shouldOpen);
       onSuccess(
         shouldOpen
-          ? "Attendance window opened."
+          ? "Attendance window is open."
           : "Attendance window closed."
       );
     } catch (err: unknown) {
       onError(
-        err instanceof Error ? err.message : "Failed to toggle attendance window."
+        err instanceof Error ? err.message : "Couldn't update attendance window. Please try again."
       );
     }
   };
@@ -109,9 +109,9 @@ export function CourseSessionsTab({
     setUpdatingStudentAttendanceId(studentId);
     try {
       const res = await updateAttendance([{ student_id: studentId, status }]);
-      onSuccess(res?.message || "Attendance status updated.");
+      onSuccess(res?.message || "Attendance updated.");
     } catch (err: unknown) {
-      onError(err instanceof Error ? err.message : "Failed to update attendance.");
+      onError(err instanceof Error ? err.message : "Couldn't update attendance. Please try again.");
     } finally {
       setUpdatingStudentAttendanceId(null);
     }
@@ -123,7 +123,7 @@ export function CourseSessionsTab({
       <div className="flex items-center justify-between">
         <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
           <Clock className="w-4 h-4 text-slate-700" />
-          <span>Class Sessions & Live Attendance Windows</span>
+          <span>Class Sessions & Live Attendance</span>
         </h3>
         <button
           type="button"
@@ -137,7 +137,7 @@ export function CourseSessionsTab({
 
       {sessions.length === 0 ? (
         <div className="text-center p-8 bg-white border border-dashed border-slate-200 rounded-3xl text-xs text-slate-400">
-          No class sessions scheduled yet. Click &quot;Add Session&quot; to create one.
+          No lab sessions scheduled yet. Click &quot;Add Session&quot; to plan one.
         </div>
       ) : (
         <div className="space-y-3">
@@ -211,17 +211,17 @@ export function CourseSessionsTab({
                         Attendance Roster for {s.title}
                       </h4>
                       <span className="text-[11px] text-slate-500">
-                        {students.length} student(s) enrolled
+                        {students.length} {students.length === 1 ? "student" : "students"} enrolled
                       </span>
                     </div>
 
                     {isLoadingAttendance ? (
                       <p className="text-xs text-slate-400 py-4 text-center">
-                        Loading attendance records...
+                        Loading attendance...
                       </p>
                     ) : students.length === 0 ? (
                       <p className="text-xs text-slate-400 py-2">
-                        No students enrolled in this course.
+                        No students enrolled in this course yet.
                       </p>
                     ) : (
                       <div className="divide-y divide-slate-200/60 bg-white rounded-2xl border border-slate-200 overflow-hidden text-xs">
@@ -291,19 +291,19 @@ export function CourseSessionsTab({
             className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4 animate-apple-modal"
           >
             <h4 id="create-session-modal-title" className="font-bold text-sm text-slate-900">
-              Schedule Class Session
+              Schedule a Session
             </h4>
             <div className="space-y-3 text-xs">
               <div>
                 <label className="block font-semibold text-slate-600 mb-1">
-                  Session Title (e.g. Pertemuan 1 - HTML/CSS)
+                  Session Title
                 </label>
                 <input
                   type="text"
                   value={sessionTitle}
                   onChange={(e) => setSessionTitle(e.target.value)}
                   required
-                  placeholder="Pertemuan 1"
+                  placeholder="e.g. Lab 1 - Introduction & Setup"
                   className="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-slate-900"
                 />
               </div>
@@ -333,7 +333,7 @@ export function CourseSessionsTab({
                 disabled={isSubmitting}
                 className="px-5 py-2 bg-slate-900 text-white rounded-full text-xs font-semibold hover:bg-slate-800 shadow-xs cursor-pointer"
               >
-                {isSubmitting ? "Creating..." : "Add Session"}
+                {isSubmitting ? "Saving..." : "Add Session"}
               </button>
             </div>
           </form>

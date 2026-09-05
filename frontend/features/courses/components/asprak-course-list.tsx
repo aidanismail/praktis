@@ -69,7 +69,7 @@ function CourseGroup({ id, title, description, courses }: CourseGroupProps) {
 function CourseListLoading() {
   return (
     <div role="status" aria-live="polite">
-      <span className="sr-only">Loading assigned practicum classes...</span>
+      <span className="sr-only">Loading your classes...</span>
 
       <div className="grid gap-4 lg:grid-cols-2" aria-hidden="true">
         {[0, 1, 2].map((item) => (
@@ -115,18 +115,18 @@ export function AsprakCourseList({ userId }: AsprakCourseListProps) {
           <div>
             <h3 className="font-semibold text-red-950">
               {isUnauthorized
-                ? "Your session has expired"
+                ? "You've been signed out"
                 : isForbidden
-                  ? "Course access is unavailable"
-                  : "Assigned classes could not be loaded"}
+                  ? "Access restricted"
+                  : "Couldn't load your classes"}
             </h3>
 
             <p className="mt-2 text-sm leading-6 text-red-800">
               {isUnauthorized
-                ? "Sign in again to continue to your assigned practicum classes."
+                ? "Please sign in again to view your assigned classes."
                 : isForbidden
-                  ? "Your account does not currently have access to this course list. Ask an administrator to verify your role and assignments."
-                  : "A network or server problem interrupted the request. You can try again."}
+                  ? "You don't have instructor access to these classes yet. Check in with your admin."
+                  : "Couldn't reach the server. Let's try that again."}
             </p>
 
             {isUnauthorized ? (
@@ -169,11 +169,10 @@ export function AsprakCourseList({ userId }: AsprakCourseListProps) {
           aria-hidden="true"
         />
         <h3 className="mt-4 font-semibold text-slate-950">
-          No assigned practicum classes
+          No classes assigned yet
         </h3>
         <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-500">
-          Your account has no assigned course offering yet. Ask a Superadmin to
-          verify your current academic-period assignment.
+          Your account doesn&apos;t have any classes assigned for this term yet. Check with your admin if this looks unexpected.
         </p>
       </div>
     );
@@ -190,15 +189,15 @@ export function AsprakCourseList({ userId }: AsprakCourseListProps) {
     <div className="space-y-8">
       <CourseGroup
         id="active-practicum-classes"
-        title="Active practicum classes"
-        description="Course offerings currently available for practicum work."
+        title="Active classes"
+        description="Classes currently in session and ready for grading, attendance, and coursework."
         courses={activeCourses}
       />
 
       <CourseGroup
         id="historical-practicum-classes"
-        title="Historical practicum classes"
-        description="Previous academic-period assignments retained for reference."
+        title="Past classes"
+        description="Previous course terms kept for records and reference."
         courses={historicalCourses}
       />
     </div>

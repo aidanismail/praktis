@@ -123,10 +123,10 @@ export function PraktikanAssignmentDetailPage({
         >
           <AlertCircle className="h-5 w-5 text-amber-700" aria-hidden="true" />
           <h1 className="mt-3 font-semibold text-amber-950">
-            Assignment is unavailable
+            Assignment not found
           </h1>
           <p className="mt-2 text-sm text-amber-800">
-            The course or assignment is not available in your enrolled classes.
+            This assignment might have been removed, or you aren&apos;t enrolled in this class.
           </p>
           {retryable ? (
             <button
@@ -143,7 +143,7 @@ export function PraktikanAssignmentDetailPage({
               className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-amber-900 underline"
             >
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-              Return to dashboard
+              Back to dashboard
             </Link>
           )}
         </div>
@@ -188,10 +188,10 @@ export function PraktikanAssignmentDetailPage({
           className="rounded-3xl border border-red-200 bg-red-50 p-6"
         >
           <h1 className="font-semibold text-red-950">
-            Assignment is unavailable
+            Assignment unavailable
           </h1>
           <p className="mt-2 text-sm text-red-800">
-            It may not exist or may not be published for your class.
+            This assignment might still be a draft, or was unpublished by your assistant.
           </p>
           {retryable ? (
             <button

@@ -27,26 +27,26 @@ function getModuleValues(module: CourseModule): ModuleMetadataFormValues {
 
 function getUpdateErrorMessage(error: Error) {
   if (!(error instanceof ApiError)) {
-    return "The module could not be updated. Try again.";
+    return "Couldn't update this module. Let's try that again.";
   }
 
   if (error.status === 401) {
-    return "Your session has expired. Sign in again to continue.";
+    return "You've been signed out. Please sign in again.";
   }
 
   if (error.status === 403) {
-    return "You are not allowed to update this module.";
+    return "You don't have permission to update this module.";
   }
 
   if (error.status === 404) {
-    return "This module no longer exists.";
+    return "This module could not be found.";
   }
 
   if (error.status === 400 || error.status === 422) {
-    return "Some module details were rejected. Review the form and try again.";
+    return "Some module details were rejected. Please review the form.";
   }
 
-  return "A network or server problem prevented the module from being updated.";
+  return "Couldn't reach the server. Let's try that again.";
 }
 export function ModuleEditor({ userId, courseId, module }: ModuleEditorProps) {
   const [isEditing, setIsEditing] = useState(false);
@@ -121,7 +121,7 @@ export function ModuleEditor({ userId, courseId, module }: ModuleEditorProps) {
               className="mb-3 rounded-xl bg-emerald-50
                   px-4 py-3 text-sm text-emerald-800"
             >
-              Module details updated successfully.
+              Changes saved!
             </p>
           ) : null}
 

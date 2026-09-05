@@ -68,7 +68,7 @@ const ADMIN_AREAS = [
   {
     id: "bulk-import",
     label: "Bulk import",
-    description: "Create Praktikan accounts from a file",
+    description: "Import student accounts in bulk via CSV or Excel",
     icon: UploadCloud
   },
   {
@@ -156,17 +156,14 @@ function SummaryMetric({
         <dd className="mt-3">
           <p className="text-lg font-semibold text-slate-700">Unavailable</p>
           <p className="mt-1 text-sm text-slate-500">
-            This value could not be loaded.
+            Couldn&apos;t load this metric.
           </p>
 
           {onRetry ? (
             <button
               type="button"
               onClick={onRetry}
-              className="mt-3 text-sm font-semibold text-slate-700 underline-
-                offset-4 hover:text-slate-950 hover:underline focus-
-                visible:outline-2 focus-visible:outline-offset-2 focus-
-                visible:outline-slate-900"
+              className="mt-3 text-sm font-semibold text-slate-700 underline-offset-4 hover:text-slate-950 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
             >
               Retry
             </button>
@@ -306,7 +303,7 @@ export function AdminOverview({
     <div className="space-y-8">
       {isInitialLoading ? (
         <p role="status" className="sr-only">
-          Loading the Superadmin overview.
+          Loading overview...
         </p>
       ) : null}
 
@@ -324,25 +321,22 @@ export function AdminOverview({
             <div>
               <h3 className="font-semibold text-red-950">
                 {accessError.status === 401
-                  ? "Your session has expired"
-                  : "Superadmin overview access is unavailable"}
+                  ? "Your session expired"
+                  : "Access restricted"}
               </h3>
 
               <p className="mt-1 text-sm leading-6 text-red-800">
                 {accessError.status === 401
-                  ? "Sign in again before loading administrative data."
-                  : "Verify that this account still has the Superadmin role."}
+                  ? "Please sign in again to access administrative data."
+                  : "This section requires a Superadmin account."}
               </p>
 
               {accessError.status === 401 ? (
                 <Link
                   href={ROUTES.login}
-                  className="mt-3 inline-flex rounded-lg bg-red-700 px-4 py-2
-                    text-sm font-semibold text-white transition hover:bg-red-800
-                    focus-visible:outline-2 focus-visible:outline-offset-2 focus-
-                    visible:outline-red-700"
+                  className="mt-3 inline-flex rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
                 >
-                  Go to sign in
+                  Sign in
                 </Link>
               ) : null}
             </div>
@@ -353,23 +347,17 @@ export function AdminOverview({
       {hasRefreshError && !accessError ? (
         <div
           role="alert"
-          className="flex flex-col gap-3 rounded-xl border border-amber-200 bg-
-            amber-50 p-4 text-amber-950 sm:flex-row sm:items-center sm:justify-
-            between"
+          className="flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-950 sm:flex-row sm:items-center sm:justify-between"
         >
           <p className="text-sm leading-6">
-            Some values could not be refreshed. The last successfully loaded
-            data remains visible.
+            Couldn&apos;t refresh some data. Showing the latest saved information.
           </p>
 
           <button
             type="button"
             onClick={() => void refreshAll()}
             disabled={isRefreshing}
-            className="shrink-0 text-sm font-semibold underline-offset-4
-              hover:underline focus-visible:outline-2 focus-visible:outline-
-              offset-2 focus-visible:outline-amber-800 disabled:cursor-not-allowed
-              disabled:opacity-60"
+            className="shrink-0 text-sm font-semibold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
             Retry refresh
           </button>
@@ -378,8 +366,7 @@ export function AdminOverview({
 
       <section aria-labelledby="operational-summary-heading">
         <div
-          className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-
-          between"
+          className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
         >
           <div>
             <h3
@@ -389,7 +376,7 @@ export function AdminOverview({
               Operational summary
             </h3>
             <p className="mt-1 text-sm leading-6 text-slate-500">
-              Current course offerings and active account coverage.
+              A quick snapshot of active courses and community members.
             </p>
           </div>
 
@@ -454,8 +441,7 @@ export function AdminOverview({
       <div className="grid gap-6 lg:grid-cols-3">
         <section
           aria-labelledby="active-offerings-heading"
-          className="overflow-hidden rounded-2xl border border-slate-200 bg-
-            white lg:col-span-2"
+          className="overflow-hidden rounded-2xl border border-slate-200 bg-white lg:col-span-2"
         >
           <div className="flex items-start justify-between gap-4 p-5 sm:p-6">
             <div>
@@ -466,8 +452,7 @@ export function AdminOverview({
                 Active course offerings
               </h3>
               <p className="mt-1 text-sm leading-6 text-slate-500">
-                Open a current practicum workspace or continue to full course
-                management.
+                Jump straight into an active course or manage all courses.
               </p>
             </div>
 
@@ -475,10 +460,7 @@ export function AdminOverview({
               <button
                 type="button"
                 onClick={() => onNavigateToNavItem("courses")}
-                className="hidden shrink-0 items-center gap-1 text-sm font-
-                  semibold text-slate-700 underline-offset-4 hover:text-slate-950
-                  hover:underline focus-visible:outline-2 focus-visible:outline-
-                  offset-2 focus-visible:outline-slate-900 sm:inline-flex"
+                className="hidden shrink-0 items-center gap-1 text-sm font-semibold text-slate-700 underline-offset-4 hover:text-slate-950 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 sm:inline-flex"
               >
                 View all
                 <ChevronRight className="h-4 w-4" aria-hidden="true" />
@@ -503,11 +485,11 @@ export function AdminOverview({
               </div>
             ) : coursesUnavailable ? (
               <InlineDataError
-                title="Course data is unavailable"
+                title="Course data unavailable"
                 message={
                   accessError
-                    ? "Administrative course access could not be confirmed."
-                    : "A network or server problem interrupted the course request."
+                    ? "Couldn&apos;t verify administrative course access."
+                    : "Couldn&apos;t load courses due to a connection error."
                 }
                 onRetry={courseRetry}
               />
@@ -518,19 +500,15 @@ export function AdminOverview({
                   aria-hidden="true"
                 />
                 <h4 className="mt-4 font-semibold text-slate-950">
-                  No course offerings yet
+                  No courses yet
                 </h4>
                 <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
-                  Create the first academic-period course offering from Course
-                  Management.
+                  Get started by creating the first practicum course in Course Management.
                 </p>
                 <button
                   type="button"
                   onClick={() => onNavigateToNavItem("courses")}
-                  className="mt-4 rounded-lg bg-slate-900 px-4 py-2 text-sm
-                    font-semibold text-white transition hover:bg-slate-800 focus-
-                    visible:outline-2 focus-visible:outline-offset-2 focus-
-                    visible:outline-slate-900"
+                  className="mt-4 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
                 >
                   Open Course Management
                 </button>
@@ -545,19 +523,14 @@ export function AdminOverview({
                   No active offerings
                 </h4>
                 <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
-                  {courses.length} historical{" "}
-                  {courses.length === 1 ? "offering is" : "offerings are"} still
-                  available in Course Management.
+                  No active courses right now. {courses.length} historical {courses.length === 1 ? "course is" : "courses are"} available in Course Management.
                 </p>
                 <button
                   type="button"
                   onClick={() => onNavigateToNavItem("courses")}
-                  className="mt-4 rounded-lg border border-slate-300 bg-white
-                    px-4 py-2 text-sm font-semibold text-slate-800 transition
-                    hover:bg-slate-50 focus-visible:outline-2 focus-
-                    visible:outline-offset-2 focus-visible:outline-slate-900"
+                  className="mt-4 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
                 >
-                  View historical offerings
+                  View historical courses
                 </button>
               </div>
             ) : (
@@ -655,7 +628,7 @@ export function AdminOverview({
                 Platform status
               </h3>
               <p className="mt-1 text-sm leading-6 text-slate-500">
-                Live application readiness.
+                Real-time service health and connection status.
               </p>
             </div>
 
@@ -684,8 +657,7 @@ export function AdminOverview({
             <>
               <div className="mt-6 flex items-center gap-3">
                 <span
-                  className={`h-3 w-3 rounded-full ${getToneClass(platformTone)}
-                    `}
+                  className={`h-3 w-3 rounded-full ${getToneClass(platformTone)}`}
                   aria-hidden="true"
                 />
                 <span className="text-xl font-semibold text-slate-950">
@@ -694,8 +666,7 @@ export function AdminOverview({
               </div>
 
               <dl
-                className="mt-5 divide-y divide-slate-100 border-y border-
-                slate-200"
+                className="mt-5 divide-y divide-slate-100 border-y border-slate-200"
               >
                 <StatusRow
                   label="API"
@@ -739,8 +710,7 @@ export function AdminOverview({
               </dl>
 
               <div
-                className="mt-4 flex items-center justify-between gap-4 text-
-                xs text-slate-500"
+                className="mt-4 flex items-center justify-between gap-4 text-xs text-slate-500"
               >
                 <span>
                   {healthQuery.dataUpdatedAt > 0
@@ -752,8 +722,8 @@ export function AdminOverview({
             </>
           ) : (
             <InlineDataError
-              title="Platform status is unavailable"
-              message="The service health request could not be completed."
+              title="Platform status unavailable"
+              message="Couldn&apos;t check service health right now."
               onRetry={() => void healthQuery.refetch()}
             />
           )}
@@ -768,7 +738,7 @@ export function AdminOverview({
           Administrative areas
         </h3>
         <p className="mt-1 text-sm leading-6 text-slate-500">
-          Continue directly to a system-management workspace.
+          Quick shortcuts to manage different parts of the system.
         </p>
 
         <nav

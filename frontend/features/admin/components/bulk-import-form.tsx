@@ -22,7 +22,7 @@ export function BulkImportForm() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!file) {
-      setError("Please select a .csv or .xlsx spreadsheet file to upload.");
+      setError("Pick a .csv or .xlsx spreadsheet file to upload.");
       return;
     }
 
@@ -34,7 +34,7 @@ export function BulkImportForm() {
       const res = await importStudentsCsv(file);
       setResult(res);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to process import file.");
+      setError(err instanceof Error ? err.message : "Couldn't process import file. Please check the format and try again.");
     } finally {
       setIsUploading(false);
     }
@@ -65,14 +65,14 @@ export function BulkImportForm() {
                   onChange={handleFileChange}
                 />
               </label>
-              <span className="pl-1 text-slate-500 font-normal">or drag & drop</span>
+              <span className="pl-1 text-slate-500 font-normal">or drag and drop</span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-1">.CSV or .XLSX format up to 5MB (Columns: username, email)</p>
+            <p className="text-[11px] text-slate-400 mt-1">.csv or .xlsx up to 5 MB with columns: username, email</p>
 
             {file && (
               <div className="mt-3.5 rounded-full bg-slate-100 border border-slate-300 px-4 py-1 text-xs font-medium text-slate-900 flex items-center gap-1.5">
                 <FileSpreadsheet className="w-3.5 h-3.5" />
-                <span>Selected: {file.name} ({(file.size / 1024).toFixed(1)} KB)</span>
+                <span>{file.name} ({(file.size / 1024).toFixed(1)} KB)</span>
               </div>
             )}
           </div>
@@ -86,7 +86,7 @@ export function BulkImportForm() {
 
           <div className="flex items-center justify-between pt-2 border-t border-slate-100">
             <span className="text-[11px] text-slate-400">
-              Accounts will be initialized with default passwords.
+              New accounts will be initialized with default passwords.
             </span>
 
             <button
@@ -94,7 +94,7 @@ export function BulkImportForm() {
               disabled={!file || isUploading}
               className="rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 disabled:opacity-50 transition-all active:scale-[0.98]"
             >
-              {isUploading ? "Importing Accounts..." : "Start Batch Import"}
+              {isUploading ? "Importing..." : "Import Students"}
             </button>
           </div>
         </form>
@@ -104,7 +104,7 @@ export function BulkImportForm() {
       {result && (
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h4 className="text-sm font-bold text-slate-900">Batch Import Summary</h4>
+            <h4 className="text-sm font-bold text-slate-900">Import Summary</h4>
             <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 border border-slate-300 px-2.5 py-0.5 text-xs font-semibold text-slate-900">
               <CheckCircle2 className="w-3.5 h-3.5" />
               <span>{result.message}</span>
@@ -113,11 +113,11 @@ export function BulkImportForm() {
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="rounded-xl bg-slate-50 border border-slate-100 p-3 text-center">
-              <p className="text-[11px] font-medium text-slate-500">Total Rows</p>
+              <p className="text-[11px] font-medium text-slate-500">Total rows</p>
               <p className="mt-1 text-xl font-bold text-slate-900">{result.total_rows}</p>
             </div>
             <div className="rounded-xl bg-slate-100 border border-slate-200 p-3 text-center">
-              <p className="text-[11px] font-medium text-slate-700">Inserted</p>
+              <p className="text-[11px] font-medium text-slate-700">Imported</p>
               <p className="mt-1 text-xl font-bold text-slate-900">{result.inserted}</p>
             </div>
             <div className="rounded-xl bg-slate-50 border border-slate-100 p-3 text-center">
@@ -132,7 +132,7 @@ export function BulkImportForm() {
 
           {result.invalid_rows && result.invalid_rows.length > 0 && (
             <div className="mt-3">
-              <h5 className="text-xs font-semibold text-rose-600 mb-2">Invalid Rows:</h5>
+              <h5 className="text-xs font-semibold text-rose-600 mb-2">Issues found:</h5>
               <ul className="divide-y divide-slate-100 rounded-xl border border-rose-200 bg-rose-50/50 text-xs">
                 {result.invalid_rows.map((inv, idx) => (
                   <li key={idx} className="p-2.5 text-rose-700 flex justify-between">

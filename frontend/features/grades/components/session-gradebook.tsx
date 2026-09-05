@@ -59,15 +59,15 @@ function getRequestError(error: Error | null, kind: "roster" | "grades") {
   if (!error) return null;
 
   if (error instanceof ApiError) {
-    if (error.status === 401) return "Your session expired. Sign in again.";
+    if (error.status === 401) return "Your session expired. Please sign in again.";
     if (error.status === 403)
-      return `You are not allowed to view this session ${kind}.`;
+      return `You don't have permission to view this session's ${kind}.`;
     if (error.status === 404)
-      return "The course or session could not be found.";
+      return "Couldn't find this course or session.";
     if (error.status === 422) return "The selected session link is invalid.";
   }
 
-  return `The ${kind} could not be loaded because of a network or server problem.`;
+  return `Couldn't load ${kind}. Please check your connection and try again.`;
 }
 
 function getSaveError(error: Error | null) {
@@ -77,16 +77,16 @@ function getSaveError(error: Error | null) {
     if (error.status === 401)
       return "Your session expired. Sign in again before saving.";
     if (error.status === 403)
-      return "You are not allowed to save grades for this course.";
+      return "You don't have permission to save grades for this course.";
     if (error.status === 404)
-      return "The session no longer exists. Refresh before retrying.";
+      return "This session doesn't seem to exist anymore. Try refreshing the page.";
     if (error.status === 409)
-      return "Grades were published elsewhere before this save completed. Your entries were kept; unpublish before retrying.";
+      return "Grades were published elsewhere while you were editing. Your entries are kept—unpublish before retrying.";
     if (error.status === 422)
-      return "A score or roster entry was rejected. Your edits were kept; review the refreshed roster before saving again.";
+      return "A score or student record was rejected. Your edits were kept—check the refreshed roster before saving again.";
   }
 
-  return "Grades were not saved because of a network or server problem. Your entries are still available.";
+  return "Couldn't save grades due to a network or server hiccup. Your entries are still safe.";
 }
 
 function GradeRequestError({
@@ -263,33 +263,33 @@ function GradebookForm({
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="rounded-2xl bg-slate-50 p-4">
           <span className="block text-2xl font-bold text-slate-950">{grades.length}</span>
-          <span className="text-sm text-slate-600">saved grade records</span>
+          <span className="text-sm text-slate-600">saved grades</span>
         </div>
         <div className="rounded-2xl bg-slate-50 p-4">
           <span className="block text-2xl font-bold text-slate-950">{students.length - grades.filter((grade) => studentById.has(grade.student_id)).length}</span>
-          <span className="text-sm text-slate-600">currently ungraded Praktikan</span>
+          <span className="text-sm text-slate-600">ungraded students</span>
         </div>
       </div>
 
       {isReadOnly ? (
         <div className="mt-4 rounded-2xl border border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-900">
-          Published grades are read-only. Unpublish them deliberately before making corrections.
+          Published grades are read-only. Unpublish them first if you need to make changes.
         </div>
       ) : (
         <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
-          Blank rows remain ungraded and are omitted from the save payload. A previously saved grade cannot be deleted by clearing it; enter a replacement score or reset the row.
+          Blank rows stay ungraded and won&apos;t overwrite existing scores. To update a previously saved score, enter a new number or reset the row.
         </div>
       )}
 
       {hasClearedSavedGrade ? (
         <p role="alert" className="mt-3 text-sm text-amber-800">
-          Restore or replace every cleared saved score before saving. The current API does not delete grade records.
+          Enter a score or reset any cleared fields before saving. Existing grades cannot be left blank.
         </p>
       ) : null}
 
       {unmatchedGrades.length > 0 ? (
         <p role="alert" className="mt-3 text-sm text-amber-800">
-          {unmatchedGrades.length} saved grade {unmatchedGrades.length === 1 ? "record does" : "records do"} not match the current roster. No record was reassigned silently.
+          {unmatchedGrades.length} saved grade {unmatchedGrades.length === 1 ? "score doesn&apos;t" : "scores don&apos;t"} match the current roster. No grades were reassigned.
         </p>
       ) : null}
 
@@ -297,12 +297,12 @@ function GradebookForm({
         <span className="text-sm font-semibold text-slate-800">Search by NPM or email</span>
         <span className="relative mt-1.5 block">
           <Search className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-slate-400" aria-hidden="true" />
-          <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} className="min-h-11 w-full rounded-xl border border-slate-300 bg-white pl-9 pr-3 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-slate-100" placeholder="Search roster" />
+          <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} className="min-h-11 w-full rounded-xl border border-slate-300 bg-white pl-9 pr-3 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-slate-100" placeholder="Search by NPM or email..." />
         </span>
       </label>
 
       {visibleIndexes.length === 0 ? (
-        <div role="status" className="mt-5 rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-600">No Praktikan match this search.</div>
+        <div role="status" className="mt-5 rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-600">No students match this search.</div>
       ) : (
         <ul className="mt-5 divide-y divide-slate-200 overflow-hidden rounded-2xl border border-slate-200">
           {visibleIndexes.map(({ field, index, student }) => {
@@ -341,7 +341,7 @@ function GradebookForm({
         </ul>
       )}
 
-      <p className="mt-3 text-sm text-slate-600">{enteredCount} of {students.length} rows currently contain a score.</p>
+      <p className="mt-3 text-sm text-slate-600">{enteredCount} of {students.length} students have a score entered.</p>
       {saveError ? <p role="alert" className="mt-3 text-sm text-red-700">{saveError}</p> : null}
       {saveMutation.isSuccess ? (
         <p role="status" aria-live="polite" className="mt-3 inline-flex items-center gap-2 text-sm text-emerald-700">
@@ -388,7 +388,7 @@ export function SessionGradebook({
         </span>
         <div>
           <h2 id="session-gradebook-heading" className="text-xl font-semibold text-slate-950">Session gradebook</h2>
-          <p className="mt-1 text-sm leading-6 text-slate-600">Save private draft scores, then publish them deliberately to Praktikan.</p>
+          <p className="mt-1 text-sm leading-6 text-slate-600">Save private draft scores, then publish them whenever you&apos;re ready.</p>
         </div>
       </div>
 
@@ -427,8 +427,8 @@ export function SessionGradebook({
         ) : (
           <div role="status" className="mt-5 rounded-2xl border border-dashed border-slate-300 p-8 text-center">
             <GraduationCap className="mx-auto h-8 w-8 text-slate-400" aria-hidden="true" />
-            <h3 className="mt-3 font-semibold text-slate-950">No Praktikan enrolled</h3>
-            <p className="mt-1 text-sm text-slate-600">Session grades cannot be recorded until the course has an enrolled roster.</p>
+            <h3 className="mt-3 font-semibold text-slate-950">No students enrolled yet</h3>
+            <p className="mt-1 text-sm text-slate-600">Session grades can be recorded once students join this course.</p>
           </div>
         )
       ) : null}

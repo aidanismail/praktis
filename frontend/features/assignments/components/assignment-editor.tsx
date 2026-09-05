@@ -64,26 +64,26 @@ function getFormValues(assignment: Assignment): AssignmentFormValues {
 
 function getUpdateErrorMessage(error: Error) {
   if (!(error instanceof ApiError)) {
-    return "The assignment could not be updated. Try again.";
+    return "Couldn't save your changes. Let's try that again.";
   }
 
   if (error.status === 401) {
-    return "Your session has expired. Sign in again to continue.";
+    return "You've been signed out. Please sign in again.";
   }
 
   if (error.status === 403) {
-    return "You are not allowed to update this assignment.";
+    return "You don't have permission to update this assignment.";
   }
 
   if (error.status === 404) {
-    return "This assignment no longer exists in the selected course.";
+    return "This assignment couldn't be found. It may have been deleted.";
   }
 
   if (error.status === 400 || error.status === 422) {
-    return "Some assignment details were rejected. Review the form and try again.";
+    return "Some assignment details need a quick fix. Check the highlighted fields.";
   }
 
-  return "A network or server problem prevented the assignment from being updated.";
+  return "Couldn't reach the server. Let's try that again.";
 }
 
 export function AssignmentEditor({
@@ -174,8 +174,7 @@ export function AssignmentEditor({
           </h2>
 
           <p className="mt-1 text-sm leading-6 text-slate-600">
-            Update instructions, deadline, points, formats, and assignment
-            visibility.
+            Edit instructions, due dates, grading criteria, and visibility.
           </p>
         </div>
 
@@ -199,7 +198,7 @@ export function AssignmentEditor({
           role="status"
           className="mt-4 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
         >
-          Assignment updated successfully.
+          Changes saved!
         </p>
       ) : null}
 

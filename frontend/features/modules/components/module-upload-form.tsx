@@ -64,47 +64,47 @@ function getUploadErrorMessage(
 ) {
   if (failedStage === "upload") {
     if (error instanceof ApiError && error.status === 413) {
-      return "Storage rejected the file because it is too large.";
+      return "That file is too large to upload (maximum 25 MiB).";
     }
 
     if (error instanceof ApiError && error.status === 403) {
-      return "The storage link was rejected or expired. Discard this attempt and request a new link.";
+      return "The upload link expired. Discard this attempt to get a fresh link.";
     }
 
-    return "The file did not finish uploading. Retry the same storage upload while its link remains valid.";
+    return "The file didn't finish uploading. You can retry while the link is active.";
   }
 
   if (!(error instanceof ApiError)) {
     return failedStage === "confirm"
-      ? "Module confirmation was interrupted. Refresh the module list before discarding this attempt."
-      : "The upload request could not be started. Try again.";
+      ? "Confirmation took too long. Refresh the page to verify if your module was saved."
+      : "Couldn't start the upload. Let's try that again.";
   }
 
   if (error.status === 401) {
-    return "Your session has expired. Sign in again to continue.";
+    return "You've been signed out. Please sign in again.";
   }
 
   if (error.status === 403) {
-    return "You are not allowed to upload modules for this course.";
+    return "You don't have permission to upload modules for this course.";
   }
 
   if (error.status === 404) {
-    return "This course could not be found or is no longer assigned to you.";
+    return "This course couldn't be found or is no longer assigned to you.";
   }
 
   if (error.status === 400) {
     return failedStage === "confirm"
-      ? "The backend rejected the uploaded file. It may be missing, expired, too large, or have an invalid signature."
-      : "The requested file type was rejected.";
+      ? "Storage couldn't process this file. Please ensure it's a valid PDF or DOCX file."
+      : "That file format isn't supported. Please upload a PDF or DOCX.";
   }
 
   if (error.status === 422) {
-    return "The module upload details were rejected. Review the form before retrying.";
+    return "Please check the module title and details.";
   }
 
   return failedStage === "confirm"
-    ? "Module confirmation was interrupted. Refresh the module list before discarding this attempt."
-    : "A network or server problem interrupted the upload request.";
+    ? "Confirmation took too long. Refresh the page to verify if your module was saved."
+    : "Couldn't reach the server. Let's try that again.";
 }
 export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
   const generatedId = useId();
@@ -139,11 +139,11 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
 
   const busyMessage =
     stage === "requesting"
-      ? "Requesting a secure upload link..."
+      ? "Preparing upload link..."
       : stage === "uploading"
-        ? "Uploading the file to storage..."
+        ? "Uploading file..."
         : stage === "confirming"
-          ? "Confirming the module record..."
+          ? "Saving module..."
           : null;
 
   function focusStatus() {
@@ -315,8 +315,7 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
           </h3>
 
           <p className="mt-1 text-sm leading-6 text-slate-600">
-            Add one PDF or DOCX up to 25 MiB. New modules are saved as private
-            drafts.
+            Upload lab guides or manuals (PDF or DOCX, up to 25 MiB). Saved as a draft until published.
           </p>
         </div>
       </div>
@@ -376,7 +375,7 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
                 text-emerald-800"
           >
             <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-            Module uploaded successfully and saved as a draft.
+            Module uploaded! Saved as draft.
           </p>
         ) : null}
 
@@ -513,8 +512,7 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
               id={`module-upload-file-help-${generatedId}`}
               className="text-xs leading-5 text-slate-500"
             >
-              PDF or DOCX, maximum 25 MiB. The backend validates the uploaded
-              object before saving it.
+              PDF or DOCX, up to 25 MiB.
             </p>
 
             {form.formState.errors.file ? (
@@ -545,7 +543,7 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
                     disabled:opacity-60"
               >
                 <X className="h-4 w-4" aria-hidden="true" />
-                Discard retry state
+                Discard
               </button>
 
               <button
@@ -562,7 +560,7 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
                     disabled:opacity-60"
               >
                 <RotateCcw className="h-4 w-4" aria-hidden="true" />
-                Retry failed stage
+                Retry upload
               </button>
             </>
           ) : null}
@@ -584,10 +582,10 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
                   className="mr-2 h-4 w-4 animate-spin"
                   aria-hidden="true"
                 />
-                Working...
+                Uploading...
               </>
             ) : (
-              "Upload as draft"
+              "Upload draft"
             )}
           </button>
         </div>

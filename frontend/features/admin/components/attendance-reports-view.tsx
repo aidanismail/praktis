@@ -157,10 +157,10 @@ export function AttendanceReportsView() {
 
     try {
       const res = await openSessionAttendance(selectedSessionId);
-      setActionSuccess(res.message || "Attendance window opened.");
+      setActionSuccess(res.message || "Attendance window is open.");
       await loadSessionsAndStudents(selectedCourseId);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to open attendance.");
+      setError(err instanceof Error ? err.message : "Couldn't open attendance window. Please try again.");
     } finally {
       setIsUpdatingSession(false);
     }
@@ -177,7 +177,7 @@ export function AttendanceReportsView() {
       setActionSuccess(res.message || "Attendance window closed.");
       await loadSessionsAndStudents(selectedCourseId);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to close attendance.");
+      setError(err instanceof Error ? err.message : "Couldn't close attendance window. Please try again.");
     } finally {
       setIsUpdatingSession(false);
     }
@@ -196,11 +196,11 @@ export function AttendanceReportsView() {
       const res = await updateSessionAttendance(selectedSessionId, [
         { student_id: studentId, status: newStatus },
       ]);
-      setActionSuccess(res.message || "Student attendance status updated.");
+      setActionSuccess(res.message || "Attendance updated.");
       const updatedList = await fetchSessionAttendance(selectedSessionId).catch(() => []);
       setAttendances(updatedList);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to update student attendance.");
+      setError(err instanceof Error ? err.message : "Couldn't update attendance. Please try again.");
     } finally {
       setUpdatingStudentId(null);
     }
@@ -218,11 +218,11 @@ export function AttendanceReportsView() {
         status: "hadir" as const,
       }));
       const res = await updateSessionAttendance(selectedSessionId, records);
-      setActionSuccess(res.message || "All students marked as present.");
+      setActionSuccess(res.message || "All students marked present.");
       const updatedList = await fetchSessionAttendance(selectedSessionId).catch(() => []);
       setAttendances(updatedList);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to mark all students present.");
+      setError(err instanceof Error ? err.message : "Couldn't update all records. Please try again.");
     } finally {
       setUpdatingStudentId(null);
     }
@@ -293,7 +293,7 @@ export function AttendanceReportsView() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
-              1. Practicum Course
+              Course
             </label>
             {isLoadingCourses ? (
               <p className="text-xs text-slate-400 py-2">Loading courses...</p>
@@ -314,12 +314,12 @@ export function AttendanceReportsView() {
 
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
-              2. Class Session
+              Session
             </label>
             {isLoadingSessions ? (
               <p className="text-xs text-slate-400 py-2">Loading sessions...</p>
             ) : sessions.length === 0 ? (
-              <p className="text-xs text-slate-400 py-2">No class sessions recorded.</p>
+              <p className="text-xs text-slate-400 py-2">No sessions scheduled yet.</p>
             ) : (
               <select
                 value={selectedSessionId}
@@ -348,12 +348,12 @@ export function AttendanceReportsView() {
 
               <div>
                 <p className="text-xs font-bold text-slate-900">
-                  Attendance Window: {currentSession.attendance_status === "OPEN" ? "OPEN" : "LOCKED"}
+                  Attendance Window: {currentSession.attendance_status === "OPEN" ? "Open" : "Closed"}
                 </p>
                 <p className="text-[11px] text-slate-500">
                   {currentSession.attendance_status === "OPEN"
-                    ? "Currently accepting student presence submissions."
-                    : "Submissions locked for students. Admins can still manually edit records below."}
+                    ? "Open for student check-ins."
+                    : "Submissions closed for students. You can still adjust records below."}
                 </p>
               </div>
             </div>
@@ -366,7 +366,7 @@ export function AttendanceReportsView() {
                 className="rounded-full border border-slate-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-800 hover:bg-slate-100 disabled:opacity-50 transition-colors flex items-center gap-1.5 shadow-xs"
               >
                 <UserCheck className="w-3.5 h-3.5" />
-                <span>{updatingStudentId === "ALL" ? "Updating..." : "Mark All Present"}</span>
+                <span>{updatingStudentId === "ALL" ? "Updating..." : "Mark all present"}</span>
               </button>
 
               {currentSession.attendance_status === "OPEN" ? (
@@ -420,24 +420,24 @@ export function AttendanceReportsView() {
       <div className="rounded-2xl border border-slate-200 bg-white shadow-xs overflow-hidden">
         {!selectedSessionId ? (
           <div className="p-8 text-center text-xs text-slate-400">
-            Select a class session above to view and manage student attendance logs.
+            Pick a session above to view and manage attendance.
           </div>
         ) : isLoadingAttendance ? (
-          <div className="p-8 text-center text-xs text-slate-400">Loading student attendance...</div>
+          <div className="p-8 text-center text-xs text-slate-400">Loading attendance...</div>
         ) : students.length === 0 ? (
-          <div className="p-8 text-center text-xs text-slate-400">No students enrolled in this course offering.</div>
+          <div className="p-8 text-center text-xs text-slate-400">No students enrolled in this course yet.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-600">
               <thead className="border-b border-slate-100 bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500">
                 <tr>
                   <th className="sticky left-0 bg-slate-50 z-10 px-6 py-3 shadow-[1px_0_0_0_#e2e8f0]">
-                    Student Account
+                    Student
                   </th>
-                  <th className="px-6 py-3">Email Address</th>
-                  <th className="px-6 py-3">Current Status</th>
-                  <th className="px-6 py-3">Change Status (Admin Override)</th>
-                  <th className="px-6 py-3 text-right">Recorded Timestamp</th>
+                  <th className="px-6 py-3">Email</th>
+                  <th className="px-6 py-3">Status</th>
+                  <th className="px-6 py-3">Update Status</th>
+                  <th className="px-6 py-3 text-right">Time</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">

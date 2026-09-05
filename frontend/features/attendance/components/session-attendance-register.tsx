@@ -72,13 +72,13 @@ function getRequestError(error: Error | null, kind: "roster" | "attendance") {
   if (error instanceof ApiError) {
     if (error.status === 401) return "Your session expired. Sign in again.";
     if (error.status === 403)
-      return `You are not allowed to view this session ${kind}.`;
+      return `You don't have permission to view this session's ${kind}.`;
     if (error.status === 404)
-      return "The course or session could not be found.";
+      return "Couldn't find this course or session.";
     if (error.status === 422) return "The selected session link is invalid.";
   }
 
-  return `The ${kind} could not be loaded because of a network or server problem.`;
+  return `Couldn't load the ${kind}. Please check your connection and try again.`;
 }
 
 function getSaveError(error: Error | null) {
@@ -86,20 +86,20 @@ function getSaveError(error: Error | null) {
 
   if (error instanceof ApiError) {
     if (error.status === 400)
-      return "Attendance was not saved because this session window is not open.";
+      return "Attendance couldn't be saved because this session window isn't open.";
     if (error.status === 401)
       return "Your session expired. Sign in again before saving.";
     if (error.status === 403)
-      return "You are not allowed to record attendance for this course.";
+      return "You don't have permission to record attendance for this course.";
     if (error.status === 404)
-      return "The session no longer exists. Refresh before retrying.";
+      return "This session doesn't seem to exist anymore. Try refreshing the page.";
     if (error.status === 422)
-      return "The roster changed or contains an invalid student. Your edits were kept; review the refreshed data before saving again.";
+      return "The roster changed or includes an invalid student. Your edits were kept—check the refreshed data before saving again.";
     if (error.status === 429)
-      return "Too many attendance saves were requested. Wait a moment before retrying manually.";
+      return "Whoa, slow down! Too many save requests. Give it a moment before trying again.";
   }
 
-  return "Attendance was not saved because of a network or server problem. Your edits are still available.";
+  return "Couldn't save attendance due to a network or server hiccup. Your edits are still safe.";
 }
 
 function AttendanceRequestError({
@@ -270,7 +270,7 @@ function AttendanceRegisterForm({
   }
 
   function setAllPresent() {
-    if (!window.confirm("Set every Praktikan to Hadir locally? Nothing is saved until you choose Save attendance.")) {
+    if (!window.confirm("Mark every student as Hadir? Nothing will be saved until you click 'Save attendance'.")) {
       return;
     }
 
@@ -312,18 +312,18 @@ function AttendanceRegisterForm({
       </div>
 
       <p className="mt-3 text-sm text-slate-600" aria-live="polite">
-        {counts.unrecorded} of {students.length} Praktikan currently show Not recorded.
+        {counts.unrecorded} of {students.length} students still need attendance recorded.
       </p>
 
       {!isEditable ? (
         <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
-          Saved attendance remains readable, but editing is available only while this session&apos;s attendance window is Open.
+          Saved attendance is visible, but you can only edit while this session&apos;s attendance window is Open.
         </div>
       ) : null}
 
       {unmatchedRecords.length > 0 ? (
         <div role="alert" className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-          {unmatchedRecords.length} saved attendance {unmatchedRecords.length === 1 ? "record does" : "records do"} not match the current course roster. The unmatched data was not silently assigned to another student.
+          {unmatchedRecords.length} saved attendance {unmatchedRecords.length === 1 ? "record doesn&apos;t" : "records don&apos;t"} match the current course roster. They haven&apos;t been assigned to another student.
         </div>
       ) : null}
 
@@ -337,7 +337,7 @@ function AttendanceRegisterForm({
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               className="min-h-11 w-full rounded-xl border border-slate-300 bg-white pl-9 pr-3 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
-              placeholder="Search roster"
+              placeholder="Search by NPM or email..."
             />
           </span>
         </label>
@@ -351,7 +351,7 @@ function AttendanceRegisterForm({
 
       {visibleIndexes.length === 0 ? (
         <div role="status" className="mt-5 rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-600">
-          No Praktikan match this search.
+          No students match this search.
         </div>
       ) : (
         <ul className="mt-5 divide-y divide-slate-200 overflow-hidden rounded-2xl border border-slate-200">
@@ -446,14 +446,14 @@ export function SessionAttendanceRegister({
         </span>
         <div>
           <h2 id="session-attendance-heading" className="text-xl font-semibold text-slate-950">Attendance register</h2>
-          <p className="mt-1 text-sm leading-6 text-slate-600">Every enrolled Praktikan must receive an explicit status before a full-roster save.</p>
+          <p className="mt-1 text-sm leading-6 text-slate-600">Make sure every student has a status selected before saving.</p>
         </div>
       </div>
 
       {rosterQuery.isPending || attendanceQuery.isPending ? (
         <div role="status" aria-live="polite" className="mt-5 flex min-h-40 items-center justify-center rounded-2xl bg-slate-50">
           <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
-          <span className="ml-3 text-sm text-slate-600">Loading roster and saved attendance...</span>
+          <span className="ml-3 text-sm text-slate-600">Loading roster and attendance...</span>
         </div>
       ) : null}
 
@@ -486,8 +486,8 @@ export function SessionAttendanceRegister({
         ) : (
           <div role="status" className="mt-5 rounded-2xl border border-dashed border-slate-300 p-8 text-center">
             <Users className="mx-auto h-8 w-8 text-slate-400" aria-hidden="true" />
-            <h3 className="mt-3 font-semibold text-slate-950">No Praktikan enrolled</h3>
-            <p className="mt-1 text-sm text-slate-600">Attendance cannot be recorded until this course has an enrolled roster.</p>
+            <h3 className="mt-3 font-semibold text-slate-950">No students enrolled yet</h3>
+            <p className="mt-1 text-sm text-slate-600">Once students join this course, you can take attendance here.</p>
           </div>
         )
       ) : null}

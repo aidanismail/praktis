@@ -32,15 +32,15 @@ function getDefaultValues(
 
 function getGradeErrorMessage(error: Error, maxPoints: number) {
   if (!(error instanceof ApiError)) {
-    return "The grade could not be saved. Try again.";
+    return "Couldn't save this grade. Let's try that again.";
   }
 
   if (error.status === 401) {
-    return "Your session has expired. Sign in again to continue.";
+    return "You've been signed out. Please sign in again.";
   }
 
   if (error.status === 403) {
-    return "You are not allowed to grade this submission.";
+    return "You don't have permission to grade this submission.";
   }
 
   if (error.status === 404) {
@@ -48,14 +48,14 @@ function getGradeErrorMessage(error: Error, maxPoints: number) {
   }
 
   if (error.status === 400) {
-    return `The score must be between 0 and ${maxPoints}.`;
+    return `Score must be between 0 and ${maxPoints}.`;
   }
 
   if (error.status === 422) {
-    return "The grade payload is invalid. Review the score and feedback.";
+    return "Please check the score and feedback format.";
   }
 
-  return "A network or server problem prevented the grade from being saved.";
+  return "Couldn't reach the server. Let's try that again.";
 }
 
 export function SubmissionGradeForm({
@@ -122,7 +122,7 @@ export function SubmissionGradeForm({
           role="status"
           className="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
         >
-          Grade saved successfully.
+          Grade recorded!
         </p>
       ) : null}
 
@@ -167,7 +167,7 @@ export function SubmissionGradeForm({
           id={feedbackId}
           rows={4}
           disabled={mutation.isPending}
-          placeholder="Feedback visible with this assignment grade."
+          placeholder="Add constructive notes or feedback for the student..."
           className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 disabled:cursor-not-allowed disabled:bg-slate-100"
           {...form.register("feedback")}
         />
@@ -197,7 +197,7 @@ export function SubmissionGradeForm({
                 className="mr-2 h-4 w-4 animate-spin"
                 aria-hidden="true"
               />
-              Saving grade...
+              Saving...
             </>
           ) : submission.score === null ? (
             "Save grade"

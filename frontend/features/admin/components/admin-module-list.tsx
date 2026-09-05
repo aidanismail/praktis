@@ -114,7 +114,7 @@ export function AdminModuleList() {
       setError(
         err instanceof Error
           ? err.message
-          : "Failed to load module management data"
+          : "Couldn't load modules. Please refresh."
       );
     } finally {
       setIsLoading(false);
@@ -138,7 +138,7 @@ export function AdminModuleList() {
           setError(
             err instanceof Error
               ? err.message
-              : "Failed to load module management data"
+              : "Couldn't load modules. Please refresh."
           );
         }
       } finally {
@@ -173,15 +173,15 @@ export function AdminModuleList() {
     try {
       if (mod.is_published) {
         const res = await unpublishModule(mod.id);
-        setActionSuccess(res.message || "Module unpublished successfully.");
+        setActionSuccess(res.message || "Module unpublished.");
       } else {
         const res = await publishModule(mod.id);
-        setActionSuccess(res.message || "Module published successfully.");
+        setActionSuccess(res.message || "Module published.");
       }
       await loadData();
     } catch (err: unknown) {
       setError(
-        err instanceof Error ? err.message : "Failed to update publish state"
+        err instanceof Error ? err.message : "Couldn't update publish status. Please try again."
       );
     } finally {
       setActiveModuleId(null);
@@ -190,7 +190,7 @@ export function AdminModuleList() {
 
   const handleDelete = async (mod: AdminModuleItem) => {
     if (
-      !confirm(`Are you sure you want to permanently delete "${mod.title}"?`)
+      !confirm(`Delete "${mod.title}" permanently?`)
     ) {
       return;
     }
@@ -201,13 +201,13 @@ export function AdminModuleList() {
 
     try {
       const res = await deleteModule(mod.id);
-      setActionSuccess(res.message || "Module deleted successfully.");
+      setActionSuccess(res.message || "Module deleted.");
       if (selectedModuleForDetail?.id === mod.id) {
         setSelectedModuleForDetail(null);
       }
       await loadData();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to delete module");
+      setError(err instanceof Error ? err.message : "Couldn't delete module. Please try again.");
     } finally {
       setActiveModuleId(null);
     }
@@ -226,7 +226,7 @@ export function AdminModuleList() {
         return;
       }
       if (file.size > maxBytes) {
-        rejectionErrors.push(`"${file.name}" exceeds the 20MB limit.`);
+        rejectionErrors.push(`"${file.name}" is over 20 MB.`);
         return;
       }
 
@@ -269,17 +269,17 @@ export function AdminModuleList() {
   const handleUploadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newModuleCourseId) {
-      setError("Please select a target course for the modules.");
+      setError("Choose a target course for the modules.");
       return;
     }
     if (uploadQueue.length === 0) {
-      setError("Please select at least one PDF or DOCX file to upload.");
+      setError("Pick at least one PDF or DOCX file to upload.");
       return;
     }
 
     const missingTitle = uploadQueue.find((item) => !item.title.trim());
     if (missingTitle) {
-      setError(`Please provide a module title for "${missingTitle.file.name}".`);
+      setError(`Add a title for "${missingTitle.file.name}".`);
       return;
     }
 
@@ -307,16 +307,16 @@ export function AdminModuleList() {
 
       if (result.errors.length === 0) {
         setActionSuccess(
-          `Successfully uploaded ${result.successCount} module${
+          `Uploaded ${result.successCount} module${
             result.successCount > 1 ? "s" : ""
-          }!`
+          }.`
         );
         setShowUploadModal(false);
         setUploadQueue([]);
         setNewModuleCourseId("");
       } else if (result.successCount > 0) {
         setActionSuccess(
-          `Uploaded ${result.successCount} of ${result.total} modules. ${result.errors.length} failed.`
+          `Uploaded ${result.successCount} of ${result.total} modules.`
         );
         const failedFilenames = new Set(result.errors.map((e) => e.filename));
         setUploadQueue((prev) =>
@@ -327,7 +327,7 @@ export function AdminModuleList() {
         );
       } else {
         setError(
-          `Failed to upload modules: ${result.errors
+          `Couldn't upload modules: ${result.errors
             .map((e) => e.error)
             .join(", ")}`
         );
@@ -336,7 +336,7 @@ export function AdminModuleList() {
       await loadData();
     } catch (err: unknown) {
       setError(
-        err instanceof Error ? err.message : "Failed to complete batch upload."
+        err instanceof Error ? err.message : "Couldn't complete the batch upload. Please try again."
       );
     } finally {
       setIsUploading(false);
@@ -450,7 +450,7 @@ export function AdminModuleList() {
           <div className="relative flex-1">
             <input
               type="text"
-              placeholder="Search module title, description, or course..."
+              placeholder="Search modules by title, description, or course..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 shadow-xs"
@@ -493,11 +493,11 @@ export function AdminModuleList() {
       {/* Module List Groups by Course */}
       {isLoading ? (
         <div className="p-16 text-center text-xs text-slate-400 bg-white rounded-3xl border border-slate-200 shadow-xs">
-          Loading learning modules...
+          Loading modules...
         </div>
       ) : filteredModules.length === 0 ? (
         <div className="p-16 text-center text-xs text-slate-400 bg-white rounded-3xl border border-slate-200 shadow-xs">
-          No learning modules found matching your criteria.
+          No learning modules found matching your search.
         </div>
       ) : (
         <div className="space-y-4">
@@ -601,7 +601,7 @@ export function AdminModuleList() {
                                 </div>
                                 <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">
                                   {mod.description ||
-                                    "No description provided."}
+                                    "No description yet."}
                                 </p>
                                 <span className="text-[10px] text-slate-400 font-mono mt-0.5 block">
                                   Uploaded:{" "}
@@ -699,10 +699,10 @@ export function AdminModuleList() {
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 shrink-0">
               <div>
                 <h4 id="admin-upload-module-title" className="font-bold text-sm text-slate-900">
-                  Upload Learning Modules (Batch)
+                  Upload Learning Modules
                 </h4>
                 <p className="text-[11px] text-slate-400 mt-0.5">
-                  Select or drop one or more PDF / DOCX modules for your course
+                  Drop PDF or DOCX files here to upload materials for your course.
                 </p>
               </div>
               <button
@@ -772,10 +772,10 @@ export function AdminModuleList() {
                   <label className="cursor-pointer flex flex-col items-center justify-center gap-1.5 py-2">
                     <UploadCloud className="w-8 h-8 text-slate-400" />
                     <span className="text-xs font-semibold text-slate-800">
-                      Click to browse or drag & drop multiple files
+                      Click to browse or drag and drop files here
                     </span>
                     <span className="text-[10px] text-slate-400">
-                      Supports PDF and DOCX (hold Shift/Ctrl to select multiple)
+                      PDF and DOCX supported (hold Shift or Ctrl to select multiple)
                     </span>
                     <input
                       type="file"
@@ -859,7 +859,7 @@ export function AdminModuleList() {
                                 })
                               }
                               required
-                              placeholder="Module Title *"
+                              placeholder="Module title *"
                               className="w-full p-2 text-xs border border-slate-200 rounded-xl bg-white focus:ring-1 focus:ring-slate-900 font-medium"
                             />
                           </div>
@@ -873,7 +873,7 @@ export function AdminModuleList() {
                                   description: e.target.value
                                 })
                               }
-                              placeholder="Summary (Optional)"
+                              placeholder="Brief description (optional)"
                               className="w-full p-2 text-xs border border-slate-200 rounded-xl bg-white focus:ring-1 focus:ring-slate-900 text-slate-600"
                             />
                           </div>
@@ -940,7 +940,7 @@ export function AdminModuleList() {
                 {isUploading ? (
                   <>
                     <span className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                    <span>Uploading Batch...</span>
+                    <span>Uploading...</span>
                   </>
                 ) : (
                   <>
@@ -978,7 +978,7 @@ export function AdminModuleList() {
                     Module Details
                   </h3>
                   <p className="text-[11px] text-slate-300 mt-0.5">
-                    Practicum learning file specifications
+                    File info and details
                   </p>
                 </div>
               </div>
@@ -1020,7 +1020,7 @@ export function AdminModuleList() {
                 </span>
                 <p className="text-slate-600 mt-0.5 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100">
                   {selectedModuleForDetail.description ||
-                    "No description provided."}
+                    "No description yet."}
                 </p>
               </div>
 

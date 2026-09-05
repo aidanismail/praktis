@@ -29,20 +29,20 @@ export function CourseRoster({ userId, courseId }: CourseRosterProps) {
   const isForbidden = error instanceof ApiError && error.status === 403;
   const isNotFound = error instanceof ApiError && error.status === 404;
 
-  let errorTitle = "Roster could not be loaded";
-  let errorDescription = "A network or server problem interrupted the request.";
+  let errorTitle = "Couldn't load student roster";
+  let errorDescription = "Couldn't reach the server. Let's try that again.";
 
   if (isUnauthorized) {
-    errorTitle = "Your session has expired";
-    errorDescription = "Sign in again to continue.";
+    errorTitle = "You've been signed out";
+    errorDescription = "Please sign in again to view the roster.";
   } else if (isForbidden) {
-    errorTitle = "Roster access is unavailable";
+    errorTitle = "Access restricted";
     errorDescription =
-      "Your account is not allowed to view this course roster.";
+      "You don't have permission to view this class roster.";
   } else if (isNotFound) {
-    errorTitle = "Course roster was not found";
+    errorTitle = "Class not found";
     errorDescription =
-      "This course may no longer exist or may no longer be assigned to you.";
+      "This class might have been moved, archived, or unassigned.";
   }
 
   return (
@@ -69,10 +69,10 @@ export function CourseRoster({ userId, courseId }: CourseRosterProps) {
               id="course-roster-heading"
               className="text-xl font-semibold text-slate-950"
             >
-              Enrolled Praktikan
+              Class Roster
             </h2>
             <p className="mt-1 text-sm leading-6 text-slate-600">
-              Students currently enrolled in this practicum course.
+              Students currently enrolled in this practicum class.
             </p>
           </div>
         </div>
@@ -100,7 +100,7 @@ export function CourseRoster({ userId, courseId }: CourseRosterProps) {
             aria-hidden="true"
           />
           <span className="ml-3 text-sm text-slate-600">
-            Loading enrolled students...
+            Loading class roster...
           </span>
         </div>
       ) : null}
@@ -175,10 +175,10 @@ export function CourseRoster({ userId, courseId }: CourseRosterProps) {
             aria-hidden="true"
           />
           <h3 className="mt-3 font-semibold text-slate-950">
-            No Praktikan enrolled
+            No students enrolled yet
           </h3>
           <p className="mt-1 text-sm text-slate-600">
-            This course does not currently have any enrolled students.
+            Enrolled students will appear here once registered by your department admin.
           </p>
         </div>
       ) : null}

@@ -52,7 +52,7 @@ export function AnnouncementComposer({
             Post an announcement
           </h2>
           <p className="mt-1 text-sm leading-6 text-slate-600">
-            Share an update with everyone enrolled in this practicum course.
+            Broadcast updates, reminders, or schedule changes to the entire class.
           </p>
         </div>
       </div>
@@ -70,7 +70,7 @@ export function AnnouncementComposer({
 
         {mutation.isSuccess ? (
           <p role="status" className="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-            Announcement posted successfully.
+            Announcement posted!
           </p>
         ) : null}
 
@@ -86,7 +86,7 @@ export function AnnouncementComposer({
             aria-invalid={Boolean(form.formState.errors.title)}
             aria-describedby={form.formState.errors.title ? "announcement-title-error" : undefined}
             className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 disabled:cursor-not-allowed disabled:bg-slate-50"
-            placeholder="What should your Praktikan know?"
+            placeholder="Title (e.g. Lab 3 guidelines updated)"
             {...form.register("title")}
           />
           {form.formState.errors.title ? (
@@ -107,7 +107,7 @@ export function AnnouncementComposer({
             aria-invalid={Boolean(form.formState.errors.content)}
             aria-describedby={form.formState.errors.content ? "announcement-content-error" : undefined}
             className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 disabled:cursor-not-allowed disabled:bg-slate-50"
-            placeholder="Write the course update here..."
+            placeholder="Share details, links, or instructions..."
             {...form.register("content")}
           />
           {form.formState.errors.content ? (
@@ -126,7 +126,7 @@ export function AnnouncementComposer({
               {...form.register("is_pinned")}
             />
             <Pin className="h-4 w-4" aria-hidden="true" />
-            Pin to the top
+            Pin to top of stream
           </label>
 
           <button
@@ -137,10 +137,10 @@ export function AnnouncementComposer({
             {mutation.isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-                Posting...
+                Publishing...
               </>
             ) : (
-              "Post announcement"
+              "Publish update"
             )}
           </button>
         </div>

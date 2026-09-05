@@ -37,24 +37,24 @@ export function CourseStream({ userId, courseId, viewerRole }: CourseStreamProps
         className="flex min-h-56 items-center justify-center rounded-3xl border border-slate-200 bg-white"
       >
         <Loader2 className="h-5 w-5 animate-spin text-slate-900" aria-hidden="true" />
-        <span className="ml-3 text-sm text-slate-600">Loading course Stream...</span>
+        <span className="ml-3 text-sm text-slate-600">Loading announcements...</span>
       </div>
     );
   }
 
   if (isError) {
-    let title = "Course Stream could not be loaded";
-    let description = "A network or server problem interrupted the request.";
+    let title = "Couldn't load announcements";
+    let description = "Couldn't reach the server. Let's try that again.";
 
     if (isUnauthorized) {
-      title = "Your session has expired";
-      description = "Sign in again to continue.";
+      title = "You've been signed out";
+      description = "Please sign in again to continue.";
     } else if (isForbidden) {
-      title = "Stream access is unavailable";
-      description = "Your account is not allowed to access this course Stream.";
+      title = "Access restricted";
+      description = "You don't have access to this course's announcements.";
     } else if (isNotFound) {
-      title = "Course Stream was not found";
-      description = "This course may no longer exist or be assigned to you.";
+      title = "Class not found";
+      description = "This class might have been moved or removed.";
     }
 
     return (
@@ -111,8 +111,8 @@ export function CourseStream({ userId, courseId, viewerRole }: CourseStreamProps
           <h2 className="text-xl font-semibold text-slate-950">Course Stream</h2>
           <p className="mt-1 text-sm text-slate-600">
             {viewerRole === "asprak"
-              ? "Pinned updates appear first, followed by the latest announcements."
-              : "Read course updates and use comments to ask questions."}
+              ? "Share notes, updates, and reminders. Pinned posts stay right at the top."
+              : "Stay in the loop with updates and reminders from your instructors."}
           </p>
         </div>
         <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700" aria-live="polite">
@@ -132,8 +132,8 @@ export function CourseStream({ userId, courseId, viewerRole }: CourseStreamProps
           <h3 className="mt-3 font-semibold text-slate-950">No announcements yet</h3>
           <p className="mt-1 text-sm text-slate-600">
             {viewerRole === "asprak"
-              ? "Post the first update for this practicum course."
-              : "Course announcements will appear here when they are published."}
+              ? "Got an update or reminder for the class? Post the first announcement above."
+              : "Quiet for now. Announcements from your instructors will appear here."}
           </p>
         </div>
       ) : (

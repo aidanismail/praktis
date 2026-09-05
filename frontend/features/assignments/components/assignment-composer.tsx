@@ -28,26 +28,26 @@ const defaultValues: AssignmentFormValues = {
 
 function getCreateErrorMessage(error: Error) {
   if (!(error instanceof ApiError)) {
-    return "The assignment could not be created. Try again.";
+    return "Couldn't create the assignment. Let's try that again.";
   }
 
   if (error.status === 401) {
-    return "Your session has expired. Sign in again to continue.";
+    return "You've been signed out. Please sign in again.";
   }
 
   if (error.status === 403) {
-    return "You are not allowed to create assignments for this course.";
+    return "You don't have permission to create assignments for this course.";
   }
 
   if (error.status === 404) {
-    return "This course could not be found or is no longer assigned to you.";
+    return "This course couldn't be found or is no longer assigned to you.";
   }
 
   if (error.status === 422) {
-    return "Some assignment details are invalid. Review the form and try again.";
+    return "Some assignment details need a quick fix. Check the highlighted fields.";
   }
 
-  return "A network or server problem prevented the assignment from being created.";
+  return "Couldn't reach the server. Let's try that again.";
 }
 
 export function AssignmentComposer({
@@ -110,8 +110,7 @@ export function AssignmentComposer({
           </h2>
 
           <p className="mt-1 text-sm leading-6 text-slate-600">
-            Save it as a draft or publish it immediately to enrolled
-            Praktikan.
+            Draft your prompt or release it directly to students.
           </p>
         </div>
       </div>
@@ -136,7 +135,7 @@ export function AssignmentComposer({
             role="status"
             className="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
           >
-            Assignment created successfully.
+            Assignment created!
           </p>
         ) : null}
 

@@ -18,12 +18,12 @@ import { useChangePassword } from "../hooks/use-change-password";
 type ChangePasswordFormProps = { isForced: boolean };
 
 function getChangePasswordError(error: Error) {
-  if (!(error instanceof ApiError)) return "A network or server problem prevented the password change.";
-  if (error.status === 400) return "The current password is incorrect or the new password cannot be used.";
-  if (error.status === 401) return "Your session has expired. Sign in again to continue.";
-  if (error.status === 422) return "Check the password requirements and try again.";
-  if (error.status === 429) return "Too many attempts. Wait a moment before trying again.";
-  return "The password could not be changed. Try again.";
+  if (!(error instanceof ApiError)) return "Couldn't update your password right now. Check your connection and try again.";
+  if (error.status === 400) return "Current password didn't match. Double-check and try again.";
+  if (error.status === 401) return "You've been signed out. Sign in again to continue.";
+  if (error.status === 422) return "Password must be at least 8 characters long.";
+  if (error.status === 429) return "Too many attempts. Take a quick breather and try again in a minute.";
+  return "Couldn't update your password. Let's try that again.";
 }
 
 export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
@@ -60,13 +60,13 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
         />
 
         <h1 className="text-2xl font-semibold tracking-tight text-slate-950">
-          {isForced ? "Secure your account" : "Change your password"}
+          {isForced ? "Let's secure your account" : "Update your password"}
         </h1>
 
         <p className="mt-2 text-sm leading-6 text-slate-500">
           {isForced
-            ? "Before continuing to Praktis, replace the temporary password created for your account."
-            : "Enter your current password and choose a new password for your Praktis account."}
+            ? "Set a personal password before jumping into your dashboard."
+            : "Choose a strong password you haven't used before."}
         </p>
       </div>
 
@@ -195,13 +195,13 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
 
         {!isForced ? (
           <Link href={ROUTES.dashboard} className="flex min-h-11 w-full items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-800">
-            Cancel and return to dashboard
+            Never mind, take me back
           </Link>
         ) : null}
 
         <div className="rounded-2xl bg-slate-50 px-4 py-3">
           <p className="text-center text-xs leading-5 text-slate-500">
-            You will return to the dashboard after the password is updated.
+            You&apos;ll head straight to your dashboard once your password is saved.
           </p>
         </div>
       </form>

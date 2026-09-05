@@ -98,9 +98,9 @@ export function CourseSubmissionsView({
         feedback: gradeFeedback.trim() || undefined,
       });
       setSelectedSubForGrade(null);
-      setActionSuccess("Submission graded successfully.");
+      setActionSuccess("Grade recorded.");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to grade submission.");
+      setError(err instanceof Error ? err.message : "Couldn't record grade. Please try again.");
     }
   };
 
@@ -173,7 +173,7 @@ export function CourseSubmissionsView({
               {assignment.title}
             </h1>
             <p className="text-xs text-slate-600 max-w-2xl leading-relaxed">
-              {assignment.description || "No specific instructions provided."}
+              {assignment.description || "No instructions provided."}
             </p>
           </div>
 
@@ -244,7 +244,7 @@ export function CourseSubmissionsView({
           <div className="relative flex-1 max-w-sm">
             <input
               type="text"
-              placeholder="Search student username or file name..."
+              placeholder="Search by student or file name..."
               value={submissionSearch}
               onChange={(e) => setSubmissionSearch(e.target.value)}
               className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 shadow-xs"
@@ -292,16 +292,16 @@ export function CourseSubmissionsView({
         {/* Submissions Roster */}
         {isLoadingSubmissions ? (
           <div className="p-16 text-center text-xs text-slate-400 bg-white rounded-3xl border border-slate-200 shadow-xs">
-            Loading submitted coursework...
+            Loading submissions...
           </div>
         ) : filteredSubmissions.length === 0 ? (
           <div className="p-16 text-center text-xs text-slate-400 bg-white rounded-3xl border border-slate-200 shadow-xs space-y-2">
             <FileText className="w-8 h-8 text-slate-300 mx-auto" />
-            <p className="font-semibold text-slate-600">No submissions found</p>
+            <p className="font-semibold text-slate-600">No submissions yet</p>
             <p className="text-[11px]">
               {submissions.length === 0
-                ? "No student has turned in this assignment yet."
-                : "No submissions match the current filter criteria."}
+                ? "No one has turned in this assignment yet."
+                : "No submissions match your search or filter."}
             </p>
           </div>
         ) : (
@@ -320,11 +320,11 @@ export function CourseSubmissionsView({
                       <h4 className="font-bold text-xs text-slate-900">{sub.student_username}</h4>
                       {sub.is_late ? (
                         <span className="px-2 py-0.2 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                          Late Submission
+                          Late
                         </span>
                       ) : (
                         <span className="px-2 py-0.2 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700">
-                          On Time
+                          On time
                         </span>
                       )}
                     </div>
@@ -351,7 +351,7 @@ export function CourseSubmissionsView({
                     </span>
                   ) : (
                     <span className="px-2.5 py-1 bg-amber-50 text-amber-800 border border-amber-200 font-semibold rounded-full text-[11px]">
-                      Not Graded
+                      Ungraded
                     </span>
                   )}
 
@@ -417,7 +417,7 @@ export function CourseSubmissionsView({
             className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4"
           >
             <h4 id="grade-submission-modal-title" className="font-bold text-sm text-slate-900">
-              Grade Submission: {selectedSubForGrade.student_username}
+              Grade {selectedSubForGrade.student_username}
             </h4>
             <div className="space-y-3 text-xs">
               <div>
@@ -441,7 +441,7 @@ export function CourseSubmissionsView({
                   onChange={(e) => setGradeFeedback(e.target.value)}
                   rows={3}
                   className="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-slate-900 resize-none"
-                  placeholder="Feedback notes..."
+                  placeholder="Add helpful feedback or notes for the student..."
                 />
               </div>
             </div>

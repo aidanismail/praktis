@@ -88,7 +88,7 @@ export function UserManagement() {
         setTargetCourseId(cData[0].id);
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to load users");
+      setError(err instanceof Error ? err.message : "Couldn't load users. Please refresh.");
     } finally {
       setIsLoading(false);
     }
@@ -111,7 +111,7 @@ export function UserManagement() {
         }
       } catch (err: unknown) {
         if (isMounted) {
-          setError(err instanceof Error ? err.message : "Failed to load users");
+          setError(err instanceof Error ? err.message : "Couldn't load users. Please refresh.");
         }
       } finally {
         if (isMounted) {
@@ -133,15 +133,15 @@ export function UserManagement() {
     const trimmedEmail = newEmail.trim().toLowerCase();
 
     if (!trimmedUsername) {
-      setCreateUserError("Username is required.");
+      setCreateUserError("Enter a username or student NPM.");
       return;
     }
     if (!trimmedEmail || !trimmedEmail.includes("@")) {
-      setCreateUserError("Please enter a valid email address.");
+      setCreateUserError("Enter a valid email address.");
       return;
     }
     if (newPassword.length < 8) {
-      setCreateUserError("Password must be at least 8 characters long.");
+      setCreateUserError("Password must be at least 8 characters.");
       return;
     }
 
@@ -159,10 +159,10 @@ export function UserManagement() {
       setNewEmail("");
       setNewRole("praktikan");
       setNewPassword("");
-      setActionSuccess(`Successfully created ${newRole} account for '${trimmedUsername}'.`);
+      setActionSuccess(`Created ${newRole} account for ${trimmedUsername}.`);
       await loadData();
     } catch (err: unknown) {
-      setCreateUserError(err instanceof Error ? err.message : "Failed to create user account.");
+      setCreateUserError(err instanceof Error ? err.message : "Couldn't create user account. Please try again.");
     } finally {
       setIsCreatingUser(false);
     }
@@ -187,16 +187,16 @@ export function UserManagement() {
   };
 
   const handleResetPassword = async (user: User) => {
-    if (!confirm(`Reset password for '${user.username}'? Default password will be set.`)) return;
+    if (!confirm(`Reset password for ${user.username} to default?`)) return;
 
     setError(null);
     setActionSuccess(null);
 
     try {
       const res = await resetUserPassword(user.id);
-      setActionSuccess(res.message || `Password for ${user.username} reset successfully.`);
+      setActionSuccess(res.message || `Password reset for ${user.username}.`);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to reset password.");
+      setError(err instanceof Error ? err.message : "Couldn't reset password. Please try again.");
     }
   };
 
@@ -213,16 +213,16 @@ export function UserManagement() {
     try {
       if (assignRole === "asprak") {
         const res = await assignCourseStaff(targetCourseId, usernames);
-        setActionSuccess(res.message || "Assigned staff successfully.");
+        setActionSuccess(res.message || "Assigned teaching assistants.");
       } else {
         const res = await enrollCourseStudents(targetCourseId, usernames);
-        setActionSuccess(res.message || "Enrolled students successfully.");
+        setActionSuccess(res.message || "Enrolled students.");
       }
       setShowEditModal(false);
       setSelectedUserIds(new Set());
       await loadData();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to perform course assignment.");
+      setError(err instanceof Error ? err.message : "Couldn't assign users to course. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -347,7 +347,7 @@ export function UserManagement() {
         {selectedUserIds.size > 0 ? (
           <div className="flex items-center justify-between bg-slate-100 border-b border-slate-200 px-6 py-3">
             <span className="text-xs font-semibold text-slate-900">
-              {selectedUserIds.size} user account(s) selected
+              {selectedUserIds.size} {selectedUserIds.size === 1 ? "user" : "users"} selected
             </span>
             <div className="flex items-center gap-2">
               <button
@@ -355,23 +355,23 @@ export function UserManagement() {
                 onClick={() => setSelectedUserIds(new Set())}
                 className="rounded-full px-3 py-1 text-xs font-medium text-slate-600 hover:bg-white transition-colors"
               >
-                Clear Selection
+                Clear selection
               </button>
               <button
                 type="button"
                 onClick={() => setShowEditModal(true)}
                 className="rounded-full bg-slate-900 px-4 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 transition-colors"
               >
-                Enroll / Assign to Course
+                Assign to Course
               </button>
             </div>
           </div>
         ) : null}
 
         {isLoading ? (
-          <div className="p-12 text-center text-xs text-slate-400">Loading user directory...</div>
+          <div className="p-12 text-center text-xs text-slate-400">Loading users...</div>
         ) : filteredUsers.length === 0 ? (
-          <div className="p-12 text-center text-xs text-slate-400">No users match your criteria.</div>
+          <div className="p-12 text-center text-xs text-slate-400">No users match your search.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
@@ -446,7 +446,7 @@ export function UserManagement() {
                           onClick={() => handleResetPassword(user)}
                           className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-xs hover:bg-slate-50 hover:text-slate-900 transition-colors"
                         >
-                          Reset Password
+                          Reset password
                         </button>
                       </td>
                     </tr>
@@ -475,10 +475,10 @@ export function UserManagement() {
                   className="font-bold text-sm text-slate-900 flex items-center gap-2"
                 >
                   <UserPlus className="w-4 h-4 text-slate-800" />
-                  <span>Create New User Account</span>
+                  <span>New User</span>
                 </h4>
                 <p className="text-[11px] text-slate-400 mt-0.5">
-                  Add a student, teaching assistant, or admin account.
+                  Add a student, assistant, or admin account.
                 </p>
               </div>
               <button
@@ -571,7 +571,7 @@ export function UserManagement() {
                   </button>
                 </div>
                 <span className="text-[10px] text-slate-400 mt-1 block">
-                  Students will be asked to change their password on first login.
+                  Students will be prompted to change their password on first login.
                 </span>
               </div>
 
@@ -609,7 +609,7 @@ export function UserManagement() {
           <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4 animate-apple-modal">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h4 id="bulk-assign-modal-title" className="font-bold text-sm text-slate-900">
-                Assign {selectedUserIds.size} User(s) to Course
+                Assign {selectedUserIds.size} {selectedUserIds.size === 1 ? "User" : "Users"} to Course
               </h4>
               <button
                 type="button"
@@ -647,8 +647,8 @@ export function UserManagement() {
                   onChange={(e) => setAssignRole(e.target.value as "praktikan" | "asprak")}
                   className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-shadow duration-150"
                 >
-                  <option value="praktikan">Enroll as Student (Praktikan)</option>
-                  <option value="asprak">Assign as Teaching Assistant (Asprak)</option>
+                  <option value="praktikan">Enroll as Student</option>
+                  <option value="asprak">Assign as Teaching Assistant</option>
                 </select>
               </div>
             </div>
@@ -667,7 +667,7 @@ export function UserManagement() {
                 disabled={isSubmitting || !targetCourseId}
                 className="rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 disabled:opacity-50 apple-press transition-all"
               >
-                {isSubmitting ? "Saving..." : "Apply Assignment"}
+                {isSubmitting ? "Saving..." : "Assign Users"}
               </button>
             </div>
           </div>

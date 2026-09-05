@@ -38,19 +38,19 @@ function getSessionFormError(error: Error | null) {
     }
 
     if (error.status === 403) {
-      return "You are not allowed to manage sessions for this course.";
+      return "You don't have permission to manage sessions for this course.";
     }
 
     if (error.status === 404) {
-      return "The course or session could not be found. Refresh before retrying.";
+      return "Couldn't find this course or session. Try refreshing the page.";
     }
 
     if (error.status === 422) {
-      return "The session details were rejected. Review the title and date.";
+      return "Check your session details. Make sure the title and date look right.";
     }
   }
 
-  return "The session could not be saved because of a network or server problem.";
+  return "Couldn't save this session. Please check your connection and try again.";
 }
 
 export function SessionForm({
@@ -104,7 +104,7 @@ export function SessionForm({
             }
             {...form.register("title")}
             className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:bg-slate-100"
-            placeholder="e.g. Meeting 1: Introduction"
+            placeholder="e.g. Session 1: Getting Started"
           />
           {form.formState.errors.title ? (
             <p

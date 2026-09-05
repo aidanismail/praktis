@@ -96,15 +96,15 @@ export function GradeExportsView() {
     <div className="max-w-2xl space-y-4">
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-5">
         {isLoadingCourses ? (
-          <p className="text-xs text-slate-400 py-4">Loading catalog courses...</p>
+          <p className="text-xs text-slate-400 py-4">Loading courses...</p>
         ) : courses.length === 0 ? (
-          <p className="text-xs text-slate-400 py-4">No practicum courses available for data export.</p>
+          <p className="text-xs text-slate-400 py-4">No courses available to export.</p>
         ) : (
           <div className="space-y-4">
             {/* Step 1: Course */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
-                1. Practicum Course
+                Course
               </label>
               <select
                 value={selectedCourseId}
@@ -122,12 +122,12 @@ export function GradeExportsView() {
             {/* Step 2: Session */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
-                2. Class Session
+                Session
               </label>
               {isLoadingSessions ? (
                 <p className="text-xs text-slate-400 py-2">Loading sessions...</p>
               ) : sessions.length === 0 ? (
-                <p className="text-xs text-slate-400 py-2">No class sessions recorded for this course.</p>
+                <p className="text-xs text-slate-400 py-2">No sessions recorded for this course.</p>
               ) : (
                 <select
                   value={selectedSessionId}
@@ -146,7 +146,7 @@ export function GradeExportsView() {
             {/* Step 3: Export Type */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
-                3. Dataset Type
+                Data to Export
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <button
@@ -158,9 +158,9 @@ export function GradeExportsView() {
                       : "border-slate-200 bg-white hover:bg-slate-50"
                   }`}
                 >
-                  <span className="font-bold text-slate-900 block">Session Grades</span>
+                  <span className="font-bold text-slate-900 block">Grades</span>
                   <span className="text-[11px] text-slate-500 mt-0.5 block">
-                    Export student scores, feedback, and grader info.
+                    Student scores, feedback notes, and grader info.
                   </span>
                 </button>
 
@@ -173,9 +173,9 @@ export function GradeExportsView() {
                       : "border-slate-200 bg-white hover:bg-slate-50"
                   }`}
                 >
-                  <span className="font-bold text-slate-900 block">Attendance Log</span>
+                  <span className="font-bold text-slate-900 block">Attendance</span>
                   <span className="text-[11px] text-slate-500 mt-0.5 block">
-                    Export check-in timestamps and status (Hadir/Sakit/Izin/Alfa).
+                    Check-in timestamps and presence records.
                   </span>
                 </button>
               </div>
@@ -184,7 +184,7 @@ export function GradeExportsView() {
             {/* Step 4: File Format */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
-                4. File Format
+                File Format
               </label>
               <div className="flex items-center gap-2">
                 <button
@@ -196,7 +196,7 @@ export function GradeExportsView() {
                       : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
                   }`}
                 >
-                  .CSV (Comma Separated)
+                  CSV (.csv)
                 </button>
                 <button
                   type="button"
@@ -207,7 +207,7 @@ export function GradeExportsView() {
                       : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
                   }`}
                 >
-                  .XLSX (Microsoft Excel)
+                  Excel (.xlsx)
                 </button>
               </div>
             </div>
@@ -218,7 +218,7 @@ export function GradeExportsView() {
                 {selectedCourse && selectedSession ? (
                   <span>Target: {selectedCourse.code} • {selectedSession.title}</span>
                 ) : (
-                  <span>Select course & session to download.</span>
+                  <span>Select a course and session to export.</span>
                 )}
               </div>
 
@@ -228,7 +228,7 @@ export function GradeExportsView() {
                 disabled={!selectedSessionId}
                 className="rounded-full bg-slate-900 px-5 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 disabled:opacity-50 transition-all active:scale-[0.98]"
               >
-                Export Dataset ({fileFormat.toUpperCase()})
+                Download ({fileFormat.toUpperCase()})
               </button>
             </div>
           </div>
