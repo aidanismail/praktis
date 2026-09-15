@@ -300,10 +300,22 @@ def run_suite():
     except Exception:
         pass
 
-    
-def test_live_api_suite():
-    """Pytest entrypoint for running the live integration test suite."""
-    run_suite()
+def _should_skip_live_tests() -> bool:
+    return os.environ.get("RUN_LIVE_TESTS", "").lower() not in ("true", "1", "yes")
+
+
+if pytest:
+    @pytest.mark.skipif(
+        _should_skip_live_tests(),
+        reason="Live integration tests require a running server. Set RUN_LIVE_TESTS=true to run.",
+    )
+    def test_live_api_suite():
+        """Pytest entrypoint for running the live integration test suite."""
+        run_suite()
+else:
+    def test_live_api_suite():
+        """Pytest entrypoint for running the live integration test suite."""
+        run_suite()
 
 if __name__ == "__main__":
     run_suite()
