@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Pencil, X } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { ApiError } from "@/lib/api/client";
@@ -27,27 +27,28 @@ function getModuleValues(module: CourseModule): ModuleMetadataFormValues {
 
 function getUpdateErrorMessage(error: Error) {
   if (!(error instanceof ApiError)) {
-    return "Couldn't update this module. Let's try that again.";
+    return "Unable to update module. Please try again.";
   }
 
   if (error.status === 401) {
-    return "You've been signed out. Please sign in again.";
+    return "Your session has expired. Please sign in again.";
   }
 
   if (error.status === 403) {
-    return "You don't have permission to update this module.";
+    return "You do not have permission to update this module.";
   }
 
   if (error.status === 404) {
-    return "This module could not be found.";
+    return "Module not found.";
   }
 
   if (error.status === 400 || error.status === 422) {
-    return "Some module details were rejected. Please review the form.";
+    return "Please correct the errors in the form.";
   }
 
-  return "Couldn't reach the server. Let's try that again.";
+  return "Unable to connect to the server. Please try again.";
 }
+
 export function ModuleEditor({ userId, courseId, module }: ModuleEditorProps) {
   const [isEditing, setIsEditing] = useState(false);
 
@@ -89,6 +90,7 @@ export function ModuleEditor({ userId, courseId, module }: ModuleEditorProps) {
       document.getElementById(editButtonId)?.focus();
     });
   }
+
   function onSubmit(values: ModuleMetadataFormValues) {
     mutation.reset();
 
@@ -111,6 +113,7 @@ export function ModuleEditor({ userId, courseId, module }: ModuleEditorProps) {
       }
     );
   }
+
   return (
     <div className="mt-4 border-t border-slate-100 pt-4">
       {!isEditing ? (
@@ -118,10 +121,9 @@ export function ModuleEditor({ userId, courseId, module }: ModuleEditorProps) {
           {mutation.isSuccess ? (
             <p
               role="status"
-              className="mb-3 rounded-xl bg-emerald-50
-                  px-4 py-3 text-sm text-emerald-800"
+              className="mb-3 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
             >
-              Changes saved!
+              Module updated.
             </p>
           ) : null}
 
@@ -131,15 +133,8 @@ export function ModuleEditor({ userId, courseId, module }: ModuleEditorProps) {
             onClick={startEditing}
             aria-expanded={false}
             aria-controls={formId}
-            className="inline-flex min-h-11 items-center
-                gap-2 rounded-xl border border-slate-300
-                bg-white px-4 text-sm font-semibold
-                text-slate-800 transition hover:bg-slate-50
-                focus-visible:outline-2
-                focus-visible:outline-offset-2
-                focus-visible:outline-emerald-700"
+            className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
           >
-            <Pencil className="h-4 w-4" aria-hidden="true" />
             Edit details
           </button>
         </>
@@ -156,8 +151,7 @@ export function ModuleEditor({ userId, courseId, module }: ModuleEditorProps) {
           {mutation.isError ? (
             <p
               role="alert"
-              className="rounded-xl bg-red-50 px-4 py-3
-                  text-sm text-red-700"
+              className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"
             >
               {getUpdateErrorMessage(mutation.error)}
             </p>
@@ -179,13 +173,7 @@ export function ModuleEditor({ userId, courseId, module }: ModuleEditorProps) {
               aria-describedby={
                 form.formState.errors.title ? `${titleId}-error` : undefined
               }
-              className="h-11 w-full rounded-xl border
-                  border-slate-200 bg-white px-3 text-sm
-                  text-slate-950 outline-none transition
-                  focus:border-emerald-500 focus:ring-4
-                  focus:ring-emerald-50
-                  disabled:cursor-not-allowed
-                  disabled:bg-slate-100"
+              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 disabled:cursor-not-allowed disabled:bg-slate-100"
               {...form.register("title")}
             />
 
@@ -217,13 +205,7 @@ export function ModuleEditor({ userId, courseId, module }: ModuleEditorProps) {
                   ? `${descriptionId}-error`
                   : undefined
               }
-              className="w-full resize-y rounded-xl border
-                  border-slate-200 bg-white px-3 py-3 text-sm
-                  leading-6 text-slate-950 outline-none transition
-                  focus:border-emerald-500 focus:ring-4
-                  focus:ring-emerald-50
-                  disabled:cursor-not-allowed
-                  disabled:bg-slate-100"
+              className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm leading-6 text-slate-950 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 disabled:cursor-not-allowed disabled:bg-slate-100"
               {...form.register("description")}
             />
 
@@ -239,31 +221,14 @@ export function ModuleEditor({ userId, courseId, module }: ModuleEditorProps) {
               type="button"
               onClick={cancelEditing}
               disabled={mutation.isPending}
-              className="inline-flex min-h-11 items-center
-                  gap-2 rounded-xl border border-slate-300
-                  bg-white px-4 text-sm font-semibold
-                  text-slate-800 transition hover:bg-slate-100
-                  focus-visible:outline-2
-                  focus-visible:outline-offset-2
-                  focus-visible:outline-slate-700
-                  disabled:cursor-not-allowed
-                  disabled:opacity-60"
+              className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 transition hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <X className="h-4 w-4" aria-hidden="true" />
               Cancel
             </button>
             <button
               type="submit"
               disabled={mutation.isPending}
-              className="inline-flex min-h-11 items-center
-                  justify-center rounded-xl bg-emerald-700
-                  px-5 text-sm font-semibold text-white
-                  transition hover:bg-emerald-800
-                  focus-visible:outline-2
-                  focus-visible:outline-offset-2
-                  focus-visible:outline-emerald-700
-                  disabled:cursor-not-allowed
-                  disabled:opacity-60"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-700 px-5 text-sm font-semibold text-white transition hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {mutation.isPending ? (
                 <>

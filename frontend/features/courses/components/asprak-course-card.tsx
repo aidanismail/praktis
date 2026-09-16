@@ -1,4 +1,3 @@
-import { CalendarDays } from "lucide-react";
 import type { Course } from "../types/course.type";
 import {
   getThemeConfig,
@@ -54,8 +53,7 @@ export function AsprakCourseCard({ course }: AsprakCourseCardProps) {
 
       {/* Card Body & Footer */}
       <div className="p-4 flex flex-wrap gap-x-5 gap-y-2 border-t border-slate-100 text-xs text-slate-600 bg-white">
-        <span className="inline-flex items-center gap-1.5 font-medium text-slate-700">
-          <CalendarDays className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+        <span className="font-medium text-slate-700">
           Academic year {course.academic_year}
         </span>
         <span className="text-slate-500 font-medium">Semester {course.semester}</span>

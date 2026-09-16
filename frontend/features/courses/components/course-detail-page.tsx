@@ -7,7 +7,6 @@ import { Loader2 } from "lucide-react";
 import type { CourseWorkspaceTab } from "@/constants/routes";
 import { ROUTES } from "@/constants/routes";
 import { useAuthStore } from "@/stores/auth-store";
-import { AsprakCourseDetailPage } from "./asprak-course-detail-page";
 import { PraktikanCourseDetailPage } from "./praktikan-course-detail-page";
 
 type CourseDetailPageProps = {
@@ -28,14 +27,17 @@ export function CourseDetailPage(props: CourseDetailPageProps) {
       router.replace(
         `/dashboard?tab=courses&courseId=${props.courseId}&workspaceTab=${targetWorkspaceTab}`
       );
+    } else if (user?.role === "asprak") {
+      router.replace(
+        `/dashboard?tab=classes&courseId=${props.courseId}&workspaceTab=${props.initialTab}`
+      );
     }
   }, [user, props.courseId, props.initialTab, router]);
 
   if (!user) return null;
-  if (user.role === "asprak") return <AsprakCourseDetailPage {...props} />;
   if (user.role === "praktikan") return <PraktikanCourseDetailPage {...props} />;
 
-  if (user.role === "superadmin") {
+  if (user.role === "superadmin" || user.role === "asprak") {
     return (
       <main className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
         <div className="flex items-center gap-3 text-slate-600">

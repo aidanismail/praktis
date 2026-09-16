@@ -24,12 +24,14 @@ export type UpdateCoursePayload = Partial<{
   is_active: boolean;
 }>;
 
-export function useAdminCourses() {
+export function useAdminCourses(options?: { enabled?: boolean }) {
   const queryClient = useQueryClient();
+  const enabled = options?.enabled ?? true;
 
   const coursesQuery = useQuery({
     queryKey: adminQueryKeys.courses(),
     queryFn: fetchAdminCourses,
+    enabled,
     staleTime: 30_000,
     refetchOnWindowFocus: false,
   });

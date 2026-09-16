@@ -55,6 +55,11 @@ export const DASHBOARD_NAVIGATION: Record<UserRole, DashboardNavItem[]> = {
       id: "classes",
       label: "My Practicum Classes",
       description: "Your practicum classes, lab sessions, and rosters."
+    },
+    {
+      id: "profile",
+      label: "Profile & Security",
+      description: "Your assistant identity and password security."
     }
   ],
 

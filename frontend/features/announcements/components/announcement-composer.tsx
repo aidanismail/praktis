@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Megaphone, Pin } from "lucide-react";
+import { Loader2, Pin } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useCreateCourseAnnouncement } from "../hooks/use-course-announcements";
 import {
@@ -41,9 +41,6 @@ export function AnnouncementComposer({
       className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
     >
       <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
-          <Megaphone className="h-5 w-5" aria-hidden="true" />
-        </span>
         <div>
           <h2
             id="announcement-composer-heading"

@@ -1,8 +1,13 @@
 import type { User } from "@/types/user.type";
+import type { Course } from "@/features/courses/types/course.type";
 import type { DashboardNavItem } from "../constants/dashboard-navigation";
 import { DashboardPlaceholderCard } from "./dashboard-placeholder-card";
 import { AsprakCourseList } from "@/features/courses/components/asprak-course-list";
 import { AsprakCourseOverview } from "@/features/courses/components/asprak-course-overview";
+import {
+  AsprakCourseWorkspace,
+  type AsprakWorkspaceTab
+} from "@/features/courses/components/asprak-course-workspace";
 import { AdminOverview } from "@/features/admin/components/admin-overview";
 import { UserManagement } from "@/features/admin/components/user-management";
 import { BulkImportForm } from "@/features/admin/components/bulk-import-form";
@@ -14,20 +19,28 @@ import { PraktikanCourseList } from "@/features/courses/components/praktikan-cou
 import { PraktikanCourseOverview } from "@/features/courses/components/praktikan-course-overview";
 import { PraktikanAttendanceHistory } from "@/features/attendance/components/praktikan-attendance-history";
 import { PraktikanGradeHistory } from "@/features/grades/components/praktikan-grade-history";
-import { PraktikanProfile } from "@/features/profile/components/praktikan-profile";
+import { UserProfile } from "@/features/profile/components/user-profile";
 
 type RoleDashboardProps = {
   user: User;
   activeItem: DashboardNavItem;
   onNavigateToCourse: (courseId: string) => void;
   onNavigateToNavItem: (itemId: string) => void;
+  activeCourse?: Course | null;
+  workspaceTab?: string;
+  assignmentId?: string | null;
+  sessionId?: string | null;
 };
 
 export function RoleDashboard({
   user,
   activeItem,
   onNavigateToCourse,
-  onNavigateToNavItem
+  onNavigateToNavItem,
+  activeCourse,
+  workspaceTab,
+  assignmentId,
+  sessionId
 }: RoleDashboardProps) {
   const renderContent = () => {
     if (user.role === "superadmin") {
@@ -64,11 +77,38 @@ export function RoleDashboard({
 
     if (user.role === "asprak") {
       if (activeItem.id === "overview") {
-        return <AsprakCourseOverview userId={user.id} />;
+        return (
+          <AsprakCourseOverview
+            userId={user.id}
+            onNavigateToCourse={onNavigateToCourse}
+          />
+        );
       }
 
       if (activeItem.id === "classes") {
-        return <AsprakCourseList userId={user.id} />;
+        if (activeCourse) {
+          return (
+            <AsprakCourseWorkspace
+              userId={user.id}
+              course={activeCourse}
+              workspaceTab={
+                (workspaceTab as AsprakWorkspaceTab) || "stream"
+              }
+              assignmentId={assignmentId}
+              sessionId={sessionId}
+            />
+          );
+        }
+        return (
+          <AsprakCourseList
+            userId={user.id}
+            onNavigateToCourse={onNavigateToCourse}
+          />
+        );
+      }
+
+      if (activeItem.id === "profile") {
+        return <UserProfile user={user} />;
       }
     }
 
@@ -95,7 +135,7 @@ export function RoleDashboard({
       }
 
       if (activeItem.id === "profile") {
-        return <PraktikanProfile user={user} />;
+        return <UserProfile user={user} />;
       }
     }
 
@@ -107,7 +147,5 @@ export function RoleDashboard({
     );
   };
 
-  return (
-    <section className="space-y-6 max-w-7xl mx-auto">{renderContent()}</section>
-  );
+  return <>{renderContent()}</>;
 }

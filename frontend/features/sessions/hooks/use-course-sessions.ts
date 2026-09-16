@@ -5,6 +5,7 @@ import { ApiError } from "@/lib/api/client";
 import {
   closeSessionAttendance,
   createCourseSession,
+  deleteCourseSession,
   listCourseSessions,
   openSessionAttendance,
   updateCourseSession
@@ -138,3 +139,23 @@ export function useTransitionSessionAttendance(scope: SessionScope) {
     retry: false
   });
 }
+
+export function useDeleteCourseSession(scope: SessionScope) {
+  const queryClient = useQueryClient();
+  const queryKey = sessionQueryKeys.course(scope.userId, scope.courseId);
+
+  return useMutation({
+    mutationFn: (sessionId: string) => deleteCourseSession(sessionId),
+    onSuccess: (_, deletedSessionId) => {
+      queryClient.setQueryData<CourseSession[]>(queryKey, (current) =>
+        current ? current.filter((s) => s.id !== deletedSessionId) : current
+      );
+      return queryClient.invalidateQueries({
+        queryKey,
+        exact: true
+      });
+    },
+    retry: false
+  });
+}
+

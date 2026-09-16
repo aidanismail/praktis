@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { getCourseDetailRoute } from "@/constants/routes";
 import { useAuthStore } from "@/stores/auth-store";
-import { AsprakSessionDetailPage } from "./asprak-session-detail-page";
 
 type SessionDetailRouteClientProps = {
   courseId: string;
@@ -15,7 +14,7 @@ type SessionDetailRouteClientProps = {
 export function SessionDetailRouteClient({
   courseId,
   sessionId,
-}: SessionDetailRouteClientProps) {
+}: SessionDetailRouteClientProps): React.JSX.Element {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
 
@@ -28,28 +27,26 @@ export function SessionDetailRouteClient({
       router.replace(
         `/dashboard?tab=courses&courseId=${courseId}&workspaceTab=sessions`
       );
+    } else if (user.role === "asprak") {
+      router.replace(
+        `/dashboard?tab=classes&courseId=${courseId}&workspaceTab=sessions&sessionId=${sessionId}`
+      );
     }
-  }, [user, courseId, router]);
+  }, [user, courseId, sessionId, router]);
 
-  if (!user || user.role !== "asprak") {
-    return (
-      <main className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
-        <div
-          role="status"
-          aria-live="polite"
-          className="flex items-center gap-3 text-slate-600"
-        >
-          <Loader2 className="h-5 w-5 animate-spin text-slate-900" />
-          <span className="text-sm font-medium">
-            {user?.role === "praktikan" || user?.role === "superadmin"
-              ? "Redirecting to session workspace..."
-              : "Verifying session access..."}
-          </span>
-        </div>
-      </main>
-    );
-  }
-
-  return <AsprakSessionDetailPage courseId={courseId} sessionId={sessionId} />;
+  return (
+    <main className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+      <div
+        role="status"
+        aria-live="polite"
+        className="flex items-center gap-3 text-slate-600"
+      >
+        <Loader2 className="h-5 w-5 animate-spin text-slate-900" />
+        <span className="text-sm font-medium">
+          Redirecting to session workspace...
+        </span>
+      </div>
+    </main>
+  );
 }
 

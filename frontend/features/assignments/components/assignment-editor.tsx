@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Pencil, X } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { ApiError } from "@/lib/api/client";
@@ -64,26 +64,26 @@ function getFormValues(assignment: Assignment): AssignmentFormValues {
 
 function getUpdateErrorMessage(error: Error) {
   if (!(error instanceof ApiError)) {
-    return "Couldn't save your changes. Let's try that again.";
+    return "Unable to update assignment. Please try again.";
   }
 
   if (error.status === 401) {
-    return "You've been signed out. Please sign in again.";
+    return "Your session has expired. Please sign in again.";
   }
 
   if (error.status === 403) {
-    return "You don't have permission to update this assignment.";
+    return "You do not have permission to update this assignment.";
   }
 
   if (error.status === 404) {
-    return "This assignment couldn't be found. It may have been deleted.";
+    return "Assignment not found.";
   }
 
   if (error.status === 400 || error.status === 422) {
-    return "Some assignment details need a quick fix. Check the highlighted fields.";
+    return "Please correct the errors in the form.";
   }
 
-  return "Couldn't reach the server. Let's try that again.";
+  return "Unable to connect to the server. Please try again.";
 }
 
 export function AssignmentEditor({
@@ -185,9 +185,8 @@ export function AssignmentEditor({
             onClick={startEditing}
             aria-expanded={false}
             aria-controls="assignment-edit-form"
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
+            className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
           >
-            <Pencil className="h-4 w-4" aria-hidden="true" />
             Edit assignment
           </button>
         ) : null}
@@ -198,7 +197,7 @@ export function AssignmentEditor({
           role="status"
           className="mt-4 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
         >
-          Changes saved!
+          Assignment updated.
         </p>
       ) : null}
 
@@ -230,9 +229,8 @@ export function AssignmentEditor({
               type="button"
               onClick={cancelEditing}
               disabled={mutation.isPending}
-              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <X className="h-4 w-4" aria-hidden="true" />
               Cancel
             </button>
 

@@ -1,17 +1,13 @@
 "use client";
 
-import {
-  ArrowRight,
-  CalendarDays,
-  Clock3,
-  Lock,
-  Pencil,
-  Radio
-} from "lucide-react";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { getSessionDetailRoute } from "@/constants/routes";
-import { useUpdateCourseSession } from "../hooks/use-course-sessions";
+import { ApiError } from "@/lib/api/client";
+import {
+  useDeleteCourseSession,
+  useUpdateCourseSession
+} from "../hooks/use-course-sessions";
 import type { SessionFormValues } from "../schemas/session.schema";
 import {
   getSessionAttendanceStatus,
@@ -64,8 +60,10 @@ export function SessionCard({
   onTransition
 }: SessionCardProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const editButtonRef = useRef<HTMLButtonElement>(null);
   const updateMutation = useUpdateCourseSession({ userId, courseId });
+  const deleteMutation = useDeleteCourseSession({ userId, courseId });
   const status = getSessionAttendanceStatus(session.attendance_status);
   const isThisTransitioning =
     transitionPending && transitioningSessionId === session.id;
@@ -97,38 +95,86 @@ export function SessionCard({
   }
 
   return (
-    <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+    <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <span
-            className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${statusStyles[status]}`}
+            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusStyles[status]}`}
           >
             {statusLabels[status]}
           </span>
-          <h3 className="mt-3 wrap-break-word text-lg font-semibold text-slate-950">
+          <h3 className="mt-2.5 wrap-break-word text-base font-bold text-slate-950">
             {session.title}
           </h3>
-          <p className="mt-2 inline-flex items-center gap-2 text-sm text-slate-600">
-            <CalendarDays className="h-4 w-4" aria-hidden="true" />
+          <p className="mt-1 text-sm text-slate-500">
             <time dateTime={session.date}>{formatSessionDate(session.date)}</time>
           </p>
         </div>
 
-        <button
-          ref={editButtonRef}
-          type="button"
-          aria-expanded={isEditing}
-          onClick={() => {
-            updateMutation.reset();
-            setIsEditing((current) => !current);
-          }}
-          disabled={updateMutation.isPending}
-          className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          <Pencil className="h-4 w-4" aria-hidden="true" />
-          Edit
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            ref={editButtonRef}
+            type="button"
+            aria-expanded={isEditing}
+            onClick={() => {
+              updateMutation.reset();
+              setIsEditing((current) => !current);
+            }}
+            disabled={updateMutation.isPending || deleteMutation.isPending}
+            className="inline-flex min-h-9 items-center rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Edit
+          </button>
+
+          {!isConfirmingDelete ? (
+            <button
+              type="button"
+              onClick={() => {
+                deleteMutation.reset();
+                setIsConfirmingDelete(true);
+              }}
+              disabled={updateMutation.isPending || deleteMutation.isPending}
+              className="inline-flex min-h-9 items-center rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-red-700 transition hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Delete
+            </button>
+          ) : null}
+        </div>
       </div>
+
+      {isConfirmingDelete ? (
+        <div role="alert" className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4">
+          <p className="text-sm font-semibold text-red-950">Delete session?</p>
+          <p className="mt-1 text-sm text-red-800">
+            Attendance records and assignments linked to this session will also be deleted. This action cannot be undone.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setIsConfirmingDelete(false)}
+              disabled={deleteMutation.isPending}
+              className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => deleteMutation.mutate(session.id)}
+              disabled={deleteMutation.isPending}
+              className="rounded-xl bg-red-700 px-3 py-2 text-sm font-semibold text-white hover:bg-red-800 disabled:opacity-60"
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+            </button>
+          </div>
+          {deleteMutation.isError ? (
+            <p className="mt-3 text-sm text-red-800">
+              {deleteMutation.error instanceof ApiError && deleteMutation.error.status === 400
+                ? deleteMutation.error.message || "Cannot delete session with published grades. Unpublish grades first."
+                : deleteMutation.error.message || "Unable to delete session. Please try again."}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
 
       {status === "UNKNOWN" ? (
         <p role="alert" className="mt-4 text-sm text-amber-800">
@@ -155,19 +201,14 @@ export function SessionCard({
         </div>
       ) : null}
 
-      <div className="mt-5 flex flex-wrap gap-2 border-t border-slate-100 pt-5">
+      <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-4">
         {status === "SCHEDULED" || status === "CLOSED" ? (
           <button
             type="button"
             onClick={() => onTransition(session.id, "open")}
             disabled={transitionPending}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-9 items-center rounded-lg bg-emerald-700 px-3 text-sm font-semibold text-white transition hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isThisTransitioning ? (
-              <Clock3 className="h-4 w-4 animate-pulse" aria-hidden="true" />
-            ) : (
-              <Radio className="h-4 w-4" aria-hidden="true" />
-            )}
             {isThisTransitioning
               ? status === "CLOSED"
                 ? "Reopening..."
@@ -183,23 +224,17 @@ export function SessionCard({
             type="button"
             onClick={() => onTransition(session.id, "close")}
             disabled={transitionPending}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-9 items-center rounded-lg bg-slate-900 px-3 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isThisTransitioning ? (
-              <Clock3 className="h-4 w-4 animate-pulse" aria-hidden="true" />
-            ) : (
-              <Lock className="h-4 w-4" aria-hidden="true" />
-            )}
             {isThisTransitioning ? "Closing..." : "Close attendance"}
           </button>
         ) : null}
 
         <Link
           href={getSessionDetailRoute(courseId, session.id)}
-          className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700"
+          className="inline-flex min-h-9 items-center rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700"
         >
           Open workspace
-          <ArrowRight className="h-4 w-4" aria-hidden="true" />
         </Link>
       </div>
     </article>

@@ -48,18 +48,18 @@ export function CourseAssignments({
           aria-hidden="true"
         />
         <span className="ml-3 text-sm text-slate-600">
-          Getting assignments ready...
+          Loading assignments...
         </span>
       </div>
     );
   }
 
   if (isError) {
-    let title = "Couldn't load assignments";
-    let description = "Couldn't reach the server. Let's try that again.";
+    let title = "Unable to load assignments";
+    let description = "Unable to connect to the server. Please try again.";
 
     if (isUnauthorized) {
-      title = "You've been signed out";
+      title = "Your session has expired";
       description = "Please sign in again to continue.";
     } else if (isForbidden) {
       title = "Access restricted";
@@ -169,8 +169,8 @@ export function CourseAssignments({
           </h3>
           <p className="mt-1 text-sm text-slate-600">
             {viewerRole === "asprak"
-              ? "Ready to create a task? Use the form above to add an assignment."
-              : "No assignments posted yet. You're all caught up!"}
+              ? "Use the form above to create an assignment."
+              : "No assignments have been posted."}
           </p>
         </div>
       ) : (
@@ -180,6 +180,7 @@ export function CourseAssignments({
               key={assignment.id}
               assignment={assignment}
               viewerRole={viewerRole}
+              userId={userId}
             />
           ))}
         </div>

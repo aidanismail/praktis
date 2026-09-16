@@ -9,6 +9,7 @@ import {
   ShieldCheck
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, type MouseEvent } from "react";
 import { getCourseDetailRoute, ROUTES } from "@/constants/routes";
 import { SessionAttendanceRegister } from "@/features/attendance/components/session-attendance-register";
@@ -17,7 +18,10 @@ import { SessionExportPanel } from "@/features/exports/components/session-export
 import { useAssignedCourses } from "@/features/courses/hooks/use-assigned-courses";
 import { ApiError } from "@/lib/api/client";
 import { useAuthStore } from "@/stores/auth-store";
-import { useCourseSessions } from "../hooks/use-course-sessions";
+import {
+  useCourseSessions,
+  useDeleteCourseSession
+} from "../hooks/use-course-sessions";
 import {
   getSessionAttendanceStatus,
   type CourseSession
@@ -145,13 +149,16 @@ function SessionHeader({ session }: { session: CourseSession }) {
   );
 }
 
-function AssignedSessionDetail({
+export function AssignedSessionDetail({
   userId,
   courseId,
   sessionId
 }: AssignedSessionDetailProps) {
+  const router = useRouter();
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [attendanceDirty, setAttendanceDirty] = useState(false);
   const [gradeDirty, setGradeDirty] = useState(false);
+  const deleteMutation = useDeleteCourseSession({ userId, courseId });
   const coursesQuery = useAssignedCourses(userId);
   const course = coursesQuery.data?.find((item) => item.id === courseId);
   const courseVerified = coursesQuery.isSuccess && Boolean(course);
@@ -237,12 +244,76 @@ function AssignedSessionDetail({
     }
   }
 
+  function handleDeleteSession() {
+    deleteMutation.reset();
+    deleteMutation.mutate(sessionId, {
+      onSuccess: () => {
+        router.push(getCourseDetailRoute(courseId, "sessions"));
+      }
+    });
+  }
+
   return (
     <PageFrame>
-      <Link href={getCourseDetailRoute(courseId, "sessions")} onClick={confirmBackNavigation} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900">
-        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        Back to Sessions &amp; Attendance
-      </Link>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <Link
+          href={getCourseDetailRoute(courseId, "sessions")}
+          onClick={confirmBackNavigation}
+          className="inline-flex min-h-11 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          Back to Sessions &amp; Attendance
+        </Link>
+
+        {!isConfirmingDelete ? (
+          <button
+            type="button"
+            onClick={() => {
+              deleteMutation.reset();
+              setIsConfirmingDelete(true);
+            }}
+            disabled={deleteMutation.isPending}
+            className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-red-700 transition hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Delete session
+          </button>
+        ) : null}
+      </div>
+
+      {isConfirmingDelete ? (
+        <div role="alert" className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4">
+          <p className="text-sm font-semibold text-red-950">Delete session?</p>
+          <p className="mt-1 text-sm text-red-800">
+            Attendance records and assignments linked to this session will also be deleted. This action cannot be undone.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setIsConfirmingDelete(false)}
+              disabled={deleteMutation.isPending}
+              className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleDeleteSession}
+              disabled={deleteMutation.isPending}
+              className="rounded-xl bg-red-700 px-3 py-2 text-sm font-semibold text-white hover:bg-red-800 disabled:opacity-60"
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+            </button>
+          </div>
+          {deleteMutation.isError ? (
+            <p className="mt-3 text-sm text-red-800">
+              {deleteMutation.error instanceof ApiError && deleteMutation.error.status === 400
+                ? deleteMutation.error.message || "Cannot delete session with published grades. Unpublish grades first."
+                : deleteMutation.error.message || "Unable to delete session. Please try again."}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
       <p className="mt-5 text-sm font-medium text-emerald-700">
         {course.code} · {course.name}
       </p>

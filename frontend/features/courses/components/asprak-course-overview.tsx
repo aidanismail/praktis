@@ -1,13 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  AlertCircle,
-  BookOpen,
-  History,
-  Layers3,
-  RefreshCw
-} from "lucide-react";
+import { AlertCircle, RefreshCw } from "lucide-react";
 import { getCourseDetailRoute, ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useAssignedCourses } from "../hooks/use-assigned-courses";
@@ -16,13 +10,13 @@ import { AsprakCourseCard } from "./asprak-course-card";
 
 type AsprakCourseOverviewProps = {
   userId: string;
+  onNavigateToCourse?: (courseId: string) => void;
 };
 
 type CourseStatProps = {
   label: string;
   value: number;
   helper: string;
-  icon: typeof BookOpen;
 };
 
 function sortCourses(courses: Course[]) {
@@ -31,27 +25,24 @@ function sortCourses(courses: Course[]) {
       first.academic_year
     );
 
-    return yearComparison !== 0
-      ? yearComparison
-      : first.code.localeCompare(second.code);
+    if (yearComparison !== 0) {
+      return yearComparison;
+    }
+
+    return first.code.localeCompare(second.code);
   });
 }
 
-function CourseStat({ label, value, helper, icon: Icon }: CourseStatProps) {
+function CourseStat({ label, value, helper }: CourseStatProps) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-sm font-medium text-slate-500">{label}</p>
-          <p className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">
-            {value}
-          </p>
-        </div>
-        <span className="rounded-xl bg-emerald-50 p-2.5 text-emerald-700">
-          <Icon className="h-5 w-5" aria-hidden="true" />
-        </span>
-      </div>
-      <p className="mt-2 text-sm text-slate-500">{helper}</p>
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+      <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+        {label}
+      </p>
+      <p className="mt-2 text-3xl font-bold tracking-tight text-slate-950">
+        {value}
+      </p>
+      <p className="mt-1 text-xs text-slate-500">{helper}</p>
     </div>
   );
 }
@@ -59,12 +50,12 @@ function CourseStat({ label, value, helper, icon: Icon }: CourseStatProps) {
 function CourseOverviewLoading() {
   return (
     <div role="status" aria-live="polite" className="space-y-8">
-      <span className="sr-only">Getting your classes ready...</span>
+      <span className="sr-only">Loading your classes...</span>
       <div className="grid gap-4 sm:grid-cols-3" aria-hidden="true">
         {[0, 1, 2].map((item) => (
           <div
             key={item}
-            className="h-36 animate-pulse rounded-2xl border border-slate-200 bg-slate-100"
+            className="h-28 animate-pulse rounded-2xl border border-slate-200 bg-slate-100"
           />
         ))}
       </div>
@@ -81,7 +72,8 @@ function CourseOverviewLoading() {
 }
 
 export function AsprakCourseOverview({
-  userId
+  userId,
+  onNavigateToCourse
 }: AsprakCourseOverviewProps) {
   const {
     data: courses = [],
@@ -110,21 +102,24 @@ export function AsprakCourseOverview({
             className="mt-0.5 h-5 w-5 shrink-0 text-red-600"
             aria-hidden="true"
           />
+
           <div>
             <h3 className="font-semibold text-red-950">
               {isUnauthorized
                 ? "You've been signed out"
                 : isForbidden
                   ? "Access restricted"
-                  : "Couldn't load your teaching overview"}
+                  : "Unable to load overview"}
             </h3>
+
             <p className="mt-2 text-sm leading-6 text-red-800">
               {isUnauthorized
-                ? "Please sign in again to continue."
+                ? "Please sign in again to view your assigned classes."
                 : isForbidden
-                  ? "You don't have instructor access to these classes yet. Check in with your admin."
-                  : "Couldn't reach the server. Let's try that again."}
+                  ? "You do not have instructor access to these classes. Please contact an administrator."
+                  : "Unable to reach the server. Please check your connection and try again."}
             </p>
+
             {isUnauthorized ? (
               <Link
                 href={ROUTES.login}
@@ -133,6 +128,7 @@ export function AsprakCourseOverview({
                 Go to sign in
               </Link>
             ) : null}
+
             {!isUnauthorized && !isForbidden ? (
               <button
                 type="button"
@@ -153,48 +149,25 @@ export function AsprakCourseOverview({
     );
   }
 
-  if (courses.length === 0) {
-    return (
-      <div
-        role="status"
-        className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center"
-      >
-        <BookOpen
-          className="mx-auto h-8 w-8 text-slate-400"
-          aria-hidden="true"
-        />
-        <h3 className="mt-4 font-semibold text-slate-950">
-          No classes assigned yet
-        </h3>
-        <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-500">
-          When an administrator assigns you to lead or assist a class, it&apos;ll appear right here.
-        </p>
-      </div>
-    );
-  }
-
   const activeCourses = sortCourses(
     courses.filter((course) => course.is_active)
   );
-  const historicalCount = courses.length - activeCourses.length;
+  const historicalCount = courses.filter((course) => !course.is_active).length;
+
   const visibleCourses = activeCourses.slice(0, 4);
-  const remainingCount = activeCourses.length - visibleCourses.length;
+  const remainingCount = Math.max(0, activeCourses.length - visibleCourses.length);
 
   return (
     <div className="space-y-8">
-      <section aria-labelledby="course-summary-heading">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <h3
-              id="course-summary-heading"
-              className="text-lg font-semibold text-slate-950"
-            >
-              Overview
-            </h3>
-            <p className="mt-1 text-sm text-slate-500">
-              A quick snapshot of your active and past teaching assignments.
-            </p>
-          </div>
+      <section aria-labelledby="class-metrics-heading">
+        <div className="flex items-center justify-between">
+          <h3
+            id="class-metrics-heading"
+            className="text-lg font-semibold text-slate-950"
+          >
+            Assigned classes
+          </h3>
+
           {isFetching ? (
             <span
               role="status"
@@ -214,19 +187,16 @@ export function AsprakCourseOverview({
             label="Assigned classes"
             value={courses.length}
             helper="All time"
-            icon={Layers3}
           />
           <CourseStat
             label="Active classes"
             value={activeCourses.length}
             helper="Current term"
-            icon={BookOpen}
           />
           <CourseStat
-            label="Historical classes"
+            label="Past classes"
             value={historicalCount}
-            helper="Past terms"
-            icon={History}
+            helper="Completed terms"
           />
         </div>
       </section>
@@ -236,10 +206,10 @@ export function AsprakCourseOverview({
           id="active-course-heading"
           className="text-lg font-semibold text-slate-950"
         >
-          Jump back in
+          Recent classes
         </h3>
         <p className="mt-1 text-sm text-slate-500">
-          Select a class to manage announcements, modules, assignments, and sessions.
+          Select a class to view announcements, modules, assignments, and sessions.
         </p>
 
         {visibleCourses.length > 0 ? (
@@ -249,6 +219,12 @@ export function AsprakCourseOverview({
                 <li key={course.id}>
                   <Link
                     href={getCourseDetailRoute(course.id)}
+                    onClick={(e) => {
+                      if (onNavigateToCourse) {
+                        e.preventDefault();
+                        onNavigateToCourse(course.id);
+                      }
+                    }}
                     aria-label={`Open ${course.code} ${course.name}, ${course.academic_year} semester ${course.semester}`}
                     className="block h-full rounded-2xl transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
                   >
@@ -260,8 +236,7 @@ export function AsprakCourseOverview({
             {remainingCount > 0 ? (
               <p className="mt-4 text-sm text-slate-500">
                 {remainingCount} more active{" "}
-                {remainingCount === 1 ? "class" : "classes"} waiting in My
-                Classes.
+                {remainingCount === 1 ? "class" : "classes"} in My Practicum Classes.
               </p>
             ) : null}
           </>
@@ -274,7 +249,7 @@ export function AsprakCourseOverview({
               No active classes right now
             </h4>
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              You can still review previous terms under My Classes.
+              You can review past classes under My Practicum Classes.
             </p>
           </div>
         )}

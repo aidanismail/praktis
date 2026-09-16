@@ -1,13 +1,5 @@
 "use client";
 
-import {
-  BookOpen,
-  ClipboardList,
-  MessageSquareText,
-  Radio,
-  Users,
-  type LucideIcon
-} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, type KeyboardEvent } from "react";
 import {
@@ -22,20 +14,12 @@ type CourseWorkspaceNavigationProps = {
   idPrefix: string;
 };
 
-type CourseWorkspaceTabItem = {
-  icon: LucideIcon;
-  label: string;
-};
-
-const COURSE_WORKSPACE_TAB_ITEMS: Record<
-  CourseWorkspaceTab,
-  CourseWorkspaceTabItem
-> = {
-  stream: { icon: MessageSquareText, label: "Stream" },
-  modules: { icon: BookOpen, label: "Modules" },
-  assignments: { icon: ClipboardList, label: "Assignments" },
-  people: { icon: Users, label: "People" },
-  sessions: { icon: Radio, label: "Sessions & Attendance" }
+const COURSE_WORKSPACE_TAB_LABELS: Record<CourseWorkspaceTab, string> = {
+  stream: "Stream",
+  modules: "Modules",
+  assignments: "Assignments",
+  people: "People",
+  sessions: "Sessions & Attendance"
 };
 
 export function getCourseWorkspaceTabIds(
@@ -111,7 +95,7 @@ export function CourseWorkspaceNavigation({
         className="flex min-w-max gap-1"
       >
         {COURSE_WORKSPACE_TABS.map((tab) => {
-          const { icon: Icon, label } = COURSE_WORKSPACE_TAB_ITEMS[tab];
+          const label = COURSE_WORKSPACE_TAB_LABELS[tab];
           const { panelId, tabId } = getCourseWorkspaceTabIds(idPrefix, tab);
           const isActive = tab === activeTab;
 
@@ -129,13 +113,12 @@ export function CourseWorkspaceNavigation({
               tabIndex={isActive ? 0 : -1}
               onClick={() => activateTab(tab)}
               onKeyDown={(event) => onTabKeyDown(event, tab)}
-              className={`inline-flex min-h-11 items-center gap-2 rounded-xl border px-4 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 ${
+              className={`inline-flex min-h-11 items-center justify-center rounded-xl border px-4 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 ${
                 isActive
                   ? "border-emerald-600 bg-emerald-50 text-emerald-800"
                   : "border-transparent text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
               }`}
             >
-              <Icon className="h-4 w-4" aria-hidden="true" />
               {label}
             </button>
           );

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AlertCircle, BookOpen, RefreshCw } from "lucide-react";
+import { AlertCircle, RefreshCw } from "lucide-react";
 import { getCourseDetailRoute, ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useAssignedCourses } from "../hooks/use-assigned-courses";
@@ -10,6 +10,7 @@ import { AsprakCourseCard } from "./asprak-course-card";
 
 type AsprakCourseListProps = {
   userId: string;
+  onNavigateToCourse?: (courseId: string) => void;
 };
 
 type CourseGroupProps = {
@@ -17,6 +18,7 @@ type CourseGroupProps = {
   title: string;
   description: string;
   courses: Course[];
+  onNavigateToCourse?: (courseId: string) => void;
 };
 
 function sortCourses(courses: Course[]) {
@@ -33,7 +35,13 @@ function sortCourses(courses: Course[]) {
   });
 }
 
-function CourseGroup({ id, title, description, courses }: CourseGroupProps) {
+function CourseGroup({
+  id,
+  title,
+  description,
+  courses,
+  onNavigateToCourse
+}: CourseGroupProps) {
   if (courses.length === 0) {
     return null;
   }
@@ -52,10 +60,14 @@ function CourseGroup({ id, title, description, courses }: CourseGroupProps) {
           <li key={course.id}>
             <Link
               href={getCourseDetailRoute(course.id)}
-              aria-label={`Open ${course.code} ${course.name},
-  ${course.academic_year} semester ${course.semester}`}
-              className="block h-full rounded-2xl transition
-  hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+              onClick={(e) => {
+                if (onNavigateToCourse) {
+                  e.preventDefault();
+                  onNavigateToCourse(course.id);
+                }
+              }}
+              aria-label={`Open ${course.code} ${course.name}, ${course.academic_year} semester ${course.semester}`}
+              className="block h-full rounded-2xl transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
             >
               <AsprakCourseCard course={course} />
             </Link>
@@ -83,7 +95,10 @@ function CourseListLoading() {
   );
 }
 
-export function AsprakCourseList({ userId }: AsprakCourseListProps) {
+export function AsprakCourseList({
+  userId,
+  onNavigateToCourse
+}: AsprakCourseListProps) {
   const {
     data: courses = [],
     error,
@@ -118,15 +133,15 @@ export function AsprakCourseList({ userId }: AsprakCourseListProps) {
                 ? "You've been signed out"
                 : isForbidden
                   ? "Access restricted"
-                  : "Couldn't load your classes"}
+                  : "Unable to load classes"}
             </h3>
 
             <p className="mt-2 text-sm leading-6 text-red-800">
               {isUnauthorized
                 ? "Please sign in again to view your assigned classes."
                 : isForbidden
-                  ? "You don't have instructor access to these classes yet. Check in with your admin."
-                  : "Couldn't reach the server. Let's try that again."}
+                  ? "You do not have instructor access to these classes. Please contact an administrator."
+                  : "Unable to reach the server. Please check your connection and try again."}
             </p>
 
             {isUnauthorized ? (
@@ -164,15 +179,11 @@ export function AsprakCourseList({ userId }: AsprakCourseListProps) {
         role="status"
         className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center"
       >
-        <BookOpen
-          className="mx-auto h-8 w-8 text-slate-400"
-          aria-hidden="true"
-        />
-        <h3 className="mt-4 font-semibold text-slate-950">
+        <h3 className="font-semibold text-slate-950">
           No classes assigned yet
         </h3>
         <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-500">
-          Your account doesn&apos;t have any classes assigned for this term yet. Check with your admin if this looks unexpected.
+          Your account does not have any classes assigned for this term yet. Please contact an administrator if you believe this is an error.
         </p>
       </div>
     );
@@ -190,8 +201,9 @@ export function AsprakCourseList({ userId }: AsprakCourseListProps) {
       <CourseGroup
         id="active-practicum-classes"
         title="Active classes"
-        description="Classes currently in session and ready for grading, attendance, and coursework."
+        description="Classes currently in session."
         courses={activeCourses}
+        onNavigateToCourse={onNavigateToCourse}
       />
 
       <CourseGroup
@@ -199,6 +211,7 @@ export function AsprakCourseList({ userId }: AsprakCourseListProps) {
         title="Past classes"
         description="Previous course terms kept for records and reference."
         courses={historicalCourses}
+        onNavigateToCourse={onNavigateToCourse}
       />
     </div>
   );

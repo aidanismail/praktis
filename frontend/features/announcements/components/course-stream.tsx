@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AlertCircle, Loader2, Megaphone, RefreshCw } from "lucide-react";
+import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useCourseAnnouncements } from "../hooks/use-course-announcements";
@@ -128,7 +128,6 @@ export function CourseStream({ userId, courseId, viewerRole }: CourseStreamProps
 
       {announcements.length === 0 ? (
         <div role="status" className="mt-5 rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
-          <Megaphone className="mx-auto h-9 w-9 text-slate-400" aria-hidden="true" />
           <h3 className="mt-3 font-semibold text-slate-950">No announcements yet</h3>
           <p className="mt-1 text-sm text-slate-600">
             {viewerRole === "asprak"

@@ -110,3 +110,32 @@ export function unpublishCourseModule(moduleId: string) {
     }
   );
 }
+
+export function deleteCourseModule(moduleId: string) {
+  return apiClient<ModuleMessageResponse>(
+    API_ENDPOINTS.modules.delete(moduleId),
+    {
+      method: "DELETE"
+    }
+  );
+}
+
+export function requestModuleReplacement(moduleId: string) {
+  return apiClient<ModuleUploadIntentResponse>(
+    API_ENDPOINTS.modules.presignedReplacementUrl(moduleId),
+    {
+      method: "POST"
+    }
+  );
+}
+
+export function confirmModuleReplacement(moduleId: string, fileKey: string) {
+  return apiClient<ModuleMessageResponse>(
+    API_ENDPOINTS.modules.confirmReplacement(moduleId),
+    {
+      method: "POST",
+      body: JSON.stringify({ file_key: fileKey })
+    }
+  );
+}
+

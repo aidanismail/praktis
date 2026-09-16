@@ -76,6 +76,10 @@ export const API_ENDPOINTS = {
     list: "/api/modules/",
     presignedUrl: "/api/modules/presigned-url",
     confirm: "/api/modules/confirm",
+    presignedReplacementUrl: (moduleId: string) =>
+      `/api/modules/${encodeURIComponent(moduleId)}/presigned-replacement-url`,
+    confirmReplacement: (moduleId: string) =>
+      `/api/modules/${encodeURIComponent(moduleId)}/confirm-replacement`,
     update: (moduleId: string) =>
       `/api/modules/${encodeURIComponent(moduleId)}`,
     publish: (moduleId: string) =>
@@ -90,6 +94,8 @@ export const API_ENDPOINTS = {
     create: (courseId: string) =>
       `/api/courses/${encodeURIComponent(courseId)}/sessions`,
     update: (sessionId: string) =>
+      `/api/class-sessions/${encodeURIComponent(sessionId)}`,
+    delete: (sessionId: string) =>
       `/api/class-sessions/${encodeURIComponent(sessionId)}`,
     openAttendance: (sessionId: string) =>
       `/api/class-sessions/${encodeURIComponent(sessionId)}/open-attendance`,

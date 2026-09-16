@@ -6,6 +6,7 @@ import type { User } from "@/types/user.type";
 import { useLogout } from "@/features/auth/hooks/use-logout";
 import { useAdminCourses } from "@/features/admin/hooks/use-admin-courses";
 import { useCourseWorkspace } from "@/features/admin/hooks/use-admin-course-workspace";
+import { useAssignedCourses } from "@/features/courses/hooks/use-assigned-courses";
 import { DASHBOARD_NAVIGATION } from "../constants/dashboard-navigation";
 import { DashboardHeader } from "./dashboard-header";
 import { DashboardSidebar } from "./dashboard-sidebar";
@@ -38,31 +39,45 @@ export function DashboardShell({ user }: DashboardShellProps) {
   const courseIdParam = searchParams.get("courseId");
   const workspaceTabParam = searchParams.get("workspaceTab");
   const assignmentIdParam = searchParams.get("assignmentId");
+  const sessionIdParam = searchParams.get("sessionId");
 
   // Fetch admin courses for breadcrumb & active course resolution
-  const { courses } = useAdminCourses();
+  const { courses: adminCourses } = useAdminCourses({ enabled: isSuperadmin });
   const { assignments } = useCourseWorkspace(isSuperadmin ? courseIdParam : null);
 
-  const activeCourse = useMemo(
-    () =>
-      isSuperadmin && courseIdParam
-        ? courses.find((c) => c.id === courseIdParam) ?? null
-        : null,
-    [isSuperadmin, courseIdParam, courses]
-  );
+  // Fetch assigned courses for asprak
+  const assignedCoursesQuery = useAssignedCourses(user.id);
+
+  const activeCourse = useMemo(() => {
+    if (!courseIdParam) return null;
+    if (isSuperadmin) {
+      return adminCourses.find((c) => c.id === courseIdParam) ?? null;
+    }
+    if (user.role === "asprak") {
+      const assignedCourses = assignedCoursesQuery.data ?? [];
+      return assignedCourses.find((c) => c.id === courseIdParam) ?? null;
+    }
+    return null;
+  }, [courseIdParam, isSuperadmin, user.role, adminCourses, assignedCoursesQuery.data]);
 
   const activeTab = useMemo(
-    () =>
-      (workspaceTabParam as "stream" | "classwork" | "people" | "sessions") ||
-      "stream",
+    () => workspaceTabParam || "stream",
     [workspaceTabParam]
   );
 
   const activeAssignmentTitle = useMemo(() => {
-    if (!isSuperadmin || !assignmentIdParam) return null;
-    const found = assignments.find((a) => a.id === assignmentIdParam);
-    return found ? found.title : "Submissions";
-  }, [isSuperadmin, assignmentIdParam, assignments]);
+    if (assignmentIdParam) {
+      if (isSuperadmin) {
+        const found = assignments.find((a) => a.id === assignmentIdParam);
+        return found ? found.title : "Submissions";
+      }
+      return "Assignment";
+    }
+    if (sessionIdParam) {
+      return "Session";
+    }
+    return null;
+  }, [isSuperadmin, assignmentIdParam, sessionIdParam, assignments]);
 
   const activeItem =
     navigationItems.find((item) => item.id === activeItemId) ??
@@ -77,10 +92,11 @@ export function DashboardShell({ user }: DashboardShellProps) {
   };
 
   const handleSelectTab = useCallback(
-    (tab: "stream" | "classwork" | "people" | "sessions") => {
+    (tab: string) => {
       const params = new URLSearchParams(searchParams.toString());
       params.set("workspaceTab", tab);
       params.delete("assignmentId");
+      params.delete("sessionId");
       router.push(`${pathname}?${params.toString()}`, { scroll: false });
     },
     [pathname, router, searchParams]
@@ -91,12 +107,14 @@ export function DashboardShell({ user }: DashboardShellProps) {
     params.delete("courseId");
     params.delete("workspaceTab");
     params.delete("assignmentId");
+    params.delete("sessionId");
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   }, [pathname, router, searchParams]);
 
   const handleBackToCourseRoot = useCallback(() => {
     const params = new URLSearchParams(searchParams.toString());
     params.delete("assignmentId");
+    params.delete("sessionId");
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   }, [pathname, router, searchParams]);
 
@@ -113,13 +131,14 @@ export function DashboardShell({ user }: DashboardShellProps) {
   const handleNavigateToCourse = useCallback(
     (courseId: string) => {
       const params = new URLSearchParams(searchParams.toString());
-      params.set("tab", "courses");
+      params.set("tab", user.role === "superadmin" ? "courses" : "classes");
       params.set("courseId", courseId);
       params.set("workspaceTab", "stream");
       params.delete("assignmentId");
+      params.delete("sessionId");
       router.push(`${pathname}?${params.toString()}`, { scroll: false });
     },
-    [pathname, router, searchParams]
+    [pathname, router, searchParams, user.role]
   );
 
   function handleLogout() {
@@ -139,6 +158,7 @@ export function DashboardShell({ user }: DashboardShellProps) {
         onBackToCourseRoot={handleBackToCourseRoot}
         activeTab={activeTab}
         onSelectTab={handleSelectTab}
+        onLogout={handleLogout}
       />
 
       {/* 2. Main Body with Sidebar & Content */}
@@ -209,6 +229,10 @@ export function DashboardShell({ user }: DashboardShellProps) {
             user={user}
             onNavigateToCourse={handleNavigateToCourse}
             onNavigateToNavItem={handleSelectNavigationItem}
+            activeCourse={activeCourse}
+            workspaceTab={activeTab}
+            assignmentId={assignmentIdParam}
+            sessionId={sessionIdParam}
           />
         </main>
       </div>

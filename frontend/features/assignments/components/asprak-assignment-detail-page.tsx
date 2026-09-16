@@ -11,11 +11,16 @@ import {
   Users
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { getCourseDetailRoute, ROUTES } from "@/constants/routes";
 import { useAssignedCourses } from "@/features/courses/hooks/use-assigned-courses";
 import { ApiError } from "@/lib/api/client";
 import { useAuthStore } from "@/stores/auth-store";
-import { useAssignmentDetail } from "../hooks/use-course-assignments";
+import {
+  useAssignmentDetail,
+  useDeleteCourseAssignment
+} from "../hooks/use-course-assignments";
 import type { Assignment } from "../types/assignment.type";
 import { AssignmentEditor } from "./assignment-editor";
 import { AssignmentSubmissions } from "./assignment-submissions";
@@ -268,13 +273,25 @@ function AssignmentSummary({ assignment }: { assignment: Assignment }) {
   );
 }
 
-function AssignedAssignmentDetail({
+export function AssignedAssignmentDetail({
   userId,
   courseId,
   assignmentId
 }: AssignedAssignmentDetailProps) {
+  const router = useRouter();
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const deleteMutation = useDeleteCourseAssignment({ userId, courseId });
   const courseQuery = useAssignedCourses(userId);
   const course = (courseQuery.data ?? []).find((item) => item.id === courseId);
+
+  function handleDeleteAssignment() {
+    deleteMutation.reset();
+    deleteMutation.mutate(assignmentId, {
+      onSuccess: () => {
+        router.push(getCourseDetailRoute(courseId, "assignments"));
+      }
+    });
+  }
 
   const courseVerified =
     !courseQuery.isPending && !courseQuery.isError && Boolean(course);
@@ -384,13 +401,63 @@ function AssignedAssignmentDetail({
 
   return (
     <DetailPageFrame>
-      <Link
-        href={getCourseDetailRoute(courseId, "assignments")}
-        className="inline-flex min-h-11 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        Back to Assignments
-      </Link>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <Link
+          href={getCourseDetailRoute(courseId, "assignments")}
+          className="inline-flex min-h-11 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          Back to Assignments
+        </Link>
+
+        {!isConfirmingDelete ? (
+          <button
+            type="button"
+            onClick={() => {
+              deleteMutation.reset();
+              setIsConfirmingDelete(true);
+            }}
+            disabled={deleteMutation.isPending}
+            className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-red-700 transition hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:opacity-60"
+          >
+            Delete assignment
+          </button>
+        ) : null}
+      </div>
+
+      {isConfirmingDelete ? (
+        <div role="alert" className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4">
+          <p className="text-sm font-semibold text-red-950">Delete assignment?</p>
+          <p className="mt-1 text-sm text-red-800">
+            All student submissions and grading records for this assignment will be permanently deleted. This action cannot be undone.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setIsConfirmingDelete(false)}
+              disabled={deleteMutation.isPending}
+              className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleDeleteAssignment}
+              disabled={deleteMutation.isPending}
+              className="rounded-xl bg-red-700 px-3 py-2 text-sm font-semibold text-white hover:bg-red-800 disabled:opacity-60"
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+            </button>
+          </div>
+          {deleteMutation.isError ? (
+            <p className="mt-3 text-sm text-red-800">
+              {deleteMutation.error instanceof ApiError
+                ? deleteMutation.error.message
+                : "Unable to delete assignment. Please try again."}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
 
       <p className="mt-5 text-sm font-medium text-emerald-700">
         {course.code} · {course.name}
