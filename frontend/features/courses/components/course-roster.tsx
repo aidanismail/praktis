@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AlertCircle, Loader2, Mail, RefreshCw, Users } from "lucide-react";
+import { AlertCircle, Loader2, RefreshCw, Users } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useCourseRoster } from "../hooks/use-course-roster";
@@ -56,32 +56,23 @@ export function CourseRoster({ userId, courseId }: CourseRosterProps) {
         className="flex flex-wrap items-start justify-between
         gap-4"
       >
-        <div className="flex items-start gap-3">
-          <span
-            className="flex h-10 w-10 shrink-0 items-center
-            justify-center rounded-xl bg-slate-100 text-slate-800"
+        <div>
+          <h2
+            id="course-roster-heading"
+            className="text-xl font-semibold text-slate-950"
           >
-            <Users className="h-5 w-5" aria-hidden="true" />
-          </span>
-
-          <div>
-            <h2
-              id="course-roster-heading"
-              className="text-xl font-semibold text-slate-950"
-            >
-              Class Roster
-            </h2>
-            <p className="mt-1 text-sm leading-6 text-slate-600">
-              Students currently enrolled in this practicum class.
-            </p>
-          </div>
+            Class Roster
+          </h2>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            Students currently enrolled in this practicum class.
+          </p>
         </div>
 
         {!isPending && !isError ? (
           <span
             aria-live="polite"
-            className="rounded-full bg-slate-100 px-3 py-1 text-sm
-              font-medium text-slate-700"
+            className="rounded-full bg-slate-100 px-3 py-1 text-xs
+              font-semibold text-slate-700"
           >
             {students.length} {students.length === 1 ? "student" : "students"}
           </span>
@@ -205,25 +196,19 @@ export function CourseRoster({ userId, courseId }: CourseRosterProps) {
                 </span>
               </div>
 
-              <div className="flex min-w-0 items-start gap-2">
-                <Mail
-                  className="mt-1 h-4 w-4 shrink-0 text-slate-400"
-                  aria-hidden="true"
-                />
-                <div className="min-w-0">
-                  <span
-                    className="text-xs font-semibold uppercase
-                    tracking-wide text-slate-500"
-                  >
-                    Email
-                  </span>
-                  <span
-                    className="mt-1 block break-all text-sm
-                    text-slate-700"
-                  >
-                    {student.email}
-                  </span>
-                </div>
+              <div className="min-w-0">
+                <span
+                  className="text-xs font-semibold uppercase
+                  tracking-wide text-slate-500"
+                >
+                  Email
+                </span>
+                <span
+                  className="mt-1 block break-all text-sm
+                  text-slate-700"
+                >
+                  {student.email}
+                </span>
               </div>
             </li>
           ))}

@@ -19,18 +19,6 @@ export function UserProfile({ user }: UserProfileProps) {
 
   return (
     <section aria-labelledby="profile-heading" className="space-y-6">
-      <div>
-        <h1
-          id="profile-heading"
-          className="text-xl font-bold tracking-tight text-slate-950 sm:text-2xl"
-        >
-          Profile &amp; Security
-        </h1>
-        <p className="mt-1 text-sm text-slate-600">
-          Manage your account credentials and security settings.
-        </p>
-      </div>
-
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
         {/* Account Details Card */}
         <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
@@ -95,7 +83,7 @@ export function UserProfile({ user }: UserProfileProps) {
           <div className="mt-5">
             <Link
               href={ROUTES.changePassword}
-              className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 shadow-xs"
             >
               Change password
             </Link>

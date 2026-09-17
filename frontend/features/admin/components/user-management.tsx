@@ -18,12 +18,16 @@ import {
   assignCourseStaff,
   enrollCourseStudents,
   resetUserPassword,
+  deactivateUser,
+  reactivateUser,
 } from "../api/admin.api";
 import type { User } from "@/types/user.type";
 import type { Course } from "@/features/courses/types/course.type";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
+import { useAuthStore } from "@/stores/auth-store";
 
 export function UserManagement() {
+  const currentUser = useAuthStore((state) => state.user);
   const [users, setUsers] = useState<User[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [filterRole, setFilterRole] = useState<string>("all");
@@ -200,6 +204,49 @@ export function UserManagement() {
     }
   };
 
+  const handleDeactivateUser = async (user: User) => {
+    if (user.id === currentUser?.id) {
+      setError("You cannot deactivate your own account.");
+      return;
+    }
+
+    if (
+      !confirm(
+        `Are you sure you want to deactivate ${user.username}? They will immediately be signed out and unable to log in.`
+      )
+    ) {
+      return;
+    }
+
+    setError(null);
+    setActionSuccess(null);
+
+    try {
+      const res = await deactivateUser(user.id);
+      setActionSuccess(res.message || `Deactivated user ${user.username}.`);
+      await loadData();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Couldn't deactivate user. Please try again.");
+    }
+  };
+
+  const handleReactivateUser = async (user: User) => {
+    if (!confirm(`Reactivate account for ${user.username}? They will be able to log in again.`)) {
+      return;
+    }
+
+    setError(null);
+    setActionSuccess(null);
+
+    try {
+      const res = await reactivateUser(user.id);
+      setActionSuccess(res.message || `Reactivated user ${user.username}.`);
+      await loadData();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Couldn't reactivate user. Please try again.");
+    }
+  };
+
   const handleApplyCourseAssign = async () => {
     if (!targetCourseId || selectedUserIds.size === 0) return;
 
@@ -234,11 +281,17 @@ export function UserManagement() {
     superadmin: users.filter((u) => u.role === "superadmin").length,
     asprak: users.filter((u) => u.role === "asprak").length,
     praktikan: users.filter((u) => u.role === "praktikan").length,
+    inactive: users.filter((u) => !u.is_active).length,
   };
 
   // Filter users based on role and search query
   const filteredUsers = users.filter((u) => {
-    const matchesRole = filterRole === "all" || u.role === filterRole;
+    const matchesRole =
+      filterRole === "all"
+        ? true
+        : filterRole === "inactive"
+          ? !u.is_active
+          : u.role === filterRole;
     const matchesSearch =
       u.username.toLowerCase().includes(search.toLowerCase()) ||
       u.email.toLowerCase().includes(search.toLowerCase());
@@ -292,7 +345,7 @@ export function UserManagement() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         {/* Role Filter Chips */}
         <div className="flex flex-wrap items-center gap-1.5">
-          {(["all", "superadmin", "asprak", "praktikan"] as const).map((r) => {
+          {(["all", "superadmin", "asprak", "praktikan", "inactive"] as const).map((r) => {
             const isSelected = filterRole === r;
             return (
               <button
@@ -427,27 +480,55 @@ export function UserManagement() {
                       </td>
 
                       <td className="px-4 py-3">
-                        <span
-                          className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold capitalize ${
-                            user.role === "superadmin"
-                              ? "bg-slate-900 text-white"
-                              : user.role === "asprak"
-                                ? "bg-slate-200 text-slate-800"
-                                : "bg-slate-100 text-slate-700"
-                          }`}
-                        >
-                          {user.role}
-                        </span>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span
+                            className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold capitalize ${
+                              user.role === "superadmin"
+                                ? "bg-slate-900 text-white"
+                                : user.role === "asprak"
+                                  ? "bg-slate-200 text-slate-800"
+                                  : "bg-slate-100 text-slate-700"
+                            }`}
+                          >
+                            {user.role}
+                          </span>
+                          {!user.is_active && (
+                            <span className="rounded-full bg-rose-50 border border-rose-200/80 px-2 py-0.5 text-[10px] font-semibold text-rose-700">
+                              Inactive
+                            </span>
+                          )}
+                        </div>
                       </td>
 
                       <td className="px-4 py-3 text-right">
-                        <button
-                          type="button"
-                          onClick={() => handleResetPassword(user)}
-                          className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-xs hover:bg-slate-50 hover:text-slate-900 transition-colors"
-                        >
-                          Reset password
-                        </button>
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleResetPassword(user)}
+                            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-xs hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                          >
+                            Reset password
+                          </button>
+                          {user.id !== currentUser?.id && (
+                            user.is_active ? (
+                              <button
+                                type="button"
+                                onClick={() => handleDeactivateUser(user)}
+                                className="rounded-lg border border-rose-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-rose-700 shadow-xs hover:bg-rose-50 hover:border-rose-300 transition-colors"
+                              >
+                                Deactivate
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handleReactivateUser(user)}
+                                className="rounded-lg border border-emerald-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-emerald-700 shadow-xs hover:bg-emerald-50 hover:border-emerald-300 transition-colors"
+                              >
+                                Reactivate
+                              </button>
+                            )
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );

@@ -198,12 +198,7 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
             Never mind, take me back
           </Link>
         ) : null}
-
-        <div className="rounded-2xl bg-slate-50 px-4 py-3">
-          <p className="text-center text-xs leading-5 text-slate-500">
-            You&apos;ll head straight to your dashboard once your password is saved.
-          </p>
-        </div>
+        
       </form>
     </div>
   );

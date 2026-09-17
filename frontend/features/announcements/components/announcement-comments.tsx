@@ -165,7 +165,7 @@ export function AnnouncementComments({
               disabled={addMutation.isPending}
               aria-invalid={Boolean(form.formState.errors.content)}
               aria-describedby={form.formState.errors.content ? `${formId}-error` : undefined}
-              className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 disabled:bg-slate-100"
+              className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:bg-slate-100"
               placeholder="Ask a question, add notes, or share feedback..."
               {...form.register("content")}
             />

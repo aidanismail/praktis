@@ -130,7 +130,7 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
     <section aria-labelledby="course-sessions-heading" aria-busy={sessionsQuery.isFetching}>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
             Schedule &amp; attendance
           </p>
           <h2
@@ -149,7 +149,7 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
             type="button"
             onClick={() => void sessionsQuery.refetch()}
             disabled={sessionsQuery.isFetching}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <RefreshCw
               className={

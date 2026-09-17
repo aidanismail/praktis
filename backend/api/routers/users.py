@@ -19,7 +19,14 @@ from models.user import User, RoleEnum
 from schemas.common import MessageResponse
 from schemas.user import UserResponse, ChangePasswordRequest, LoginRequest, ImportCsvResponse, AdminResetPasswordRequest, UserCreate
 
-from services.user_service import get_user_by_username, get_password_hash, bulk_create_users, create_user
+from services.user_service import (
+    get_user_by_username,
+    get_password_hash,
+    bulk_create_users,
+    create_user,
+    deactivate_user,
+    reactivate_user,
+)
 from services.import_service import parse_import_file, ImportRow
 from api.dependencies import get_current_user, RoleChecker
 
@@ -240,6 +247,65 @@ async def reset_user_password(
     await db.commit()
 
     return {"message": f"Successfully reset password for user '{user.username}'"}
+
+
+@router.delete(
+    "/users/{user_id}",
+    response_model=MessageResponse,
+    summary="Deactivate a user account",
+    description="Superadmin only. Deactivates a user account (`is_active=False`). Self-deactivation is rejected with 400 Bad Request.",
+    responses={
+        **UNAUTHENTICATED_401,
+        400: {"description": "Cannot deactivate your own account."},
+        403: {"description": "Superadmin role required."},
+        404: {"description": "User not found."},
+    },
+)
+async def remove_user(
+    user_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_superadmin),
+):
+    if user_id == current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You cannot deactivate your own account.",
+        )
+
+    user = await deactivate_user(db, user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found.",
+        )
+
+    return {"message": f"Successfully deactivated user '{user.username}'."}
+
+
+@router.post(
+    "/users/{user_id}/reactivate",
+    response_model=MessageResponse,
+    summary="Reactivate a user account",
+    description="Superadmin only. Reactivates a user account (`is_active=True`).",
+    responses={
+        **UNAUTHENTICATED_401,
+        403: {"description": "Superadmin role required."},
+        404: {"description": "User not found."},
+    },
+)
+async def restore_user(
+    user_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    _current_user: User = Depends(require_superadmin),
+):
+    user = await reactivate_user(db, user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found.",
+        )
+
+    return {"message": f"Successfully reactivated user '{user.username}'."}
 
 
 def build_user_rows(rows: list[ImportRow]) -> list[dict]:

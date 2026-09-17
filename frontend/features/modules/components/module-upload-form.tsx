@@ -406,8 +406,8 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
                   border-slate-200 bg-white px-3 text-sm
                   text-slate-950 outline-none transition
                   placeholder:text-slate-400
-                  focus:border-emerald-500
-                  focus:ring-4 focus:ring-emerald-50
+                  focus:border-slate-400
+                  focus:ring-4 focus:ring-slate-100
                   disabled:cursor-not-allowed
                   disabled:bg-slate-50"
               {...form.register("title")}
@@ -449,8 +449,8 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
                   border-slate-200 bg-white px-3 py-3 text-sm
                   leading-6 text-slate-950 outline-none transition
                   placeholder:text-slate-400
-                  focus:border-emerald-500
-                  focus:ring-4 focus:ring-emerald-50
+                  focus:border-slate-400
+                  focus:ring-4 focus:ring-slate-100
                   disabled:cursor-not-allowed
                   disabled:bg-slate-50"
               {...form.register("description")}
@@ -568,13 +568,13 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
             type="submit"
             disabled={isBusy || stage === "failed"}
             className="inline-flex min-h-11 items-center
-                justify-center rounded-xl bg-emerald-700 px-5
+                justify-center rounded-xl bg-slate-900 px-5
                 text-sm font-semibold text-white transition
-                hover:bg-emerald-800 focus-visible:outline-2
+                hover:bg-slate-800 focus-visible:outline-2
                 focus-visible:outline-offset-2
-                focus-visible:outline-emerald-700
+                focus-visible:outline-slate-900
                 disabled:cursor-not-allowed
-                disabled:opacity-60"
+                disabled:opacity-60 shadow-xs"
           >
             {isBusy ? (
               <>

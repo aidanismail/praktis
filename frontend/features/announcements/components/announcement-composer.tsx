@@ -82,7 +82,7 @@ export function AnnouncementComposer({
             disabled={mutation.isPending}
             aria-invalid={Boolean(form.formState.errors.title)}
             aria-describedby={form.formState.errors.title ? "announcement-title-error" : undefined}
-            className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 disabled:cursor-not-allowed disabled:bg-slate-50"
+            className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-50"
             placeholder="Title (e.g. Lab 3 guidelines updated)"
             {...form.register("title")}
           />
@@ -103,7 +103,7 @@ export function AnnouncementComposer({
             disabled={mutation.isPending}
             aria-invalid={Boolean(form.formState.errors.content)}
             aria-describedby={form.formState.errors.content ? "announcement-content-error" : undefined}
-            className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 disabled:cursor-not-allowed disabled:bg-slate-50"
+            className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-50"
             placeholder="Share details, links, or instructions..."
             {...form.register("content")}
           />
@@ -119,7 +119,7 @@ export function AnnouncementComposer({
             <input
               type="checkbox"
               disabled={mutation.isPending}
-              className="h-4 w-4 rounded border-slate-300 accent-emerald-600"
+              className="h-4 w-4 rounded border-slate-300 accent-slate-900"
               {...form.register("is_pinned")}
             />
             <Pin className="h-4 w-4" aria-hidden="true" />
@@ -129,7 +129,7 @@ export function AnnouncementComposer({
           <button
             type="submit"
             disabled={mutation.isPending}
-            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-700 px-5 text-sm font-semibold text-white transition hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60 shadow-xs"
           >
             {mutation.isPending ? (
               <>

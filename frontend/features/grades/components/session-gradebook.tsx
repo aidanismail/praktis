@@ -352,7 +352,7 @@ function GradebookForm({
 
       {!isReadOnly ? (
         <div className="mt-5 flex flex-wrap gap-2">
-          <button type="submit" disabled={saveMutation.isPending || !form.formState.isDirty || enteredCount === 0 || hasClearedSavedGrade} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-brand px-4 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60">
+          <button type="submit" disabled={saveMutation.isPending || !form.formState.isDirty || enteredCount === 0 || hasClearedSavedGrade} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white shadow-xs transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60">
             {saveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
             {saveMutation.isPending ? "Saving..." : "Save draft grades"}
           </button>
@@ -382,14 +382,9 @@ export function SessionGradebook({
 
   return (
     <section aria-labelledby="session-gradebook-heading" className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-      <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-700">
-          <GraduationCap className="h-5 w-5" aria-hidden="true" />
-        </span>
-        <div>
-          <h2 id="session-gradebook-heading" className="text-xl font-semibold text-slate-950">Session gradebook</h2>
-          <p className="mt-1 text-sm leading-6 text-slate-600">Save private draft scores, then publish them whenever you&apos;re ready.</p>
-        </div>
+      <div>
+        <h2 id="session-gradebook-heading" className="text-xl font-semibold text-slate-950">Session gradebook</h2>
+        <p className="mt-1 text-sm leading-6 text-slate-600">Save private draft scores, then publish them whenever you&apos;re ready.</p>
       </div>
 
       {rosterQuery.isPending || gradesQuery.isPending ? (

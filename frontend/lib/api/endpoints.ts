@@ -8,7 +8,11 @@ export const API_ENDPOINTS = {
     listUsers: "/api/auth/users",
     createUser: "/api/auth/users",
     resetPassword: (userId: string) =>
-      `/api/auth/users/${encodeURIComponent(userId)}/reset-password`
+      `/api/auth/users/${encodeURIComponent(userId)}/reset-password`,
+    deleteUser: (userId: string) =>
+      `/api/auth/users/${encodeURIComponent(userId)}`,
+    reactivateUser: (userId: string) =>
+      `/api/auth/users/${encodeURIComponent(userId)}/reactivate`
   },
 
   courses: {

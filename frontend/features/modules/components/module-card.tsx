@@ -41,14 +41,14 @@ export function ModuleCard({ userId, courseId, module, accessMode }: ModuleCardP
             <span
               className={
                 module.is_published
-                  ? "inline-flex rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800"
-                  : "inline-flex rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800"
+                  ? "inline-flex rounded-full border border-emerald-200/60 bg-emerald-50/80 px-2.5 py-0.5 text-xs font-semibold text-emerald-700"
+                  : "inline-flex rounded-full border border-slate-200 bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600"
               }
             >
               {accessMode === "read-only" ? "Available" : module.is_published ? "Published" : "Draft"}
             </span>
 
-            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-slate-600">
+            <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-slate-700">
               {fileType}
             </span>
           </div>
@@ -82,7 +82,7 @@ export function ModuleCard({ userId, courseId, module, accessMode }: ModuleCardP
           target="_blank"
           rel="noreferrer"
           aria-label={`Open ${module.title} in a new tab`}
-          className="inline-flex min-h-9 items-center rounded-lg px-3 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50 hover:text-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
+          className="inline-flex min-h-9 items-center rounded-lg px-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100 hover:text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
         >
           Open file
         </a>

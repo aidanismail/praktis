@@ -186,7 +186,7 @@ export function AnnouncementCard({
               disabled={updateMutation.isPending}
               aria-invalid={Boolean(form.formState.errors.title)}
               aria-describedby={form.formState.errors.title ? `edit-title-${announcement.id}-error` : undefined}
-              className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 disabled:bg-slate-50"
+              className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:bg-slate-50"
               {...form.register("title")}
             />
             {form.formState.errors.title ? (
@@ -203,7 +203,7 @@ export function AnnouncementCard({
               disabled={updateMutation.isPending}
               aria-invalid={Boolean(form.formState.errors.content)}
               aria-describedby={form.formState.errors.content ? `edit-content-${announcement.id}-error` : undefined}
-              className="w-full resize-y rounded-xl border border-slate-200 px-3 py-3 text-sm leading-6 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 disabled:bg-slate-50"
+              className="w-full resize-y rounded-xl border border-slate-200 px-3 py-3 text-sm leading-6 outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:bg-slate-50"
               {...form.register("content")}
             />
             {form.formState.errors.content ? (
@@ -214,7 +214,7 @@ export function AnnouncementCard({
             <input
               type="checkbox"
               disabled={updateMutation.isPending}
-              className="h-4 w-4 rounded border-slate-300 accent-emerald-600"
+              className="h-4 w-4 rounded border-slate-300 accent-slate-900"
               {...form.register("is_pinned")}
             />
             <Pin className="h-4 w-4" aria-hidden="true" />
@@ -226,7 +226,7 @@ export function AnnouncementCard({
           <button
             type="submit"
             disabled={updateMutation.isPending}
-            className="inline-flex min-h-10 items-center rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 disabled:opacity-60"
+            className="inline-flex min-h-10 items-center rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white hover:bg-slate-800 shadow-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:opacity-60"
           >
             {updateMutation.isPending ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />

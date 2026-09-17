@@ -336,14 +336,14 @@ function AttendanceRegisterForm({
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              className="min-h-11 w-full rounded-xl border border-slate-300 bg-white pl-9 pr-3 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+              className="min-h-11 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
               placeholder="Search by NPM or email..."
             />
           </span>
         </label>
 
         {isEditable ? (
-          <button type="button" onClick={setAllPresent} disabled={saveMutation.isPending || students.length === 0} className="inline-flex min-h-11 items-center rounded-xl border border-emerald-300 bg-emerald-50 px-4 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60">
+          <button type="button" onClick={setAllPresent} disabled={saveMutation.isPending || students.length === 0} className="inline-flex min-h-11 items-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60">
             Set all to Hadir
           </button>
         ) : null}
@@ -380,7 +380,7 @@ function AttendanceRegisterForm({
                       saveMutation.reset();
                       onDirtyChange?.(true);
                     }}
-                    className="min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:bg-slate-100"
+                    className="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100"
                   >
                     <option value="">Not recorded</option>
                     {statusOptions.map((option) => (
@@ -408,7 +408,7 @@ function AttendanceRegisterForm({
           <button
             type="submit"
             disabled={saveMutation.isPending || !form.formState.isDirty || counts.unrecorded > 0 || students.length === 0}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white shadow-xs transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {saveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
             {saveMutation.isPending ? "Saving..." : "Save attendance"}
@@ -440,14 +440,9 @@ export function SessionAttendanceRegister({
 
   return (
     <section aria-labelledby="session-attendance-heading" className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-      <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
-          <Users className="h-5 w-5" aria-hidden="true" />
-        </span>
-        <div>
-          <h2 id="session-attendance-heading" className="text-xl font-semibold text-slate-950">Attendance register</h2>
-          <p className="mt-1 text-sm leading-6 text-slate-600">Make sure every student has a status selected before saving.</p>
-        </div>
+      <div>
+        <h2 id="session-attendance-heading" className="text-xl font-semibold text-slate-950">Attendance register</h2>
+        <p className="mt-1 text-sm leading-6 text-slate-600">Make sure every student has a status selected before saving.</p>
       </div>
 
       {rosterQuery.isPending || attendanceQuery.isPending ? (

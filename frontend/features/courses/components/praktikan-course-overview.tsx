@@ -1,6 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import {
+  BookOpen,
+  ClipboardCheck,
+  GraduationCap,
+  History,
+  Layers3,
+  Loader2,
+  MoveRight,
+  RefreshCw,
+} from "lucide-react";
 import { getCourseDetailRoute } from "@/constants/routes";
 import { useEnrolledCourses } from "../hooks/use-enrolled-courses";
 import { PraktikanCourseCard } from "./praktikan-course-card";
@@ -40,11 +50,11 @@ export function PraktikanCourseOverview({ userId, onViewClasses }: PraktikanCour
       </header>
       <dl className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         {[
-          { label: "Enrolled classes", value: courses.length, helper: "All-time enrolled"},
-          { label: "Active classes", value: activeCourses.length, helper: "This semester"},
-          { label: "Past classes", value: courses.length - activeCourses.length, helper: "Archived classes"},
-          { label: "Attendance records", value: attendanceQuery.isError ? "—" : attendanceRows.length, helper: attendanceQuery.isError ? "Temporarily unavailable" : "Recorded sessions"},
-          { label: "Published average", value: gradesQuery.isError || average === null ? "—" : average.toFixed(1), helper: gradesQuery.isError ? "Temporarily unavailable" : "Released session scores"}
+          { label: "Enrolled classes", value: courses.length, helper: "All-time enrolled", icon: Layers3 },
+          { label: "Active classes", value: activeCourses.length, helper: "This semester", icon: BookOpen },
+          { label: "Past classes", value: courses.length - activeCourses.length, helper: "Archived classes", icon: History },
+          { label: "Attendance records", value: attendanceQuery.isError ? "—" : attendanceRows.length, helper: attendanceQuery.isError ? "Temporarily unavailable" : "Recorded sessions", icon: ClipboardCheck },
+          { label: "Published average", value: gradesQuery.isError || average === null ? "—" : average.toFixed(1), helper: gradesQuery.isError ? "Temporarily unavailable" : "Released session scores", icon: GraduationCap }
         ].map((stat) => <div key={stat.label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="flex items-start justify-between gap-3"><div><dt className="text-sm font-medium text-slate-600">{stat.label}</dt><dd className="mt-2 text-3xl font-bold tracking-tight text-slate-950">{stat.value}</dd></div><span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700"><stat.icon className="h-5 w-5" aria-hidden="true" /></span></div><p className="mt-3 text-xs text-slate-500">{stat.helper}</p></div>)}
       </dl>
       <section aria-labelledby="continue-classes-heading">

@@ -26,7 +26,7 @@ export const DASHBOARD_NAVIGATION: Record<UserRole, DashboardNavItem[]> = {
     {
       id: "bulk-import",
       label: "Import",
-      description: "Batch-create student accounts with a simple CSV."
+      description: "Batch create student accounts."
     },
     {
       id: "modules",

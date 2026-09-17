@@ -113,10 +113,10 @@ export function CourseWorkspaceNavigation({
               tabIndex={isActive ? 0 : -1}
               onClick={() => activateTab(tab)}
               onKeyDown={(event) => onTabKeyDown(event, tab)}
-              className={`inline-flex min-h-11 items-center justify-center rounded-xl border px-4 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 ${
+              className={`inline-flex min-h-10 items-center justify-center rounded-xl px-4 text-xs font-semibold transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 ${
                 isActive
-                  ? "border-emerald-600 bg-emerald-50 text-emerald-800"
-                  : "border-transparent text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
+                  ? "bg-slate-900 text-white shadow-xs"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
               }`}
             >
               {label}

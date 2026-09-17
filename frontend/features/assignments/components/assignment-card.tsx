@@ -57,8 +57,8 @@ export function AssignmentCard({
             <span
               className={
                 assignment.is_published
-                  ? "rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800"
-                  : "rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800"
+                  ? "rounded-full border border-emerald-200/60 bg-emerald-50/80 px-2.5 py-0.5 text-xs font-semibold text-emerald-700"
+                  : "rounded-full border border-slate-200 bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600"
               }
             >
               {assignment.is_published ? "Published" : "Draft"}
@@ -78,7 +78,7 @@ export function AssignmentCard({
         </div>
 
         {viewerRole === "asprak" ? (
-          <div className="rounded-xl bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700">
+          <div className="rounded-xl border border-slate-200/80 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700">
             {assignment.submissions_count}{" "}
             {assignment.submissions_count === 1 ? "submission" : "submissions"}
           </div>
@@ -161,7 +161,7 @@ export function AssignmentCard({
             assignment.course_id,
             assignment.id
           )}
-          className="inline-flex min-h-9 items-center rounded-lg text-sm font-semibold text-emerald-700 underline-offset-4 transition hover:text-emerald-800 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
+          className="inline-flex min-h-9 items-center rounded-lg text-sm font-semibold text-slate-900 underline-offset-4 transition hover:text-slate-700 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
         >
           Open assignment
         </Link>

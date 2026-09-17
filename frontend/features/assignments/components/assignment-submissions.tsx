@@ -281,7 +281,7 @@ export function AssignmentSubmissions({
                   value={searchValue}
                   onChange={(event) => setSearchValue(event.target.value)}
                   placeholder="Search NPM or email"
-                  className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3 text-sm text-slate-950 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50"
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3 text-sm text-slate-950 outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
                 />
               </div>
             </div>
@@ -300,7 +300,7 @@ export function AssignmentSubmissions({
                 onChange={(event) =>
                   setFilter(event.target.value as SubmissionFilter)
                 }
-                className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50"
+                className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
               >
                 <option value="all">All submissions</option>
                 <option value="awaiting-grade">Awaiting grade</option>
@@ -451,7 +451,7 @@ export function AssignmentSubmissions({
                             expanded ? null : submission.id
                           )
                         }
-                        className="inline-flex min-h-11 items-center rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
+                        className="inline-flex min-h-11 items-center rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white shadow-xs transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
                       >
                         {graded ? "Edit grade" : "Grade submission"}
                       </button>

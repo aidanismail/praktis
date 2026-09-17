@@ -207,7 +207,7 @@ export function SessionCard({
             type="button"
             onClick={() => onTransition(session.id, "open")}
             disabled={transitionPending}
-            className="inline-flex min-h-9 items-center rounded-lg bg-emerald-700 px-3 text-sm font-semibold text-white transition hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-9 items-center rounded-lg bg-slate-900 px-3 text-sm font-semibold text-white shadow-xs transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isThisTransitioning
               ? status === "CLOSED"

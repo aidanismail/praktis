@@ -20,7 +20,7 @@ const fileTypeLabels: Record<AssignmentFileType, string> = {
 };
 
 const inputClassName =
-  "h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 disabled:cursor-not-allowed disabled:bg-slate-50";
+  "h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-50";
 
 export function AssignmentFormFields({
   form,
@@ -75,8 +75,7 @@ export function AssignmentFormFields({
           rows={5}
           disabled={disabled}
           placeholder="Explain the task, expected output, and submission requirements..."
-          className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm leading-6 text-slate-950 outline-none transition
-placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 disabled:cursor-not-allowed disabled:bg-slate-50"
+          className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-50"
           {...form.register("description")}
         />
       </div>
@@ -170,7 +169,7 @@ text-slate-700"
                 type="checkbox"
                 value={fileType}
                 disabled={disabled}
-                className="h-4 w-4 rounded border-slate-300 accent-emerald-600"
+                className="h-4 w-4 rounded border-slate-300 accent-slate-900"
                 {...form.register("allowed_file_types")}
               />
               {fileTypeLabels[fileType]}
@@ -185,7 +184,7 @@ text-slate-700"
         ) : null}
       </fieldset>
 
-      <div className="border-t border-slate-100 pt-5">
+      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
         <label
           htmlFor={publicationId}
           className="inline-flex cursor-pointer items-start gap-3"
@@ -194,7 +193,7 @@ text-slate-700"
             id={publicationId}
             type="checkbox"
             disabled={disabled}
-            className="mt-1 h-4 w-4 rounded border-slate-300 accent-emerald-600"
+            className="mt-1 h-4 w-4 rounded border-slate-300 accent-slate-900"
             {...form.register("is_published")}
           />
           <span>

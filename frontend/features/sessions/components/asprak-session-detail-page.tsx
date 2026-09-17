@@ -3,10 +3,8 @@
 import {
   AlertCircle,
   ArrowLeft,
-  CalendarDays,
   Loader2,
-  RefreshCw,
-  ShieldCheck
+  RefreshCw
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -125,14 +123,13 @@ function SessionHeader({ session }: { session: CourseSession }) {
     <header className="rounded-3xl bg-brand p-6 text-white shadow-sm sm:p-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-wider text-emerald-300">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
             Session workspace
           </p>
           <h1 className="mt-2 wrap-break-word text-2xl font-bold tracking-tight sm:text-3xl">
             {session.title}
           </h1>
-          <p className="mt-3 inline-flex items-center gap-2 text-sm text-slate-300">
-            <CalendarDays className="h-4 w-4" aria-hidden="true" />
+          <p className="mt-2 text-sm text-slate-300">
             <time dateTime={session.date}>{session.date}</time>
           </p>
         </div>
@@ -314,22 +311,11 @@ export function AssignedSessionDetail({
         </div>
       ) : null}
 
-      <p className="mt-5 text-sm font-medium text-emerald-700">
+      <p className="mt-5 text-sm font-semibold text-slate-700">
         {course.code} · {course.name}
       </p>
       <div className="mt-4 space-y-6">
         <SessionHeader session={session} />
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm" aria-labelledby="verified-session-heading">
-          <div className="flex items-start gap-3">
-            <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" aria-hidden="true" />
-            <div>
-              <h2 id="verified-session-heading" className="font-semibold text-slate-950">Verified session context</h2>
-              <p className="mt-1 text-sm leading-6 text-slate-600">
-                Attendance, grades, and exports load only after this session is confirmed in your assigned course list.
-              </p>
-            </div>
-          </div>
-        </section>
         <SessionAttendanceRegister
           userId={userId}
           courseId={courseId}

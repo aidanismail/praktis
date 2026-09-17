@@ -62,7 +62,7 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
         <div>
           <p
             className="text-xs font-semibold uppercase tracking-wider
-            text-emerald-700"
+            text-slate-500"
           >
             Learning materials
           </p>
@@ -99,7 +99,7 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
                   border border-slate-200 bg-white px-3 text-sm font-semibold
                   text-slate-700 transition hover:bg-slate-50
                   focus-visible:outline-2 focus-visible:outline-offset-2
-                  focus-visible:outline-emerald-700
+                  focus-visible:outline-slate-900
                   disabled:cursor-not-allowed disabled:opacity-60"
             >
               <RefreshCw
