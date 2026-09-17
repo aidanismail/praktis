@@ -112,6 +112,9 @@ services:
     restart: unless-stopped
     networks:
       - praktis_network
+    environment:
+      - HOSTNAME=0.0.0.0
+      - PORT=3000
 
   nginx:
     image: nginx:alpine
