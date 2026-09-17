@@ -1,9 +1,10 @@
 "use client";
 
-import { AlertCircle, CalendarRange, Loader2, RefreshCw } from "lucide-react";
+import { CalendarRange, Loader2, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 import {
   useCourseSessions,
   useCreateCourseSession,
@@ -184,9 +185,9 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
             resetAfterSubmit
           />
           {createMutation.isSuccess ? (
-            <p role="status" aria-live="polite" className="mt-3 text-sm text-emerald-700">
-              Session scheduled!
-            </p>
+            <div className="mt-3">
+              <NotificationBanner variant="success" message="Session scheduled!" />
+            </div>
           ) : null}
         </section>
       ) : null}
@@ -203,23 +204,22 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
       ) : null}
 
       {blockingError ? (
-        <div role="alert" className="mt-5 rounded-3xl border border-red-200 bg-red-50 p-6">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" aria-hidden="true" />
+        <div className="mt-5">
+          <NotificationBanner variant="error">
             <div>
-              <h3 className="font-semibold text-red-950">{errorTitle}</h3>
-              <p className="mt-1 text-sm leading-6 text-red-800">{errorDescription}</p>
+              <h3 className="font-semibold text-white">{errorTitle}</h3>
+              <p className="mt-1 text-xs text-slate-300">{errorDescription}</p>
               {status === 401 ? (
                 <Link
                   href={ROUTES.login}
-                  className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-red-700 px-4 text-sm font-semibold text-white"
+                  className="mt-3 inline-flex min-h-9 items-center rounded-lg bg-slate-800 border border-slate-700 px-3 text-xs font-semibold text-white hover:bg-slate-700 transition"
                 >
                   Go to sign in
                 </Link>
               ) : accessError ? (
                 <Link
                   href={ROUTES.dashboard}
-                  className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-red-900 underline underline-offset-4"
+                  className="mt-3 inline-flex min-h-9 items-center text-xs font-semibold text-slate-300 underline underline-offset-4 hover:text-white"
                 >
                   Return to dashboard
                 </Link>
@@ -228,35 +228,44 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
                   type="button"
                   onClick={() => void sessionsQuery.refetch()}
                   disabled={sessionsQuery.isFetching}
-                  className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-red-700 px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+                  className="mt-3 inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 text-xs font-semibold text-white hover:bg-slate-700 transition disabled:opacity-60"
                 >
-                  <RefreshCw className="h-4 w-4" aria-hidden="true" />
+                  <RefreshCw className={sessionsQuery.isFetching ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"} aria-hidden="true" />
                   Try again
                 </button>
               )}
             </div>
-          </div>
+          </NotificationBanner>
         </div>
       ) : null}
 
       {!sessionsQuery.isPending && !blockingError ? (
         <>
           {refreshError ? (
-            <div role="alert" className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-              Couldn&apos;t refresh sessions right now. Showing previous schedule.
+            <div className="mt-5">
+              <NotificationBanner
+                variant="warning"
+                message="Couldn't refresh sessions right now. Showing previous schedule."
+              />
             </div>
           ) : null}
 
           {transitionError ? (
-            <div role="alert" className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-              {transitionError}
+            <div className="mt-5">
+              <NotificationBanner
+                variant="error"
+                message={transitionError}
+              />
             </div>
           ) : null}
 
           {transitionMutation.isSuccess ? (
-            <p role="status" aria-live="polite" className="mt-4 text-sm text-emerald-700">
-              {transitionMutation.data.message}
-            </p>
+            <div className="mt-4">
+              <NotificationBanner
+                variant="success"
+                message={transitionMutation.data.message}
+              />
+            </div>
           ) : null}
 
           {sessions.length === 0 ? (

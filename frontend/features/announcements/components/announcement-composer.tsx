@@ -8,6 +8,7 @@ import {
   announcementSchema,
   type AnnouncementFormValues
 } from "../schemas/announcement.schema";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 
 type AnnouncementComposerProps = {
   userId: string;
@@ -60,15 +61,17 @@ export function AnnouncementComposer({
         aria-busy={mutation.isPending}
       >
         {mutation.isError ? (
-          <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
-            {mutation.error.message}
-          </p>
+          <NotificationBanner
+            variant="error"
+            message={mutation.error.message}
+          />
         ) : null}
 
         {mutation.isSuccess ? (
-          <p role="status" className="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-            Announcement posted!
-          </p>
+          <NotificationBanner
+            variant="success"
+            message="Announcement posted!"
+          />
         ) : null}
 
         <div className="space-y-2">

@@ -11,6 +11,7 @@ import {
   type SubmissionGradeFormValues
 } from "../schemas/submission-grade.schema";
 import type { AssignmentSubmission } from "../types/assignment.type";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 
 type SubmissionGradeFormProps = {
   userId: string;
@@ -109,21 +110,17 @@ export function SubmissionGradeForm({
       className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4"
     >
       {mutation.isError ? (
-        <p
-          role="alert"
-          className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"
-        >
-          {getGradeErrorMessage(mutation.error, maxPoints)}
-        </p>
+        <NotificationBanner
+          variant="error"
+          message={getGradeErrorMessage(mutation.error, maxPoints)}
+        />
       ) : null}
 
       {mutation.isSuccess ? (
-        <p
-          role="status"
-          className="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
-        >
-          Grade recorded!
-        </p>
+        <NotificationBanner
+          variant="success"
+          message="Grade recorded!"
+        />
       ) : null}
 
       <div className="space-y-2">

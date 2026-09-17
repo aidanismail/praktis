@@ -11,6 +11,7 @@ import { DASHBOARD_NAVIGATION } from "../constants/dashboard-navigation";
 import { DashboardHeader } from "./dashboard-header";
 import { DashboardSidebar } from "./dashboard-sidebar";
 import { RoleDashboard } from "./role-dashboard";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 
 type DashboardShellProps = {
   user: User;
@@ -177,39 +178,26 @@ export function DashboardShell({ user }: DashboardShellProps) {
 
         <main className="flex-1 min-w-0 p-3 sm:p-6 lg:p-8 max-w-5xl mx-auto w-full">
           {logoutMutation.isError ? (
-            <div
-              id="logout-error-message"
-              role="alert"
-              className="mb-5 rounded-2xl border border-red-200 bg-red-50 p-4
-                text-red-950"
-            >
-              <h2 className="text-sm font-semibold">
-                Sign out could not be confirmed
-              </h2>
-
-              <p className="mt-1 text-sm leading-6 text-red-800">
-                Your server session is still active. Check your connection and
-                try signing out again.
-              </p>
-
-              <div className="mt-3 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  disabled={logoutMutation.isPending}
-                  className="rounded-xl bg-red-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  Try again
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => logoutMutation.reset()}
-                  className="rounded-xl border border-red-300 bg-white px-4 py-2 text-sm font-semibold text-red-900 transition hover:bg-red-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
-                >
-                  Dismiss
-                </button>
-              </div>
+            <div id="logout-error-message" className="mb-5">
+              <NotificationBanner
+                variant="error"
+                onClose={() => logoutMutation.reset()}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                  <div>
+                    <span className="font-semibold text-white">Sign out could not be confirmed: </span>
+                    <span className="text-slate-300">Your server session is still active. Check your connection and try signing out again.</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    disabled={logoutMutation.isPending}
+                    className="inline-flex items-center rounded-lg bg-slate-800 border border-slate-700 px-3 py-1 text-xs font-semibold text-white hover:bg-slate-700 transition disabled:opacity-60 shrink-0"
+                  >
+                    Try again
+                  </button>
+                </div>
+              </NotificationBanner>
             </div>
           ) : null}
 

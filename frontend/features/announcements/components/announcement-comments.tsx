@@ -13,6 +13,7 @@ import {
   type AnnouncementCommentFormValues
 } from "../schemas/announcement.schema";
 import type { AnnouncementComment } from "../types/announcement.type";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 
 type AnnouncementCommentsProps = {
   userId: string;
@@ -147,9 +148,9 @@ export function AnnouncementComments({
       )}
 
       {deleteMutation.isError ? (
-        <p role="alert" className="mt-3 text-sm text-red-700">
-          {deleteMutation.error.message}
-        </p>
+        <div className="mt-3">
+          <NotificationBanner variant="error" message={deleteMutation.error.message} />
+        </div>
       ) : null}
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4">
@@ -189,14 +190,14 @@ export function AnnouncementComments({
           </button>
         </div>
         {addMutation.isError ? (
-          <p role="alert" className="mt-2 text-sm text-red-700">
-            {addMutation.error.message}
-          </p>
+          <div className="mt-3">
+            <NotificationBanner variant="error" message={addMutation.error.message} />
+          </div>
         ) : null}
         {addMutation.isSuccess ? (
-          <p role="status" className="mt-2 text-sm text-emerald-700">
-            Comment posted!
-          </p>
+          <div className="mt-3">
+            <NotificationBanner variant="success" message="Comment posted!" />
+          </div>
         ) : null}
       </form>
     </div>

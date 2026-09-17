@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { AlertCircle, CheckCircle2, Trash2, X } from "lucide-react";
+import { AlertCircle, Trash2 } from "lucide-react";
 import type {
   Course,
   Assignment,
@@ -14,6 +14,7 @@ import {
 } from "@/features/courses/constants/banner-themes";
 import { CourseBannerCustomizerModal } from "@/features/courses/components/course-banner-customizer-modal";
 import { DocumentPreviewModal } from "@/components/ui/document-preview-modal";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 
 import { useAdminCourses } from "../hooks/use-admin-courses";
 import { useCourseWorkspace } from "../hooks/use-admin-course-workspace";
@@ -419,41 +420,24 @@ export function CourseManagement() {
   return (
     <div className="space-y-6">
       {/* Toast Alert Feedback */}
-      <div aria-live="polite" aria-atomic="true">
-        {actionSuccess && (
-          <div
-            role="status"
-            className="flex items-center gap-2 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-xs font-semibold shadow-xs animate-in fade-in"
-          >
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>{actionSuccess}</span>
-            <button
-              type="button"
-              onClick={() => setActionSuccess(null)}
-              className="ml-auto text-emerald-600 hover:text-emerald-900"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
-
-        {error && (
-          <div
-            role="alert"
-            className="flex items-center gap-2 p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs font-semibold shadow-xs animate-in fade-in"
-          >
-            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-            <span>{error}</span>
-            <button
-              type="button"
-              onClick={() => setError(null)}
-              className="ml-auto text-rose-600 hover:text-rose-900"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
-      </div>
+      {(actionSuccess || error) && (
+        <div className="space-y-2">
+          {actionSuccess && (
+            <NotificationBanner
+              variant="success"
+              message={actionSuccess}
+              onClose={() => setActionSuccess(null)}
+            />
+          )}
+          {error && (
+            <NotificationBanner
+              variant="error"
+              message={error}
+              onClose={() => setError(null)}
+            />
+          )}
+        </div>
+      )}
 
       {/* Main Content: Course Catalog vs. Course Workspace */}
       {courseId && !isLoadingCourses && !selectedCourse ? (

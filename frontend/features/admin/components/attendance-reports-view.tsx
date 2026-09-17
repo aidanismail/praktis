@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Lock, Unlock, X, AlertCircle, CheckCircle2, UserCheck } from "lucide-react";
+import { Lock, Unlock, UserCheck } from "lucide-react";
 import {
   fetchAdminCourses,
   fetchCourseSessions,
@@ -13,6 +13,7 @@ import {
 } from "../api/admin.api";
 import type { Course } from "@/features/courses/types/course.type";
 import type { ClassSessionItem, StudentItem, AttendanceItem } from "../types/admin.type";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 
 export function AttendanceReportsView() {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -248,45 +249,24 @@ export function AttendanceReportsView() {
   return (
     <div className="space-y-4">
       {/* Alert Notifications */}
-      <div aria-live="polite" aria-atomic="true" className="space-y-2">
-        {actionSuccess && (
-          <div
-            role="status"
-            className="rounded-xl bg-slate-900 border border-slate-200 px-4 py-3 text-xs font-medium text-white flex items-center justify-between shadow-xs"
-          >
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-slate-300 shrink-0" />
-              <span>{actionSuccess}</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setActionSuccess(null)}
-              className="text-slate-400 hover:text-white"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        )}
-
-        {error && (
-          <div
-            role="alert"
-            className="rounded-xl bg-rose-50 border border-rose-200 px-4 py-3 text-xs font-medium text-rose-800 flex items-center justify-between shadow-xs"
-          >
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-              <span>{error}</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setError(null)}
-              className="text-rose-600 hover:text-rose-900"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        )}
-      </div>
+      {(actionSuccess || error) && (
+        <div className="space-y-2">
+          {actionSuccess && (
+            <NotificationBanner
+              variant="success"
+              message={actionSuccess}
+              onClose={() => setActionSuccess(null)}
+            />
+          )}
+          {error && (
+            <NotificationBanner
+              variant="error"
+              message={error}
+              onClose={() => setError(null)}
+            />
+          )}
+        </div>
+      )}
 
       {/* Select Course & Session Filter Controls */}
       <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs space-y-4">

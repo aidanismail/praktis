@@ -14,6 +14,7 @@ import {
   type ChangePasswordFormValues
 } from "../schemas/auth.schema";
 import { useChangePassword } from "../hooks/use-change-password";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 
 type ChangePasswordFormProps = { isForced: boolean };
 
@@ -72,9 +73,10 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
         {changePasswordMutation.isError ? (
-          <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {getChangePasswordError(changePasswordMutation.error)}
-          </div>
+          <NotificationBanner
+            variant="error"
+            message={getChangePasswordError(changePasswordMutation.error)}
+          />
         ) : null}
 
         <div className="space-y-2">

@@ -8,6 +8,7 @@ import { ProductLogo } from "@/components/branding/product-logo";
 
 import { loginSchema, type LoginFormValues } from "../schemas/auth.schema";
 import { useLogin } from "../hooks/use-login";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -44,11 +45,14 @@ export function LoginForm() {
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
         {loginMutation.isError ? (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {loginMutation.error instanceof Error
-              ? loginMutation.error.message
-              : "Couldn't sign you in. Double-check your username and password."}
-          </div>
+          <NotificationBanner
+            variant="error"
+            message={
+              loginMutation.error instanceof Error
+                ? loginMutation.error.message
+                : "Couldn't sign you in. Double-check your username and password."
+            }
+          />
         ) : null}
 
         <div className="space-y-2">

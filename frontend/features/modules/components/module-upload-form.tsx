@@ -2,8 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  AlertCircle,
-  CheckCircle2,
   FileUp,
   Loader2,
   RotateCcw,
@@ -12,6 +10,7 @@ import {
 import { useId, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { ApiError } from "@/lib/api/client";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 import {
   useConfirmCourseModuleUpload,
   useRequestCourseModuleUpload,
@@ -339,44 +338,31 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
         ) : null}
 
         {stage === "failed" && errorMessage ? (
-          <div
+          <NotificationBanner
             id={statusId}
-            role="alert"
             tabIndex={-1}
-            className="rounded-xl border border-red-200
-                bg-red-50 px-4 py-3"
+            variant="error"
           >
-            <div className="flex items-start gap-2">
-              <AlertCircle
-                className="mt-0.5 h-4 w-4 shrink-0
-                    text-red-600"
-                aria-hidden="true"
-              />
-              <p className="text-sm leading-6 text-red-800">{errorMessage}</p>
+            <div>
+              <div>{errorMessage}</div>
+              {failedStage === "confirm" ? (
+                <div className="mt-1 text-xs text-slate-300">
+                  Confirmation may have completed even if its response was
+                  interrupted. Refresh the module list before starting a separate
+                  upload.
+                </div>
+              ) : null}
             </div>
-
-            {failedStage === "confirm" ? (
-              <p className="mt-2 text-xs leading-5 text-red-700">
-                Confirmation may have completed even if its response was
-                interrupted. Refresh the module list before starting a separate
-                upload.
-              </p>
-            ) : null}
-          </div>
+          </NotificationBanner>
         ) : null}
 
         {stage === "complete" ? (
-          <p
+          <NotificationBanner
             id={statusId}
-            role="status"
             tabIndex={-1}
-            className="flex items-center gap-2 rounded-xl
-                bg-emerald-50 px-4 py-3 text-sm
-                text-emerald-800"
-          >
-            <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-            Module uploaded! Saved as draft.
-          </p>
+            variant="success"
+            message="Module uploaded! Saved as draft."
+          />
         ) : null}
 
         <fieldset

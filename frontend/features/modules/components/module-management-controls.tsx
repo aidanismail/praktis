@@ -9,6 +9,7 @@ import {
 } from "../hooks/use-course-modules";
 import type { CourseModule } from "../types/module.type";
 import { ModuleEditor } from "./module-editor";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 
 type ModuleManagementControlsProps = {
   userId: string;
@@ -150,11 +151,16 @@ export function ModuleManagementControls({
       </div>
 
       {publishMutation.isError ? (
-        <p role="alert" className="mt-3 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
-          {publishMutation.error instanceof ApiError
-            ? publishMutation.error.message
-            : "Unable to update module visibility. Please try again."}
-        </p>
+        <div className="mt-3">
+          <NotificationBanner
+            variant="error"
+            message={
+              publishMutation.error instanceof ApiError
+                ? publishMutation.error.message
+                : "Unable to update module visibility. Please try again."
+            }
+          />
+        </div>
       ) : null}
 
       {/* Delete Confirmation */}
@@ -183,11 +189,16 @@ export function ModuleManagementControls({
             </button>
           </div>
           {deleteMutation.isError ? (
-            <p className="mt-3 text-sm text-red-800">
-              {deleteMutation.error instanceof ApiError
-                ? deleteMutation.error.message
-                : "Unable to delete module. Please try again."}
-            </p>
+            <div className="mt-3">
+              <NotificationBanner
+                variant="error"
+                message={
+                  deleteMutation.error instanceof ApiError
+                    ? deleteMutation.error.message
+                    : "Unable to delete module. Please try again."
+                }
+              />
+            </div>
           ) : null}
         </div>
       ) : null}
@@ -216,11 +227,16 @@ export function ModuleManagementControls({
           ) : null}
 
           {replaceMutation.isError ? (
-            <p role="alert" className="mt-2 text-sm text-red-600">
-              {replaceMutation.error instanceof ApiError
-                ? replaceMutation.error.message
-                : "Unable to replace file. Please try again."}
-            </p>
+            <div className="mt-2">
+              <NotificationBanner
+                variant="error"
+                message={
+                  replaceMutation.error instanceof ApiError
+                    ? replaceMutation.error.message
+                    : "Unable to replace file. Please try again."
+                }
+              />
+            </div>
           ) : null}
 
           <div className="mt-4 flex flex-wrap gap-2">

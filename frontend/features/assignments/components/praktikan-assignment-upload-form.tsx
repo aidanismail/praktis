@@ -4,12 +4,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { FileUp, Loader2, RotateCcw } from "lucide-react";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 import { ApiError } from "@/lib/api/client";
 import { useSubmitAssignment } from "../hooks/use-course-assignments";
 import {
   ASSIGNMENT_MAX_UPLOAD_BYTES,
   createAssignmentSubmissionSchema,
-  type AssignmentSubmissionFormValues
+  type AssignmentSubmissionFormValues,
 } from "../schemas/assignment.schema";
 import type { AssignmentFileType } from "../types/assignment.type";
 
@@ -24,7 +25,7 @@ type PraktikanAssignmentUploadFormProps = {
 const ACCEPTED_FILE_TYPES: Record<AssignmentFileType, string> = {
   pdf: ".pdf,application/pdf",
   zip: ".zip,application/zip,application/x-zip-compressed",
-  docx: ".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  docx: ".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 };
 
 function getSubmissionErrorMessage(error: Error) {
@@ -57,23 +58,23 @@ export function PraktikanAssignmentUploadForm({
   assignmentId,
   courseId,
   hasSubmission,
-  userId
+  userId,
 }: PraktikanAssignmentUploadFormProps) {
   const inputId = useId();
-  const successStatusRef = useRef<HTMLParagraphElement>(null);
+  const successStatusRef = useRef<HTMLDivElement>(null);
   const [inputKey, setInputKey] = useState(0);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const submissionMutation = useSubmitAssignment({
     userId,
     courseId,
-    assignmentId
+    assignmentId,
   });
   const submissionSchema = useMemo(
     () => createAssignmentSubmissionSchema(allowedFileTypes),
     [allowedFileTypes]
   );
   const form = useForm<AssignmentSubmissionFormValues>({
-    resolver: zodResolver(submissionSchema)
+    resolver: zodResolver(submissionSchema),
   });
 
   useEffect(() => {
@@ -82,17 +83,10 @@ export function PraktikanAssignmentUploadForm({
 
   if (allowedFileTypes.length === 0) {
     return (
-      <section
-        aria-labelledby="assignment-upload-heading"
-        className="rounded-3xl border border-amber-200 bg-amber-50 p-5 sm:p-6"
-      >
-        <h2 id="assignment-upload-heading" className="font-semibold text-amber-950">
-          Submission unavailable
-        </h2>
-        <p className="mt-2 text-sm leading-6 text-amber-800">
-          This assignment does not list a supported PDF, ZIP, or DOCX format.
-        </p>
-      </section>
+      <NotificationBanner
+        variant="warning"
+        message="This assignment does not list a supported PDF, ZIP, or DOCX format."
+      />
     );
   }
 
@@ -123,17 +117,17 @@ export function PraktikanAssignmentUploadForm({
         );
         form.reset();
         setInputKey((currentKey) => currentKey + 1);
-      }
+      },
     });
   }
 
   return (
     <section
       aria-labelledby="assignment-upload-heading"
-      className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+      className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs sm:p-8"
     >
-      <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-brand">
+      <div className="flex items-start gap-4">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">
           {hasSubmission ? (
             <RotateCcw className="h-5 w-5" aria-hidden="true" />
           ) : (
@@ -141,10 +135,10 @@ export function PraktikanAssignmentUploadForm({
           )}
         </span>
         <div>
-          <h2 id="assignment-upload-heading" className="text-lg font-semibold text-slate-950">
+          <h2 id="assignment-upload-heading" className="text-lg font-bold text-slate-950">
             {hasSubmission ? "Turn in a new version" : "Turn in assignment"}
           </h2>
-          <p className="mt-1 text-sm leading-6 text-slate-600">
+          <p className="mt-1 text-xs text-slate-500">
             {hasSubmission
               ? "Uploading a new file replaces your current submission and clears previous feedback."
               : "Select your assignment file and click turn in."}
@@ -153,12 +147,12 @@ export function PraktikanAssignmentUploadForm({
       </div>
 
       <form
-        className="mt-5 space-y-4"
+        className="mt-6 space-y-4"
         onSubmit={form.handleSubmit(submitFile)}
         noValidate
       >
         <div>
-          <label htmlFor={inputId} className="text-sm font-semibold text-slate-800">
+          <label htmlFor={inputId} className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-2">
             Assignment file
           </label>
           <Controller
@@ -181,48 +175,47 @@ export function PraktikanAssignmentUploadForm({
                   setSuccessMessage(null);
                   field.onChange(event.target.files?.[0]);
                 }}
-                className="mt-2 block min-h-11 w-full cursor-pointer rounded-xl border border-slate-300 bg-white text-sm text-slate-700 file:mr-4 file:min-h-11 file:border-0 file:border-r file:border-slate-200 file:bg-slate-50 file:px-4 file:text-sm file:font-semibold file:text-slate-800 hover:file:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-60"
+                className="block w-full text-xs text-slate-700 border border-slate-200 rounded-2xl bg-slate-50/50 p-2 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-slate-900 file:text-white hover:file:bg-slate-800 cursor-pointer shadow-xs focus:outline-none focus:ring-2 focus:ring-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
               />
             )}
           />
-          <p id={`${inputId}-help`} className="mt-2 text-xs leading-5 text-slate-500">
+          <p id={`${inputId}-help`} className="mt-2 text-[11px] text-slate-400">
             Accepted: {allowedLabel}. Maximum size: {ASSIGNMENT_MAX_UPLOAD_BYTES / (1024 * 1024)} MiB.
           </p>
           {form.formState.errors.file ? (
-            <p id={`${inputId}-error`} role="alert" className="mt-2 text-sm text-red-700">
+            <p id={`${inputId}-error`} role="alert" className="mt-2 text-xs font-semibold text-red-600">
               {form.formState.errors.file.message}
             </p>
           ) : null}
         </div>
 
         {submissionMutation.isError ? (
-          <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-800">
-            {getSubmissionErrorMessage(submissionMutation.error)}
-          </div>
+          <NotificationBanner
+            variant="error"
+            message={getSubmissionErrorMessage(submissionMutation.error)}
+          />
         ) : null}
 
         {successMessage ? (
-          <p
+          <NotificationBanner
             ref={successStatusRef}
-            role="status"
+            variant="success"
+            message={successMessage}
             tabIndex={-1}
-            className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-800 outline-none"
-          >
-            {successMessage}
-          </p>
+          />
         ) : null}
 
         <button
           type="submit"
           disabled={submissionMutation.isPending}
-          className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-brand px-4 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800 shadow-xs disabled:cursor-not-allowed disabled:opacity-60"
         >
           {submissionMutation.isPending ? (
-            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
           ) : hasSubmission ? (
-            <RotateCcw className="h-4 w-4" aria-hidden="true" />
+            <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
           ) : (
-            <FileUp className="h-4 w-4" aria-hidden="true" />
+            <FileUp className="h-3.5 w-3.5" aria-hidden="true" />
           )}
           {submissionMutation.isPending
             ? "Turning in..."

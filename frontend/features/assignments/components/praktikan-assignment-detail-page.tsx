@@ -1,15 +1,15 @@
 "use client";
 
 import {
-  AlertCircle,
   ArrowLeft,
   CalendarClock,
   FileText,
   Gauge,
   Loader2,
-  RefreshCw
+  RefreshCw,
 } from "lucide-react";
 import Link from "next/link";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 import { getCourseDetailRoute, ROUTES } from "@/constants/routes";
 import { useEnrolledCourses } from "@/features/courses/hooks/use-enrolled-courses";
 import { ApiError } from "@/lib/api/client";
@@ -26,7 +26,7 @@ type PraktikanAssignmentDetailPageProps = {
 
 const dateFormatter = new Intl.DateTimeFormat("en", {
   dateStyle: "medium",
-  timeStyle: "short"
+  timeStyle: "short",
 });
 
 function formatDate(value: string) {
@@ -46,7 +46,7 @@ function PageFrame({ children }: { children: React.ReactNode }) {
 
 export function PraktikanAssignmentDetailPage({
   courseId,
-  assignmentId
+  assignmentId,
 }: PraktikanAssignmentDetailPageProps) {
   const user = useAuthStore((state) => state.user);
   const coursesQuery = useEnrolledCourses(
@@ -65,7 +65,7 @@ export function PraktikanAssignmentDetailPage({
     userId: user?.id ?? "",
     courseId,
     assignmentId,
-    enabled: courseVerified
+    enabled: courseVerified,
   });
 
   if (!user) return null;
@@ -73,20 +73,20 @@ export function PraktikanAssignmentDetailPage({
   if (user.role !== "praktikan") {
     return (
       <PageFrame>
-        <div
-          role="alert"
-          className="rounded-3xl border border-amber-200 bg-amber-50 p-6"
-        >
-          <h1 className="font-semibold text-amber-950">
-            Praktikan access required
-          </h1>
-          <Link
-            href={ROUTES.dashboard}
-            className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-amber-900 underline"
-          >
-            Return to dashboard
-          </Link>
-        </div>
+        <NotificationBanner variant="warning">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
+            <div>
+              <h3 className="font-semibold text-white">Praktikan access required</h3>
+              <p className="mt-0.5 text-xs text-slate-300">You need a student account to view this page.</p>
+            </div>
+            <Link
+              href={ROUTES.dashboard}
+              className="inline-flex rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700 transition shrink-0"
+            >
+              Return to dashboard
+            </Link>
+          </div>
+        </NotificationBanner>
       </PageFrame>
     );
   }
@@ -98,8 +98,8 @@ export function PraktikanAssignmentDetailPage({
           role="status"
           className="flex min-h-72 items-center justify-center rounded-3xl border border-slate-200 bg-white"
         >
-          <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
-          <span className="ml-3 text-sm text-slate-600">
+          <Loader2 className="h-5 w-5 animate-spin text-slate-400" aria-hidden="true" />
+          <span className="ml-3 text-xs font-medium text-slate-600">
             Checking course enrollment...
           </span>
         </div>
@@ -117,36 +117,34 @@ export function PraktikanAssignmentDetailPage({
 
     return (
       <PageFrame>
-        <div
-          role="alert"
-          className="rounded-3xl border border-amber-200 bg-amber-50 p-6"
-        >
-          <AlertCircle className="h-5 w-5 text-amber-700" aria-hidden="true" />
-          <h1 className="mt-3 font-semibold text-amber-950">
-            Assignment not found
-          </h1>
-          <p className="mt-2 text-sm text-amber-800">
-            This assignment might have been removed, or you aren&apos;t enrolled in this class.
-          </p>
-          {retryable ? (
-            <button
-              type="button"
-              onClick={() => void coursesQuery.refetch()}
-              className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-amber-900 px-4 text-sm font-semibold text-white"
-            >
-              <RefreshCw className="h-4 w-4" aria-hidden="true" />
-              Try again
-            </button>
-          ) : (
-            <Link
-              href={ROUTES.dashboard}
-              className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-amber-900 underline"
-            >
-              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-              Back to dashboard
-            </Link>
-          )}
-        </div>
+        <NotificationBanner variant="warning">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
+            <div>
+              <h3 className="font-semibold text-white">Assignment not found</h3>
+              <p className="mt-0.5 text-xs text-slate-300">
+                This assignment might have been removed, or you aren&apos;t enrolled in this class.
+              </p>
+            </div>
+            {retryable ? (
+              <button
+                type="button"
+                onClick={() => void coursesQuery.refetch()}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700 transition shrink-0"
+              >
+                <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
+                Try again
+              </button>
+            ) : (
+              <Link
+                href={ROUTES.dashboard}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700 transition shrink-0"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+                Back to dashboard
+              </Link>
+            )}
+          </div>
+        </NotificationBanner>
       </PageFrame>
     );
   }
@@ -158,8 +156,8 @@ export function PraktikanAssignmentDetailPage({
           role="status"
           className="flex min-h-72 items-center justify-center rounded-3xl border border-slate-200 bg-white"
         >
-          <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
-          <span className="ml-3 text-sm text-slate-600">
+          <Loader2 className="h-5 w-5 animate-spin text-slate-400" aria-hidden="true" />
+          <span className="ml-3 text-xs font-medium text-slate-600">
             Loading assignment...
           </span>
         </div>
@@ -183,35 +181,34 @@ export function PraktikanAssignmentDetailPage({
 
     return (
       <PageFrame>
-        <div
-          role="alert"
-          className="rounded-3xl border border-red-200 bg-red-50 p-6"
-        >
-          <h1 className="font-semibold text-red-950">
-            Assignment unavailable
-          </h1>
-          <p className="mt-2 text-sm text-red-800">
-            This assignment might still be a draft, or was unpublished by your assistant.
-          </p>
-          {retryable ? (
-            <button
-              type="button"
-              onClick={() => void assignmentQuery.refetch()}
-              className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-red-700 px-4 text-sm font-semibold text-white"
-            >
-              <RefreshCw className="h-4 w-4" aria-hidden="true" />
-              Try again
-            </button>
-          ) : (
-            <Link
-              href={getCourseDetailRoute(courseId, "assignments")}
-              className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-red-900 underline"
-            >
-              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-              Back to Assignments
-            </Link>
-          )}
-        </div>
+        <NotificationBanner variant="error">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
+            <div>
+              <h3 className="font-semibold text-white">Assignment unavailable</h3>
+              <p className="mt-0.5 text-xs text-slate-300">
+                This assignment might still be a draft, or was unpublished by your assistant.
+              </p>
+            </div>
+            {retryable ? (
+              <button
+                type="button"
+                onClick={() => void assignmentQuery.refetch()}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700 transition shrink-0"
+              >
+                <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
+                Try again
+              </button>
+            ) : (
+              <Link
+                href={getCourseDetailRoute(courseId, "assignments")}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700 transition shrink-0"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+                Back to Assignments
+              </Link>
+            )}
+          </div>
+        </NotificationBanner>
       </PageFrame>
     );
   }
@@ -223,22 +220,31 @@ export function PraktikanAssignmentDetailPage({
 
   return (
     <PageFrame>
-      <Link
-        href={getCourseDetailRoute(courseId, "assignments")}
-        className="inline-flex min-h-11 items-center gap-2 rounded-xl text-sm font-semibold text-slate-700 hover:text-slate-950 focus-visible:outline-2 focus-visible:outline-slate-800"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        Back to Assignments
-      </Link>
+      <div className="space-y-5">
+        {/* Top Bar */}
+        <div className="flex items-center justify-between">
+          <Link
+            href={getCourseDetailRoute(courseId, "assignments")}
+            className="flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-full shadow-xs transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to Assignments</span>
+          </Link>
 
-      <div className="mt-4 space-y-5">
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+            {course.code} / Assignments
+          </span>
+        </div>
+
+        {/* Assignment Info Card */}
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/60 bg-emerald-50/80 px-3 py-1 text-xs font-semibold text-emerald-700">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                 Published
               </span>
-              <p className="mt-3 text-sm font-medium text-emerald-700">
+              <p className="mt-3 text-xs font-bold uppercase tracking-wider text-slate-400">
                 {course.code} · {course.name}
               </p>
               <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
@@ -252,18 +258,18 @@ export function PraktikanAssignmentDetailPage({
               {assignment.description}
             </p>
           ) : (
-            <p className="mt-5 text-sm italic text-slate-500">
+            <p className="mt-5 text-xs italic text-slate-400">
               No additional instructions.
             </p>
           )}
 
           <dl className="mt-6 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <dt className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                <CalendarClock className="h-4 w-4" aria-hidden="true" />
+            <div className="rounded-2xl border border-slate-200/60 bg-slate-50 p-4">
+              <dt className="flex items-center gap-2 text-[10px] uppercase font-semibold tracking-wider text-slate-400">
+                <CalendarClock className="h-4 w-4 text-slate-400" aria-hidden="true" />
                 Due
               </dt>
-              <dd className="mt-2 text-sm font-medium text-slate-900">
+              <dd className="mt-2 text-sm font-bold text-slate-900">
                 {assignment.due_date ? (
                   <time dateTime={assignment.due_date}>
                     {formatDate(assignment.due_date)}
@@ -274,22 +280,22 @@ export function PraktikanAssignmentDetailPage({
               </dd>
             </div>
 
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <dt className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                <Gauge className="h-4 w-4" aria-hidden="true" />
+            <div className="rounded-2xl border border-slate-200/60 bg-slate-50 p-4">
+              <dt className="flex items-center gap-2 text-[10px] uppercase font-semibold tracking-wider text-slate-400">
+                <Gauge className="h-4 w-4 text-slate-400" aria-hidden="true" />
                 Points
               </dt>
-              <dd className="mt-2 text-sm font-medium text-slate-900">
+              <dd className="mt-2 text-sm font-bold text-slate-900">
                 {assignment.max_points} maximum
               </dd>
             </div>
 
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <dt className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                <FileText className="h-4 w-4" aria-hidden="true" />
+            <div className="rounded-2xl border border-slate-200/60 bg-slate-50 p-4">
+              <dt className="flex items-center gap-2 text-[10px] uppercase font-semibold tracking-wider text-slate-400">
+                <FileText className="h-4 w-4 text-slate-400" aria-hidden="true" />
                 Formats
               </dt>
-              <dd className="mt-2 text-sm font-medium uppercase text-slate-900">
+              <dd className="mt-2 text-sm font-bold uppercase text-slate-900">
                 {allowedFileTypes.join(", ") || "None supported"}
               </dd>
             </div>

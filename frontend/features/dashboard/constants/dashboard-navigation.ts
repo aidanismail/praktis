@@ -65,11 +65,6 @@ export const DASHBOARD_NAVIGATION: Record<UserRole, DashboardNavItem[]> = {
 
   praktikan: [
     {
-      id: "overview",
-      label: "Overview",
-      description: "Your current classes, upcoming deadlines, and progress."
-    },
-    {
       id: "classes",
       label: "My Practicum Classes",
       description: "Course materials, assignments, and announcements."

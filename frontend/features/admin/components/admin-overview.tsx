@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import {
-  AlertCircle,
   BookOpen,
   ChevronRight,
   FileText,
@@ -13,6 +12,7 @@ import {
 import { ROUTES } from "@/constants/routes";
 import type { Course } from "@/features/courses/types/course.type";
 import { ApiError } from "@/lib/api/client";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 import { useAdminOverview } from "../hooks/use-admin-overview";
 
 type AdminSectionId = "courses" | "users" | "bulk-import" | "modules";
@@ -182,32 +182,25 @@ function SummaryMetric({
 
 function InlineDataError({ title, message, onRetry }: InlineDataErrorProps) {
   return (
-    <div role="alert" className="p-6">
-      <div className="flex items-start gap-3">
-        <AlertCircle
-          className="mt-0.5 h-5 w-5 shrink-0 text-red-600"
-          aria-hidden="true"
-        />
-
-        <div>
-          <h4 className="font-semibold text-slate-950">{title}</h4>
-          <p className="mt-1 text-sm leading-6 text-slate-600">{message}</p>
-
+    <div className="p-4">
+      <NotificationBanner variant="error">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
+          <div>
+            <h4 className="font-semibold text-white">{title}</h4>
+            <p className="mt-0.5 text-xs text-slate-300">{message}</p>
+          </div>
           {onRetry ? (
             <button
               type="button"
               onClick={onRetry}
-              className="mt-3 inline-flex items-center gap-2 rounded-lg border
-                border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-
-                slate-800 transition hover:bg-slate-50 focus-visible:outline-2
-                focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-700 shrink-0"
             >
-              <RefreshCw className="h-4 w-4" aria-hidden="true" />
+              <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
               Try again
             </button>
           ) : null}
         </div>
-      </div>
+      </NotificationBanner>
     </div>
   );
 }
@@ -307,60 +300,49 @@ export function AdminOverview({
       ) : null}
 
       {accessError ? (
-        <div
-          role="alert"
-          className="rounded-xl border border-red-200 bg-red-50 p-5"
-        >
-          <div className="flex items-start gap-3">
-            <AlertCircle
-              className="mt-0.5 h-5 w-5 shrink-0 text-red-600"
-              aria-hidden="true"
-            />
-
+        <NotificationBanner variant="error">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full">
             <div>
-              <h3 className="font-semibold text-red-950">
+              <h3 className="font-semibold text-white">
                 {accessError.status === 401
                   ? "Your session expired"
                   : "Access restricted"}
               </h3>
 
-              <p className="mt-1 text-sm leading-6 text-red-800">
+              <p className="mt-0.5 text-xs text-slate-300">
                 {accessError.status === 401
                   ? "Please sign in again to access administrative data."
                   : "This section requires a Superadmin account."}
               </p>
-
-              {accessError.status === 401 ? (
-                <Link
-                  href={ROUTES.login}
-                  className="mt-3 inline-flex rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
-                >
-                  Sign in
-                </Link>
-              ) : null}
             </div>
+
+            {accessError.status === 401 ? (
+              <Link
+                href={ROUTES.login}
+                className="inline-flex rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-700 shrink-0"
+              >
+                Sign in
+              </Link>
+            ) : null}
           </div>
-        </div>
+        </NotificationBanner>
       ) : null}
 
       {hasRefreshError && !accessError ? (
-        <div
-          role="alert"
-          className="flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-950 sm:flex-row sm:items-center sm:justify-between"
-        >
-          <p className="text-sm leading-6">
-            Couldn&apos;t refresh some data. Showing the latest saved information.
-          </p>
+        <NotificationBanner variant="warning">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between w-full">
+            <span>Couldn&apos;t refresh some data. Showing the latest saved information.</span>
 
-          <button
-            type="button"
-            onClick={() => void refreshAll()}
-            disabled={isRefreshing}
-            className="shrink-0 text-sm font-semibold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-800 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            Retry refresh
-          </button>
-        </div>
+            <button
+              type="button"
+              onClick={() => void refreshAll()}
+              disabled={isRefreshing}
+              className="inline-flex items-center rounded-lg bg-slate-800 border border-slate-700 px-3 py-1 text-xs font-semibold text-white hover:bg-slate-700 transition disabled:opacity-60 shrink-0"
+            >
+              Retry refresh
+            </button>
+          </div>
+        </NotificationBanner>
       ) : null}
 
       <section aria-labelledby="operational-summary-heading">

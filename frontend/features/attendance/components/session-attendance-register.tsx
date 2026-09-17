@@ -2,13 +2,12 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  AlertCircle,
-  CheckCircle2,
   Loader2,
   RefreshCw,
   Search,
   Users
 } from "lucide-react";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useCourseRoster } from "@/features/courses/hooks/use-course-roster";
@@ -112,23 +111,20 @@ function AttendanceRequestError({
   isRetrying: boolean;
 }) {
   return (
-    <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-5">
-      <div className="flex items-start gap-3">
-        <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" aria-hidden="true" />
-        <div>
-          <p className="text-sm text-red-800">{message}</p>
-          <button
-            type="button"
-            onClick={onRetry}
-            disabled={isRetrying}
-            className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-xl bg-red-700 px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <RefreshCw className={isRetrying ? "h-4 w-4 animate-spin" : "h-4 w-4"} aria-hidden="true" />
-            Try again
-          </button>
-        </div>
+    <NotificationBanner variant="error">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <span>{message}</span>
+        <button
+          type="button"
+          onClick={onRetry}
+          disabled={isRetrying}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1 text-xs font-semibold text-white hover:bg-slate-700 transition disabled:opacity-60"
+        >
+          <RefreshCw className={isRetrying ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"} aria-hidden="true" />
+          Try again
+        </button>
       </div>
-    </div>
+    </NotificationBanner>
   );
 }
 
@@ -395,12 +391,15 @@ function AttendanceRegisterForm({
         </ul>
       )}
 
-      {saveError ? <p role="alert" className="mt-4 text-sm text-red-700">{saveError}</p> : null}
+      {saveError ? (
+        <div className="mt-4">
+          <NotificationBanner variant="error" message={saveError} />
+        </div>
+      ) : null}
       {saveMutation.isSuccess ? (
-        <p role="status" aria-live="polite" className="mt-4 inline-flex items-center gap-2 text-sm text-emerald-700">
-          <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-          {saveMutation.data.message}
-        </p>
+        <div className="mt-4">
+          <NotificationBanner variant="success" message={saveMutation.data.message} />
+        </div>
       ) : null}
 
       {isEditable ? (

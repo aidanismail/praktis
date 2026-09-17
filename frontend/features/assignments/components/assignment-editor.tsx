@@ -16,6 +16,7 @@ import {
   type AssignmentFileType
 } from "../types/assignment.type";
 import { AssignmentFormFields } from "./assignment-form-fields";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 
 type AssignmentEditorProps = {
   userId: string;
@@ -193,12 +194,12 @@ export function AssignmentEditor({
       </div>
 
       {mutation.isSuccess && !isEditing ? (
-        <p
-          role="status"
-          className="mt-4 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
-        >
-          Assignment updated.
-        </p>
+        <div className="mt-4">
+          <NotificationBanner
+            variant="success"
+            message="Assignment updated."
+          />
+        </div>
       ) : null}
 
       {isEditing ? (
@@ -210,12 +211,10 @@ export function AssignmentEditor({
           className="mt-6 space-y-5"
         >
           {mutation.isError ? (
-            <p
-              role="alert"
-              className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"
-            >
-              {getUpdateErrorMessage(mutation.error)}
-            </p>
+            <NotificationBanner
+              variant="error"
+              message={getUpdateErrorMessage(mutation.error)}
+            />
           ) : null}
 
           <AssignmentFormFields

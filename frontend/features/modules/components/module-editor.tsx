@@ -11,6 +11,7 @@ import {
   type ModuleMetadataFormValues
 } from "../schemas/module.schema";
 import type { CourseModule } from "../types/module.type";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 
 type ModuleEditorProps = {
   userId: string;
@@ -119,12 +120,12 @@ export function ModuleEditor({ userId, courseId, module }: ModuleEditorProps) {
       {!isEditing ? (
         <>
           {mutation.isSuccess ? (
-            <p
-              role="status"
-              className="mb-3 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
-            >
-              Module updated.
-            </p>
+            <div className="mb-3">
+              <NotificationBanner
+                variant="success"
+                message="Module updated."
+              />
+            </div>
           ) : null}
 
           <button
@@ -149,12 +150,10 @@ export function ModuleEditor({ userId, courseId, module }: ModuleEditorProps) {
           <h4 className="font-semibold text-slate-950">Edit module details</h4>
 
           {mutation.isError ? (
-            <p
-              role="alert"
-              className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"
-            >
-              {getUpdateErrorMessage(mutation.error)}
-            </p>
+            <NotificationBanner
+              variant="error"
+              message={getUpdateErrorMessage(mutation.error)}
+            />
           ) : null}
 
           <div className="space-y-2">

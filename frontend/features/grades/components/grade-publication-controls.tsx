@@ -4,6 +4,7 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { ApiError } from "@/lib/api/client";
 import type { CourseSession } from "@/features/sessions/types/session.type";
 import { useSetSessionGradePublication } from "../hooks/use-session-grades";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 
 type GradePublicationControlsProps = {
   userId: string;
@@ -81,9 +82,12 @@ export function GradePublicationControls({
             {savedGradeCount} saved of {rosterCount} enrolled
           </p>
           {hasUnsavedChanges ? (
-            <p className="mt-2 text-sm text-amber-800">
-              Save or discard local grade changes before changing publication.
-            </p>
+            <div className="mt-2">
+              <NotificationBanner
+                variant="warning"
+                message="Save or discard local grade changes before changing publication."
+              />
+            </div>
           ) : null}
         </div>
 
@@ -110,11 +114,15 @@ export function GradePublicationControls({
         )}
       </div>
 
-      {errorMessage ? <p role="alert" className="mt-3 text-sm text-red-700">{errorMessage}</p> : null}
+      {errorMessage ? (
+        <div className="mt-3">
+          <NotificationBanner variant="error" message={errorMessage} />
+        </div>
+      ) : null}
       {publicationMutation.isSuccess ? (
-        <p role="status" aria-live="polite" className="mt-3 text-sm text-emerald-700">
-          {publicationMutation.data.message}
-        </p>
+        <div className="mt-3">
+          <NotificationBanner variant="success" message={publicationMutation.data.message} />
+        </div>
       ) : null}
     </section>
   );

@@ -14,6 +14,7 @@ import {
 } from "../schemas/announcement.schema";
 import type { Announcement } from "../types/announcement.type";
 import { AnnouncementComments } from "./announcement-comments";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 
 type AnnouncementCardProps = {
   userId: string;
@@ -156,7 +157,9 @@ export function AnnouncementCard({
             </button>
           </div>
           {deleteMutation.isError ? (
-            <p className="mt-3 text-sm text-red-800">{deleteMutation.error.message}</p>
+            <div className="mt-3">
+              <NotificationBanner variant="error" message={deleteMutation.error.message} />
+            </div>
           ) : null}
         </div>
       ) : null}
@@ -221,7 +224,7 @@ export function AnnouncementCard({
             Pin to the top
           </label>
           {updateMutation.isError ? (
-            <p role="alert" className="text-sm text-red-700">{updateMutation.error.message}</p>
+            <NotificationBanner variant="error" message={updateMutation.error.message} />
           ) : null}
           <button
             type="submit"

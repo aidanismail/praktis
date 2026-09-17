@@ -11,6 +11,7 @@ import {
 } from "../schemas/assignment.schema";
 import { ASSIGNMENT_FILE_TYPES } from "../types/assignment.type";
 import { AssignmentFormFields } from "./assignment-form-fields";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 
 type AssignmentComposerProps = {
   userId: string;
@@ -116,21 +117,17 @@ export function AssignmentComposer({
         aria-busy={mutation.isPending}
       >
         {mutation.isError ? (
-          <p
-            role="alert"
-            className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"
-          >
-            {getCreateErrorMessage(mutation.error)}
-          </p>
+          <NotificationBanner
+            variant="error"
+            message={getCreateErrorMessage(mutation.error)}
+          />
         ) : null}
 
         {mutation.isSuccess ? (
-          <p
-            role="status"
-            className="rounded-xl border border-emerald-200/60 bg-emerald-50/70 px-4 py-3 text-sm font-medium text-emerald-800"
-          >
-            Assignment created!
-          </p>
+          <NotificationBanner
+            variant="success"
+            message="Assignment created!"
+          />
         ) : null}
 
         <AssignmentFormFields
