@@ -106,7 +106,7 @@ export function PraktikanCourseGrades({ userId, courseId }: Props) {
                 </div>
 
                 {!session.grades_published ? (
-                  <span className="rounded-full bg-slate-100 border border-slate-200/60 px-3 py-1 text-xs font-semibold text-slate-600 shrink-0">
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 shrink-0">
                     Not released yet
                   </span>
                 ) : row ? (
@@ -119,7 +119,7 @@ export function PraktikanCourseGrades({ userId, courseId }: Props) {
                     </span>
                   </div>
                 ) : (
-                  <span className="rounded-full border border-amber-200/60 bg-amber-50/80 px-3 py-1 text-xs font-semibold text-amber-700 shrink-0">
+                  <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 shrink-0">
                     No score recorded
                   </span>
                 )}

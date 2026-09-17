@@ -67,10 +67,10 @@ export function PraktikanSubmissionSummary({
         </div>
         <div className="flex items-center gap-2">
           <span
-            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
               submission.is_late
-                ? "border-red-200/60 bg-red-50/80 text-red-700"
-                : "border-emerald-200/60 bg-emerald-50/80 text-emerald-700"
+                ? "bg-red-50 text-red-700"
+                : "bg-emerald-50 text-emerald-700"
             }`}
           >
             <span
@@ -80,14 +80,14 @@ export function PraktikanSubmissionSummary({
             />
             <span>{submission.is_late ? "Late" : "On time"}</span>
           </span>
-          <span className="rounded-full bg-slate-100 border border-slate-200/60 px-3 py-1 text-xs font-semibold text-slate-600">
+          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
             {submission.status}
           </span>
         </div>
       </div>
 
       <dl className="mt-5 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-2xl border border-slate-200/60 bg-slate-50 p-4">
+        <div className="rounded-2xl bg-slate-50 p-4">
           <dt className="text-[10px] uppercase font-semibold tracking-wider text-slate-400">File</dt>
           <dd className="mt-1 wrap-break-word text-xs font-bold text-slate-950">
             {submission.file_name}
@@ -96,7 +96,7 @@ export function PraktikanSubmissionSummary({
             {formatFileSize(submission.file_size)}
           </dd>
         </div>
-        <div className="rounded-2xl border border-slate-200/60 bg-slate-50 p-4">
+        <div className="rounded-2xl bg-slate-50 p-4">
           <dt className="text-[10px] uppercase font-semibold tracking-wider text-slate-400">Submitted</dt>
           <dd className="mt-1 text-xs font-bold text-slate-950">
             <time dateTime={submission.submitted_at}>
@@ -104,7 +104,7 @@ export function PraktikanSubmissionSummary({
             </time>
           </dd>
         </div>
-        <div className="rounded-2xl border border-slate-200/60 bg-slate-50 p-4">
+        <div className="rounded-2xl bg-slate-50 p-4">
           <dt className="text-[10px] uppercase font-semibold tracking-wider text-slate-400">Score</dt>
           <dd className="mt-1 text-xs font-bold text-slate-950">
             {submission.score === null
@@ -112,7 +112,7 @@ export function PraktikanSubmissionSummary({
               : `${submission.score} / ${maxPoints}`}
           </dd>
         </div>
-        <div className="rounded-2xl border border-slate-200/60 bg-slate-50 p-4">
+        <div className="rounded-2xl bg-slate-50 p-4">
           <dt className="text-[10px] uppercase font-semibold tracking-wider text-slate-400">Graded</dt>
           <dd className="mt-1 text-xs font-bold text-slate-950">
             {submission.graded_at ? (

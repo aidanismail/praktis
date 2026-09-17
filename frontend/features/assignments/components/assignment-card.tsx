@@ -56,10 +56,10 @@ export function AssignmentCard({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span
-              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${
+              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                 assignment.is_published
-                  ? "border-emerald-200/60 bg-emerald-50/80 text-emerald-700"
-                  : "border-slate-200 bg-slate-100 text-slate-600"
+                  ? "bg-emerald-50 text-emerald-700"
+                  : "bg-slate-100 text-slate-600"
               }`}
             >
               <span
@@ -84,18 +84,18 @@ export function AssignmentCard({
         </div>
 
         {viewerRole === "asprak" ? (
-          <div className="rounded-full border border-slate-200/80 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
+          <div className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
             {assignment.submissions_count}{" "}
             {assignment.submissions_count === 1 ? "submission" : "submissions"}
           </div>
         ) : (
           <span
-            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${
+            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
               assignment.my_submission
                 ? assignment.my_submission.score === null
-                  ? "border-sky-200/60 bg-sky-50/80 text-sky-700"
-                  : "border-emerald-200/60 bg-emerald-50/80 text-emerald-700"
-                : "border-slate-200 bg-slate-100 text-slate-600"
+                  ? "bg-sky-50 text-sky-700"
+                  : "bg-emerald-50 text-emerald-700"
+                : "bg-slate-100 text-slate-600"
             }`}
           >
             <span
@@ -129,7 +129,7 @@ export function AssignmentCard({
       )}
 
       <dl className="mt-4 grid gap-3 sm:grid-cols-3">
-        <div className="rounded-2xl border border-slate-200/60 bg-slate-50 p-3.5">
+        <div className="rounded-2xl bg-slate-50 p-3.5">
           <dt className="text-[10px] uppercase font-semibold tracking-wider text-slate-400">
             Due
           </dt>
@@ -144,7 +144,7 @@ export function AssignmentCard({
           </dd>
         </div>
 
-        <div className="rounded-2xl border border-slate-200/60 bg-slate-50 p-3.5">
+        <div className="rounded-2xl bg-slate-50 p-3.5">
           <dt className="text-[10px] uppercase font-semibold tracking-wider text-slate-400">
             Points
           </dt>
@@ -153,7 +153,7 @@ export function AssignmentCard({
           </dd>
         </div>
 
-        <div className="rounded-2xl border border-slate-200/60 bg-slate-50 p-3.5">
+        <div className="rounded-2xl bg-slate-50 p-3.5">
           <dt className="text-[10px] uppercase font-semibold tracking-wider text-slate-400">
             Allowed formats
           </dt>
@@ -162,7 +162,7 @@ export function AssignmentCard({
               allowedFileTypes.map((fileType) => (
                 <span
                   key={fileType}
-                  className="rounded-full bg-white px-2.5 py-0.5 text-[10px] font-semibold uppercase text-slate-700 border border-slate-200"
+                  className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-semibold uppercase text-slate-700"
                 >
                   {fileType}
                 </span>
@@ -180,7 +180,7 @@ export function AssignmentCard({
             assignment.course_id,
             assignment.id
           )}
-          className="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 px-3.5 py-1.5 rounded-full shadow-xs transition-colors"
+          className="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3.5 py-1.5 rounded-full transition-colors"
         >
           <span>Open assignment</span>
           <ChevronRight className="w-3.5 h-3.5" />

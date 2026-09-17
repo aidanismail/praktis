@@ -20,19 +20,19 @@ const labels: Record<AttendanceStatus, string> = {
 
 const statusStyles: Record<AttendanceStatus, { badge: string; dot: string }> = {
   hadir: {
-    badge: "border-emerald-200/60 bg-emerald-50/80 text-emerald-700",
+    badge: "bg-emerald-50 text-emerald-700",
     dot: "bg-emerald-500",
   },
   sakit: {
-    badge: "border-sky-200/60 bg-sky-50/80 text-sky-700",
+    badge: "bg-sky-50 text-sky-700",
     dot: "bg-sky-500",
   },
   izin: {
-    badge: "border-amber-200/60 bg-amber-50/80 text-amber-700",
+    badge: "bg-amber-50 text-amber-700",
     dot: "bg-amber-500",
   },
   alfa: {
-    badge: "border-red-200/60 bg-red-50/80 text-red-700",
+    badge: "bg-red-50 text-red-700",
     dot: "bg-red-500",
   },
 };
@@ -264,7 +264,7 @@ export function PraktikanAttendanceHistory({ userId }: Props) {
                       </div>
 
                       <span
-                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${styling.badge}`}
+                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${styling.badge}`}
                       >
                         <span className={`w-1.5 h-1.5 rounded-full ${styling.dot}`} />
                         <span>{labels[row.status]}</span>
