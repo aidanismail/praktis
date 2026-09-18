@@ -48,9 +48,8 @@ USERS_DATA = [
 
 async def seed_data():
     async with AsyncSessionLocal() as db:
-        print("--- Starting Database Seeding ---")
+        print("-Star Seed")
 
-        # 1. Seed Users
         user_map = {}
         for u_data in USERS_DATA:
             res = await db.execute(select(User).where(User.username == u_data["username"]))
@@ -71,24 +70,15 @@ async def seed_data():
                 print(f"[Users] Created: {user.username} ({user.role})")
             else:
                 print(f"[Users] Exists: {user.username}")
-            user_map[u_data["username"]] = user
 
-        
-
+            user_map[u_data["username"]] = user(
                     select(Enrollment).where(
                         Enrollment.course_id == course.id,
                         Enrollment.student_id == student.id,
                     )
                 )
-                if not res_e.scalar_one_or_none():
-                    enrollment = Enrollment(
-                        id=uuid.uuid4(),
-                        course_id=course.id,
-                        student_id=student.id,
-                    )
-                    db.add(enrollment)
-                    print(f"[Enrollments] Enrolled {student.username} in {course.code}")
 
+        db.commit()
         print("Done Seeding")
 
 

@@ -65,6 +65,7 @@ Thumbs.db
 .codex/
 .impeccable/
 .agents/*
+.gemini/*
 PLANS.MD
 PLANS.md
 PRODUCT.md
