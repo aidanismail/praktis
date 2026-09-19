@@ -183,7 +183,8 @@ export function DashboardHeader({
             <span className="font-semibold text-slate-900 hidden sm:inline">
               {user.username}
             </span>
-            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700 capitalize">
+            <span className="text-slate-300 hidden sm:inline" aria-hidden="true">·</span>
+            <span className="text-[11px] font-medium text-slate-500 capitalize">
               {user.role}
             </span>
           </button>

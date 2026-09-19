@@ -56,32 +56,28 @@ export function PraktikanSubmissionSummary({
   return (
     <section
       aria-labelledby="my-submission-heading"
-      className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs"
+      className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs"
     >
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Your Work</p>
-          <h2 id="my-submission-heading" className="mt-1 text-lg font-bold text-slate-950">
-            Your Submission
+          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Your Work</p>
+          <h2 id="my-submission-heading" className="mt-1 text-base font-bold tracking-tight text-slate-950">
+            Your submission
           </h2>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 text-xs">
           <span
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
+            className={`font-semibold ${
               submission.is_late
-                ? "bg-red-50 text-red-700"
-                : "bg-emerald-50 text-emerald-700"
+                ? "text-rose-700"
+                : "text-slate-500"
             }`}
           >
-            <span
-              className={`w-1.5 h-1.5 rounded-full ${
-                submission.is_late ? "bg-red-500" : "bg-emerald-500"
-              }`}
-            />
-            <span>{submission.is_late ? "Late" : "On time"}</span>
+            {submission.is_late ? "Late" : "On time"}
           </span>
-          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-            {submission.status}
+          <span className="text-slate-300" aria-hidden="true">·</span>
+          <span className="font-semibold text-slate-900 capitalize">
+            {submission.status.toLowerCase()}
           </span>
         </div>
       </div>

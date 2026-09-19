@@ -232,16 +232,18 @@ export function CourseClassworkTab({
                   <button
                     type="button"
                     onClick={() => onOpenEditAssignment(a)}
-                    className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg text-xs apple-press transition-colors"
+                    className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg text-xs apple-press transition-colors"
                     title="Edit assignment"
+                    aria-label="Edit assignment"
                   >
                     <Pencil className="w-3.5 h-3.5" />
                   </button>
                   <button
                     type="button"
                     onClick={() => onDeleteAssignment(a.id)}
-                    className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg text-xs apple-press transition-colors"
+                    className="p-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg text-xs apple-press transition-colors"
                     title="Delete assignment"
+                    aria-label="Delete assignment"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -315,10 +317,10 @@ export function CourseClassworkTab({
                     </>
                   )}
                   <span
-                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${
+                    className={`text-xs font-semibold ${
                       m.is_published
-                        ? "bg-slate-100 text-slate-800 border border-slate-200"
-                        : "bg-slate-50 text-slate-500 border border-slate-200"
+                        ? "text-slate-900"
+                        : "text-amber-700"
                     }`}
                   >
                     {m.is_published ? "Published" : "Draft"}
@@ -326,8 +328,9 @@ export function CourseClassworkTab({
                   <button
                     type="button"
                     onClick={() => onDeleteModule(m.id)}
-                    className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg text-xs apple-press transition-colors"
+                    className="p-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg text-xs apple-press transition-colors"
                     title="Delete module"
+                    aria-label="Delete module"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -368,7 +371,8 @@ export function CourseClassworkTab({
                   setShowUploadModal(false);
                   setModUploadQueue([]);
                 }}
-                className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center text-xs"
+                className="apple-press w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center text-xs"
+                aria-label="Close modal"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -449,7 +453,7 @@ export function CourseClassworkTab({
                       >
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2 overflow-hidden">
-                            <FileCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <FileCheck className="w-4 h-4 text-cyan-600 shrink-0" />
                             <span className="font-semibold text-slate-900 text-xs truncate">
                               {item.file.name}
                             </span>
@@ -463,7 +467,9 @@ export function CourseClassworkTab({
                               onClick={() => {
                                 setModUploadQueue((prev) => prev.filter((_, i) => i !== idx));
                               }}
-                              className="p-1 rounded-full text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                              className="apple-press p-1.5 rounded-full text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition-colors"
+                              aria-label={`Remove ${item.file.name} from upload queue`}
+                              title="Remove item"
                             >
                               <X className="w-3.5 h-3.5" />
                             </button>
@@ -520,7 +526,7 @@ export function CourseClassworkTab({
                   </div>
                   <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
                     <div
-                      className="bg-emerald-400 h-full transition-all duration-200"
+                      className="bg-cyan-400 h-full transition-all duration-200 shadow-[0_0_8px_rgba(34,211,238,0.5)]"
                       style={{
                         width: `${
                           (modUploadProgress.current / modUploadProgress.total) * 100

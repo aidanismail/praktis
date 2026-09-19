@@ -412,6 +412,7 @@ export function UserManagement() {
                   <th className="w-10 px-4 py-3 text-center">
                     <input
                       type="checkbox"
+                      aria-label="Select all users"
                       onChange={handleSelectAll}
                       checked={
                         filteredUsers.length > 0 &&
@@ -440,6 +441,7 @@ export function UserManagement() {
                       <td className="px-4 py-3 text-center">
                         <input
                           type="checkbox"
+                          aria-label={`Select user ${user.username}`}
                           checked={isSelected}
                           onChange={() => handleSelectUser(user.id)}
                           className="rounded border-slate-300 text-slate-900 focus:ring-slate-900"
@@ -459,22 +461,17 @@ export function UserManagement() {
                       </td>
 
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span
-                            className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold capitalize ${
-                              user.role === "superadmin"
-                                ? "bg-slate-900 text-white"
-                                : user.role === "asprak"
-                                  ? "bg-slate-200 text-slate-800"
-                                  : "bg-slate-100 text-slate-700"
-                            }`}
-                          >
+                        <div className="flex items-center gap-1.5 flex-wrap text-xs">
+                          <span className="font-semibold text-slate-900 capitalize">
                             {user.role}
                           </span>
                           {!user.is_active && (
-                            <span className="rounded-full bg-rose-50 border border-rose-200/80 px-2 py-0.5 text-[10px] font-semibold text-rose-700">
-                              Inactive
-                            </span>
+                            <>
+                              <span className="text-slate-300" aria-hidden="true">·</span>
+                              <span className="font-semibold text-rose-700">
+                                Inactive
+                              </span>
+                            </>
                           )}
                         </div>
                       </td>
@@ -484,7 +481,7 @@ export function UserManagement() {
                           <button
                             type="button"
                             onClick={() => handleResetPassword(user)}
-                            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-xs hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                            className="apple-press rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-xs hover:bg-slate-50 hover:text-slate-900 transition-colors"
                           >
                             Reset password
                           </button>
@@ -493,7 +490,7 @@ export function UserManagement() {
                               <button
                                 type="button"
                                 onClick={() => handleDeactivateUser(user)}
-                                className="rounded-lg border border-rose-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-rose-700 shadow-xs hover:bg-rose-50 hover:border-rose-300 transition-colors"
+                                className="apple-press rounded-full border border-rose-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-rose-700 shadow-xs hover:bg-rose-50 hover:border-rose-300 transition-colors"
                               >
                                 Deactivate
                               </button>
@@ -501,7 +498,7 @@ export function UserManagement() {
                               <button
                                 type="button"
                                 onClick={() => handleReactivateUser(user)}
-                                className="rounded-lg border border-emerald-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-emerald-700 shadow-xs hover:bg-emerald-50 hover:border-emerald-300 transition-colors"
+                                className="apple-press rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-xs hover:bg-slate-50 hover:text-slate-900 transition-colors"
                               >
                                 Reactivate
                               </button>

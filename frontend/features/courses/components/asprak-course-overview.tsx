@@ -1,12 +1,14 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import { AlertCircle, RefreshCw } from "lucide-react";
-import { getCourseDetailRoute, ROUTES } from "@/constants/routes";
+import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useAssignedCourses } from "../hooks/use-assigned-courses";
 import type { Course } from "../types/course.type";
 import { AsprakCourseCard } from "./asprak-course-card";
+import { sortCourses } from "../utils/sort-courses";
 
 type AsprakCourseOverviewProps = {
   userId: string;
@@ -18,20 +20,6 @@ type CourseStatProps = {
   value: number;
   helper: string;
 };
-
-function sortCourses(courses: Course[]) {
-  return [...courses].sort((first, second) => {
-    const yearComparison = second.academic_year.localeCompare(
-      first.academic_year
-    );
-
-    if (yearComparison !== 0) {
-      return yearComparison;
-    }
-
-    return first.code.localeCompare(second.code);
-  });
-}
 
 function CourseStat({ label, value, helper }: CourseStatProps) {
   return (
@@ -83,6 +71,20 @@ export function AsprakCourseOverview({
     isPending,
     refetch
   } = useAssignedCourses(userId);
+
+  const activeCourses = useMemo(
+    () => sortCourses(courses.filter((course) => course.is_active)),
+    [courses]
+  );
+  const historicalCount = useMemo(
+    () => courses.filter((course) => !course.is_active).length,
+    [courses]
+  );
+  const visibleCourses = useMemo(
+    () => activeCourses.slice(0, 4),
+    [activeCourses]
+  );
+  const remainingCount = Math.max(0, activeCourses.length - visibleCourses.length);
 
   if (isPending) {
     return <CourseOverviewLoading />;
@@ -149,14 +151,6 @@ export function AsprakCourseOverview({
     );
   }
 
-  const activeCourses = sortCourses(
-    courses.filter((course) => course.is_active)
-  );
-  const historicalCount = courses.filter((course) => !course.is_active).length;
-
-  const visibleCourses = activeCourses.slice(0, 4);
-  const remainingCount = Math.max(0, activeCourses.length - visibleCourses.length);
-
   return (
     <div className="space-y-8">
       <section aria-labelledby="class-metrics-heading">
@@ -168,33 +162,37 @@ export function AsprakCourseOverview({
             Assigned classes
           </h3>
 
-          {isFetching ? (
-            <span
-              role="status"
-              className="inline-flex items-center gap-2 text-xs font-medium text-slate-500"
-            >
-              <RefreshCw
-                className="h-3.5 w-3.5 animate-spin"
-                aria-hidden="true"
-              />
-              Refreshing
-            </span>
-          ) : null}
+          {/* Persistent aria-live region so screen readers announce refresh state */}
+          <span
+            role="status"
+            aria-live="polite"
+            className="inline-flex items-center gap-2 text-xs font-medium text-slate-500"
+          >
+            {isFetching ? (
+              <>
+                <RefreshCw
+                  className="h-3.5 w-3.5 animate-spin"
+                  aria-hidden="true"
+                />
+                Refreshing
+              </>
+            ) : null}
+          </span>
         </div>
 
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
           <CourseStat
-            label="Assigned classes"
+            label="Total"
             value={courses.length}
             helper="All time"
           />
           <CourseStat
-            label="Active classes"
+            label="Active"
             value={activeCourses.length}
             helper="Current term"
           />
           <CourseStat
-            label="Past classes"
+            label="Past"
             value={historicalCount}
             helper="Completed terms"
           />
@@ -215,21 +213,16 @@ export function AsprakCourseOverview({
         {visibleCourses.length > 0 ? (
           <>
             <ul className="mt-4 grid gap-4 lg:grid-cols-2">
-              {visibleCourses.map((course) => (
+              {visibleCourses.map((course: Course) => (
                 <li key={course.id}>
-                  <Link
-                    href={getCourseDetailRoute(course.id)}
-                    onClick={(e) => {
-                      if (onNavigateToCourse) {
-                        e.preventDefault();
-                        onNavigateToCourse(course.id);
-                      }
-                    }}
+                  <button
+                    type="button"
+                    onClick={() => onNavigateToCourse?.(course.id)}
+                    className="block h-full w-full rounded-2xl text-left transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
                     aria-label={`Open ${course.code} ${course.name}, ${course.academic_year} semester ${course.semester}`}
-                    className="block h-full rounded-2xl transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
                   >
                     <AsprakCourseCard course={course} />
-                  </Link>
+                  </button>
                 </li>
               ))}
             </ul>
@@ -243,14 +236,21 @@ export function AsprakCourseOverview({
         ) : (
           <div
             role="status"
-            className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6"
+            className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center"
           >
             <h4 className="font-semibold text-slate-950">
               No active classes right now
             </h4>
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              You can review past classes under My Practicum Classes.
+              You can review completed terms under My Practicum Classes.
             </p>
+            <button
+              type="button"
+              onClick={() => onNavigateToCourse && onNavigateToCourse("")}
+              className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+            >
+              Browse all classes
+            </button>
           </div>
         )}
       </section>

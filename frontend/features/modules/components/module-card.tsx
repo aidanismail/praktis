@@ -34,26 +34,34 @@ export function ModuleCard({ userId, courseId, module, accessMode }: ModuleCardP
   const fileType = getFileTypeBadge(module.file_key, module.download_url);
 
   return (
-    <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs sm:p-6">
+    <article className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xs transition-all hover:border-slate-300 hover:shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-xs">
             <span
               className={
                 module.is_published
-                  ? "inline-flex rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700"
-                  : "inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600"
+                  ? "font-semibold text-slate-900"
+                  : "font-semibold text-amber-700"
               }
             >
               {accessMode === "read-only" ? "Available" : module.is_published ? "Published" : "Draft"}
             </span>
 
-            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-slate-600">
+            <span className="text-slate-300" aria-hidden="true">·</span>
+
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
               {fileType}
             </span>
+
+            <span className="text-slate-300" aria-hidden="true">·</span>
+
+            <time dateTime={module.created_at} className="text-[11px] text-slate-400">
+              {formatModuleDate(module.created_at)}
+            </time>
           </div>
 
-          <h3 className="mt-2.5 wrap-break-word text-base font-bold text-slate-950">
+          <h3 className="mt-2 wrap-break-word text-sm sm:text-base font-bold text-slate-950 tracking-tight">
             {module.title}
           </h3>
         </div>

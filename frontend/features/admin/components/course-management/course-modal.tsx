@@ -135,11 +135,6 @@ function CourseFormInner({
             <div className="flex items-center justify-between p-3 rounded-2xl border border-slate-200 bg-slate-50/70">
               <div>
                 <div className="flex items-center gap-2">
-                  <span
-                    className={`w-2 h-2 rounded-full ${
-                      isActiveCourse ? "bg-emerald-500" : "bg-slate-400"
-                    }`}
-                  />
                   <span className="font-bold text-slate-900 text-xs">
                     {isActiveCourse ? "Active Offering" : "Archived"}
                   </span>

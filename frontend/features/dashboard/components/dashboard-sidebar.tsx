@@ -83,10 +83,6 @@ export function DashboardSidebar({
               <IconComponent className="h-4 w-4 shrink-0 transition-transform duration-200" />
               {!collapsed && <span className="truncate">{item.label}</span>}
             </div>
-
-            {!collapsed && isActive && (
-              <span className="h-1.5 w-1.5 rounded-full bg-white shrink-0 animate-in fade-in zoom-in duration-200" />
-            )}
           </button>
         );
       })}

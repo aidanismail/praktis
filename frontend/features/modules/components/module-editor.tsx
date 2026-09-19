@@ -134,7 +134,7 @@ export function ModuleEditor({ userId, courseId, module }: ModuleEditorProps) {
             onClick={startEditing}
             aria-expanded={false}
             aria-controls={formId}
-            className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
+            className="apple-press inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
           >
             Edit details
           </button>
@@ -172,7 +172,7 @@ export function ModuleEditor({ userId, courseId, module }: ModuleEditorProps) {
               aria-describedby={
                 form.formState.errors.title ? `${titleId}-error` : undefined
               }
-              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 disabled:cursor-not-allowed disabled:bg-slate-100"
+              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900 disabled:cursor-not-allowed disabled:bg-slate-100"
               {...form.register("title")}
             />
 
@@ -189,14 +189,11 @@ export function ModuleEditor({ userId, courseId, module }: ModuleEditorProps) {
               className="text-sm font-medium text-slate-800"
             >
               Description
-              <span className="ml-1 font-normal text-slate-500">
-                (optional)
-              </span>
             </label>
             <textarea
               id={descriptionId}
               rows={4}
-              maxLength={500}
+              maxLength={2000}
               disabled={mutation.isPending}
               aria-invalid={Boolean(form.formState.errors.description)}
               aria-describedby={
@@ -204,7 +201,7 @@ export function ModuleEditor({ userId, courseId, module }: ModuleEditorProps) {
                   ? `${descriptionId}-error`
                   : undefined
               }
-              className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm leading-6 text-slate-950 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 disabled:cursor-not-allowed disabled:bg-slate-100"
+              className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm leading-6 text-slate-950 outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900 disabled:cursor-not-allowed disabled:bg-slate-100"
               {...form.register("description")}
             />
 
@@ -220,14 +217,14 @@ export function ModuleEditor({ userId, courseId, module }: ModuleEditorProps) {
               type="button"
               onClick={cancelEditing}
               disabled={mutation.isPending}
-              className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 transition hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+              className="apple-press inline-flex min-h-10 items-center rounded-full border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={mutation.isPending}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-700 px-5 text-sm font-semibold text-white transition hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+              className="apple-press inline-flex min-h-10 items-center justify-center rounded-full bg-slate-900 px-5 text-xs font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {mutation.isPending ? (
                 <>

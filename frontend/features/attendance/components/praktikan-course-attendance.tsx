@@ -16,23 +16,11 @@ const labels: Record<AttendanceStatus, string> = {
   alfa: "Alfa",
 };
 
-const statusStyles: Record<AttendanceStatus, { badge: string; dot: string }> = {
-  hadir: {
-    badge: "bg-emerald-50 text-emerald-700",
-    dot: "bg-emerald-500",
-  },
-  sakit: {
-    badge: "bg-sky-50 text-sky-700",
-    dot: "bg-sky-500",
-  },
-  izin: {
-    badge: "bg-amber-50 text-amber-700",
-    dot: "bg-amber-500",
-  },
-  alfa: {
-    badge: "bg-red-50 text-red-700",
-    dot: "bg-red-500",
-  },
+const statusTextColors: Record<AttendanceStatus, string> = {
+  hadir: "text-emerald-700 font-semibold",
+  sakit: "text-sky-700 font-semibold",
+  izin: "text-amber-700 font-semibold",
+  alfa: "text-rose-700 font-semibold",
 };
 
 const dateFormatter = new Intl.DateTimeFormat("en", { dateStyle: "full" });
@@ -119,7 +107,6 @@ export function PraktikanCourseAttendance({ userId, courseId }: Props) {
           {sessions.map((session) => {
             const record = attendance.get(session.id);
             const windowState = getSessionAttendanceStatus(session.attendance_status);
-            const styling = record ? statusStyles[record.status] : null;
 
             return (
               <article
@@ -128,31 +115,27 @@ export function PraktikanCourseAttendance({ userId, courseId }: Props) {
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <h3 className="text-sm font-bold text-slate-950">{session.title}</h3>
-                    <p className="mt-1 text-xs text-slate-500">
+                    <h3 className="text-sm font-bold text-slate-950 tracking-tight">{session.title}</h3>
+                    <p className="mt-0.5 text-xs text-slate-500">
                       <time dateTime={session.date}>{formatDate(session.date)}</time>
                     </p>
                   </div>
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-                    Window: {windowState === "UNKNOWN" ? "Unavailable" : windowState.toLowerCase()}
+                  <span className="text-xs text-slate-500 font-medium">
+                    Window: <span className="font-semibold text-slate-800 capitalize">{windowState === "UNKNOWN" ? "Unavailable" : windowState.toLowerCase()}</span>
                   </span>
                 </div>
 
-                <div className="mt-4 border-t border-slate-100 pt-3.5">
-                  <span className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider block">
+                <div className="mt-3.5 flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
+                  <span className="text-[11px] uppercase font-semibold text-slate-400 tracking-wider">
                     My attendance
                   </span>
-                  {record && styling ? (
-                    <span
-                      className={`mt-2 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${styling.badge}`}
-                    >
-                      <span className={`w-1.5 h-1.5 rounded-full ${styling.dot}`} />
-                      <span>{labels[record.status]}</span>
+                  {record ? (
+                    <span className={statusTextColors[record.status]}>
+                      {labels[record.status]}
                     </span>
                   ) : (
-                    <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-slate-100 text-slate-600 px-3 py-1 text-xs font-semibold">
-                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                      <span>Not recorded yet</span>
+                    <span className="text-slate-400 font-medium">
+                      Not recorded yet
                     </span>
                   )}
                 </div>

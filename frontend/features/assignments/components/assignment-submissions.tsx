@@ -222,19 +222,18 @@ export function AssignmentSubmissions({
         <div>
           <h2
             id="assignment-submissions-heading"
-            className="text-lg font-semibold text-slate-950"
+            className="text-base sm:text-lg font-bold tracking-tight text-slate-950"
           >
             Praktikan submissions
+            <span className="ml-2 text-xs font-normal text-slate-500 tabular-nums">
+              ({submissions.length})
+            </span>
           </h2>
 
-          <p className="mt-1 text-sm leading-6 text-slate-600">
+          <p className="mt-0.5 text-xs text-slate-500">
             Review submitted files and provide private scores and feedback.
           </p>
         </div>
-
-        <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
-          {submissions.length} {submissions.length === 1 ? "submission" : "submissions"}
-        </span>
       </div>
 
       {query.isFetching ? (
@@ -340,22 +339,24 @@ export function AssignmentSubmissions({
                   >
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2 text-xs">
                           <span
                             className={
                               graded
-                                ? "rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800"
-                                : "rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800"
+                                ? "font-semibold text-slate-900"
+                                : "font-semibold text-amber-700"
                             }
                           >
                             {graded ? "Graded" : "Awaiting grade"}
                           </span>
 
+                          <span className="text-slate-300" aria-hidden="true">·</span>
+
                           <span
                             className={
                               submission.is_late
-                                ? "rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700"
-                                : "rounded-full bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-700"
+                                ? "font-semibold text-rose-700"
+                                : "font-medium text-slate-500"
                             }
                           >
                             {submission.is_late ? "Late" : "On time"}

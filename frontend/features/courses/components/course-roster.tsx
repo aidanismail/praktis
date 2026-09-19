@@ -71,8 +71,7 @@ export function CourseRoster({ userId, courseId }: CourseRosterProps) {
         {!isPending && !isError ? (
           <span
             aria-live="polite"
-            className="rounded-full bg-slate-100 px-3 py-1 text-xs
-              font-semibold text-slate-700"
+            className="text-xs font-semibold text-slate-500"
           >
             {students.length} {students.length === 1 ? "student" : "students"}
           </span>

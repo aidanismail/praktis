@@ -37,18 +37,18 @@ function formatSessionDate(value: string) {
     : dateFormatter.format(date);
 }
 
-const statusStyles = {
-  SCHEDULED: "bg-sky-50 text-sky-800",
-  OPEN: "bg-emerald-50 text-emerald-800",
-  CLOSED: "bg-slate-100 text-slate-700",
-  UNKNOWN: "bg-amber-50 text-amber-900"
+const statusTextColors = {
+  SCHEDULED: "text-sky-700 font-semibold",
+  OPEN: "text-slate-900 font-semibold",
+  CLOSED: "text-slate-500 font-medium",
+  UNKNOWN: "text-amber-700 font-medium"
 } as const;
 
 const statusLabels = {
   SCHEDULED: "Scheduled",
   OPEN: "Attendance open",
   CLOSED: "Attendance closed",
-  UNKNOWN: "Unknown state"
+  UNKNOWN: "State unknown"
 } as const;
 
 export function SessionCard({
@@ -95,20 +95,21 @@ export function SessionCard({
   }
 
   return (
-    <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs sm:p-6">
+    <article className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xs transition-all hover:border-slate-300 hover:shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
-          <span
-            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusStyles[status]}`}
-          >
-            {statusLabels[status]}
-          </span>
-          <h3 className="mt-2.5 wrap-break-word text-base font-bold text-slate-950">
+          <div className="flex items-center gap-2 text-xs">
+            <span className={statusTextColors[status]}>
+              {statusLabels[status]}
+            </span>
+            <span className="text-slate-300" aria-hidden="true">·</span>
+            <time dateTime={session.date} className="text-[11px] text-slate-400">
+              {formatSessionDate(session.date)}
+            </time>
+          </div>
+          <h3 className="mt-2 wrap-break-word text-sm sm:text-base font-bold text-slate-950 tracking-tight">
             {session.title}
           </h3>
-          <p className="mt-1 text-sm text-slate-500">
-            <time dateTime={session.date}>{formatSessionDate(session.date)}</time>
-          </p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -121,7 +122,7 @@ export function SessionCard({
               setIsEditing((current) => !current);
             }}
             disabled={updateMutation.isPending || deleteMutation.isPending}
-            className="inline-flex min-h-9 items-center rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="apple-press inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
             Edit
           </button>
@@ -134,7 +135,7 @@ export function SessionCard({
                 setIsConfirmingDelete(true);
               }}
               disabled={updateMutation.isPending || deleteMutation.isPending}
-              className="inline-flex min-h-9 items-center rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-red-700 transition hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+              className="apple-press inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-red-700 transition hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
               Delete
             </button>
@@ -201,13 +202,13 @@ export function SessionCard({
         </div>
       ) : null}
 
-      <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-4">
+      <div className="mt-3.5 flex flex-wrap gap-2 border-t border-slate-100 pt-3">
         {status === "SCHEDULED" || status === "CLOSED" ? (
           <button
             type="button"
             onClick={() => onTransition(session.id, "open")}
             disabled={transitionPending}
-            className="inline-flex min-h-9 items-center rounded-lg bg-slate-900 px-3 text-sm font-semibold text-white shadow-xs transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+            className="apple-press inline-flex items-center rounded-full bg-slate-900 px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isThisTransitioning
               ? status === "CLOSED"
@@ -224,7 +225,7 @@ export function SessionCard({
             type="button"
             onClick={() => onTransition(session.id, "close")}
             disabled={transitionPending}
-            className="inline-flex min-h-9 items-center rounded-lg bg-slate-900 px-3 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+            className="apple-press inline-flex items-center rounded-full bg-slate-900 px-3.5 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isThisTransitioning ? "Closing..." : "Close attendance"}
           </button>
@@ -232,7 +233,7 @@ export function SessionCard({
 
         <Link
           href={getSessionDetailRoute(courseId, session.id)}
-          className="inline-flex min-h-9 items-center rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700"
+          className="apple-press inline-flex items-center rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
         >
           Open workspace
         </Link>

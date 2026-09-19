@@ -20,14 +20,23 @@ function formatDate(value: string) {
 
 export function PraktikanAnnouncementCard({ userId, courseId, announcement }: PraktikanAnnouncementCardProps) {
   return (
-    <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-      <div className="flex flex-wrap items-center gap-2">
-        {announcement.is_pinned ? <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800"><Pin className="h-3.5 w-3.5" aria-hidden="true" />Pinned</span> : null}
-        <span className="text-sm font-semibold text-slate-900">{announcement.author_username}</span>
-        <span className="text-xs uppercase tracking-wide text-slate-500">{announcement.author_role}</span>
+    <article className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xs transition-all hover:border-slate-300 hover:shadow-sm">
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        {announcement.is_pinned ? (
+          <>
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-700">
+              <Pin className="h-3.5 w-3.5" aria-hidden="true" />
+              Pinned
+            </span>
+            <span className="text-slate-300" aria-hidden="true">·</span>
+          </>
+        ) : null}
+        <span className="text-xs sm:text-sm font-semibold text-slate-950">{announcement.author_username}</span>
+        <span className="text-[11px] font-medium uppercase tracking-wider text-slate-400">{announcement.author_role}</span>
+        <span className="text-slate-300" aria-hidden="true">·</span>
+        <time dateTime={announcement.created_at} className="text-[11px] text-slate-400">{formatDate(announcement.created_at)}</time>
       </div>
-      <p className="mt-2 text-xs text-slate-500"><time dateTime={announcement.created_at}>{formatDate(announcement.created_at)}</time></p>
-      <h3 className="mt-5 wrap-break-word text-lg font-semibold text-slate-950">{announcement.title}</h3>
+      <h3 className="mt-3 wrap-break-word text-base font-bold text-slate-950 tracking-tight">{announcement.title}</h3>
       <p className="mt-3 whitespace-pre-wrap wrap-break-word text-sm leading-7 text-slate-700">{announcement.content}</p>
       <AnnouncementComments
         userId={userId}

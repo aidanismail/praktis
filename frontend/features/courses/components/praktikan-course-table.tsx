@@ -33,12 +33,7 @@ export function PraktikanCourseTable({ courses }: PraktikanCourseTableProps) {
                 {course.academic_year} · Semester {course.semester}
               </td>
               <td className="px-5 py-4">
-                <span className="font-medium text-slate-800 flex items-center gap-1.5">
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full ${
-                      course.is_active ? "bg-emerald-500" : "bg-slate-400"
-                    } inline-block`}
-                  />
+                <span className={`font-semibold ${course.is_active ? "text-slate-900" : "text-slate-500"}`}>
                   {course.is_active ? "Active" : "Archived"}
                 </span>
               </td>

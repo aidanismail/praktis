@@ -108,16 +108,18 @@ export function CourseStream({ userId, courseId, viewerRole }: CourseStreamProps
 
       <div className="mt-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="text-xl font-semibold text-slate-950">Course Stream</h2>
-          <p className="mt-1 text-sm text-slate-600">
+          <h2 className="text-base sm:text-lg font-bold tracking-tight text-slate-950">
+            Course stream
+            <span className="ml-2 text-xs font-normal text-slate-500 tabular-nums">
+              ({announcements.length})
+            </span>
+          </h2>
+          <p className="mt-0.5 text-xs text-slate-500">
             {viewerRole === "asprak"
               ? "Share notes, updates, and reminders. Pinned posts stay right at the top."
               : "Stay in the loop with updates and reminders from your instructors."}
           </p>
         </div>
-        <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700" aria-live="polite">
-          {announcements.length} {announcements.length === 1 ? "announcement" : "announcements"}
-        </span>
       </div>
 
       {isFetching ? (

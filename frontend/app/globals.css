@@ -33,7 +33,7 @@ body {
 
 :root {
   --ease-apple: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-apple-spring: cubic-bezier(0.34, 1.3, 0.64, 1);
+  --ease-apple-spring: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-apple-snappy: cubic-bezier(0.25, 1, 0.5, 1);
 }
 
@@ -107,15 +107,24 @@ body {
   transform: translateY(-2px);
 }
 
-/* Respect user's motion preference (Accessibility standard) */
+/* Respect user's motion preference (WCAG AA standard) */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  /* Neutralize physical displacement transforms while preserving color/opacity feedback */
+  .animate-apple-modal,
+  .animate-apple-fade,
+  .animate-apple-sheet,
+  .apple-press:active,
+  .apple-card-hover:hover {
+    animation: none !important;
+    transform: none !important;
   }
 }
 

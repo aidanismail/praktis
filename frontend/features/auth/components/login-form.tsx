@@ -27,7 +27,7 @@ export function LoginForm() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-md rounded-3xl border border-white/10 bg-white/95 p-7 shadow-2xl shadow-black/20 backdrop-blur">
+    <div className="mx-auto w-full max-w-md rounded-3xl border border-white/10 bg-white p-7 shadow-2xl shadow-black/20">
       <div className="mb-7">
         <ProductLogo
           size={48}
@@ -71,13 +71,17 @@ export function LoginForm() {
               type="text"
               placeholder="e.g. 140810230075"
               autoComplete="username"
-              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 pl-10 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+              aria-invalid={Boolean(form.formState.errors.username)}
+              aria-describedby={
+                form.formState.errors.username ? "username-error" : undefined
+              }
+              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 pl-10 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
               {...form.register("username")}
             />
           </div>
 
           {form.formState.errors.username ? (
-            <p className="text-sm text-red-600">
+            <p id="username-error" className="text-sm text-red-600">
               {form.formState.errors.username.message}
             </p>
           ) : null}
@@ -99,14 +103,18 @@ export function LoginForm() {
               type={showPassword ? "text" : "password"}
               placeholder="Enter your password"
               autoComplete="current-password"
-              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 pl-10 pr-10 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+              aria-invalid={Boolean(form.formState.errors.password)}
+              aria-describedby={
+                form.formState.errors.password ? "password-error" : undefined
+              }
+              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 pl-10 pr-11 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
               {...form.register("password")}
             />
 
             <button
               type="button"
               onClick={() => setShowPassword((value) => !value)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md text-slate-400 transition hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-300"
+              className="absolute right-1 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-lg text-slate-400 transition hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? (
@@ -118,7 +126,7 @@ export function LoginForm() {
           </div>
 
           {form.formState.errors.password ? (
-            <p className="text-sm text-red-600">
+            <p id="password-error" className="text-sm text-red-600">
               {form.formState.errors.password.message}
             </p>
           ) : null}
@@ -127,11 +135,11 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={loginMutation.isPending}
-          className="flex h-11 w-full cursor-pointer items-center justify-center rounded-xl bg-brand px-4 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
+          className="flex h-11 w-full cursor-pointer items-center justify-center rounded-full bg-slate-900 px-4 text-sm font-semibold text-white apple-press transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {loginMutation.isPending ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
               Signing in...
             </>
           ) : (

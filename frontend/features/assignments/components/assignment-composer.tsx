@@ -95,25 +95,25 @@ export function AssignmentComposer({
   return (
     <section
       aria-labelledby="assignment-composer-heading"
-      className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+      className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xs"
     >
       <div>
         <h2
           id="assignment-composer-heading"
-          className="font-semibold text-slate-950"
+          className="text-sm font-bold tracking-tight text-slate-950"
         >
-          Create an assignment
+          Create assignment
         </h2>
 
-        <p className="mt-1 text-sm leading-6 text-slate-600">
-          Draft your prompt or release it directly to students.
+        <p className="mt-0.5 text-xs text-slate-500">
+          Draft your task prompt or release directly to students.
         </p>
       </div>
 
       <form
         noValidate
         onSubmit={form.handleSubmit(onSubmit)}
-        className="mt-5 space-y-4"
+        className="mt-4 space-y-3.5"
         aria-busy={mutation.isPending}
       >
         {mutation.isError ? (
@@ -134,18 +134,19 @@ export function AssignmentComposer({
           form={form}
           idPrefix="assignment-create"
           disabled={mutation.isPending}
+          compact
         />
 
-        <div className="flex justify-end">
+        <div className="flex justify-end pt-1">
           <button
             type="submit"
             disabled={mutation.isPending}
-            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60 shadow-xs"
+            className="apple-press inline-flex items-center justify-center rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60 shadow-xs"
           >
             {mutation.isPending ? (
               <>
                 <Loader2
-                  className="mr-2 h-4 w-4 animate-spin"
+                  className="mr-1.5 h-3.5 w-3.5 animate-spin"
                   aria-hidden="true"
                 />
                 Creating...

@@ -11,6 +11,7 @@ type AssignmentFormFieldsProps = {
   form: UseFormReturn<AssignmentFormValues>;
   idPrefix: string;
   disabled: boolean;
+  compact?: boolean;
 };
 
 const fileTypeLabels: Record<AssignmentFileType, string> = {
@@ -19,13 +20,11 @@ const fileTypeLabels: Record<AssignmentFileType, string> = {
   docx: "DOCX"
 };
 
-const inputClassName =
-  "h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-50";
-
 export function AssignmentFormFields({
   form,
   idPrefix,
-  disabled
+  disabled,
+  compact = false
 }: AssignmentFormFieldsProps) {
   const titleId = `${idPrefix}-title`;
   const descriptionId = `${idPrefix}-description`;
@@ -35,10 +34,18 @@ export function AssignmentFormFields({
   const fileTypesErrorId = `${idPrefix}-file-types-error`;
   const publicationId = `${idPrefix}-published`;
 
+  const inputCls = compact
+    ? "h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-50"
+    : "h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-50";
+
+  const labelCls = compact
+    ? "text-xs font-semibold text-slate-700"
+    : "text-sm font-medium text-slate-800";
+
   return (
     <>
-      <div className="space-y-2">
-        <label htmlFor={titleId} className="text-sm font-medium text-slate-800">
+      <div className={compact ? "space-y-1.5" : "space-y-2"}>
+        <label htmlFor={titleId} className={labelCls}>
           Title
         </label>
         <input
@@ -46,48 +53,46 @@ export function AssignmentFormFields({
           type="text"
           maxLength={255}
           disabled={disabled}
-          placeholder="Example: Linked List Implementation"
+          placeholder="e.g. Lab Exercise 01"
           aria-invalid={Boolean(form.formState.errors.title)}
           aria-describedby={
             form.formState.errors.title ? `${titleId}-error` : undefined
           }
-          className={inputClassName}
+          className={inputCls}
           {...form.register("title")}
         />
 
         {form.formState.errors.title ? (
-          <p id={`${titleId}-error`} className="text-sm text-red-600">
+          <p id={`${titleId}-error`} className="text-xs text-red-600">
             {form.formState.errors.title.message}
           </p>
         ) : null}
       </div>
 
-      <div className="space-y-2">
-        <label
-          htmlFor={descriptionId}
-          className="text-sm font-medium text-slate-800"
-        >
+      <div className={compact ? "space-y-1.5" : "space-y-2"}>
+        <label htmlFor={descriptionId} className={labelCls}>
           Instructions
-          <span className="ml-1 font-normal text-slate-500">(optional)</span>
+          <span className="ml-1 font-normal text-slate-400">(optional)</span>
         </label>
         <textarea
           id={descriptionId}
-          rows={5}
+          rows={compact ? 3 : 5}
           disabled={disabled}
-          placeholder="Explain the task, expected output, and submission requirements..."
-          className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-50"
+          placeholder="Brief task description and submission rules..."
+          className={
+            compact
+              ? "w-full resize-y rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs leading-5 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-50"
+              : "w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-50"
+          }
           {...form.register("description")}
         />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <label
-            htmlFor={dueDateId}
-            className="text-sm font-medium text-slate-800"
-          >
+      <div className={`grid gap-3 ${compact ? "grid-cols-1 sm:grid-cols-2" : "sm:grid-cols-2"}`}>
+        <div className={compact ? "space-y-1.5" : "space-y-2"}>
+          <label htmlFor={dueDateId} className={labelCls}>
             Due date
-            <span className="ml-1 font-normal text-slate-500">(optional)</span>
+            <span className="ml-1 font-normal text-slate-400">(optional)</span>
           </label>
 
           <input
@@ -98,22 +103,19 @@ export function AssignmentFormFields({
             aria-describedby={
               form.formState.errors.due_date ? `${dueDateId}-error` : undefined
             }
-            className={inputClassName}
+            className={inputCls}
             {...form.register("due_date")}
           />
           {form.formState.errors.due_date ? (
-            <p id={`${dueDateId}-error`} className="text-sm text-red-600">
+            <p id={`${dueDateId}-error`} className="text-xs text-red-600">
               {form.formState.errors.due_date.message}
             </p>
           ) : null}
         </div>
 
-        <div className="space-y-2">
-          <label
-            htmlFor={maxPointsId}
-            className="text-sm font-medium text-slate-800"
-          >
-            Maximum points
+        <div className={compact ? "space-y-1.5" : "space-y-2"}>
+          <label htmlFor={maxPointsId} className={labelCls}>
+            Max points
           </label>
 
           <input
@@ -129,13 +131,13 @@ export function AssignmentFormFields({
                 ? `${maxPointsId}-error`
                 : undefined
             }
-            className={inputClassName}
+            className={inputCls}
             {...form.register("max_points", {
               valueAsNumber: true
             })}
           />
           {form.formState.errors.max_points ? (
-            <p id={`${maxPointsId}-error`} className="text-sm text-red-600">
+            <p id={`${maxPointsId}-error`} className="text-xs text-red-600">
               {form.formState.errors.max_points.message}
             </p>
           ) : null}
@@ -148,60 +150,69 @@ export function AssignmentFormFields({
             ? fileTypesErrorId
             : fileTypesHelpId
         }
-        className="space-y-3"
+        className={compact ? "space-y-2" : "space-y-3"}
       >
-        <legend className="text-sm font-medium text-slate-800">
-          Allowed submission formats
-        </legend>
+        <legend className={labelCls}>Allowed formats</legend>
 
-        <p id={fileTypesHelpId} className="text-sm text-slate-500">
-          Select at least one documented format.
-        </p>
-
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-2">
           {ASSIGNMENT_FILE_TYPES.map((fileType) => (
             <label
               key={fileType}
-              className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium
-text-slate-700"
+              className={`inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 ${
+                compact ? "px-2.5 py-1.5 text-xs" : "min-h-11 px-4 text-sm"
+              }`}
             >
               <input
                 type="checkbox"
                 value={fileType}
                 disabled={disabled}
-                className="h-4 w-4 rounded border-slate-300 accent-slate-900"
+                className="h-3.5 w-3.5 rounded border-slate-300 text-slate-900 accent-slate-900"
                 {...form.register("allowed_file_types")}
               />
-              {fileTypeLabels[fileType]}
+              <span className="font-semibold text-slate-800">
+                {fileTypeLabels[fileType]}
+              </span>
             </label>
           ))}
         </div>
 
         {form.formState.errors.allowed_file_types ? (
-          <p id={fileTypesErrorId} className="text-sm text-red-600">
+          <p id={fileTypesErrorId} className="text-xs text-red-600">
             {form.formState.errors.allowed_file_types.message}
           </p>
         ) : null}
       </fieldset>
 
-      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+      <div
+        className={`border border-slate-200 bg-slate-50/70 ${
+          compact ? "rounded-xl p-3" : "rounded-2xl p-4"
+        }`}
+      >
         <label
           htmlFor={publicationId}
-          className="inline-flex cursor-pointer items-start gap-3"
+          className="inline-flex cursor-pointer items-start gap-2.5"
         >
           <input
             id={publicationId}
             type="checkbox"
             disabled={disabled}
-            className="mt-1 h-4 w-4 rounded border-slate-300 accent-slate-900"
+            className="mt-0.5 h-3.5 w-3.5 rounded border-slate-300 text-slate-900 accent-slate-900"
             {...form.register("is_published")}
           />
           <span>
-            <span className="block text-sm font-medium text-slate-800">
-              Published to Praktikan
+            <span
+              className={`block font-semibold text-slate-900 ${
+                compact ? "text-xs" : "text-sm font-medium text-slate-800"
+              }`}
+            >
+              Publish immediately
             </span>
-            <span className="mt-0.5 block text-xs leading-5 text-slate-500">
-              Leave unchecked to keep this assignment as a private draft.
+            <span
+              className={`block text-slate-500 ${
+                compact ? "text-[11px] leading-4" : "mt-0.5 text-xs leading-5"
+              }`}
+            >
+              Leave unchecked to save as a draft.
             </span>
           </span>
         </label>

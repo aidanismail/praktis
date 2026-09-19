@@ -66,7 +66,7 @@ const ADMIN_AREAS = [
   },
   {
     id: "bulk-import",
-    label: "import",
+    label: "Bulk import accounts",
     description: "Import student accounts in batch via CSV or Excel",
     icon: UploadCloud
   },
@@ -111,18 +111,6 @@ function canRetryError(error: unknown) {
   return !isAccessError(error);
 }
 
-function getToneClass(tone: StatusTone) {
-  switch (tone) {
-    case "positive":
-      return "bg-emerald-500";
-    case "warning":
-      return "bg-amber-500";
-    case "negative":
-      return "bg-red-500";
-    default:
-      return "bg-slate-400";
-  }
-}
 
 function formatCheckedTime(timestamp: number) {
   return new Intl.DateTimeFormat("en-GB", {
@@ -193,7 +181,7 @@ function InlineDataError({ title, message, onRetry }: InlineDataErrorProps) {
             <button
               type="button"
               onClick={onRetry}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-700 shrink-0"
+              className="inline-flex items-center gap-1.5 rounded-full bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-700 shrink-0 apple-press"
             >
               <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
               Try again
@@ -210,13 +198,16 @@ function StatusRow({ label, value, tone }: StatusRowProps) {
     <div className="flex items-center justify-between gap-4 py-3">
       <dt className="text-sm text-slate-500">{label}</dt>
       <dd
-        className="flex items-center gap-2 text-sm font-medium text-slate-
-        900"
+        className={`text-sm font-semibold ${
+          tone === "positive"
+            ? "text-slate-900"
+            : tone === "warning"
+            ? "text-amber-700"
+            : tone === "negative"
+            ? "text-rose-700"
+            : "text-slate-600"
+        }`}
       >
-        <span
-          className={`h-2 w-2 shrink-0 rounded-full ${getToneClass(tone)}`}
-          aria-hidden="true"
-        />
         {value}
       </dd>
     </div>
@@ -319,7 +310,7 @@ export function AdminOverview({
             {accessError.status === 401 ? (
               <Link
                 href={ROUTES.login}
-                className="inline-flex rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-700 shrink-0"
+                className="inline-flex rounded-full bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-700 shrink-0 apple-press"
               >
                 Sign in
               </Link>
@@ -337,7 +328,7 @@ export function AdminOverview({
               type="button"
               onClick={() => void refreshAll()}
               disabled={isRefreshing}
-              className="inline-flex items-center rounded-lg bg-slate-800 border border-slate-700 px-3 py-1 text-xs font-semibold text-white hover:bg-slate-700 transition disabled:opacity-60 shrink-0"
+              className="inline-flex items-center rounded-full bg-slate-800 border border-slate-700 px-3 py-1 text-xs font-semibold text-white hover:bg-slate-700 transition disabled:opacity-60 shrink-0 apple-press"
             >
               Retry refresh
             </button>
@@ -349,27 +340,14 @@ export function AdminOverview({
         <div
           className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
         >
-          <div>
-            <h3
-              id="operational-summary-heading"
-              className="text-lg font-semibold text-slate-950"
-            >
-              Operational summary
-            </h3>
-            <p className="mt-1 text-sm leading-6 text-slate-500">
-              A quick snapshot of active courses and community members.
-            </p>
-          </div>
-
           <button
             type="button"
             onClick={() => void refreshAll()}
             disabled={isRefreshing}
-            className="inline-flex min-h-10 items-center justify-center gap-2
-              self-start rounded-lg border border-slate-300 bg-white px-4 py-2
-              text-sm font-semibold text-slate-800 transition hover:bg-slate-50
-              focus-visible:outline-2 focus-visible:outline-offset-2 focus-
-              visible:outline-slate-900 disabled:cursor-not-allowed
+            className="apple-press inline-flex min-h-10 items-center justify-center gap-2
+              self-start rounded-full border border-slate-200 bg-white px-4 py-2
+              text-sm font-semibold text-slate-700 transition hover:bg-slate-50
+              focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed
               disabled:opacity-60 sm:self-auto"
           >
             <RefreshCw
@@ -489,7 +467,7 @@ export function AdminOverview({
                 <button
                   type="button"
                   onClick={() => onNavigateToNavItem("courses")}
-                  className="mt-4 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+                  className="apple-press mt-4 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
                 >
                   Open Course Management
                 </button>
@@ -509,7 +487,7 @@ export function AdminOverview({
                 <button
                   type="button"
                   onClick={() => onNavigateToNavItem("courses")}
-                  className="mt-4 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+                  className="apple-press mt-4 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
                 >
                   View historical courses
                 </button>
@@ -629,10 +607,6 @@ export function AdminOverview({
           ) : health ? (
             <>
               <div className="mt-6 flex items-center gap-3">
-                <span
-                  className={`h-3 w-3 rounded-full ${getToneClass(platformTone)}`}
-                  aria-hidden="true"
-                />
                 <span className="text-xl font-semibold text-slate-950">
                   {platformLabel}
                 </span>

@@ -65,9 +65,9 @@ function ExportButtons({
             type="button"
             onClick={() => onDownload(kind, format)}
             disabled={disabled || activeDownload !== null}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold uppercase text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-semibold uppercase text-slate-700 transition hover:bg-slate-50 apple-press focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {active ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Download className="h-4 w-4" aria-hidden="true" />}
+            {active ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" /> : <Download className="h-3.5 w-3.5" aria-hidden="true" />}
             {active ? `Preparing ${format}` : format}
           </button>
         );
@@ -222,8 +222,8 @@ export function SessionExportPanel({
       ) : null}
 
       {successMessage ? (
-        <p role="status" aria-live="polite" className="mt-4 inline-flex items-center gap-2 text-sm text-emerald-700">
-          <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+        <p role="status" aria-live="polite" className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
+          <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" aria-hidden="true" />
           {successMessage}
         </p>
       ) : null}

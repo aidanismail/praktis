@@ -59,7 +59,7 @@ export function UserProfile({ user }: UserProfileProps) {
                 <dt className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Status
                 </dt>
-                <dd className="mt-1 text-sm font-medium text-slate-950">
+                <dd className="mt-1 text-sm font-semibold text-slate-950">
                   {user.is_active ? "Active" : "Inactive"}
                 </dd>
               </div>

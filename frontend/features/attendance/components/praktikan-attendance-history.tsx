@@ -18,23 +18,11 @@ const labels: Record<AttendanceStatus, string> = {
   alfa: "Alfa",
 };
 
-const statusStyles: Record<AttendanceStatus, { badge: string; dot: string }> = {
-  hadir: {
-    badge: "bg-emerald-50 text-emerald-700",
-    dot: "bg-emerald-500",
-  },
-  sakit: {
-    badge: "bg-sky-50 text-sky-700",
-    dot: "bg-sky-500",
-  },
-  izin: {
-    badge: "bg-amber-50 text-amber-700",
-    dot: "bg-amber-500",
-  },
-  alfa: {
-    badge: "bg-red-50 text-red-700",
-    dot: "bg-red-500",
-  },
+const statusTextColors: Record<AttendanceStatus, string> = {
+  hadir: "text-emerald-700 font-semibold",
+  sakit: "text-sky-700 font-semibold",
+  izin: "text-amber-700 font-semibold",
+  alfa: "text-rose-700 font-semibold",
 };
 
 const dateFormatter = new Intl.DateTimeFormat("en", { dateStyle: "medium" });
@@ -248,9 +236,7 @@ export function PraktikanAttendanceHistory({ userId }: Props) {
               </div>
 
               <div className="space-y-2.5">
-                {group.rows.map((row) => {
-                  const styling = statusStyles[row.status];
-                  return (
+                {group.rows.map((row) => (
                     <article
                       key={row.id}
                       className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs apple-card-hover transition-all"
@@ -264,14 +250,12 @@ export function PraktikanAttendanceHistory({ userId }: Props) {
                       </div>
 
                       <span
-                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${styling.badge}`}
+                        className={`text-xs ${statusTextColors[row.status]}`}
                       >
-                        <span className={`w-1.5 h-1.5 rounded-full ${styling.dot}`} />
-                        <span>{labels[row.status]}</span>
+                        {labels[row.status]}
                       </span>
                     </article>
-                  );
-                })}
+                ))}
               </div>
             </section>
           ))}

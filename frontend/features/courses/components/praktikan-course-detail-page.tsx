@@ -184,12 +184,16 @@ export function PraktikanCourseDetailPage({ courseId, initialTab }: Props) {
 
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <span
-                className={`text-xs font-bold uppercase tracking-wider ${theme.badgeBg} px-3 py-1 rounded-full backdrop-blur-xs`}
-              >
-                {course.code}
-              </span>
-              <h1 className="text-2xl sm:text-3xl font-bold mt-3 text-white tracking-tight drop-shadow-xs">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-white/90 drop-shadow-xs">
+                  {course.code}
+                </span>
+                <span className="text-white/40" aria-hidden="true">·</span>
+                <span className="text-xs font-semibold text-white/80">
+                  {course.is_active ? "Active Offering" : "Historical Offering"}
+                </span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-bold mt-2 text-white tracking-tight drop-shadow-xs">
                 {course.name}
               </h1>
               <p className="text-xs text-slate-200 mt-1.5 flex items-center gap-2 drop-shadow-xs">
@@ -198,17 +202,6 @@ export function PraktikanCourseDetailPage({ courseId, initialTab }: Props) {
                   Academic Year {course.academic_year} • Semester {course.semester}
                 </span>
               </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="px-3.5 py-1.5 rounded-full bg-white/10 border border-white/10 text-xs font-semibold text-white backdrop-blur-xs flex items-center gap-1.5">
-                <span
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    course.is_active ? "bg-emerald-400" : "bg-amber-400"
-                  }`}
-                />
-                <span>{course.is_active ? "Active Offering" : "Historical Offering"}</span>
-              </span>
             </div>
           </div>
         </div>

@@ -70,9 +70,10 @@ export function BulkImportForm() {
             <p className="text-[11px] text-slate-400 mt-1">.csv or .xlsx up to 5 MB with columns: username, email</p>
 
             {file && (
-              <div className="mt-3.5 rounded-full bg-slate-100 border border-slate-300 px-4 py-1 text-xs font-medium text-slate-900 flex items-center gap-1.5">
-                <FileSpreadsheet className="w-3.5 h-3.5" />
-                <span>{file.name} ({(file.size / 1024).toFixed(1)} KB)</span>
+              <div className="mt-3.5 inline-flex items-center gap-2 rounded-xl bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-800">
+                <FileSpreadsheet className="w-4 h-4 text-slate-500" />
+                <span>{file.name}</span>
+                <span className="text-slate-400 font-normal">({(file.size / 1024).toFixed(1)} KB)</span>
               </div>
             )}
           </div>
@@ -105,8 +106,8 @@ export function BulkImportForm() {
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <h4 className="text-sm font-bold text-slate-900">Import Summary</h4>
-            <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 border border-slate-300 px-2.5 py-0.5 text-xs font-semibold text-slate-900">
-              <CheckCircle2 className="w-3.5 h-3.5" />
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
               <span>{result.message}</span>
             </span>
           </div>

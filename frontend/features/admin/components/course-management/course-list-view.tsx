@@ -188,12 +188,7 @@ export function CourseListView({
                       <span className="text-[10px] text-slate-400 uppercase font-semibold block">
                         Status
                       </span>
-                      <span className="font-medium text-slate-800 flex items-center gap-1.5">
-                        <span
-                          className={`w-1.5 h-1.5 rounded-full ${
-                            course.is_active ? "bg-emerald-500" : "bg-slate-400"
-                          } inline-block`}
-                        />
+                      <span className="font-semibold text-slate-900 block mt-0.5">
                         {course.is_active ? "Active" : "Archived"}
                       </span>
                     </div>
@@ -275,7 +270,7 @@ export function CourseListView({
                     <td className="p-3.5 text-slate-600">{c.academic_year}</td>
                     <td className="p-3.5 text-slate-600">{c.semester}</td>
                     <td className="p-3.5">
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-800 border border-slate-200">
+                      <span className={`font-semibold ${c.is_active ? "text-slate-900" : "text-slate-500"}`}>
                         {c.is_active ? "Active" : "Archived"}
                       </span>
                     </td>

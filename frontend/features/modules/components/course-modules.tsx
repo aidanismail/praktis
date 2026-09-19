@@ -83,38 +83,21 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
 
         {hasLoadedData && !isAccessError ? (
           <div className="flex flex-wrap items-center gap-2">
-            <span
-              aria-live="polite"
-              className="rounded-full bg-slate-100 px-3 py-1 text-sm
-                  font-medium text-slate-700"
-            >
-              {modules.length} {modules.length === 1 ? "module" : "modules"}
-            </span>
-
             <button
               type="button"
               onClick={() => void refetch()}
               disabled={isFetching}
-              className="inline-flex min-h-11 items-center gap-2 rounded-xl
-                  border border-slate-200 bg-white px-3 text-sm font-semibold
-                  text-slate-700 transition hover:bg-slate-50
-                  focus-visible:outline-2 focus-visible:outline-offset-2
-                  focus-visible:outline-slate-900
-                  disabled:cursor-not-allowed disabled:opacity-60"
+              className="apple-press inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <RefreshCw
-                className={isFetching ? "h-4 w-4 animate-spin" : "h-4 w-4"}
+                className={isFetching ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"}
                 aria-hidden="true"
               />
-
               {isFetching ? "Refreshing..." : "Refresh links"}
             </button>
           </div>
         ) : null}
       </div>
-      {hasLoadedData && !isAccessError && accessMode === "manage" ? (
-        <ModuleUploadForm userId={userId} courseId={courseId} />
-      ) : null}
       {isPending ? (
         <div
           role="status"
@@ -255,36 +238,73 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
             </p>
           ) : null}
 
-          {modules.length === 0 ? (
-            <div
-              role="status"
-              className="mt-5 rounded-3xl border border-dashed
-                  border-slate-300 bg-white px-6 py-12 text-center"
-            >
-              <BookOpen
-                className="mx-auto h-9 w-9 text-slate-400"
-                aria-hidden="true"
-              />
+          {accessMode === "manage" ? (
+            <div className="mt-5 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+              {/* Left Column: Modules list */}
+              <div className="lg:col-span-7 space-y-3">
+                {modules.length === 0 ? (
+                  <div
+                    role="status"
+                    className="rounded-2xl border border-dashed border-slate-200 bg-white/70 p-8 text-center"
+                  >
+                    <BookOpen
+                      className="mx-auto h-7 w-7 text-slate-300"
+                      aria-hidden="true"
+                    />
+                    <h3 className="mt-2 text-sm font-semibold text-slate-900">
+                      No modules uploaded yet
+                    </h3>
+                    <p className="mt-1 text-xs text-slate-500">
+                      Upload lab manuals or guides using the panel on the right.
+                    </p>
+                  </div>
+                ) : (
+                  modules.map((module) => (
+                    <ModuleCard
+                      key={module.id}
+                      userId={userId}
+                      courseId={courseId}
+                      module={module}
+                      accessMode={accessMode}
+                    />
+                  ))
+                )}
+              </div>
 
-              <h3 className="mt-3 font-semibold text-slate-950">
-                No modules uploaded yet
-              </h3>
-
-              <p className="mt-1 text-sm text-slate-600">
-                Lab manuals and reference guides will show up here once uploaded.
-              </p>
+              {/* Right Column: Upload panel (sticky) */}
+              <div className="lg:col-span-5 lg:sticky lg:top-4">
+                <ModuleUploadForm userId={userId} courseId={courseId} />
+              </div>
             </div>
           ) : (
-            <div className="mt-5 grid gap-4 lg:grid-cols-2">
-              {modules.map((module) => (
-                <ModuleCard
-                  key={module.id}
-                  userId={userId}
-                  courseId={courseId}
-                  module={module}
-                  accessMode={accessMode}
-                />
-              ))}
+            <div className="mt-5 max-w-3xl space-y-3">
+              {modules.length === 0 ? (
+                <div
+                  role="status"
+                  className="rounded-2xl border border-dashed border-slate-200 bg-white/70 p-8 text-center"
+                >
+                  <BookOpen
+                    className="mx-auto h-7 w-7 text-slate-300"
+                    aria-hidden="true"
+                  />
+                  <h3 className="mt-2 text-sm font-semibold text-slate-900">
+                    No modules available yet
+                  </h3>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Lab manuals and guides will show up here once uploaded by instructors.
+                  </p>
+                </div>
+              ) : (
+                modules.map((module) => (
+                  <ModuleCard
+                    key={module.id}
+                    userId={userId}
+                    courseId={courseId}
+                    module={module}
+                    accessMode={accessMode}
+                  />
+                ))
+              )}
             </div>
           )}
         </>

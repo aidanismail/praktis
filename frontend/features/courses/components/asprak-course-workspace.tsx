@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Palette } from "lucide-react";
 import type { Course } from "@/features/courses/types/course.type";
 import { CourseStream } from "@/features/announcements/components/course-stream";
@@ -40,6 +41,10 @@ export function AsprakCourseWorkspace({
   assignmentId,
   sessionId
 }: AsprakCourseWorkspaceProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [overrideTheme, setOverrideTheme] = useState<SavedCourseTheme | null>(null);
   const [showCustomizeModal, setShowCustomizeModal] = useState(false);
 
@@ -62,6 +67,27 @@ export function AsprakCourseWorkspace({
     return () => window.removeEventListener("course-theme-updated", handleThemeUpdate);
   }, [course.id]);
 
+  const handleSelectAssignment = useCallback((id: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("assignmentId", id);
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  }, [pathname, router, searchParams]);
+
+  /** Navigate back to the workspace tab without assignmentId/sessionId params */
+  const handleBackFromAssignment = useCallback(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("assignmentId");
+    params.delete("sessionId");
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  }, [pathname, router, searchParams]);
+
+  const handleBackFromSession = useCallback(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("sessionId");
+    params.delete("assignmentId");
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  }, [pathname, router, searchParams]);
+
   return (
     <div className="space-y-6">
       {/* Stream Tab: Banner Card & Announcements Stream */}
@@ -75,6 +101,8 @@ export function AsprakCourseWorkspace({
             {courseTheme.imageUrl && (
               <>
                 <div
+                  role="presentation"
+                  aria-hidden="true"
                   className="absolute inset-0 bg-cover bg-center"
                   style={{ backgroundImage: `url(${courseTheme.imageUrl})` }}
                 />
@@ -90,28 +118,28 @@ export function AsprakCourseWorkspace({
 
             <div className="relative z-10 flex flex-wrap items-start justify-between gap-4">
               <div>
-                <span
-                  className={`text-xs font-bold uppercase tracking-wider ${themeCfg.badgeBg} px-3 py-1 rounded-full backdrop-blur-xs`}
-                >
-                  {course.code}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-white/90 drop-shadow-xs">
+                    {course.code}
+                  </span>
+                  <span className="text-white/40" aria-hidden="true">·</span>
+                  <span className="text-xs font-semibold text-white/80">
+                    {course.is_active ? "Active" : "Archived"}
+                  </span>
+                </div>
 
-                <h1 className="mt-3 text-2xl font-bold tracking-tight text-white sm:text-3xl drop-shadow-xs">
+                <h1 className="mt-2 text-2xl font-bold tracking-tight text-white sm:text-3xl drop-shadow-xs">
                   {course.name}
                 </h1>
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="rounded-full bg-white/15 px-3.5 py-1 text-xs font-semibold text-white border border-white/10 backdrop-blur-xs">
-                  {course.is_active ? "Active" : "Archived"}
-                </span>
-
                 <button
                   type="button"
                   onClick={() => setShowCustomizeModal(true)}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-white/90 hover:text-white bg-white/10 hover:bg-white/20 border border-white/15 px-3 py-1 rounded-full backdrop-blur-xs transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-white/90 hover:text-white bg-white/10 hover:bg-white/20 border border-white/15 px-3.5 py-1.5 rounded-full backdrop-blur-xs transition-colors apple-press"
                 >
-                  <Palette className="h-3.5 w-3.5" />
+                  <Palette className="h-3.5 w-3.5" aria-hidden="true" />
                   <span>Customize Banner</span>
                 </button>
               </div>
@@ -158,12 +186,14 @@ export function AsprakCourseWorkspace({
             userId={userId}
             courseId={course.id}
             assignmentId={assignmentId}
+            onBack={handleBackFromAssignment}
           />
         ) : (
           <CourseAssignments
             userId={userId}
             courseId={course.id}
             viewerRole="asprak"
+            onSelectAssignment={handleSelectAssignment}
           />
         )
       )}
@@ -183,6 +213,8 @@ export function AsprakCourseWorkspace({
             userId={userId}
             courseId={course.id}
             sessionId={sessionId}
+            course={course}
+            onBack={handleBackFromSession}
           />
         ) : (
           <CourseSessions
@@ -194,4 +226,3 @@ export function AsprakCourseWorkspace({
     </div>
   );
 }
-

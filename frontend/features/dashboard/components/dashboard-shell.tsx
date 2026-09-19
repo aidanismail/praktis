@@ -201,17 +201,6 @@ export function DashboardShell({ user }: DashboardShellProps) {
             </div>
           ) : null}
 
-          {!activeCourse && (
-            <div className="mb-5 sm:mb-6">
-              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
-                {activeItem.label}
-              </h2>
-              <p className="text-xs text-slate-500 mt-1">
-                {activeItem.description}
-              </p>
-            </div>
-          )}
-
           <RoleDashboard
             activeItem={activeItem}
             user={user}

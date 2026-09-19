@@ -65,9 +65,10 @@ Thumbs.db
 .codex/
 .impeccable/
 .agents/*
+.agent/*
 .gemini/*
-PLANS.MD
 PLANS.md
+DESIGN.md
 PRODUCT.md
 skills-lock.json
 .github/skills

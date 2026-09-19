@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { getCourseDetailRoute, ROUTES } from "@/constants/routes";
@@ -7,6 +8,7 @@ import { ApiError } from "@/lib/api/client";
 import { useAssignedCourses } from "../hooks/use-assigned-courses";
 import type { Course } from "../types/course.type";
 import { AsprakCourseCard } from "./asprak-course-card";
+import { sortCourses } from "../utils/sort-courses";
 
 type AsprakCourseListProps = {
   userId: string;
@@ -20,20 +22,6 @@ type CourseGroupProps = {
   courses: Course[];
   onNavigateToCourse?: (courseId: string) => void;
 };
-
-function sortCourses(courses: Course[]) {
-  return [...courses].sort((first, second) => {
-    const yearComparison = second.academic_year.localeCompare(
-      first.academic_year
-    );
-
-    if (yearComparison !== 0) {
-      return yearComparison;
-    }
-
-    return first.code.localeCompare(second.code);
-  });
-}
 
 function CourseGroup({
   id,
@@ -107,6 +95,15 @@ export function AsprakCourseList({
     isPending,
     refetch
   } = useAssignedCourses(userId);
+
+  const activeCourses = useMemo(
+    () => sortCourses(courses.filter((course) => course.is_active)),
+    [courses]
+  );
+  const historicalCourses = useMemo(
+    () => sortCourses(courses.filter((course) => !course.is_active)),
+    [courses]
+  );
 
   if (isPending) {
     return <CourseListLoading />;
@@ -188,13 +185,6 @@ export function AsprakCourseList({
       </div>
     );
   }
-
-  const activeCourses = sortCourses(
-    courses.filter((course) => course.is_active)
-  );
-  const historicalCourses = sortCourses(
-    courses.filter((course) => !course.is_active)
-  );
 
   return (
     <div className="space-y-8">

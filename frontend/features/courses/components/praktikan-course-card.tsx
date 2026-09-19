@@ -39,20 +39,19 @@ export function PraktikanCourseCard({ course }: PraktikanCourseCardProps) {
             className={`absolute inset-0 pointer-events-none ${patternCfg.overlayClass}`}
           />
         )}
-        <div className="relative z-10 flex items-start justify-between">
-          <div>
-            <span
-              className={`text-[10px] font-bold uppercase tracking-wider ${theme.badgeBg} px-2 py-0.5 rounded-md backdrop-blur-xs`}
-            >
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 text-[11px]">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-white/90 drop-shadow-xs">
               {course.code}
             </span>
-            <h3 className="text-sm font-bold mt-2 text-white group-hover:underline line-clamp-1 drop-shadow-xs">
-              {course.name}
-            </h3>
+            <span className="text-white/40" aria-hidden="true">·</span>
+            <span className="text-[11px] font-medium text-white/80">
+              {course.semester} {course.academic_year}
+            </span>
           </div>
-          <span className="text-[11px] font-medium bg-white/10 px-2 py-0.5 rounded-lg border border-white/10 backdrop-blur-xs">
-            {course.semester} {course.academic_year}
-          </span>
+          <h3 className="text-sm font-bold mt-2 text-white group-hover:underline line-clamp-1 drop-shadow-xs">
+            {course.name}
+          </h3>
         </div>
       </div>
 
@@ -71,12 +70,7 @@ export function PraktikanCourseCard({ course }: PraktikanCourseCardProps) {
             <span className="text-[10px] text-slate-400 uppercase font-semibold block">
               Status
             </span>
-            <span className="font-medium text-slate-800 flex items-center gap-1.5">
-              <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                  course.is_active ? "bg-emerald-500" : "bg-slate-400"
-                } inline-block`}
-              />
+            <span className="font-semibold text-slate-900 block mt-0.5">
               {course.is_active ? "Active" : "Archived"}
             </span>
           </div>

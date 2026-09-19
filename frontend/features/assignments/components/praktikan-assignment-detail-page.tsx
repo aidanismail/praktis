@@ -240,8 +240,7 @@ export function PraktikanAssignmentDetailPage({
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-800">
                 Published
               </span>
               <p className="mt-3 text-xs font-bold uppercase tracking-wider text-slate-400">

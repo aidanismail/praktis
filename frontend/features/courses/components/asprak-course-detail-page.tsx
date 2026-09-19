@@ -233,7 +233,7 @@ function AssignedCourseDetail({
           onClick={() => setShowCustomizeModal(true)}
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-full shadow-xs transition-colors"
         >
-          <Palette className="h-3.5 w-3.5" />
+          <Palette className="h-3.5 w-3.5" aria-hidden="true" />
           <span>Customize Banner</span>
         </button>
       </div>
@@ -246,6 +246,8 @@ function AssignedCourseDetail({
         {courseTheme.imageUrl && (
           <>
             <div
+              role="presentation"
+              aria-hidden="true"
               className="absolute inset-0 bg-cover bg-center"
               style={{ backgroundImage: `url(${courseTheme.imageUrl})` }}
             />
@@ -261,23 +263,23 @@ function AssignedCourseDetail({
 
         <div className="relative z-10 flex flex-wrap items-start justify-between gap-4">
           <div>
-            <span
-              className={`text-xs font-bold uppercase tracking-wider ${themeCfg.badgeBg} px-3 py-1 rounded-full backdrop-blur-xs`}
-            >
-              {course.code}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-white/90 drop-shadow-xs">
+                {course.code}
+              </span>
+              <span className="text-white/40" aria-hidden="true">·</span>
+              <span className="text-xs font-semibold text-white/80">
+                {statusLabel}
+              </span>
+            </div>
 
             <h1
-              className="mt-3 text-2xl font-bold
+              className="mt-2 text-2xl font-bold
               tracking-tight text-white sm:text-3xl drop-shadow-xs"
             >
               {course.name}
             </h1>
           </div>
-
-          <span className="rounded-full bg-white/15 px-3.5 py-1 text-xs font-semibold text-white border border-white/10 backdrop-blur-xs">
-            {statusLabel}
-          </span>
         </div>
 
         <div

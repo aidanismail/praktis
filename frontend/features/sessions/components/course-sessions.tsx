@@ -150,13 +150,13 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
             type="button"
             onClick={() => void sessionsQuery.refetch()}
             disabled={sessionsQuery.isFetching}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+            className="apple-press inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <RefreshCw
               className={
                 sessionsQuery.isFetching
-                  ? "h-4 w-4 animate-spin"
-                  : "h-4 w-4"
+                  ? "h-3.5 w-3.5 animate-spin"
+                  : "h-3.5 w-3.5"
               }
               aria-hidden="true"
             />
@@ -164,33 +164,6 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
           </button>
         ) : null}
       </div>
-
-      {hasLoadedData && !accessError ? (
-        <section
-          aria-labelledby="create-session-heading"
-          className="mt-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
-        >
-          <h3 id="create-session-heading" className="font-semibold text-slate-950">
-            Schedule a session
-          </h3>
-          <p className="mt-1 mb-4 text-sm text-slate-600">
-            Set up a lab date, title, and topic for your students.
-          </p>
-          <SessionForm
-            submitLabel="Schedule session"
-            pendingLabel="Scheduling..."
-            isPending={createMutation.isPending}
-            error={createMutation.error}
-            onSubmit={createSession}
-            resetAfterSubmit
-          />
-          {createMutation.isSuccess ? (
-            <div className="mt-3">
-              <NotificationBanner variant="success" message="Session scheduled!" />
-            </div>
-          ) : null}
-        </section>
-      ) : null}
 
       {sessionsQuery.isPending ? (
         <div
@@ -268,31 +241,67 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
             </div>
           ) : null}
 
-          {sessions.length === 0 ? (
-            <div role="status" className="mt-5 rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
-              <CalendarRange className="mx-auto h-9 w-9 text-slate-400" aria-hidden="true" />
-              <h3 className="mt-3 font-semibold text-slate-950">No sessions scheduled yet</h3>
-              <p className="mt-1 text-sm text-slate-600">
-                Add your first lab session using the form above.
-              </p>
+          <div className="mt-5 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+            {/* Left Column: Sessions list */}
+            <div className="lg:col-span-7 space-y-3">
+              {sessions.length === 0 ? (
+                <div role="status" className="rounded-2xl border border-dashed border-slate-200 bg-white/70 p-8 text-center">
+                  <CalendarRange className="mx-auto h-7 w-7 text-slate-300" aria-hidden="true" />
+                  <h3 className="mt-2 text-sm font-semibold text-slate-900">No sessions scheduled yet</h3>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Use the panel on the right to schedule your first lab session.
+                  </p>
+                </div>
+              ) : (
+                sessions.map((session) => (
+                  <SessionCard
+                    key={session.id}
+                    userId={userId}
+                    courseId={courseId}
+                    session={session}
+                    transitionPending={transitionMutation.isPending}
+                    transitioningSessionId={
+                      transitionMutation.variables?.sessionId ?? null
+                    }
+                    onTransition={transitionSession}
+                  />
+                ))
+              )}
             </div>
-          ) : (
-            <div className="mt-5 grid gap-4 lg:grid-cols-2">
-              {sessions.map((session) => (
-                <SessionCard
-                  key={session.id}
-                  userId={userId}
-                  courseId={courseId}
-                  session={session}
-                  transitionPending={transitionMutation.isPending}
-                  transitioningSessionId={
-                    transitionMutation.variables?.sessionId ?? null
-                  }
-                  onTransition={transitionSession}
-                />
-              ))}
+
+            {/* Right Column: Schedule a session panel (sticky) */}
+            <div className="lg:col-span-5 lg:sticky lg:top-4">
+              <section
+                aria-labelledby="create-session-heading"
+                className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xs"
+              >
+                <div>
+                  <h3 id="create-session-heading" className="text-sm font-bold tracking-tight text-slate-950">
+                    Schedule session
+                  </h3>
+                  <p className="mt-0.5 text-xs text-slate-500">
+                    Set up a lab date and topic for your students.
+                  </p>
+                </div>
+                <div className="mt-4">
+                  <SessionForm
+                    submitLabel="Schedule session"
+                    pendingLabel="Scheduling..."
+                    isPending={createMutation.isPending}
+                    error={createMutation.error}
+                    onSubmit={createSession}
+                    resetAfterSubmit
+                    compact
+                  />
+                </div>
+                {createMutation.isSuccess ? (
+                  <div className="mt-3">
+                    <NotificationBanner variant="success" message="Session scheduled!" />
+                  </div>
+                ) : null}
+              </section>
             </div>
-          )}
+          </div>
         </>
       ) : null}
     </section>

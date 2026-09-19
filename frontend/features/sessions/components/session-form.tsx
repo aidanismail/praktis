@@ -20,6 +20,7 @@ type SessionFormProps = {
   onCancel?: () => void;
   resetAfterSubmit?: boolean;
   autoFocusTitle?: boolean;
+  compact?: boolean;
 };
 
 const emptyValues: SessionFormValues = {
@@ -62,7 +63,8 @@ export function SessionForm({
   onSubmit,
   onCancel,
   resetAfterSubmit = false,
-  autoFocusTitle = false
+  autoFocusTitle = false,
+  compact = false
 }: SessionFormProps) {
   const generatedId = useId();
   const titleId = `session-title-${generatedId}`;
@@ -82,13 +84,21 @@ export function SessionForm({
     }
   }
 
+  const inputCls = compact
+    ? "h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100"
+    : "min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100";
+
+  const labelCls = compact
+    ? "text-xs font-semibold text-slate-700"
+    : "text-sm font-semibold text-slate-800";
+
   return (
-    <form onSubmit={form.handleSubmit(submit)} noValidate>
-      <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_12rem]">
-        <div>
+    <form onSubmit={form.handleSubmit(submit)} noValidate className={compact ? "space-y-3" : "space-y-4"}>
+      <div className={compact ? "space-y-3" : "grid gap-4 sm:grid-cols-[minmax(0,1fr)_12rem]"}>
+        <div className={compact ? "space-y-1" : ""}>
           <label
             htmlFor={titleId}
-            className="text-sm font-semibold text-slate-800"
+            className={labelCls}
           >
             Session title
           </label>
@@ -103,24 +113,24 @@ export function SessionForm({
               form.formState.errors.title ? `${titleId}-error` : undefined
             }
             {...form.register("title")}
-            className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100"
+            className={inputCls}
             placeholder="e.g. Session 1: Getting Started"
           />
           {form.formState.errors.title ? (
             <p
               id={`${titleId}-error`}
               role="alert"
-              className="mt-1 text-sm text-red-700"
+              className="mt-1 text-xs text-red-700"
             >
               {form.formState.errors.title.message}
             </p>
           ) : null}
         </div>
 
-        <div>
+        <div className={compact ? "space-y-1" : ""}>
           <label
             htmlFor={dateId}
-            className="text-sm font-semibold text-slate-800"
+            className={labelCls}
           >
             Session date
           </label>
@@ -133,13 +143,13 @@ export function SessionForm({
               form.formState.errors.date ? `${dateId}-error` : undefined
             }
             {...form.register("date")}
-            className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100"
+            className={inputCls}
           />
           {form.formState.errors.date ? (
             <p
               id={`${dateId}-error`}
               role="alert"
-              className="mt-1 text-sm text-red-700"
+              className="mt-1 text-xs text-red-700"
             >
               {form.formState.errors.date.message}
             </p>
@@ -148,33 +158,33 @@ export function SessionForm({
       </div>
 
       {formError ? (
-        <p role="alert" className="mt-3 text-sm text-red-700">
+        <p role="alert" className="text-xs text-red-700">
           {formError}
         </p>
       ) : null}
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        <button
-          type="submit"
-          disabled={isPending}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60 shadow-xs"
-        >
-          {isPending ? (
-            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-          ) : null}
-          {isPending ? pendingLabel : submitLabel}
-        </button>
-
+      <div className="flex flex-wrap items-center justify-end gap-2 pt-1">
         {onCancel ? (
           <button
             type="button"
             onClick={onCancel}
             disabled={isPending}
-            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700 disabled:cursor-not-allowed disabled:opacity-60 shadow-xs"
+            className="apple-press inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700 disabled:cursor-not-allowed disabled:opacity-60 shadow-xs"
           >
             Cancel
           </button>
         ) : null}
+
+        <button
+          type="submit"
+          disabled={isPending}
+          className="apple-press inline-flex items-center justify-center gap-1.5 rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60 shadow-xs"
+        >
+          {isPending ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+          ) : null}
+          {isPending ? pendingLabel : submitLabel}
+        </button>
       </div>
     </form>
   );

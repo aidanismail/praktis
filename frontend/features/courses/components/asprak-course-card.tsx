@@ -36,11 +36,12 @@ export function AsprakCourseCard({ course }: AsprakCourseCardProps) {
         )}
 
         <div className="relative z-10">
-          <div className="flex items-center justify-between text-[11px]">
-            <span className={`font-semibold ${themeCfg.badgeBg} px-2 py-0.5 rounded text-[10px] uppercase tracking-wider backdrop-blur-xs`}>
+          <div className="flex items-center gap-2 text-[11px]">
+            <span className="font-bold text-white uppercase tracking-wider text-[10px] drop-shadow-xs">
               {course.code}
             </span>
-            <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-[10px] text-white border border-white/10 backdrop-blur-xs">
+            <span className="text-white/40" aria-hidden="true">·</span>
+            <span className="font-medium text-white/80 text-[11px]">
               {statusLabel}
             </span>
           </div>

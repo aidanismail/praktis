@@ -28,7 +28,9 @@ function getChangePasswordError(error: Error) {
 }
 
 export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
-  const [showPassword, setShowPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const changePasswordMutation = useChangePassword();
 
   const form = useForm<ChangePasswordFormValues>({
@@ -51,7 +53,7 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
   }
 
   return (
-    <div className="w-full rounded-3xl border border-white/10 bg-white/95 p-7 shadow-2xl shadow-black/20 backdrop-blur">
+    <div className="w-full rounded-3xl border border-white/10 bg-white p-7 shadow-2xl shadow-black/20">
       <div className="mb-7">
         <ProductLogo
           size={48}
@@ -87,21 +89,41 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
             Current password
           </label>
 
-          <input
-            id="current_password"
-            type="password"
-            placeholder="Enter your current password"
-            autoComplete="current-password"
-            disabled={changePasswordMutation.isPending}
-            aria-invalid={Boolean(form.formState.errors.current_password)}
-            aria-describedby={
-              form.formState.errors.current_password
-                ? "current-password-error"
-                : undefined
-            }
-            className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
-            {...form.register("current_password")}
-          />
+          <div className="relative">
+            <input
+              id="current_password"
+              type={showCurrentPassword ? "text" : "password"}
+              placeholder="Enter your current password"
+              autoComplete="current-password"
+              disabled={changePasswordMutation.isPending}
+              aria-invalid={Boolean(form.formState.errors.current_password)}
+              aria-describedby={
+                form.formState.errors.current_password
+                  ? "current-password-error"
+                  : undefined
+              }
+              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 pr-11 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+              {...form.register("current_password")}
+            />
+
+            <button
+              type="button"
+              onClick={() => setShowCurrentPassword((value) => !value)}
+              disabled={changePasswordMutation.isPending}
+              className="absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 disabled:opacity-60"
+              aria-label={
+                showCurrentPassword
+                  ? "Hide current password"
+                  : "Show current password"
+              }
+            >
+              {showCurrentPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </button>
+          </div>
 
           {form.formState.errors.current_password ? (
             <p id="current-password-error" className="text-sm text-red-600">
@@ -121,24 +143,30 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
           <div className="relative">
             <input
               id="new_password"
-              type={showPassword ? "text" : "password"}
+              type={showNewPassword ? "text" : "password"}
               placeholder="Minimum 8 characters"
               autoComplete="new-password"
               disabled={changePasswordMutation.isPending}
               aria-invalid={Boolean(form.formState.errors.new_password)}
-              aria-describedby={form.formState.errors.new_password ? "new-password-error" : undefined}
-              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 pr-10 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+              aria-describedby={
+                form.formState.errors.new_password
+                  ? "new-password-error"
+                  : undefined
+              }
+              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 pr-11 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
               {...form.register("new_password")}
             />
 
             <button
               type="button"
-              onClick={() => setShowPassword((value) => !value)}
+              onClick={() => setShowNewPassword((value) => !value)}
               disabled={changePasswordMutation.isPending}
-              className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-300 disabled:opacity-60"
-              aria-label={showPassword ? "Hide password" : "Show password"}
+              className="absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 disabled:opacity-60"
+              aria-label={
+                showNewPassword ? "Hide new password" : "Show new password"
+              }
             >
-              {showPassword ? (
+              {showNewPassword ? (
                 <EyeOff className="h-4 w-4" />
               ) : (
                 <Eye className="h-4 w-4" />
@@ -161,17 +189,41 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
             Confirm new password
           </label>
 
-          <input
-            id="confirm_password"
-            type={showPassword ? "text" : "password"}
-            placeholder="Repeat your new password"
-            autoComplete="new-password"
-            disabled={changePasswordMutation.isPending}
-            aria-invalid={Boolean(form.formState.errors.confirm_password)}
-            aria-describedby={form.formState.errors.confirm_password ? "confirm-password-error" : undefined}
-            className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
-            {...form.register("confirm_password")}
-          />
+          <div className="relative">
+            <input
+              id="confirm_password"
+              type={showConfirmPassword ? "text" : "password"}
+              placeholder="Repeat your new password"
+              autoComplete="new-password"
+              disabled={changePasswordMutation.isPending}
+              aria-invalid={Boolean(form.formState.errors.confirm_password)}
+              aria-describedby={
+                form.formState.errors.confirm_password
+                  ? "confirm-password-error"
+                  : undefined
+              }
+              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 pr-11 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+              {...form.register("confirm_password")}
+            />
+
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword((value) => !value)}
+              disabled={changePasswordMutation.isPending}
+              className="absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 disabled:opacity-60"
+              aria-label={
+                showConfirmPassword
+                  ? "Hide confirm password"
+                  : "Show confirm password"
+              }
+            >
+              {showConfirmPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </button>
+          </div>
 
           {form.formState.errors.confirm_password ? (
             <p id="confirm-password-error" className="text-sm text-red-600">
@@ -183,11 +235,11 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
         <button
           type="submit"
           disabled={changePasswordMutation.isPending}
-          className="flex h-11 w-full items-center justify-center rounded-xl bg-slate-900 px-4 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
+          className="flex h-11 w-full cursor-pointer items-center justify-center rounded-full bg-slate-900 px-4 text-sm font-semibold text-white apple-press transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {changePasswordMutation.isPending ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
               Updating password...
             </>
           ) : (
@@ -196,7 +248,10 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
         </button>
 
         {!isForced ? (
-          <Link href={ROUTES.dashboard} className="flex min-h-11 w-full items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-800">
+          <Link
+            href={ROUTES.dashboard}
+            className="flex min-h-11 w-full items-center justify-center rounded-full border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 apple-press hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+          >
             Never mind, take me back
           </Link>
         ) : null}

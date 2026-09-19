@@ -91,14 +91,11 @@ export function CourseWorkspaceHeader({
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <span className="px-3.5 py-1.5 rounded-full bg-white/10 border border-white/10 text-xs font-semibold text-white backdrop-blur-xs flex items-center gap-1.5">
-              <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                  course.is_active ? "bg-emerald-400" : "bg-amber-400"
-                }`}
-              />
-              <span>{course.is_active ? "Active" : "Archived"}</span>
-              <span>•</span>
+            <span className="px-3.5 py-1.5 rounded-full bg-white/10 border border-white/10 text-xs font-semibold text-white backdrop-blur-xs flex items-center gap-2">
+              <span className="font-bold uppercase tracking-wider text-[11px] text-white">
+                {course.is_active ? "Active" : "Archived"}
+              </span>
+              <span className="opacity-40">•</span>
               <span>
                 {enrolledCount} {enrolledCount === 1 ? "student" : "students"} • {staffCount} {staffCount === 1 ? "assistant" : "assistants"}
               </span>

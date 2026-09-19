@@ -158,15 +158,18 @@ export function CourseSubmissionsView({
       <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-7 shadow-xs space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-900 text-white uppercase">
+            <div className="flex items-center gap-2 text-xs">
+              <span className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">
                 Assignment Task
               </span>
               {assignment.due_date && (
-                <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
-                  <Clock3 className="w-3.5 h-3.5" />
-                  <span>Due {new Date(assignment.due_date).toLocaleString()}</span>
-                </span>
+                <>
+                  <span className="text-slate-300" aria-hidden="true">·</span>
+                  <span className="font-medium text-slate-500 flex items-center gap-1">
+                    <Clock3 className="w-3.5 h-3.5" />
+                    <span>Due {new Date(assignment.due_date).toLocaleString()}</span>
+                  </span>
+                </>
               )}
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900">
@@ -178,14 +181,14 @@ export function CourseSubmissionsView({
           </div>
 
           <div className="flex flex-wrap sm:flex-col items-end gap-2 shrink-0">
-            <div className="flex items-center gap-2">
-              <span className="px-3.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-xs font-bold text-slate-800">
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-bold text-slate-900">
                 Max Score: {assignment.max_points} pts
               </span>
               <button
                 type="button"
                 onClick={() => onOpenEditAssignment(assignment)}
-                className="px-3 py-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs rounded-full flex items-center gap-1.5 apple-press shadow-xs transition-colors"
+                className="px-3.5 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs rounded-full flex items-center gap-1.5 apple-press shadow-xs transition-colors"
                 title="Edit Assignment Details"
               >
                 <Pencil className="w-3 h-3" />
@@ -318,12 +321,13 @@ export function CourseSubmissionsView({
                   <div>
                     <div className="flex items-center gap-2">
                       <h4 className="font-bold text-xs text-slate-900">{sub.student_username}</h4>
+                      <span className="text-slate-300" aria-hidden="true">·</span>
                       {sub.is_late ? (
-                        <span className="px-2 py-0.2 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                        <span className="text-xs font-semibold text-rose-700">
                           Late
                         </span>
                       ) : (
-                        <span className="px-2 py-0.2 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700">
+                        <span className="text-xs font-medium text-slate-500">
                           On time
                         </span>
                       )}
@@ -343,14 +347,14 @@ export function CourseSubmissionsView({
 
                 <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
                   {sub.score !== null ? (
-                    <span className="px-3 py-1.5 bg-slate-100 border border-slate-200 text-slate-900 font-bold rounded-full text-xs flex items-center gap-1.5">
-                      <CheckCheck className="w-3.5 h-3.5 text-slate-700" />
+                    <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                      <CheckCheck className="w-3.5 h-3.5 text-emerald-600" />
                       <span>
                         {sub.score} / {assignment.max_points} pts
                       </span>
                     </span>
                   ) : (
-                    <span className="px-2.5 py-1 bg-amber-50 text-amber-800 border border-amber-200 font-semibold rounded-full text-[11px]">
+                    <span className="text-xs font-semibold text-amber-700">
                       Ungraded
                     </span>
                   )}
@@ -367,7 +371,7 @@ export function CourseSubmissionsView({
                             courseCode: course.code,
                           })
                         }
-                        className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full text-xs flex items-center gap-1.5 transition-colors shadow-xs"
+                        className="apple-press px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full text-xs flex items-center gap-1.5 transition-colors shadow-xs"
                       >
                         <Eye className="w-3.5 h-3.5" />
                         <span>Preview</span>
@@ -376,7 +380,7 @@ export function CourseSubmissionsView({
                       <a
                         href={sub.download_url}
                         download
-                        className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-full text-xs flex items-center gap-1.5 transition-colors"
+                        className="apple-press px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-full text-xs flex items-center gap-1.5 transition-colors"
                         title="Download student submission"
                       >
                         <Download className="w-3.5 h-3.5" />
@@ -392,7 +396,7 @@ export function CourseSubmissionsView({
                       setGradeScore(sub.score ?? assignment.max_points ?? 100);
                       setGradeFeedback(sub.feedback || "");
                     }}
-                    className="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full text-xs shadow-xs transition-colors"
+                    className="apple-press px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full text-xs shadow-xs transition-colors"
                   >
                     {sub.score !== null ? "Edit Grade" : "Grade"}
                   </button>
