@@ -122,6 +122,58 @@ body {
   transform-origin: center;
 }
 
+/* Easter Egg: Logo Asterisk Delight Animations */
+@keyframes asteriskDislodge1 {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  50% { transform: translate(-50%, -50%) rotate(-14deg) scale(1.08); }
+  100% { transform: translate(-50%, -50%) rotate(-8deg); }
+}
+
+@keyframes asteriskDislodge2 {
+  0% { transform: translate(-50%, -50%) rotate(-8deg); }
+  50% { transform: translate(-50%, -50%) rotate(22deg) scale(1.12); }
+  100% { transform: translate(-50%, -50%) rotate(15deg); }
+}
+
+@keyframes asteriskDislodge3 {
+  0% { transform: translate(-50%, -50%) rotate(15deg); }
+  40% { transform: translate(-50%, -46%) rotate(-32deg) scale(1.18); }
+  80% { transform: translate(-50%, -48%) rotate(-20deg); }
+  100% { transform: translate(-50%, -46%) rotate(-25deg); }
+}
+
+@keyframes asteriskDislodge4 {
+  0% { transform: translate(-50%, -46%) rotate(-25deg); }
+  25% { transform: translate(-50%, -40%) rotate(45deg) scale(1.22); }
+  50% { transform: translate(-50%, -38%) rotate(28deg); }
+  75% { transform: translate(-50%, -42%) rotate(42deg); }
+  100% { transform: translate(-50%, -40%) rotate(38deg); }
+}
+
+.animate-asterisk-dislodge-1 {
+  animation: asteriskDislodge1 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: center;
+}
+
+.animate-asterisk-dislodge-2 {
+  animation: asteriskDislodge2 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: center;
+}
+
+.animate-asterisk-dislodge-3 {
+  animation: asteriskDislodge3 240ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: center;
+}
+
+.animate-asterisk-dislodge-4 {
+  animation: asteriskDislodge4 260ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: center;
+}
+
+.fallen-asterisk-glyph {
+  filter: drop-shadow(0 0 1.5px rgba(15, 23, 42, 0.95)) drop-shadow(0 4px 12px rgba(15, 23, 42, 0.35));
+}
+
 /* Respect user's motion preference (WCAG AA standard) */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -137,6 +189,12 @@ body {
   .animate-apple-fade,
   .animate-apple-sheet,
   .animate-asterisk-spin,
+  .animate-asterisk-wobble-1,
+  .animate-asterisk-wobble-2,
+  .animate-asterisk-wobble-3,
+  .animate-asterisk-wobble-4,
+  .animate-asterisk-fall,
+  .animate-asterisk-recover,
   .apple-press:active,
   .apple-card-hover:hover {
     animation: none !important;

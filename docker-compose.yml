@@ -86,7 +86,7 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       MINIO_ENDPOINT: storage:9000
-      MINIO_PUBLIC_ENDPOINT: ${MINIO_PUBLIC_ENDPOINT:-http://localhost:8080}
+      MINIO_PUBLIC_ENDPOINT: ${MINIO_PUBLIC_ENDPOINT:-http://localhost:8085}
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       MINIO_USE_SSL: "false"
@@ -113,6 +113,8 @@ services:
     environment:
       - HOSTNAME=0.0.0.0
       - PORT=3000
+      - NEXT_PUBLIC_API_URL=https://localhost-0.tail8b8e30.ts.net:10000/api
+      - INTERNAL_API_URL=http://backend:8000
     command: >
       sh -c "
       pnpm build &&

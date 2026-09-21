@@ -7,7 +7,6 @@ import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import type { CourseWorkspaceTab } from "@/constants/routes";
 import { ROUTES } from "@/constants/routes";
 import { useAuthStore } from "@/stores/auth-store";
-import { PraktikanCourseDetailPage } from "./praktikan-course-detail-page";
 
 type CourseDetailPageProps = {
   courseId: string;
@@ -27,7 +26,7 @@ export function CourseDetailPage(props: CourseDetailPageProps) {
       router.replace(
         `/dashboard?tab=courses&courseId=${props.courseId}&workspaceTab=${targetWorkspaceTab}`
       );
-    } else if (user?.role === "asprak") {
+    } else if (user?.role === "asprak" || user?.role === "praktikan") {
       router.replace(
         `/dashboard?tab=classes&courseId=${props.courseId}&workspaceTab=${props.initialTab}`
       );
@@ -35,9 +34,12 @@ export function CourseDetailPage(props: CourseDetailPageProps) {
   }, [user, props.courseId, props.initialTab, router]);
 
   if (!user) return null;
-  if (user.role === "praktikan") return <PraktikanCourseDetailPage {...props} />;
 
-  if (user.role === "superadmin" || user.role === "asprak") {
+  if (
+    user.role === "superadmin" ||
+    user.role === "asprak" ||
+    user.role === "praktikan"
+  ) {
     return (
       <main className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
         <div className="flex items-center gap-3 text-slate-600">

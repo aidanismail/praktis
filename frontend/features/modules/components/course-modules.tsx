@@ -59,23 +59,19 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
 
   return (
     <section aria-labelledby="course-modules-heading" aria-busy={isFetching}>
-      <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="flex items-baseline justify-between border-b border-slate-200/80 pb-3">
         <div>
-          <p
-            className="text-xs font-semibold uppercase tracking-wider
-            text-slate-500"
-          >
-            Learning materials
-          </p>
-
           <h2
             id="course-modules-heading"
-            className="mt-1 text-xl font-semibold text-slate-950"
+            className="text-base sm:text-lg font-bold tracking-tight text-slate-950"
           >
             Course modules
+            <span className="ml-2 text-xs font-normal text-slate-500 tabular-nums">
+              ({modules.length})
+            </span>
           </h2>
 
-          <p className="mt-1 text-sm leading-6 text-slate-600">
+          <p className="mt-0.5 text-xs text-slate-500">
             {accessMode === "manage"
               ? "Upload, publish, and organize reading materials and lab manuals."
               : "Download lab manuals, guides, and reading materials."}
@@ -83,7 +79,7 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
         </div>
 
         {hasLoadedData && !isAccessError ? (
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => void refetch()}

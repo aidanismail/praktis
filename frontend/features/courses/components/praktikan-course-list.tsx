@@ -12,7 +12,10 @@ import type { Course } from "../types/course.type";
 import { PraktikanCourseCard } from "./praktikan-course-card";
 import { PraktikanCourseTable } from "./praktikan-course-table";
 
-type PraktikanCourseListProps = { userId: string };
+type PraktikanCourseListProps = {
+  userId: string;
+  onNavigateToCourse?: (courseId: string) => void;
+};
 type ViewMode = "grid" | "table";
 
 function sortCourses(courses: Course[]) {
@@ -23,7 +26,10 @@ function sortCourses(courses: Course[]) {
   });
 }
 
-export function PraktikanCourseList({ userId }: PraktikanCourseListProps) {
+export function PraktikanCourseList({
+  userId,
+  onNavigateToCourse
+}: PraktikanCourseListProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [searchQuery, setSearchQuery] = useState("");
   const query = useEnrolledCourses(userId);
@@ -167,13 +173,22 @@ export function PraktikanCourseList({ userId }: PraktikanCourseListProps) {
           No classes match your search.
         </div>
       ) : viewMode === "table" ? (
-        <PraktikanCourseTable courses={filteredCourses} />
+        <PraktikanCourseTable
+          courses={filteredCourses}
+          onNavigateToCourse={onNavigateToCourse}
+        />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredCourses.map((course) => (
             <Link
               key={course.id}
               href={getCourseDetailRoute(course.id)}
+              onClick={(e) => {
+                if (onNavigateToCourse) {
+                  e.preventDefault();
+                  onNavigateToCourse(course.id);
+                }
+              }}
               className="rounded-3xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 block h-full"
             >
               <PraktikanCourseCard course={course} />

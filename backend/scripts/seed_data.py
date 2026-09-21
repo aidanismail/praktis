@@ -48,7 +48,7 @@ USERS_DATA = [
 
 async def seed_data():
     async with AsyncSessionLocal() as db:
-        print("-Star Seed")
+        print("Start Seed")
 
         user_map = {}
         for u_data in USERS_DATA:

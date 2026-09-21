@@ -6,7 +6,6 @@ import Link from "next/link";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { ROUTES } from "@/constants/routes";
 import { useAuthStore } from "@/stores/auth-store";
-import { PraktikanAssignmentDetailPage } from "./praktikan-assignment-detail-page";
 
 type Props = { courseId: string; assignmentId: string };
 
@@ -19,7 +18,7 @@ export function AssignmentDetailPage(props: Props) {
       router.replace(
         `/dashboard?tab=courses&courseId=${props.courseId}&workspaceTab=classwork&assignmentId=${props.assignmentId}`
       );
-    } else if (user?.role === "asprak") {
+    } else if (user?.role === "asprak" || user?.role === "praktikan") {
       router.replace(
         `/dashboard?tab=classes&courseId=${props.courseId}&workspaceTab=assignments&assignmentId=${props.assignmentId}`
       );
@@ -27,9 +26,12 @@ export function AssignmentDetailPage(props: Props) {
   }, [user, props.courseId, props.assignmentId, router]);
 
   if (!user) return null;
-  if (user.role === "praktikan") return <PraktikanAssignmentDetailPage {...props} />;
 
-  if (user.role === "superadmin" || user.role === "asprak") {
+  if (
+    user.role === "superadmin" ||
+    user.role === "asprak" ||
+    user.role === "praktikan"
+  ) {
     return (
       <main className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
         <div

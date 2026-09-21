@@ -7,6 +7,7 @@ import { useLogout } from "@/features/auth/hooks/use-logout";
 import { useAdminCourses } from "@/features/admin/hooks/use-admin-courses";
 import { useCourseWorkspace } from "@/features/admin/hooks/use-admin-course-workspace";
 import { useAssignedCourses } from "@/features/courses/hooks/use-assigned-courses";
+import { useEnrolledCourses } from "@/features/courses/hooks/use-enrolled-courses";
 import { DASHBOARD_NAVIGATION } from "../constants/dashboard-navigation";
 import { DashboardHeader } from "./dashboard-header";
 import { DashboardSidebar } from "./dashboard-sidebar";
@@ -49,6 +50,9 @@ export function DashboardShell({ user }: DashboardShellProps) {
   // Fetch assigned courses for asprak
   const assignedCoursesQuery = useAssignedCourses(user.id);
 
+  // Fetch enrolled courses for praktikan
+  const enrolledCoursesQuery = useEnrolledCourses(user.role === "praktikan" ? user.id : "");
+
   const activeCourse = useMemo(() => {
     if (!courseIdParam) return null;
     if (isSuperadmin) {
@@ -58,8 +62,19 @@ export function DashboardShell({ user }: DashboardShellProps) {
       const assignedCourses = assignedCoursesQuery.data ?? [];
       return assignedCourses.find((c) => c.id === courseIdParam) ?? null;
     }
+    if (user.role === "praktikan") {
+      const enrolledCourses = enrolledCoursesQuery.data ?? [];
+      return enrolledCourses.find((c) => c.id === courseIdParam) ?? null;
+    }
     return null;
-  }, [courseIdParam, isSuperadmin, user.role, adminCourses, assignedCoursesQuery.data]);
+  }, [
+    courseIdParam,
+    isSuperadmin,
+    user.role,
+    adminCourses,
+    assignedCoursesQuery.data,
+    enrolledCoursesQuery.data
+  ]);
 
   const activeTab = useMemo(
     () => workspaceTabParam || "stream",

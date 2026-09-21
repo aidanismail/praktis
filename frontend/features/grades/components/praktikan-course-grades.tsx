@@ -107,20 +107,20 @@ export function PraktikanCourseGrades({ userId, courseId }: Props) {
                 </div>
 
                 {!session.grades_published ? (
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 shrink-0">
+                  <span className="text-xs font-medium text-slate-400 shrink-0">
                     Not released yet
                   </span>
                 ) : row ? (
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-baseline gap-1.5 shrink-0">
                     <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
                       Score
                     </span>
-                    <span className="rounded-full bg-slate-900 text-white px-3.5 py-1 text-xs font-bold shadow-xs">
+                    <span className="text-base font-bold text-slate-950 font-mono">
                       {formatScore(row.score)}
                     </span>
                   </div>
                 ) : (
-                  <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 shrink-0">
+                  <span className="text-xs font-medium text-amber-700 shrink-0">
                     No score recorded
                   </span>
                 )}

@@ -16,6 +16,10 @@ import { AttendanceReportsView } from "@/features/admin/components/attendance-re
 import { GradeExportsView } from "@/features/admin/components/grade-exports-view";
 import { CourseManagement } from "@/features/admin/components/course-management";
 import { PraktikanCourseList } from "@/features/courses/components/praktikan-course-list";
+import {
+  PraktikanCourseWorkspace,
+  type PraktikanWorkspaceTab
+} from "@/features/courses/components/praktikan-course-workspace";
 import { PraktikanAttendanceHistory } from "@/features/attendance/components/praktikan-attendance-history";
 import { PraktikanGradeHistory } from "@/features/grades/components/praktikan-grade-history";
 import { UserProfile } from "@/features/profile/components/user-profile";
@@ -113,7 +117,25 @@ export function RoleDashboard({
 
     if (user.role === "praktikan") {
       if (activeItem.id === "classes") {
-        return <PraktikanCourseList userId={user.id} />;
+        if (activeCourse) {
+          return (
+            <PraktikanCourseWorkspace
+              user={user}
+              course={activeCourse}
+              workspaceTab={
+                (workspaceTab as PraktikanWorkspaceTab) || "stream"
+              }
+              assignmentId={assignmentId}
+              sessionId={sessionId}
+            />
+          );
+        }
+        return (
+          <PraktikanCourseList
+            userId={user.id}
+            onNavigateToCourse={onNavigateToCourse}
+          />
+        );
       }
 
       if (activeItem.id === "attendance") {

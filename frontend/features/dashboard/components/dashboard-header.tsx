@@ -42,6 +42,14 @@ const DEFAULT_ASPRAK_TABS: CourseTabItem[] = [
   { id: "sessions", label: "Sessions & Attendance" },
 ];
 
+const DEFAULT_PRAKTIKAN_TABS: CourseTabItem[] = [
+  { id: "stream", label: "Stream" },
+  { id: "modules", label: "Modules" },
+  { id: "assignments", label: "Assignments" },
+  { id: "people", label: "People" },
+  { id: "sessions", label: "Attendance & Grades" },
+];
+
 export function DashboardHeader({
   user,
   onToggleSidebar,
@@ -61,7 +69,11 @@ export function DashboardHeader({
 
   const effectiveTabs =
     courseTabs ||
-    (user.role === "asprak" ? DEFAULT_ASPRAK_TABS : DEFAULT_SUPERADMIN_TABS);
+    (user.role === "praktikan"
+      ? DEFAULT_PRAKTIKAN_TABS
+      : user.role === "asprak"
+        ? DEFAULT_ASPRAK_TABS
+        : DEFAULT_SUPERADMIN_TABS);
 
   useEffect(() => {
     if (!isUserMenuOpen) return;

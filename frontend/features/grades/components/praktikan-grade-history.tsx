@@ -213,9 +213,9 @@ export function PraktikanGradeHistory({ userId }: Props) {
                       <p className="text-[11px] text-slate-500 mt-0.5">{formatDate(row.session_date)}</p>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-baseline gap-1.5">
                       <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Score</span>
-                      <span className="rounded-full bg-slate-900 text-white font-bold text-xs px-3.5 py-1.5 shadow-xs">
+                      <span className="text-base font-bold text-slate-950 font-mono">
                         {formatScore(row.score)}
                       </span>
                     </div>

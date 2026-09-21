@@ -7,9 +7,13 @@ import type { Course } from "../types/course.type";
 
 type PraktikanCourseTableProps = {
   courses: Course[];
+  onNavigateToCourse?: (courseId: string) => void;
 };
 
-export function PraktikanCourseTable({ courses }: PraktikanCourseTableProps) {
+export function PraktikanCourseTable({
+  courses,
+  onNavigateToCourse
+}: PraktikanCourseTableProps) {
   return (
     <div className="overflow-x-auto rounded-3xl border border-slate-200 bg-white shadow-xs">
       <table className="min-w-full divide-y divide-slate-200 text-left text-xs">
@@ -40,8 +44,14 @@ export function PraktikanCourseTable({ courses }: PraktikanCourseTableProps) {
               <td className="px-5 py-4 text-right">
                 <Link
                   href={getCourseDetailRoute(course.id)}
+                  onClick={(e) => {
+                    if (onNavigateToCourse) {
+                      e.preventDefault();
+                      onNavigateToCourse(course.id);
+                    }
+                  }}
                   aria-label={`Open ${course.name}`}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold text-slate-900 bg-slate-100 hover:bg-slate-900 hover:text-white transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold text-slate-900 bg-slate-100 hover:bg-slate-900 hover:text-white transition-colors cursor-pointer apple-press"
                 >
                   <span>Open</span>
                   <ChevronRight className="w-3.5 h-3.5" />
