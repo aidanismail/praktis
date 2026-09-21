@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { AlertCircle, BookOpen, Loader2, RefreshCw } from "lucide-react";
+import { AlertCircle, BookOpen, RefreshCw } from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useCourseModules } from "../hooks/use-course-modules";
@@ -105,8 +106,8 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
           className="mt-5 flex min-h-48 items-center justify-center
               rounded-3xl border border-slate-200 bg-white"
         >
-          <Loader2
-            className="h-5 w-5 animate-spin text-slate-900"
+          <AsteriskLoader
+            className="h-5 w-5 text-slate-900"
             aria-hidden="true"
           />
           <span className="ml-3 text-sm text-slate-600">

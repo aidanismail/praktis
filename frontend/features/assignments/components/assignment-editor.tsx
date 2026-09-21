@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { ApiError } from "@/lib/api/client";
@@ -240,9 +240,8 @@ export function AssignmentEditor({
             >
               {mutation.isPending ? (
                 <>
-                  <Loader2
-                    className="mr-2 h-4 w-4 animate-spin"
-                    aria-hidden="true"
+                  <AsteriskLoader
+                    className="mr-2 h-4 w-4"
                   />
                   Saving...
                 </>

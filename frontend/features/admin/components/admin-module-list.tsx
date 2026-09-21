@@ -14,6 +14,7 @@ import {
   FileCheck,
   Eye
 } from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import {
   fetchAdminModules,
   fetchAdminCourses,
@@ -922,7 +923,7 @@ export function AdminModuleList() {
               >
                 {isUploading ? (
                   <>
-                    <span className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                    <AsteriskLoader className="w-3.5 h-3.5" />
                     <span>Uploading...</span>
                   </>
                 ) : (

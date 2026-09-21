@@ -4,11 +4,11 @@ import {
   AlertCircle,
   Download,
   FileText,
-  Loader2,
   RefreshCw,
   Search,
   Users
 } from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ROUTES } from "@/constants/routes";
@@ -153,8 +153,8 @@ export function AssignmentSubmissions({
           aria-live="polite"
           className="mt-6 flex min-h-40 items-center justify-center"
         >
-          <Loader2
-            className="h-5 w-5 animate-spin text-slate-700"
+          <AsteriskLoader
+            className="h-5 w-5 text-slate-700"
             aria-hidden="true"
           />
           <span className="ml-3 text-sm text-slate-600">

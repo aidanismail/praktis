@@ -1,10 +1,11 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Loader2, LockKeyhole, UserRound } from "lucide-react";
+import { Eye, EyeOff, LockKeyhole, UserRound } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { ProductLogo } from "@/components/branding/product-logo";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 
 import { loginSchema, type LoginFormValues } from "../schemas/auth.schema";
 import { useLogin } from "../hooks/use-login";
@@ -139,7 +140,7 @@ export function LoginForm() {
         >
           {loginMutation.isPending ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+              <AsteriskLoader className="mr-2 h-4 w-4" aria-hidden="true" />
               Signing in...
             </>
           ) : (

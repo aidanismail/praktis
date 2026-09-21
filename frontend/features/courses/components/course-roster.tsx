@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { AlertCircle, Loader2, RefreshCw, Users } from "lucide-react";
+import { AlertCircle, RefreshCw, Users } from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useCourseRoster } from "../hooks/use-course-roster";
@@ -85,8 +86,8 @@ export function CourseRoster({ userId, courseId }: CourseRosterProps) {
           className="mt-6 flex min-h-40 items-center justify-center
             rounded-2xl border border-slate-200 bg-slate-50"
         >
-          <Loader2
-            className="h-5 w-5 animate-spin text-slate-900"
+          <AsteriskLoader
+            className="h-5 w-5 text-slate-900"
             aria-hidden="true"
           />
           <span className="ml-3 text-sm text-slate-600">

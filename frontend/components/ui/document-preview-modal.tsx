@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { FileText, Download, ExternalLink, X, Loader2 } from "lucide-react";
+import { FileText, Download, ExternalLink, X } from "lucide-react";
+import { AsteriskLoader } from "./asterisk-loader";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
 
 type DocumentPreviewModalProps = {
@@ -110,7 +111,7 @@ export function DocumentPreviewModal({
         <div className="relative flex-1 bg-slate-100 overflow-hidden">
           {isFrameLoading && isPdf && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-50/90 z-10">
-              <Loader2 className="h-6 w-6 animate-spin text-slate-700" />
+              <AsteriskLoader className="h-6 w-6 text-slate-700" />
               <span className="text-xs font-medium text-slate-500">Loading document preview...</span>
             </div>
           )}

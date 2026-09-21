@@ -107,6 +107,21 @@ body {
   transform: translateY(-2px);
 }
 
+/* Branded Asterisk Spinner Animation */
+@keyframes asteriskSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-asterisk-spin {
+  animation: asteriskSpin 1.4s linear infinite;
+  transform-origin: center;
+}
+
 /* Respect user's motion preference (WCAG AA standard) */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -121,6 +136,7 @@ body {
   .animate-apple-modal,
   .animate-apple-fade,
   .animate-apple-sheet,
+  .animate-asterisk-spin,
   .apple-press:active,
   .apple-card-hover:hover {
     animation: none !important;

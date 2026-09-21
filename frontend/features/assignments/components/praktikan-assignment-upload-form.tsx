@@ -1,7 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FileUp, Loader2, RotateCcw } from "lucide-react";
+import { FileUp, RotateCcw } from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { NotificationBanner } from "@/components/ui/notification-banner";
@@ -211,7 +212,7 @@ export function PraktikanAssignmentUploadForm({
           className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800 shadow-xs disabled:cursor-not-allowed disabled:opacity-60"
         >
           {submissionMutation.isPending ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+            <AsteriskLoader className="h-3.5 w-3.5" />
           ) : hasSubmission ? (
             <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
           ) : (

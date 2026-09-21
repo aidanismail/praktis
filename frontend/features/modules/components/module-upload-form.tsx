@@ -2,10 +2,10 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  Loader2,
   RotateCcw,
   X
 } from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { useId, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { ApiError } from "@/lib/api/client";
@@ -320,7 +320,7 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
             className="flex items-center gap-2 rounded-xl
                 bg-slate-100 px-4 py-3 text-sm text-slate-700"
           >
-            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            <AsteriskLoader className="h-4 w-4" />
             {busyMessage}
           </p>
         ) : null}
@@ -545,9 +545,8 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
           >
             {isBusy ? (
               <>
-                <Loader2
-                  className="mr-1.5 h-3.5 w-3.5 animate-spin"
-                  aria-hidden="true"
+                <AsteriskLoader
+                  className="mr-1.5 h-3.5 w-3.5"
                 />
                 Uploading...
               </>

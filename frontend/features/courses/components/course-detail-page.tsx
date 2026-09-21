@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import type { CourseWorkspaceTab } from "@/constants/routes";
 import { ROUTES } from "@/constants/routes";
 import { useAuthStore } from "@/stores/auth-store";
@@ -41,7 +41,7 @@ export function CourseDetailPage(props: CourseDetailPageProps) {
     return (
       <main className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
         <div className="flex items-center gap-3 text-slate-600">
-          <Loader2 className="h-5 w-5 animate-spin text-slate-900" />
+          <AsteriskLoader className="h-5 w-5 text-slate-900" />
           <span className="text-sm font-medium">
             Redirecting to course workspace...
           </span>

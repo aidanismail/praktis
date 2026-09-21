@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { BookOpen, LayoutGrid, List, Loader2, RefreshCw, Search } from "lucide-react";
+import { BookOpen, LayoutGrid, List, RefreshCw, Search } from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { useState, useMemo } from "react";
 import { getCourseDetailRoute, ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
@@ -47,7 +48,7 @@ export function PraktikanCourseList({ userId }: PraktikanCourseListProps) {
         role="status"
         className="flex min-h-72 items-center justify-center rounded-3xl border border-slate-200 bg-white"
       >
-        <Loader2 className="h-5 w-5 animate-spin text-slate-400" aria-hidden="true" />
+        <AsteriskLoader className="h-5 w-5 text-slate-400" aria-hidden="true" />
         <span className="ml-3 text-xs font-medium text-slate-600">Loading your practicum classes...</span>
       </div>
     );

@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { useId } from "react";
 import { useForm } from "react-hook-form";
 import { ApiError } from "@/lib/api/client";
@@ -181,7 +181,7 @@ export function SessionForm({
           className="apple-press inline-flex items-center justify-center gap-1.5 rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60 shadow-xs"
         >
           {isPending ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+            <AsteriskLoader className="h-3.5 w-3.5" />
           ) : null}
           {isPending ? pendingLabel : submitLabel}
         </button>

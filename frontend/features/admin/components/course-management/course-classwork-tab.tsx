@@ -15,6 +15,7 @@ import {
   Users,
   X,
 } from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import type {
   Course,
   Assignment,
@@ -564,7 +565,7 @@ export function CourseClassworkTab({
               >
                 {isUploadingMod ? (
                   <>
-                    <span className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                    <AsteriskLoader className="w-3.5 h-3.5" />
                     <span>Uploading...</span>
                   </>
                 ) : (

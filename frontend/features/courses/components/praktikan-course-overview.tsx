@@ -7,10 +7,10 @@ import {
   GraduationCap,
   History,
   Layers3,
-  Loader2,
   MoveRight,
   RefreshCw,
 } from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { getCourseDetailRoute } from "@/constants/routes";
 import { useEnrolledCourses } from "../hooks/use-enrolled-courses";
 import { PraktikanCourseCard } from "./praktikan-course-card";
@@ -28,7 +28,7 @@ export function PraktikanCourseOverview({ userId, onViewClasses }: PraktikanCour
   const recentCourses = [...activeCourses].sort((a, b) => a.code.localeCompare(b.code)).slice(0, 3);
 
   if (query.isPending) {
-    return <div role="status" className="flex min-h-72 items-center justify-center rounded-3xl border border-slate-200 bg-white"><Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" /><span className="ml-3 text-sm text-slate-600">Loading your classes...</span></div>;
+    return <div role="status" className="flex min-h-72 items-center justify-center rounded-3xl border border-slate-200 bg-white"><AsteriskLoader className="h-5 w-5 text-slate-900" aria-hidden="true" /><span className="ml-3 text-sm text-slate-600">Loading your classes...</span></div>;
   }
 
   if (query.isError) {

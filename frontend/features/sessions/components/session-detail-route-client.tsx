@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { getCourseDetailRoute } from "@/constants/routes";
 import { useAuthStore } from "@/stores/auth-store";
 
@@ -41,7 +41,7 @@ export function SessionDetailRouteClient({
         aria-live="polite"
         className="flex items-center gap-3 text-slate-600"
       >
-        <Loader2 className="h-5 w-5 animate-spin text-slate-900" />
+        <AsteriskLoader className="h-5 w-5 text-slate-900" />
         <span className="text-sm font-medium">
           Redirecting to session workspace...
         </span>

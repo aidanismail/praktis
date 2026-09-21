@@ -1,6 +1,7 @@
 "use client";
 
-import { GraduationCap, Loader2, RefreshCw } from "lucide-react";
+import { GraduationCap, RefreshCw } from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { useMemo, useState } from "react";
 import { NotificationBanner } from "@/components/ui/notification-banner";
 import { ApiError } from "@/lib/api/client";
@@ -83,7 +84,7 @@ export function PraktikanGradeHistory({ userId }: Props) {
         role="status"
         className="flex min-h-72 items-center justify-center rounded-3xl border border-slate-200 bg-white"
       >
-        <Loader2 className="h-5 w-5 animate-spin text-slate-400" aria-hidden="true" />
+        <AsteriskLoader className="h-5 w-5 text-slate-400" aria-hidden="true" />
         <span className="ml-3 text-xs font-medium text-slate-600">Loading your grades...</span>
       </div>
     );

@@ -1,7 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Pencil, Pin, Trash2, X } from "lucide-react";
+import { Pencil, Pin, Trash2, X } from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import {
@@ -155,7 +156,7 @@ export function AnnouncementCard({
               className="inline-flex items-center rounded-xl bg-red-700 px-3 py-2 text-sm font-semibold text-white hover:bg-red-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:opacity-60"
             >
               {deleteMutation.isPending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                <AsteriskLoader className="mr-2 h-4 w-4" />
               ) : null}
               {deleteMutation.isPending ? "Deleting..." : "Confirm delete"}
             </button>
@@ -236,7 +237,7 @@ export function AnnouncementCard({
             className="inline-flex min-h-10 items-center rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white hover:bg-slate-800 shadow-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:opacity-60"
           >
             {updateMutation.isPending ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+              <AsteriskLoader className="mr-2 h-4 w-4" />
             ) : null}
             {updateMutation.isPending ? "Saving..." : "Save changes"}
           </button>

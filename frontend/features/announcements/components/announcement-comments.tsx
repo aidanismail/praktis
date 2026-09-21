@@ -1,7 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, MessageCircle, Send, Trash2 } from "lucide-react";
+import { MessageCircle, Send, Trash2 } from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import {
@@ -182,7 +183,7 @@ export function AnnouncementComments({
             className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {addMutation.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              <AsteriskLoader className="h-4 w-4" />
             ) : (
               <Send className="h-4 w-4" aria-hidden="true" />
             )}

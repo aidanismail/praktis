@@ -1,13 +1,14 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { ProductLogo } from "@/components/branding/product-logo";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 
 import {
   changePasswordSchema,
@@ -239,7 +240,7 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
         >
           {changePasswordMutation.isPending ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+              <AsteriskLoader className="mr-2 h-4 w-4" aria-hidden="true" />
               Updating password...
             </>
           ) : (

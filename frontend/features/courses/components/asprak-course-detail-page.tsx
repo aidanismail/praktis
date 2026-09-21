@@ -8,10 +8,10 @@ import {
   AlertCircle,
   ArrowLeft,
   CalendarDays,
-  Loader2,
   RefreshCw,
   Palette
 } from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useAuthStore } from "@/stores/auth-store";
@@ -91,8 +91,8 @@ function AssignedCourseDetail({
           className="flex min-h-72 items-center justify-center
             rounded-3xl border border-slate-200 bg-white"
         >
-          <Loader2
-            className="h-6 w-6 animate-spin text-slate-900"
+          <AsteriskLoader
+            className="h-6 w-6 text-slate-900"
             aria-hidden="true"
           />
           <span className="ml-3 text-sm text-slate-600">

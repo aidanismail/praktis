@@ -1,6 +1,7 @@
 "use client";
 
-import { CalendarRange, Loader2, RefreshCw } from "lucide-react";
+import { CalendarRange, RefreshCw } from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { NotificationBanner } from "@/components/ui/notification-banner";
 import { useCourseSessions } from "@/features/sessions/hooks/use-course-sessions";
 import { getSessionAttendanceStatus } from "@/features/sessions/types/session.type";
@@ -40,7 +41,7 @@ export function PraktikanCourseAttendance({ userId, courseId }: Props) {
         role="status"
         className="flex min-h-56 items-center justify-center rounded-3xl border border-slate-200 bg-white"
       >
-        <Loader2 className="h-5 w-5 animate-spin text-slate-400" aria-hidden="true" />
+        <AsteriskLoader className="h-5 w-5 text-slate-400" aria-hidden="true" />
         <span className="ml-3 text-xs font-medium text-slate-600">Loading sessions and attendance...</span>
       </div>
     );

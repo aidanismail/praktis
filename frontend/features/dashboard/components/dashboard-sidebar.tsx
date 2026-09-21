@@ -10,11 +10,11 @@ import {
   GraduationCap,
   FileSpreadsheet,
   LogOut,
-  Loader2,
   Layers,
   X
 } from "lucide-react";
 import { ProductLogo } from "@/components/branding/product-logo";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import type { DashboardNavItem } from "../constants/dashboard-navigation";
 
 type DashboardSidebarProps = {
@@ -111,8 +111,8 @@ export function DashboardSidebar({
           }`}
         >
           {isLoggingOut ? (
-            <Loader2
-              className="h-4 w-4 shrink-0 animate-spin"
+            <AsteriskLoader
+              className="h-4 w-4 shrink-0"
               aria-hidden="true"
             />
           ) : (

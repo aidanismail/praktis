@@ -3,10 +3,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   GraduationCap,
-  Loader2,
   RefreshCw,
   Search
 } from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { NotificationBanner } from "@/components/ui/notification-banner";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
@@ -357,7 +357,7 @@ function GradebookForm({
       {!isReadOnly ? (
         <div className="mt-5 flex flex-wrap gap-2">
           <button type="submit" disabled={saveMutation.isPending || !form.formState.isDirty || enteredCount === 0 || hasClearedSavedGrade} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white shadow-xs transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60">
-            {saveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
+            {saveMutation.isPending ? <AsteriskLoader className="h-4 w-4" /> : null}
             {saveMutation.isPending ? "Saving..." : "Save draft grades"}
           </button>
           <button type="button" onClick={resetChanges} disabled={saveMutation.isPending || !form.formState.isDirty} className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-60">Reset changes</button>
@@ -393,7 +393,7 @@ export function SessionGradebook({
 
       {rosterQuery.isPending || gradesQuery.isPending ? (
         <div role="status" aria-live="polite" className="mt-5 flex min-h-40 items-center justify-center rounded-2xl bg-slate-50">
-          <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+          <AsteriskLoader className="h-5 w-5" />
           <span className="ml-3 text-sm text-slate-600">Loading roster and saved grades...</span>
         </div>
       ) : null}

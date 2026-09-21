@@ -1,6 +1,7 @@
 "use client";
 
-import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
+import { AlertCircle, RefreshCw } from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -75,9 +76,9 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   if (currentUserQuery.isPending || (!user && !currentUserQuery.isError)) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-brand text-white">
-        <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur">
-          <Loader2 className="h-5 w-5 animate-spin" />
-          <span className="text-sm text-slate-200">Checking session...</span>
+        <div className="flex flex-col items-center gap-3.5 rounded-3xl border border-white/10 bg-white/5 px-8 py-6 backdrop-blur shadow-2xl">
+          <AsteriskLoader className="h-9 w-9 text-white" />
+          <span className="text-xs font-medium text-slate-300">Checking session...</span>
         </div>
       </div>
     );
@@ -92,7 +93,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
       return (
         <div className="flex min-h-screen items-center justify-center bg-brand text-white">
           <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur">
-            <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+            <AsteriskLoader className="h-5 w-5 text-white" />
             <span className="text-sm text-slate-200">
               Returning to sign in...
             </span>

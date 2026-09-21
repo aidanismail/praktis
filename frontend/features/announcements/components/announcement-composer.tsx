@@ -1,7 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Pin } from "lucide-react";
+import { Pin } from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { useForm } from "react-hook-form";
 import { useCreateCourseAnnouncement } from "../hooks/use-course-announcements";
 import {
@@ -136,7 +137,7 @@ export function AnnouncementComposer({
           >
             {mutation.isPending ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                <AsteriskLoader className="mr-2 h-4 w-4" />
                 Publishing...
               </>
             ) : (

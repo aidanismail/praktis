@@ -3,9 +3,9 @@
 import {
   AlertCircle,
   ArrowLeft,
-  Loader2,
   RefreshCw
 } from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -61,8 +61,8 @@ function LoadingPanel({ label }: { label: string }) {
       aria-live="polite"
       className="flex min-h-72 items-center justify-center rounded-3xl border border-slate-200 bg-white"
     >
-      <Loader2
-        className="h-6 w-6 animate-spin text-slate-900"
+      <AsteriskLoader
+        className="h-6 w-6 text-slate-900"
         aria-hidden="true"
       />
       <span className="ml-3 text-sm text-slate-600">{label}</span>

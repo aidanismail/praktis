@@ -1,6 +1,7 @@
 "use client";
 
-import { AlertCircle, ClipboardList, Loader2, RefreshCw } from "lucide-react";
+import { AlertCircle, ClipboardList, RefreshCw } from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
@@ -45,8 +46,8 @@ export function CourseAssignments({
         aria-live="polite"
         className="flex min-h-56 items-center justify-center rounded-2xl border border-slate-200 bg-white"
       >
-        <Loader2
-          className="h-5 w-5 animate-spin text-slate-900"
+        <AsteriskLoader
+          className="h-5 w-5 text-slate-900"
           aria-hidden="true"
         />
         <span className="ml-3 text-xs font-medium text-slate-600">

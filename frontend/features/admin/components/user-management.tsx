@@ -8,8 +8,8 @@ import {
   UserPlus,
   Eye,
   EyeOff,
-  Loader2,
 } from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import {
   fetchAdminUsers,
   fetchAdminCourses,
@@ -645,7 +645,7 @@ export function UserManagement() {
                   disabled={isCreatingUser}
                   className="rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 disabled:opacity-50 apple-press transition-all flex items-center gap-1.5"
                 >
-                  {isCreatingUser && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  {isCreatingUser && <AsteriskLoader className="w-3.5 h-3.5" />}
                   <span>{isCreatingUser ? "Creating..." : "Create User"}</span>
                 </button>
               </div>

@@ -9,8 +9,8 @@ import {
   Check,
   Trash2,
   AlertCircle,
-  Loader2,
 } from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
 import { courseQueryKeys } from "../constants/course-query-keys";
 import { adminQueryKeys } from "@/features/admin/constants/admin-query-keys";
@@ -382,7 +382,7 @@ export function CourseBannerCustomizerModal({
               disabled={isSubmitting || isProcessingImage}
               className="px-5 py-2 bg-slate-900 hover:bg-slate-800 disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-full text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5"
             >
-              {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+              {isSubmitting && <AsteriskLoader className="w-3.5 h-3.5" />}
               <span>{isSubmitting ? "Applying..." : "Apply Theme"}</span>
             </button>
           </div>
