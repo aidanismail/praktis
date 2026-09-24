@@ -1,13 +1,13 @@
 "use client";
 
 import {
-  AlertCircle,
-  Download,
+  WarningCircle,
+  DownloadSimple,
   FileText,
-  RefreshCw,
-  Search,
+  ArrowsClockwise,
+  MagnifyingGlass,
   Users
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -199,7 +199,7 @@ export function AssignmentSubmissions({
             disabled={query.isFetching}
             className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-red-700 px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <RefreshCw
+            <ArrowsClockwise
               className={
                 query.isFetching ? "h-4 w-4 animate-spin" : "h-4 w-4"
               }
@@ -270,7 +270,7 @@ export function AssignmentSubmissions({
               </label>
 
               <div className="relative">
-                <Search
+                <MagnifyingGlass
                   className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-slate-400"
                   aria-hidden="true"
                 />
@@ -313,7 +313,7 @@ export function AssignmentSubmissions({
               role="status"
               className="mt-6 rounded-2xl border border-dashed border-slate-300 px-6 py-10 text-center"
             >
-              <AlertCircle
+              <WarningCircle
                 className="mx-auto h-8 w-8 text-slate-400"
                 aria-hidden="true"
               />
@@ -431,7 +431,7 @@ export function AssignmentSubmissions({
                           aria-label={`Download submission from ${submission.student_username}`}
                           className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700"
                         >
-                          <Download className="h-4 w-4" aria-hidden="true" />
+                          <DownloadSimple className="h-4 w-4" aria-hidden="true" />
                           Download submission
                         </a>
                       ) : (

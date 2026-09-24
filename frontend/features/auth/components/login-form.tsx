@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, LockKeyhole, UserRound } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { ProductLogo } from "@/components/branding/product-logo";
@@ -10,6 +9,12 @@ import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { loginSchema, type LoginFormValues } from "../schemas/auth.schema";
 import { useLogin } from "../hooks/use-login";
 import { NotificationBanner } from "@/components/ui/notification-banner";
+import {
+  Eye,
+  EyeSlash,
+  LockKey,
+  User
+} from "@phosphor-icons/react";
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -65,7 +70,7 @@ export function LoginForm() {
           </label>
 
           <div className="relative">
-            <UserRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 
             <input
               id="username"
@@ -97,7 +102,7 @@ export function LoginForm() {
           </label>
 
           <div className="relative">
-            <LockKeyhole className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <LockKey className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 
             <input
               id="password"
@@ -119,7 +124,7 @@ export function LoginForm() {
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? (
-                <EyeOff className="h-4 w-4" />
+                <EyeSlash className="h-4 w-4" />
               ) : (
                 <Eye className="h-4 w-4" />
               )}

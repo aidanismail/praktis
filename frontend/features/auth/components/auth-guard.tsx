@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { WarningCircle, ArrowsClockwise } from "@phosphor-icons/react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -108,7 +108,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
           role="alert"
           className="w-full max-w-lg rounded-3xl border border-red-200 bg-white p-6 shadow-sm sm:p-8"
         >
-          <AlertCircle className="h-7 w-7 text-red-600" aria-hidden="true" />
+          <WarningCircle className="h-7 w-7 text-red-600" aria-hidden="true" />
           <h1 className="mt-4 text-xl font-semibold text-slate-950">
             We could not verify your session
           </h1>
@@ -122,7 +122,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
             disabled={currentUserQuery.isFetching}
             className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <RefreshCw
+            <ArrowsClockwise
               className={
                 currentUserQuery.isFetching
                   ? "h-4 w-4 animate-spin"

@@ -2,11 +2,14 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { Menu, ChevronRight } from "lucide-react";
 import type { User } from "@/types/user.type";
 import type { Course } from "@/features/courses/types/course.type";
 import { ProductLogo } from "@/components/branding/product-logo";
 import { ROUTES } from "@/constants/routes";
+import {
+  List,
+  CaretRight
+} from "@phosphor-icons/react";
 
 export type CourseTabItem = {
   id: string;
@@ -113,7 +116,7 @@ export function DashboardHeader({
             title="Toggle Navigation Menu"
             aria-label="Toggle Navigation Menu"
           >
-            <Menu className="w-5 h-5" />
+            <List className="w-5 h-5" />
           </button>
 
           <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-slate-800 min-w-0">
@@ -128,7 +131,7 @@ export function DashboardHeader({
 
             {activeCourse && (
               <>
-                <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+                <CaretRight className="w-4 h-4 text-slate-400 shrink-0" />
                 {activeAssignmentTitle ? (
                   <>
                     <button
@@ -139,7 +142,7 @@ export function DashboardHeader({
                     >
                       {activeCourse.code}
                     </button>
-                    <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <CaretRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                     <span className="font-bold text-slate-900 truncate max-w-[100px] sm:max-w-[180px] md:max-w-[240px]">
                       {activeAssignmentTitle}
                     </span>
@@ -154,9 +157,9 @@ export function DashboardHeader({
           </div>
         </div>
 
-        {/* Middle: Google Classroom Top-Bar Tabs (Desktop View >= md) */}
+        {/* Middle: Google Classroom Top-Bar Tabs — visible on all viewports */}
         {activeCourse && onSelectTab && !activeAssignmentTitle && (
-          <nav className="hidden md:flex items-center gap-1 h-full">
+          <nav className="hidden md:flex items-center gap-1 h-full overflow-x-auto scrollbar-none">
             {effectiveTabs.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
@@ -164,7 +167,7 @@ export function DashboardHeader({
                   key={tab.id}
                   type="button"
                   onClick={() => onSelectTab(tab.id)}
-                  className={`h-full px-4 text-xs font-semibold border-b-2 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center justify-center relative ${
+                  className={`h-full px-4 text-xs font-semibold border-b-2 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center justify-center relative shrink-0 ${
                     isActive
                       ? "border-slate-900 text-slate-900 font-bold"
                       : "border-transparent text-slate-500 hover:text-slate-900 hover:bg-slate-50/80"

@@ -2,7 +2,6 @@
 
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { AlertCircle, Trash2 } from "lucide-react";
 import type {
   Course,
   Assignment,
@@ -28,6 +27,10 @@ import { CourseSessionsTab } from "./course-management/course-sessions-tab";
 import { CourseSubmissionsView } from "./course-management/course-submissions-view";
 import { CourseModal } from "./course-management/course-modal";
 import { CourseAssignmentModal } from "./course-management/course-assignment-modal";
+import {
+  WarningCircle,
+  Trash
+} from "@phosphor-icons/react";
 
 export function CourseManagement() {
   const router = useRouter();
@@ -443,7 +446,7 @@ export function CourseManagement() {
       {courseId && !isLoadingCourses && !selectedCourse ? (
         <div className="p-8 sm:p-12 bg-white rounded-3xl border border-slate-200 shadow-xs text-center space-y-4 max-w-lg mx-auto mt-4">
           <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto shadow-xs">
-            <AlertCircle className="w-6 h-6" />
+            <WarningCircle className="w-6 h-6" />
           </div>
           <div className="space-y-1">
             <h3 className="font-bold text-sm text-slate-900">Course not found</h3>
@@ -508,7 +511,7 @@ export function CourseManagement() {
             ) : (
               <div className="p-8 sm:p-12 bg-white rounded-3xl border border-slate-200 shadow-xs text-center space-y-4 max-w-lg mx-auto">
                 <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto shadow-xs">
-                  <AlertCircle className="w-6 h-6" />
+                  <WarningCircle className="w-6 h-6" />
                 </div>
                 <div className="space-y-1">
                   <h3 className="font-bold text-sm text-slate-900">Assignment not found</h3>
@@ -621,7 +624,7 @@ export function CourseManagement() {
           <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4">
             <div className="flex items-center gap-3 text-rose-600">
               <div className="p-2.5 rounded-full bg-rose-50">
-                <Trash2 className="w-5 h-5" />
+                <Trash className="w-5 h-5" />
               </div>
               <h4 className="font-bold text-sm text-slate-900">
                 Delete course

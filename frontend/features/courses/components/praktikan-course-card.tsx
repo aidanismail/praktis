@@ -1,12 +1,14 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
 import type { Course } from "../types/course.type";
 import {
   getThemeConfig,
   getPatternConfig,
   getCourseBannerTheme,
 } from "../constants/banner-themes";
+import {
+  CaretRight
+} from "@phosphor-icons/react";
 
 type PraktikanCourseCardProps = {
   course: Course;
@@ -79,7 +81,7 @@ export function PraktikanCourseCard({ course }: PraktikanCourseCardProps) {
         <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
           <span className="text-slate-900 font-semibold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
             <span>Open class</span>
-            <ChevronRight className="w-3.5 h-3.5" />
+            <CaretRight className="w-3.5 h-3.5" />
           </span>
           <span className="text-[11px] text-slate-400 font-medium">
             Semester {course.semester}

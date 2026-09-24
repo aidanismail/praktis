@@ -1,15 +1,6 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import {
-  Calendar,
-  Clock,
-  Download,
-  Lock,
-  Plus,
-  Unlock,
-  Users,
-} from "lucide-react";
 import type {
   Course,
   CourseSession,
@@ -18,6 +9,15 @@ import type {
 import { getAttendanceExportUrl } from "@/features/admin/api/admin.api";
 import { useSessionAttendance } from "@/features/admin/hooks/use-admin-course-workspace";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
+import {
+  CalendarBlank,
+  Clock,
+  DownloadSimple,
+  Lock,
+  Plus,
+  LockOpen,
+  Users
+} from "@phosphor-icons/react";
 
 interface CourseSessionsTabProps {
   course: Course;
@@ -159,7 +159,7 @@ export function CourseSessionsTab({
                   <div>
                     <span className="font-bold text-xs text-slate-900 block">{s.title}</span>
                     <span className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
-                      <Calendar className="w-3 h-3" />
+                      <CalendarBlank className="w-3 h-3" />
                       <span>Date: {s.date}</span>
                     </span>
                   </div>
@@ -194,7 +194,7 @@ export function CourseSessionsTab({
                         </>
                       ) : (
                         <>
-                          <Unlock className="w-3.5 h-3.5" />
+                          <LockOpen className="w-3.5 h-3.5" />
                           <span>Open Window</span>
                         </>
                       )}
@@ -204,7 +204,7 @@ export function CourseSessionsTab({
                       href={getAttendanceExportUrl(s.id, "csv")}
                       className="apple-press px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-full text-xs flex items-center gap-1 transition-colors"
                     >
-                      <Download className="w-3.5 h-3.5" />
+                      <DownloadSimple className="w-3.5 h-3.5" />
                       <span>CSV</span>
                     </a>
                   </div>

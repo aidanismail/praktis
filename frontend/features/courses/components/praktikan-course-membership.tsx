@@ -1,5 +1,8 @@
-import { LockKeyhole, UserRound } from "lucide-react";
 import type { User } from "@/types/user.type";
+import {
+  LockKey,
+  User as UserIcon
+} from "@phosphor-icons/react";
 
 type PraktikanCourseMembershipProps = { user: User };
 
@@ -11,7 +14,7 @@ export function PraktikanCourseMembership({ user }: PraktikanCourseMembershipPro
     >
       <div className="flex items-start gap-4">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">
-          <UserRound className="h-5 w-5" aria-hidden="true" />
+          <UserIcon className="h-5 w-5" aria-hidden="true" />
         </span>
         <div className="min-w-0">
           <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Your Membership</p>
@@ -22,7 +25,7 @@ export function PraktikanCourseMembership({ user }: PraktikanCourseMembershipPro
         </div>
       </div>
       <div className="mt-6 flex items-start gap-3 rounded-2xl border border-slate-200/60 bg-slate-50 p-4">
-        <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
+        <LockKey className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
         <div>
           <h3 className="text-xs font-bold text-slate-900">Class membership is private</h3>
           <p className="mt-1 text-xs leading-5 text-slate-500">

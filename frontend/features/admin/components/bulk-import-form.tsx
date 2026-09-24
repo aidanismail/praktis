@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, type ChangeEvent, type FormEvent } from "react";
-import { UploadCloud, FileSpreadsheet, CheckCircle2, AlertCircle } from "lucide-react";
+import {
+  CloudArrowUp,
+  Table,
+  CheckCircle,
+  WarningCircle
+} from "@phosphor-icons/react";
 import { importStudentsCsv } from "../api/admin.api";
 import type { ImportCsvResponse } from "../types/admin.type";
 
@@ -47,7 +52,7 @@ export function BulkImportForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 p-8 text-center bg-slate-50/50 hover:bg-slate-50 transition-colors">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-700 mb-3">
-              <UploadCloud className="h-6 w-6" />
+              <CloudArrowUp className="h-6 w-6" />
             </div>
 
             <div className="flex text-xs font-semibold text-slate-700">
@@ -71,7 +76,7 @@ export function BulkImportForm() {
 
             {file && (
               <div className="mt-3.5 inline-flex items-center gap-2 rounded-xl bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-800">
-                <FileSpreadsheet className="w-4 h-4 text-slate-500" />
+                <Table className="w-4 h-4 text-slate-500" />
                 <span>{file.name}</span>
                 <span className="text-slate-400 font-normal">({(file.size / 1024).toFixed(1)} KB)</span>
               </div>
@@ -80,7 +85,7 @@ export function BulkImportForm() {
 
           {error && (
             <div className="rounded-xl bg-rose-50 border border-rose-200 px-4 py-3 text-xs font-medium text-rose-800 flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              <WarningCircle className="w-4 h-4 text-rose-600 shrink-0" />
               <span>{error}</span>
             </div>
           )}
@@ -107,7 +112,7 @@ export function BulkImportForm() {
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <h4 className="text-sm font-bold text-slate-900">Import Summary</h4>
             <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <CheckCircle className="w-4 h-4 text-emerald-600" />
               <span>{result.message}</span>
             </span>
           </div>

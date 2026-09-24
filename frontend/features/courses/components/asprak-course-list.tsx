@@ -2,13 +2,16 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { AlertCircle, RefreshCw } from "lucide-react";
 import { getCourseDetailRoute, ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useAssignedCourses } from "../hooks/use-assigned-courses";
 import type { Course } from "../types/course.type";
 import { AsprakCourseCard } from "./asprak-course-card";
 import { sortCourses } from "../utils/sort-courses";
+import {
+  WarningCircle,
+  ArrowsClockwise
+} from "@phosphor-icons/react";
 
 type AsprakCourseListProps = {
   userId: string;
@@ -119,7 +122,7 @@ export function AsprakCourseList({
         className="rounded-2xl border border-red-200 bg-red-50 p-6"
       >
         <div className="flex items-start gap-3">
-          <AlertCircle
+          <WarningCircle
             className="mt-0.5 h-5 w-5 shrink-0 text-red-600"
             aria-hidden="true"
           />
@@ -157,7 +160,7 @@ export function AsprakCourseList({
                 disabled={isFetching}
                 className="mt-4 inline-flex items-center gap-2 rounded-xl bg-red-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <RefreshCw
+                <ArrowsClockwise
                   className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`}
                   aria-hidden="true"
                 />

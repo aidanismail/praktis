@@ -1,21 +1,21 @@
 "use client";
 
-import {
-  LayoutDashboard,
-  BookOpen,
-  Users,
-  UploadCloud,
-  FileText,
-  ClipboardCheck,
-  GraduationCap,
-  FileSpreadsheet,
-  LogOut,
-  Layers,
-  X
-} from "lucide-react";
 import { ProductLogo } from "@/components/branding/product-logo";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import type { DashboardNavItem } from "../constants/dashboard-navigation";
+import {
+  SquaresFour,
+  BookOpen,
+  Users,
+  CloudArrowUp,
+  FileText,
+  ClipboardText,
+  GraduationCap,
+  Table,
+  SignOut,
+  Stack,
+  X
+} from "@phosphor-icons/react";
 
 type DashboardSidebarProps = {
   items: DashboardNavItem[];
@@ -30,16 +30,16 @@ type DashboardSidebarProps = {
 };
 
 const NAV_ICONS: Record<string, React.ElementType> = {
-  overview: LayoutDashboard,
+  overview: SquaresFour,
   courses: BookOpen,
   classes: BookOpen,
   users: Users,
-  "bulk-import": UploadCloud,
+  "bulk-import": CloudArrowUp,
   modules: FileText,
-  "attendance-reports": ClipboardCheck,
-  attendance: ClipboardCheck,
+  "attendance-reports": ClipboardText,
+  attendance: ClipboardText,
   grades: GraduationCap,
-  "grade-exports": FileSpreadsheet,
+  "grade-exports": Table,
   profile: Users
 };
 
@@ -58,7 +58,7 @@ export function DashboardSidebar({
     <nav className="flex-1 space-y-1 overflow-y-auto p-3 pt-4">
       {items.map((item) => {
         const isActive = item.id === activeItemId;
-        const IconComponent = NAV_ICONS[item.id] || Layers;
+        const IconComponent = NAV_ICONS[item.id] || Stack;
 
         return (
           <button
@@ -116,7 +116,7 @@ export function DashboardSidebar({
               aria-hidden="true"
             />
           ) : (
-            <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <SignOut className="h-4 w-4 shrink-0" aria-hidden="true" />
           )}
 
           {!collapsed ? <span aria-live="polite">{logoutLabel}</span> : null}

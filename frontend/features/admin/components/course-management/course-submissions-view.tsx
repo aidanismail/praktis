@@ -1,18 +1,6 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import {
-  ArrowLeft,
-  Clock3,
-  Pencil,
-  Search,
-  FileText,
-  CheckCheck,
-  Eye,
-  Download,
-  AlertCircle,
-  X,
-} from "lucide-react";
 import type {
   Course,
   CourseStudent,
@@ -21,6 +9,18 @@ import type {
 } from "@/features/admin/types";
 import { useAssignmentSubmissions } from "@/features/admin/hooks/use-admin-course-workspace";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
+import {
+  ArrowLeft,
+  Clock,
+  PencilSimple,
+  MagnifyingGlass,
+  FileText,
+  Checks,
+  Eye,
+  DownloadSimple,
+  WarningCircle,
+  X
+} from "@phosphor-icons/react";
 
 interface CourseSubmissionsViewProps {
   course: Course;
@@ -123,7 +123,7 @@ export function CourseSubmissionsView({
       {error && (
         <div className="rounded-2xl bg-rose-50 border border-rose-200 px-4 py-3 text-xs font-medium text-rose-800 flex items-center justify-between shadow-xs">
           <div className="flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+            <WarningCircle className="w-4 h-4 text-rose-600 shrink-0" />
             <span>{error}</span>
           </div>
           <button
@@ -166,7 +166,7 @@ export function CourseSubmissionsView({
                 <>
                   <span className="text-slate-300" aria-hidden="true">·</span>
                   <span className="font-medium text-slate-500 flex items-center gap-1">
-                    <Clock3 className="w-3.5 h-3.5" />
+                    <Clock className="w-3.5 h-3.5" />
                     <span>Due {new Date(assignment.due_date).toLocaleString()}</span>
                   </span>
                 </>
@@ -191,7 +191,7 @@ export function CourseSubmissionsView({
                 className="px-3.5 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs rounded-full flex items-center gap-1.5 apple-press shadow-xs transition-colors"
                 title="Edit Assignment Details"
               >
-                <Pencil className="w-3 h-3" />
+                <PencilSimple className="w-3 h-3" />
                 <span>Edit Task</span>
               </button>
             </div>
@@ -252,7 +252,7 @@ export function CourseSubmissionsView({
               onChange={(e) => setSubmissionSearch(e.target.value)}
               className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 shadow-xs"
             />
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+            <MagnifyingGlass className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
           </div>
 
           <div className="flex items-center gap-1.5 self-end sm:self-auto bg-white border border-slate-200 rounded-full p-1 shadow-xs">
@@ -348,7 +348,7 @@ export function CourseSubmissionsView({
                 <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
                   {sub.score !== null ? (
                     <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                      <CheckCheck className="w-3.5 h-3.5 text-emerald-600" />
+                      <Checks className="w-3.5 h-3.5 text-emerald-600" />
                       <span>
                         {sub.score} / {assignment.max_points} pts
                       </span>
@@ -383,7 +383,7 @@ export function CourseSubmissionsView({
                         className="apple-press px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-full text-xs flex items-center gap-1.5 transition-colors"
                         title="Download student submission"
                       >
-                        <Download className="w-3.5 h-3.5" />
+                        <DownloadSimple className="w-3.5 h-3.5" />
                         <span className="hidden md:inline">Download</span>
                       </a>
                     </>

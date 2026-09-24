@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { WarningCircle, ArrowsClockwise } from "@phosphor-icons/react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
@@ -61,7 +61,7 @@ export function CourseStream({ userId, courseId, viewerRole }: CourseStreamProps
     return (
       <div role="alert" className="rounded-3xl border border-red-200 bg-red-50 p-6">
         <div className="flex items-start gap-3">
-          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" aria-hidden="true" />
+          <WarningCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" aria-hidden="true" />
           <div>
             <h2 className="font-semibold text-red-950">{title}</h2>
             <p className="mt-1 text-sm leading-6 text-red-800">{description}</p>
@@ -88,7 +88,7 @@ export function CourseStream({ userId, courseId, viewerRole }: CourseStreamProps
                 disabled={isFetching}
                 className="mt-4 inline-flex items-center gap-2 rounded-xl bg-red-700 px-4 py-2 text-sm font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <RefreshCw
+                <ArrowsClockwise
                   className={isFetching ? "h-4 w-4 animate-spin" : "h-4 w-4"}
                   aria-hidden="true"
                 />

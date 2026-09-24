@@ -1,9 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { FileText, Download, ExternalLink, X } from "lucide-react";
 import { AsteriskLoader } from "./asterisk-loader";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
+import {
+  FileText,
+  DownloadSimple,
+  ArrowSquareOut,
+  X
+} from "@phosphor-icons/react";
 
 type DocumentPreviewModalProps = {
   isOpen: boolean;
@@ -81,7 +86,7 @@ export function DocumentPreviewModal({
               className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900 shadow-xs"
               title="Open in new browser tab"
             >
-              <ExternalLink className="h-3.5 w-3.5" />
+              <ArrowSquareOut className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">New Tab</span>
             </a>
 
@@ -91,7 +96,7 @@ export function DocumentPreviewModal({
               className="flex items-center gap-1.5 rounded-full bg-slate-900 px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-slate-800"
               title="Download original file"
             >
-              <Download className="h-3.5 w-3.5" />
+              <DownloadSimple className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Download</span>
             </a>
 
@@ -141,7 +146,7 @@ export function DocumentPreviewModal({
                   rel="noopener noreferrer"
                   className="rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold text-white hover:bg-slate-800 shadow-xs flex items-center gap-1.5"
                 >
-                  <ExternalLink className="h-3.5 w-3.5" />
+                  <ArrowSquareOut className="h-3.5 w-3.5" />
                   <span>Open via Document Viewer</span>
                 </a>
                 <a
@@ -149,7 +154,7 @@ export function DocumentPreviewModal({
                   download
                   className="rounded-full border border-slate-200 bg-white px-5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-xs flex items-center gap-1.5"
                 >
-                  <Download className="h-3.5 w-3.5" />
+                  <DownloadSimple className="h-3.5 w-3.5" />
                   <span>Download File</span>
                 </a>
               </div>

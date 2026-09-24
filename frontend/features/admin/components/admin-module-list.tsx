@@ -2,18 +2,18 @@
 
 import { useEffect, useState } from "react";
 import {
-  Download,
+  DownloadSimple,
   FileText,
   X,
-  Search,
-  Trash2,
-  Globe,
+  MagnifyingGlass,
+  Trash,
+  GlobeSimple,
   Lock,
   Plus,
-  UploadCloud,
-  FileCheck,
+  CloudArrowUp,
+  FileArrowDown,
   Eye
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import {
   fetchAdminModules,
@@ -434,7 +434,7 @@ export function AdminModuleList() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 shadow-xs"
             />
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+            <MagnifyingGlass className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
           </div>
 
           <select
@@ -569,7 +569,7 @@ export function AdminModuleList() {
                                   >
                                     {mod.is_published ? (
                                       <>
-                                        <Globe className="w-3 h-3" />
+                                        <GlobeSimple className="w-3 h-3" />
                                         <span>Published</span>
                                       </>
                                     ) : (
@@ -621,7 +621,7 @@ export function AdminModuleList() {
                                     download
                                     className="apple-press px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-colors"
                                   >
-                                    <Download className="w-3.5 h-3.5" />
+                                    <DownloadSimple className="w-3.5 h-3.5" />
                                     <span className="hidden sm:inline">
                                       Download
                                     </span>
@@ -650,7 +650,7 @@ export function AdminModuleList() {
                                 title="Delete Module"
                                 aria-label="Delete module"
                               >
-                                <Trash2 className="w-3.5 h-3.5" />
+                                <Trash className="w-3.5 h-3.5" />
                               </button>
                             </div>
                           </div>
@@ -753,7 +753,7 @@ export function AdminModuleList() {
                   }`}
                 >
                   <label className="cursor-pointer flex flex-col items-center justify-center gap-1.5 py-2">
-                    <UploadCloud className="w-8 h-8 text-slate-400" />
+                    <CloudArrowUp className="w-8 h-8 text-slate-400" />
                     <span className="text-xs font-semibold text-slate-800">
                       Click to browse or drag and drop files here
                     </span>
@@ -809,7 +809,7 @@ export function AdminModuleList() {
                       >
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2 overflow-hidden">
-                            <FileCheck className="w-4 h-4 text-slate-800 shrink-0" />
+                            <FileArrowDown className="w-4 h-4 text-slate-800 shrink-0" />
                             <span className="font-semibold text-slate-900 truncate block text-[11px]">
                               {item.file.name}
                             </span>
@@ -826,7 +826,7 @@ export function AdminModuleList() {
                               title="Remove file"
                               aria-label={`Remove file ${item.file.name}`}
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              <Trash className="w-3.5 h-3.5" />
                             </button>
                           )}
                         </div>
@@ -928,7 +928,7 @@ export function AdminModuleList() {
                   </>
                 ) : (
                   <>
-                    <UploadCloud className="w-3.5 h-3.5" />
+                    <CloudArrowUp className="w-3.5 h-3.5" />
                     <span>
                       Upload {uploadQueue.length > 0 ? uploadQueue.length : ""}{" "}
                       Module{uploadQueue.length !== 1 ? "s" : ""}
@@ -1078,7 +1078,7 @@ export function AdminModuleList() {
                         download
                         className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-full font-semibold flex items-center gap-1.5 transition-colors"
                       >
-                        <Download className="w-3.5 h-3.5" />
+                        <DownloadSimple className="w-3.5 h-3.5" />
                         <span>Download</span>
                       </a>
                     </>
@@ -1102,7 +1102,7 @@ export function AdminModuleList() {
                   onClick={() => handleDelete(selectedModuleForDetail)}
                   className="px-3 py-2 text-rose-600 hover:bg-rose-50 rounded-full font-semibold transition-colors flex items-center gap-1"
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
+                  <Trash className="w-3.5 h-3.5" />
                   <span>Delete</span>
                 </button>
               </div>

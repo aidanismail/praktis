@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
+import { CaretRight } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useState } from "react";
 import { getAssignmentDetailRoute } from "@/constants/routes";
@@ -125,16 +125,19 @@ export function AssignmentCard({
           </span>
         </div>
 
-        <span className="text-slate-200 hidden sm:inline" aria-hidden="true">·</span>
-
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            Max
-          </span>
-          <span className="font-medium text-slate-800 tabular-nums">
-            {assignment.max_points} pts
-          </span>
-        </div>
+        {viewerRole === "asprak" && (
+          <>
+            <span className="text-slate-200 hidden sm:inline" aria-hidden="true">·</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Max
+              </span>
+              <span className="font-medium text-slate-800 tabular-nums">
+                {assignment.max_points} pts
+              </span>
+            </div>
+          </>
+        )}
 
         {allowedFileTypes.length > 0 && (
           <>
@@ -160,7 +163,7 @@ export function AssignmentCard({
             className="apple-press inline-flex items-center gap-1 text-xs font-semibold text-slate-800 hover:text-slate-950 transition-colors"
           >
             <span>Open assignment</span>
-            <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+            <CaretRight className="w-3.5 h-3.5 text-slate-400" />
           </button>
         ) : (
           <Link
@@ -171,7 +174,7 @@ export function AssignmentCard({
             className="apple-press inline-flex items-center gap-1 text-xs font-semibold text-slate-800 hover:text-slate-950 transition-colors"
           >
             <span>Open assignment</span>
-            <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+            <CaretRight className="w-3.5 h-3.5 text-slate-400" />
           </Link>
         )}
 

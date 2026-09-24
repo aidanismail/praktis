@@ -1,12 +1,17 @@
 "use client";
 
-import { Calendar, Palette, Pencil, ArrowLeft } from "lucide-react";
 import type { Course } from "@/features/courses/types/course.type";
 import {
   getThemeConfig,
   getPatternConfig,
   type SavedCourseTheme,
 } from "@/features/courses/constants/banner-themes";
+import {
+  CalendarBlank,
+  Palette,
+  PencilSimple,
+  ArrowLeft
+} from "@phosphor-icons/react";
 
 type CourseWorkspaceHeaderProps = {
   course: Course;
@@ -83,7 +88,7 @@ export function CourseWorkspaceHeader({
               {course.name}
             </h1>
             <p className="text-xs text-slate-200 mt-1.5 flex items-center gap-2 drop-shadow-xs">
-              <Calendar className="w-4 h-4 text-white/70" />
+              <CalendarBlank className="w-4 h-4 text-white/70" />
               <span>
                 Academic Year {course.academic_year} • Semester {course.semester}
               </span>
@@ -116,7 +121,7 @@ export function CourseWorkspaceHeader({
               onClick={onEditCourse}
               className="rounded-full border border-white/20 bg-white/10 hover:bg-white/20 px-3.5 py-1.5 text-xs font-semibold text-white transition-colors flex items-center gap-1 backdrop-blur-xs shadow-xs"
             >
-              <Pencil className="w-3 h-3" />
+              <PencilSimple className="w-3 h-3" />
               <span>Edit</span>
             </button>
           </div>

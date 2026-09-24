@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState, type ChangeEvent, useEffect } from "react";
-import { ExternalLink, FileText, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
@@ -18,6 +17,10 @@ import {
   type ModuleMetadataFormValues,
 } from "../schemas/module.schema";
 import type { CourseModule } from "../types/module.type";
+import {
+  ArrowSquareOut,
+  X
+} from "@phosphor-icons/react";
 
 type ModuleCardProps = {
   userId: string;
@@ -204,34 +207,21 @@ export function ModuleCard({ userId, courseId, module, accessMode }: ModuleCardP
           className="apple-press inline-flex items-center gap-1 text-xs font-semibold text-slate-800 hover:text-slate-950 transition-colors group"
         >
           <span>Open file</span>
-          <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700 transition-colors" />
+          <ArrowSquareOut className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700 transition-colors" />
         </a>
       </div>
 
-      {/* Main Content: File Icon + Title + Description */}
+      {/* Main Content: Title + Description */}
       {!isEditing ? (
-        <div className="mt-3 flex items-start gap-3.5">
-          <div
-            className={`h-10 w-10 shrink-0 rounded-xl flex items-center justify-center border ${
-              isPdf
-                ? "bg-rose-50/80 border-rose-100 text-rose-600"
-                : "bg-blue-50/80 border-blue-100 text-blue-600"
-            }`}
-            aria-hidden="true"
-          >
-            <FileText className="h-5 w-5" />
-          </div>
-
-          <div className="min-w-0 flex-1">
-            <h3 className="text-sm sm:text-base font-bold text-slate-950 tracking-tight wrap-break-word">
-              {module.title}
-            </h3>
-            {module.description ? (
-              <p className="mt-1 text-xs text-slate-600 line-clamp-2 leading-relaxed wrap-break-word">
-                {module.description}
-              </p>
-            ) : null}
-          </div>
+        <div className="mt-3">
+          <h3 className="text-sm sm:text-base font-bold text-slate-950 tracking-tight wrap-break-word">
+            {module.title}
+          </h3>
+          {module.description ? (
+            <p className="mt-1 text-xs text-slate-600 line-clamp-2 leading-relaxed wrap-break-word">
+              {module.description}
+            </p>
+          ) : null}
         </div>
       ) : (
         /* Inline Edit Form */

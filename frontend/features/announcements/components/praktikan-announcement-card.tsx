@@ -1,4 +1,4 @@
-import { Pin } from "lucide-react";
+import { PushPin } from "@phosphor-icons/react";
 import type { Announcement } from "../types/announcement.type";
 import { AnnouncementComments } from "./announcement-comments";
 
@@ -25,7 +25,7 @@ export function PraktikanAnnouncementCard({ userId, courseId, announcement }: Pr
         {announcement.is_pinned ? (
           <>
             <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-700">
-              <Pin className="h-3.5 w-3.5" aria-hidden="true" />
+              <PushPin className="h-3.5 w-3.5" aria-hidden="true" />
               Pinned
             </span>
             <span className="text-slate-300" aria-hidden="true">·</span>

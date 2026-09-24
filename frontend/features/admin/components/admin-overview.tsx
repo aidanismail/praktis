@@ -3,12 +3,12 @@
 import Link from "next/link";
 import {
   BookOpen,
-  ChevronRight,
+  Users,
+  CloudArrowUp,
+  CaretRight,
   FileText,
-  RefreshCw,
-  UploadCloud,
-  Users
-} from "lucide-react";
+  ArrowsClockwise,
+} from "@phosphor-icons/react";
 import { ROUTES } from "@/constants/routes";
 import type { Course } from "@/features/courses/types/course.type";
 import { ApiError } from "@/lib/api/client";
@@ -68,7 +68,7 @@ const ADMIN_AREAS = [
     id: "bulk-import",
     label: "Bulk import accounts",
     description: "Import student accounts in batch via CSV or Excel",
-    icon: UploadCloud
+    icon: CloudArrowUp
   },
   {
     id: "modules",
@@ -183,7 +183,7 @@ function InlineDataError({ title, message, onRetry }: InlineDataErrorProps) {
               onClick={onRetry}
               className="inline-flex items-center gap-1.5 rounded-full bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-700 shrink-0 apple-press"
             >
-              <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
+              <ArrowsClockwise className="h-3.5 w-3.5" aria-hidden="true" />
               Try again
             </button>
           ) : null}
@@ -350,7 +350,7 @@ export function AdminOverview({
               focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed
               disabled:opacity-60 sm:self-auto"
           >
-            <RefreshCw
+            <ArrowsClockwise
               className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
               aria-hidden="true"
             />
@@ -422,7 +422,7 @@ export function AdminOverview({
                 className="hidden shrink-0 items-center gap-1 text-sm font-semibold text-slate-700 underline-offset-4 hover:text-slate-950 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 sm:inline-flex"
               >
                 View all
-                <ChevronRight className="h-4 w-4" aria-hidden="true" />
+                <CaretRight className="h-4 w-4" aria-hidden="true" />
               </button>
             ) : null}
           </div>
@@ -533,7 +533,7 @@ export function AdminOverview({
                           </span>
                         </span>
 
-                        <ChevronRight
+                        <CaretRight
                           className="h-4 w-4 shrink-0 text-slate-400 transition
                             group-hover:translate-x-0.5 group-hover:text-slate-
                             700"
@@ -731,7 +731,7 @@ export function AdminOverview({
                   </span>
                 </span>
 
-                <ChevronRight
+                <CaretRight
                   className="h-4 w-4 shrink-0 text-slate-400 transition group-
                     hover:translate-x-0.5 group-hover:text-slate-700"
                   aria-hidden="true"

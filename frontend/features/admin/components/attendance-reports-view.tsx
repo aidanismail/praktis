@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Lock, Unlock, UserCheck } from "lucide-react";
 import {
   fetchAdminCourses,
   fetchCourseSessions,
@@ -14,6 +13,11 @@ import {
 import type { Course } from "@/features/courses/types/course.type";
 import type { ClassSessionItem, StudentItem, AttendanceItem } from "../types/admin.type";
 import { NotificationBanner } from "@/components/ui/notification-banner";
+import {
+  Lock,
+  LockOpen,
+  UserCheck
+} from "@phosphor-icons/react";
 
 export function AttendanceReportsView() {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -363,7 +367,7 @@ export function AttendanceReportsView() {
                   disabled={isUpdatingSession}
                   className="rounded-full bg-slate-900 px-4 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 shadow-xs disabled:opacity-50 transition-colors flex items-center gap-1.5"
                 >
-                  <Unlock className="w-3.5 h-3.5" />
+                  <LockOpen className="w-3.5 h-3.5" />
                   <span>{isUpdatingSession ? "..." : "Open Window"}</span>
                 </button>
               )}

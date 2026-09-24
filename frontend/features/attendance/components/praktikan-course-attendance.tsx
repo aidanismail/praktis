@@ -1,12 +1,15 @@
 "use client";
 
-import { CalendarRange, RefreshCw } from "lucide-react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { NotificationBanner } from "@/components/ui/notification-banner";
 import { useCourseSessions } from "@/features/sessions/hooks/use-course-sessions";
 import { getSessionAttendanceStatus } from "@/features/sessions/types/session.type";
 import { usePersonalAttendance } from "../hooks/use-personal-attendance";
 import type { AttendanceStatus } from "../types/attendance.type";
+import {
+  CalendarDots,
+  ArrowsClockwise
+} from "@phosphor-icons/react";
 
 type Props = { userId: string; courseId: string };
 
@@ -65,7 +68,7 @@ export function PraktikanCourseAttendance({ userId, courseId }: Props) {
             }}
             className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700 transition disabled:opacity-60 shrink-0"
           >
-            <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
+            <ArrowsClockwise className="h-3.5 w-3.5" aria-hidden="true" />
             Try again
           </button>
         </div>
@@ -97,7 +100,7 @@ export function PraktikanCourseAttendance({ userId, courseId }: Props) {
           role="status"
           className="rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center shadow-xs"
         >
-          <CalendarRange className="mx-auto h-9 w-9 text-slate-400" aria-hidden="true" />
+          <CalendarDots className="mx-auto h-9 w-9 text-slate-400" aria-hidden="true" />
           <h3 className="mt-3 text-sm font-bold text-slate-950">No sessions scheduled yet</h3>
           <p className="mt-1 text-xs text-slate-500">
             Upcoming lab sessions and attendance windows will show up here once created.

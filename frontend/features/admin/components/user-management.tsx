@@ -1,14 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  X,
-  AlertCircle,
-  Plus,
-  UserPlus,
-  Eye,
-  EyeOff,
-} from "lucide-react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import {
   fetchAdminUsers,
@@ -25,6 +17,14 @@ import type { Course } from "@/features/courses/types/course.type";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
 import { useAuthStore } from "@/stores/auth-store";
 import { NotificationBanner } from "@/components/ui/notification-banner";
+import {
+  X,
+  WarningCircle,
+  Plus,
+  UserPlus,
+  Eye,
+  EyeSlash
+} from "@phosphor-icons/react";
 
 export function UserManagement() {
   const currentUser = useAuthStore((state) => state.user);
@@ -549,7 +549,7 @@ export function UserManagement() {
 
             {createUserError && (
               <div className="p-3 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-800 flex items-center gap-2 animate-apple-fade">
-                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                <WarningCircle className="w-4 h-4 text-rose-600 shrink-0" />
                 <span>{createUserError}</span>
               </div>
             )}
@@ -624,7 +624,7 @@ export function UserManagement() {
                     onClick={() => setShowNewPassword((prev) => !prev)}
                     className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors"
                   >
-                    {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showNewPassword ? <EyeSlash className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
                 <span className="text-[10px] text-slate-400 mt-1 block">

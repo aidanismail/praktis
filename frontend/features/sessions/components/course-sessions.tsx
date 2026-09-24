@@ -1,6 +1,5 @@
 "use client";
 
-import { CalendarRange, RefreshCw } from "lucide-react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
@@ -15,6 +14,10 @@ import type { SessionFormValues } from "../schemas/session.schema";
 import type { CourseSession } from "../types/session.type";
 import { SessionCard } from "./session-card";
 import { SessionForm } from "./session-form";
+import {
+  CalendarDots,
+  ArrowsClockwise
+} from "@phosphor-icons/react";
 
 type CourseSessionsProps = {
   userId: string;
@@ -153,7 +156,7 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
             disabled={sessionsQuery.isFetching}
             className="apple-press inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <RefreshCw
+            <ArrowsClockwise
               className={
                 sessionsQuery.isFetching
                   ? "h-3.5 w-3.5 animate-spin"
@@ -204,7 +207,7 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
                   disabled={sessionsQuery.isFetching}
                   className="mt-3 inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 text-xs font-semibold text-white hover:bg-slate-700 transition disabled:opacity-60"
                 >
-                  <RefreshCw className={sessionsQuery.isFetching ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"} aria-hidden="true" />
+                  <ArrowsClockwise className={sessionsQuery.isFetching ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"} aria-hidden="true" />
                   Try again
                 </button>
               )}
@@ -247,7 +250,7 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
             <div className="lg:col-span-7 space-y-3">
               {sessions.length === 0 ? (
                 <div role="status" className="rounded-2xl border border-dashed border-slate-200 bg-white/70 p-8 text-center">
-                  <CalendarRange className="mx-auto h-7 w-7 text-slate-300" aria-hidden="true" />
+                  <CalendarDots className="mx-auto h-7 w-7 text-slate-300" aria-hidden="true" />
                   <h3 className="mt-2 text-sm font-semibold text-slate-900">No sessions scheduled yet</h3>
                   <p className="mt-1 text-xs text-slate-500">
                     Use the panel on the right to schedule your first lab session.

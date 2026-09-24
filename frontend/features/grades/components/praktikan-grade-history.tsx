@@ -1,12 +1,15 @@
 "use client";
 
-import { GraduationCap, RefreshCw } from "lucide-react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { useMemo, useState } from "react";
 import { NotificationBanner } from "@/components/ui/notification-banner";
 import { ApiError } from "@/lib/api/client";
 import { usePersonalGrades } from "../hooks/use-personal-grades";
 import type { PersonalGradeHistoryItem } from "../types/grade.type";
+import {
+  GraduationCap,
+  ArrowsClockwise
+} from "@phosphor-icons/react";
 
 type Props = { userId: string };
 const INITIAL_LIMIT = 60;
@@ -110,7 +113,7 @@ export function PraktikanGradeHistory({ userId }: Props) {
               disabled={query.isFetching}
               className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700 transition disabled:opacity-60 shrink-0"
             >
-              <RefreshCw className={`h-3.5 w-3.5 ${query.isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
+              <ArrowsClockwise className={`h-3.5 w-3.5 ${query.isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
               Try again
             </button>
           ) : null}
@@ -139,7 +142,7 @@ export function PraktikanGradeHistory({ userId }: Props) {
           className="p-2 self-start sm:self-auto rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-xs transition-colors cursor-pointer disabled:opacity-60"
           title="Refresh grades"
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${query.isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
+          <ArrowsClockwise className={`w-3.5 h-3.5 ${query.isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
         </button>
       </div>
 

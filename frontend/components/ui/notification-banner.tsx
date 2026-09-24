@@ -1,7 +1,13 @@
 "use client";
 
 import { forwardRef, type ReactNode } from "react";
-import { CheckCircle2, AlertCircle, AlertTriangle, Info, X } from "lucide-react";
+import {
+  CheckCircle,
+  WarningCircle,
+  Warning,
+  Info,
+  X
+} from "@phosphor-icons/react";
 
 export type NotificationVariant = "success" | "error" | "warning" | "info";
 
@@ -42,13 +48,13 @@ export const NotificationBanner = forwardRef<HTMLDivElement, NotificationBannerP
       >
         <div className="flex items-center gap-2.5 min-w-0">
           {variant === "success" && (
-            <CheckCircle2 className="w-4 h-4 text-slate-300 shrink-0" aria-hidden="true" />
+            <CheckCircle className="w-4 h-4 text-slate-300 shrink-0" aria-hidden="true" />
           )}
           {variant === "error" && (
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" aria-hidden="true" />
+            <WarningCircle className="w-4 h-4 text-rose-400 shrink-0" aria-hidden="true" />
           )}
           {variant === "warning" && (
-            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" aria-hidden="true" />
+            <Warning className="w-4 h-4 text-amber-400 shrink-0" aria-hidden="true" />
           )}
           {variant === "info" && (
             <Info className="w-4 h-4 text-sky-400 shrink-0" aria-hidden="true" />

@@ -4,13 +4,6 @@ import type { CourseWorkspaceTab } from "@/constants/routes";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import {
-  AlertCircle,
-  ArrowLeft,
-  CalendarDays,
-  RefreshCw,
-  Palette
-} from "lucide-react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
@@ -24,6 +17,13 @@ import {
   type SavedCourseTheme
 } from "../constants/banner-themes";
 import { CourseBannerCustomizerModal } from "./course-banner-customizer-modal";
+import {
+  WarningCircle,
+  ArrowLeft,
+  CalendarDots,
+  ArrowsClockwise,
+  Palette
+} from "@phosphor-icons/react";
 
 type AsprakCourseDetailPageProps = {
   courseId: string;
@@ -114,7 +114,7 @@ function AssignedCourseDetail({
           className="rounded-3xl border border-red-200 bg-red-50 p-6"
         >
           <div className="flex items-start gap-3">
-            <AlertCircle
+            <WarningCircle
               className="mt-0.5 h-5 w-5 shrink-0 text-red-600"
               aria-hidden="true"
             />
@@ -167,7 +167,7 @@ function AssignedCourseDetail({
                     hover:bg-red-100 disabled:cursor-not-allowed
                     disabled:opacity-60"
                 >
-                  <RefreshCw
+                  <ArrowsClockwise
                     className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`}
                     aria-hidden="true"
                   />
@@ -287,7 +287,7 @@ function AssignedCourseDetail({
           border-t border-white/15 pt-5 text-sm text-slate-200 relative z-10"
         >
           <span className="inline-flex items-center gap-2">
-            <CalendarDays
+            <CalendarDots
               className="h-4 w-4 text-white/70"
               aria-hidden="true"
             />

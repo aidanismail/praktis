@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Calendar, RefreshCw } from "lucide-react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { NotificationBanner } from "@/components/ui/notification-banner";
 import { ROUTES, type CourseWorkspaceTab } from "@/constants/routes";
@@ -14,6 +13,11 @@ import {
 } from "../constants/banner-themes";
 import { useEnrolledCourses } from "../hooks/use-enrolled-courses";
 import { PraktikanCourseWorkspaceTabs } from "./praktikan-course-workspace-tabs";
+import {
+  ArrowLeft,
+  CalendarBlank,
+  ArrowsClockwise
+} from "@phosphor-icons/react";
 
 type Props = { courseId: string; initialTab: CourseWorkspaceTab };
 
@@ -103,7 +107,7 @@ export function PraktikanCourseDetailPage({ courseId, initialTab }: Props) {
                 disabled={query.isFetching}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700 transition disabled:opacity-60 shrink-0"
               >
-                <RefreshCw
+                <ArrowsClockwise
                   className={`h-3.5 w-3.5 ${query.isFetching ? "animate-spin" : ""}`}
                   aria-hidden="true"
                 />
@@ -198,7 +202,7 @@ export function PraktikanCourseDetailPage({ courseId, initialTab }: Props) {
                 {course.name}
               </h1>
               <p className="text-xs text-slate-200 mt-1.5 flex items-center gap-2 drop-shadow-xs">
-                <Calendar className="w-4 h-4 text-white/70" />
+                <CalendarBlank className="w-4 h-4 text-white/70" />
                 <span>
                   Academic Year {course.academic_year} • Semester {course.semester}
                 </span>

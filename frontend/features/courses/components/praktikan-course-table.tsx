@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
 import { getCourseDetailRoute } from "@/constants/routes";
 import type { Course } from "../types/course.type";
+import {
+  CaretRight
+} from "@phosphor-icons/react";
 
 type PraktikanCourseTableProps = {
   courses: Course[];
@@ -54,7 +56,7 @@ export function PraktikanCourseTable({
                   className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold text-slate-900 bg-slate-100 hover:bg-slate-900 hover:text-white transition-colors cursor-pointer apple-press"
                 >
                   <span>Open</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
+                  <CaretRight className="w-3.5 h-3.5" />
                 </Link>
               </td>
             </tr>

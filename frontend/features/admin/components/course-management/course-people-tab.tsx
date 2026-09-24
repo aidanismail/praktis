@@ -1,17 +1,6 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import {
-  AlertCircle,
-  GraduationCap,
-  Search,
-  Trash2,
-  UserCheck,
-  UserMinus,
-  UserPlus,
-  Users,
-  X,
-} from "lucide-react";
 import type {
   Course,
   CourseStudent,
@@ -19,6 +8,17 @@ import type {
   AdminUser,
 } from "@/features/admin/types";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
+import {
+  WarningCircle,
+  GraduationCap,
+  MagnifyingGlass,
+  Trash,
+  UserCheck,
+  UserMinus,
+  UserPlus,
+  Users,
+  X
+} from "@phosphor-icons/react";
 
 interface CoursePeopleTabProps {
   course: Course;
@@ -263,7 +263,7 @@ export function CoursePeopleTab({
             onChange={(e) => setPeopleSearch(e.target.value)}
             className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 shadow-xs"
           />
-          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+          <MagnifyingGlass className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
         </div>
 
         <div className="flex items-center gap-2 self-end sm:self-auto">
@@ -338,7 +338,7 @@ export function CoursePeopleTab({
                     title="Remove assistant from course"
                     aria-label="Remove assistant from course"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
@@ -435,7 +435,7 @@ export function CoursePeopleTab({
             {/* In-Modal Error Banner */}
             {enrollModalError && (
               <div className="rounded-2xl bg-rose-50 border border-rose-200 p-3.5 text-xs text-rose-800 flex items-start gap-2.5 animate-in fade-in slide-in-from-top-1 duration-150">
-                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                <WarningCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                 <div className="flex-1">
                   <span className="font-bold block text-rose-900">Enrollment Notice</span>
                   <span className="text-rose-700 leading-relaxed">{enrollModalError}</span>

@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FileUp, RotateCcw } from "lucide-react";
+import { FileArrowUp, ArrowCounterClockwise } from "@phosphor-icons/react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -25,8 +25,8 @@ type PraktikanAssignmentUploadFormProps = {
 
 const ACCEPTED_FILE_TYPES: Record<AssignmentFileType, string> = {
   pdf: ".pdf,application/pdf",
-  zip: ".zip,application/zip,application/x-zip-compressed",
-  docx: ".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  zip: ".zip,application/zip",
+  docx: ".docx",
 };
 
 function getSubmissionErrorMessage(error: Error) {
@@ -130,9 +130,9 @@ export function PraktikanAssignmentUploadForm({
       <div className="flex items-start gap-4">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">
           {hasSubmission ? (
-            <RotateCcw className="h-5 w-5" aria-hidden="true" />
+            <ArrowCounterClockwise className="h-5 w-5" aria-hidden="true" />
           ) : (
-            <FileUp className="h-5 w-5" aria-hidden="true" />
+            <FileArrowUp className="h-5 w-5" aria-hidden="true" />
           )}
         </span>
         <div>
@@ -214,9 +214,9 @@ export function PraktikanAssignmentUploadForm({
           {submissionMutation.isPending ? (
             <AsteriskLoader className="h-3.5 w-3.5" />
           ) : hasSubmission ? (
-            <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+            <ArrowCounterClockwise className="h-3.5 w-3.5" aria-hidden="true" />
           ) : (
-            <FileUp className="h-3.5 w-3.5" aria-hidden="true" />
+            <FileArrowUp className="h-3.5 w-3.5" aria-hidden="true" />
           )}
           {submissionMutation.isPending
             ? "Turning in..."

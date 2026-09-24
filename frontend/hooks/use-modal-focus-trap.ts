@@ -18,14 +18,18 @@ export function useModalFocusTrap<T extends HTMLElement = HTMLDivElement>({
 }: UseModalFocusTrapOptions) {
   const containerRef = useRef<T>(null);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
+  // Track initial focused element and manage autoFocus only on transition to open
   useEffect(() => {
     if (!isOpen) return;
 
-    previouslyFocusedElementRef.current = document.activeElement as HTMLElement | null;
-
-    const container = containerRef.current;
-    if (!container) return;
+    if (!previouslyFocusedElementRef.current) {
+      previouslyFocusedElementRef.current = document.activeElement as HTMLElement | null;
+    }
 
     if (autoFocus) {
       const timer = requestAnimationFrame(() => {
@@ -41,13 +45,35 @@ export function useModalFocusTrap<T extends HTMLElement = HTMLDivElement>({
     }
   }, [isOpen, autoFocus]);
 
+  // Restore focus to previous element only when modal actually closes or unmounts
   useEffect(() => {
-    if (!isOpen) return;
+    return () => {
+      if (
+        previouslyFocusedElementRef.current &&
+        typeof previouslyFocusedElementRef.current.focus === "function"
+      ) {
+        previouslyFocusedElementRef.current.focus();
+        previouslyFocusedElementRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) {
+      if (
+        previouslyFocusedElementRef.current &&
+        typeof previouslyFocusedElementRef.current.focus === "function"
+      ) {
+        previouslyFocusedElementRef.current.focus();
+        previouslyFocusedElementRef.current = null;
+      }
+      return;
+    }
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.stopPropagation();
-        onClose();
+        onCloseRef.current();
         return;
       }
 
@@ -82,17 +108,10 @@ export function useModalFocusTrap<T extends HTMLElement = HTMLDivElement>({
     };
 
     window.addEventListener("keydown", handleKeyDown);
-
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      if (
-        previouslyFocusedElementRef.current &&
-        typeof previouslyFocusedElementRef.current.focus === "function"
-      ) {
-        previouslyFocusedElementRef.current.focus();
-      }
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   return containerRef;
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import { AlertCircle, ClipboardList, RefreshCw } from "lucide-react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
@@ -8,6 +7,11 @@ import { ApiError } from "@/lib/api/client";
 import { useCourseAssignments } from "../hooks/use-course-assignments";
 import { AssignmentCard } from "./assignment-card";
 import { AssignmentComposer } from "./assignment-composer";
+import {
+  WarningCircle,
+  Clipboard,
+  ArrowsClockwise
+} from "@phosphor-icons/react";
 
 type CourseAssignmentsProps = {
   courseId: string;
@@ -79,7 +83,7 @@ export function CourseAssignments({
         className="rounded-2xl border border-red-200 bg-red-50 p-6"
       >
         <div className="flex items-start gap-3">
-          <AlertCircle
+          <WarningCircle
             className="mt-0.5 h-5 w-5 shrink-0 text-red-600"
             aria-hidden="true"
           />
@@ -113,7 +117,7 @@ export function CourseAssignments({
                 disabled={isFetching}
                 className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-red-700 px-4 py-2 text-xs font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <RefreshCw
+                <ArrowsClockwise
                   className={isFetching ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"}
                   aria-hidden="true"
                 />
@@ -158,7 +162,7 @@ export function CourseAssignments({
                 role="status"
                 className="rounded-2xl border border-dashed border-slate-200 bg-white/70 p-8 text-center"
               >
-                <ClipboardList
+                <Clipboard
                   className="mx-auto h-7 w-7 text-slate-300"
                   aria-hidden="true"
                 />
@@ -221,7 +225,7 @@ export function CourseAssignments({
           role="status"
           className="rounded-2xl border border-dashed border-slate-200 bg-white/70 p-8 text-center"
         >
-          <ClipboardList
+          <Clipboard
             className="mx-auto h-7 w-7 text-slate-300"
             aria-hidden="true"
           />

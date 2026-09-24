@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
@@ -16,6 +15,10 @@ import {
 } from "../schemas/auth.schema";
 import { useChangePassword } from "../hooks/use-change-password";
 import { NotificationBanner } from "@/components/ui/notification-banner";
+import {
+  Eye,
+  EyeSlash
+} from "@phosphor-icons/react";
 
 type ChangePasswordFormProps = { isForced: boolean };
 
@@ -119,7 +122,7 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
               }
             >
               {showCurrentPassword ? (
-                <EyeOff className="h-4 w-4" />
+                <EyeSlash className="h-4 w-4" />
               ) : (
                 <Eye className="h-4 w-4" />
               )}
@@ -168,7 +171,7 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
               }
             >
               {showNewPassword ? (
-                <EyeOff className="h-4 w-4" />
+                <EyeSlash className="h-4 w-4" />
               ) : (
                 <Eye className="h-4 w-4" />
               )}
@@ -219,7 +222,7 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
               }
             >
               {showConfirmPassword ? (
-                <EyeOff className="h-4 w-4" />
+                <EyeSlash className="h-4 w-4" />
               ) : (
                 <Eye className="h-4 w-4" />
               )}

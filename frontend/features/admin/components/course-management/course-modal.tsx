@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { AlertCircle } from "lucide-react";
 import type { Course } from "@/features/admin/types";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
+import {
+  WarningCircle
+} from "@phosphor-icons/react";
 
 interface CourseModalProps {
   isOpen: boolean;
@@ -68,7 +70,7 @@ function CourseFormInner({
           aria-live="polite"
           className="flex items-center gap-2 p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs font-medium"
         >
-          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+          <WarningCircle className="w-4 h-4 text-rose-600 shrink-0" />
           <span className="flex-1">{formError}</span>
         </div>
       )}

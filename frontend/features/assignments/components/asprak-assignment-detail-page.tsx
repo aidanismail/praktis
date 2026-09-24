@@ -1,10 +1,10 @@
 "use client";
 
 import {
-  AlertCircle,
+  WarningCircle,
   ArrowLeft,
-  RefreshCw
-} from "lucide-react";
+  ArrowsClockwise
+} from "@phosphor-icons/react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -115,7 +115,7 @@ function RequestErrorPanel({
       className="rounded-3xl border border-red-200 bg-red-50 p-6"
     >
       <div className="flex items-start gap-3">
-        <AlertCircle
+        <WarningCircle
           className="mt-0.5 h-5 w-5 shrink-0 text-red-600"
           aria-hidden="true"
         />
@@ -141,7 +141,7 @@ function RequestErrorPanel({
               disabled={isRetrying}
               className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-red-700 px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <RefreshCw
+              <ArrowsClockwise
                 className={
                   isRetrying ? "h-4 w-4 animate-spin" : "h-4 w-4"
                 }

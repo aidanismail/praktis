@@ -1,10 +1,13 @@
 "use client";
 
-import { GraduationCap, RefreshCw } from "lucide-react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { NotificationBanner } from "@/components/ui/notification-banner";
 import { useCourseSessions } from "@/features/sessions/hooks/use-course-sessions";
 import { usePersonalGrades } from "../hooks/use-personal-grades";
+import {
+  GraduationCap,
+  ArrowsClockwise
+} from "@phosphor-icons/react";
 
 type Props = { userId: string; courseId: string };
 
@@ -56,7 +59,7 @@ export function PraktikanCourseGrades({ userId, courseId }: Props) {
             }}
             className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700 transition disabled:opacity-60 shrink-0"
           >
-            <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
+            <ArrowsClockwise className="h-3.5 w-3.5" aria-hidden="true" />
             Try again
           </button>
         </div>

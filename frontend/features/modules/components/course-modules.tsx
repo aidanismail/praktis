@@ -1,13 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { AlertCircle, BookOpen, RefreshCw } from "lucide-react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useCourseModules } from "../hooks/use-course-modules";
 import { ModuleCard } from "./module-card";
 import { ModuleUploadForm } from "./module-upload-form";
+import {
+  WarningCircleIcon,
+  BookOpenIcon,
+  ArrowsClockwiseIcon
+} from "@phosphor-icons/react";
 type CourseModulesProps = {
   userId: string;
   courseId: string;
@@ -86,7 +90,7 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
               disabled={isFetching}
               className="apple-press inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <RefreshCw
+              <ArrowsClockwiseIcon
                 className={isFetching ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"}
                 aria-hidden="true"
               />
@@ -119,7 +123,7 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
               bg-red-50 p-6"
         >
           <div className="flex items-start gap-3">
-            <AlertCircle
+            <WarningCircleIcon
               className="mt-0.5 h-5 w-5 shrink-0 text-red-600"
               aria-hidden="true"
             />
@@ -171,7 +175,7 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
                       focus-visible:outline-red-700
                       disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  <RefreshCw
+                  <ArrowsClockwiseIcon
                     className={isFetching ? "h-4 w-4 animate-spin" : "h-4 w-4"}
                     aria-hidden="true"
                   />
@@ -193,7 +197,7 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
                   border-amber-200 bg-amber-50 px-4 py-3"
             >
               <div className="flex items-start gap-2">
-                <AlertCircle
+                <WarningCircleIcon
                   className="mt-0.5 h-4 w-4 shrink-0
                       text-amber-700"
                   aria-hidden="true"
@@ -216,7 +220,7 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
                     focus-visible:outline-amber-700
                     disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <RefreshCw
+                <ArrowsClockwiseIcon
                   className={isFetching ? "h-4 w-4 animate-spin" : "h-4 w-4"}
                   aria-hidden="true"
                 />
@@ -244,7 +248,7 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
                     role="status"
                     className="rounded-2xl border border-dashed border-slate-200 bg-white/70 p-8 text-center"
                   >
-                    <BookOpen
+                    <BookOpenIcon
                       className="mx-auto h-7 w-7 text-slate-300"
                       aria-hidden="true"
                     />
@@ -280,7 +284,7 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
                   role="status"
                   className="rounded-2xl border border-dashed border-slate-200 bg-white/70 p-8 text-center"
                 >
-                  <BookOpen
+                  <BookOpenIcon
                     className="mx-auto h-7 w-7 text-slate-300"
                     aria-hidden="true"
                   />

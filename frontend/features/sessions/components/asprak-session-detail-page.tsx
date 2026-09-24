@@ -1,10 +1,5 @@
 "use client";
 
-import {
-  AlertCircle,
-  ArrowLeft,
-  RefreshCw
-} from "lucide-react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -30,6 +25,11 @@ import {
   getSessionAttendanceStatus,
   type CourseSession
 } from "../types/session.type";
+import {
+  WarningCircle,
+  ArrowLeft,
+  ArrowsClockwise
+} from "@phosphor-icons/react";
 
 type AsprakSessionDetailPageProps = {
   courseId: string;
@@ -88,7 +88,7 @@ function ErrorPanel({
   return (
     <div role="alert" className="rounded-3xl border border-red-200 bg-red-50 p-6">
       <div className="flex items-start gap-3">
-        <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" aria-hidden="true" />
+        <WarningCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" aria-hidden="true" />
         <div>
           <h1 className="text-lg font-semibold text-red-950">{title}</h1>
           <p className="mt-2 text-sm leading-6 text-red-800">{description}</p>
@@ -98,7 +98,7 @@ function ErrorPanel({
             </Link>
           ) : retryable ? (
             <button type="button" onClick={onRetry} disabled={isRetrying} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-red-700 px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60">
-              <RefreshCw className={isRetrying ? "h-4 w-4 animate-spin" : "h-4 w-4"} aria-hidden="true" />
+              <ArrowsClockwise className={isRetrying ? "h-4 w-4 animate-spin" : "h-4 w-4"} aria-hidden="true" />
               Try again
             </button>
           ) : onBack ? (

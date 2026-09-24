@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { MessageCircle, Send, Trash2 } from "lucide-react";
+import { ChatCircle, PaperPlaneTilt, Trash } from "@phosphor-icons/react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -71,7 +71,7 @@ export function AnnouncementComments({
   return (
     <div className="mt-5 border-t border-slate-200 pt-5">
       <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-        <MessageCircle className="h-4 w-4" aria-hidden="true" />
+        <ChatCircle className="h-4 w-4" aria-hidden="true" />
         Comments ({comments.length})
       </div>
 
@@ -131,7 +131,7 @@ export function AnnouncementComments({
                         }}
                         className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
                       >
-                        <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                        <Trash className="h-3.5 w-3.5" aria-hidden="true" />
                         Delete
                       </button>
                     )
@@ -185,7 +185,7 @@ export function AnnouncementComments({
             {addMutation.isPending ? (
               <AsteriskLoader className="h-4 w-4" />
             ) : (
-              <Send className="h-4 w-4" aria-hidden="true" />
+              <PaperPlaneTilt className="h-4 w-4" aria-hidden="true" />
             )}
             {addMutation.isPending ? "Posting..." : "Post"}
           </button>

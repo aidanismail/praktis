@@ -1,12 +1,5 @@
 "use client";
 
-import {
-  ArrowLeft,
-  CalendarClock,
-  FileText,
-  Gauge,
-  RefreshCw,
-} from "lucide-react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import Link from "next/link";
 import { NotificationBanner } from "@/components/ui/notification-banner";
@@ -18,6 +11,12 @@ import { useAssignmentDetail } from "../hooks/use-course-assignments";
 import { getAllowedAssignmentFileTypes } from "../schemas/assignment.schema";
 import { PraktikanAssignmentUploadForm } from "./praktikan-assignment-upload-form";
 import { PraktikanSubmissionSummary } from "./praktikan-submission-summary";
+import {
+  ArrowLeft,
+  CalendarCheck,
+  FileText,
+  ArrowsClockwise
+} from "@phosphor-icons/react";
 
 type PraktikanAssignmentDetailPageProps = {
   assignmentId: string;
@@ -145,7 +144,7 @@ export function PraktikanAssignmentDetailPage({
                 onClick={() => void coursesQuery.refetch()}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700 transition shrink-0"
               >
-                <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
+                <ArrowsClockwise className="h-3.5 w-3.5" aria-hidden="true" />
                 Try again
               </button>
             ) : onBack ? (
@@ -218,7 +217,7 @@ export function PraktikanAssignmentDetailPage({
                 onClick={() => void assignmentQuery.refetch()}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700 transition shrink-0"
               >
-                <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
+                <ArrowsClockwise className="h-3.5 w-3.5" aria-hidden="true" />
                 Try again
               </button>
             ) : onBack ? (
@@ -311,13 +310,14 @@ export function PraktikanAssignmentDetailPage({
                 </p>
               )}
 
-              <dl className="mt-6 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl bg-slate-50 p-4 border border-slate-100">
-                  <dt className="flex items-center gap-2 text-[10px] uppercase font-semibold tracking-wider text-slate-400">
-                    <CalendarClock className="h-4 w-4 text-slate-400" aria-hidden="true" />
-                    Due
-                  </dt>
-                  <dd className="mt-2 text-xs sm:text-sm font-bold text-slate-900">
+              {/* Clean Typographic Metadata Layout (No Card Boxes, No Points) */}
+              <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2.5 border-t border-slate-100 pt-5 text-xs text-slate-600">
+                <div className="flex items-center gap-2">
+                  <CalendarCheck className="h-4 w-4 text-slate-400 shrink-0" aria-hidden="true" />
+                  <span className="font-semibold uppercase tracking-wider text-[10px] text-slate-400">
+                    Due:
+                  </span>
+                  <span className="font-semibold text-slate-900">
                     {assignment.due_date ? (
                       <time dateTime={assignment.due_date}>
                         {formatDate(assignment.due_date)}
@@ -325,29 +325,26 @@ export function PraktikanAssignmentDetailPage({
                     ) : (
                       "No deadline"
                     )}
-                  </dd>
+                  </span>
                 </div>
 
-                <div className="rounded-2xl bg-slate-50 p-4 border border-slate-100">
-                  <dt className="flex items-center gap-2 text-[10px] uppercase font-semibold tracking-wider text-slate-400">
-                    <Gauge className="h-4 w-4 text-slate-400" aria-hidden="true" />
-                    Points
-                  </dt>
-                  <dd className="mt-2 text-xs sm:text-sm font-bold text-slate-900 font-mono">
-                    {assignment.max_points} pts
-                  </dd>
-                </div>
-
-                <div className="rounded-2xl bg-slate-50 p-4 border border-slate-100">
-                  <dt className="flex items-center gap-2 text-[10px] uppercase font-semibold tracking-wider text-slate-400">
-                    <FileText className="h-4 w-4 text-slate-400" aria-hidden="true" />
-                    Formats
-                  </dt>
-                  <dd className="mt-2 text-xs sm:text-sm font-bold uppercase text-slate-900 tracking-wide">
-                    {allowedFileTypes.join(", ") || "None"}
-                  </dd>
-                </div>
-              </dl>
+                {allowedFileTypes.length > 0 && (
+                  <>
+                    <span className="text-slate-300 hidden sm:inline" aria-hidden="true">
+                      ·
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-slate-400 shrink-0" aria-hidden="true" />
+                      <span className="font-semibold uppercase tracking-wider text-[10px] text-slate-400">
+                        Accepted Formats:
+                      </span>
+                      <span className="font-semibold uppercase tracking-wide text-slate-800">
+                        {allowedFileTypes.join(", ")}
+                      </span>
+                    </div>
+                  </>
+                )}
+              </div>
             </section>
           </div>
 

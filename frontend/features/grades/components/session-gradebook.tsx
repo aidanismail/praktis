@@ -1,11 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  GraduationCap,
-  RefreshCw,
-  Search
-} from "lucide-react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { NotificationBanner } from "@/components/ui/notification-banner";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -25,6 +20,11 @@ import {
 } from "../hooks/use-session-grades";
 import type { SessionGrade } from "../types/grade.type";
 import { GradePublicationControls } from "./grade-publication-controls";
+import {
+  GraduationCap,
+  ArrowsClockwise,
+  MagnifyingGlass
+} from "@phosphor-icons/react";
 
 type SessionGradebookProps = {
   userId: string;
@@ -107,7 +107,7 @@ function GradeRequestError({
           disabled={isRetrying}
           className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1 text-xs font-semibold text-white hover:bg-slate-700 transition disabled:opacity-60"
         >
-          <RefreshCw className={isRetrying ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"} aria-hidden="true" />
+          <ArrowsClockwise className={isRetrying ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"} aria-hidden="true" />
           Try again
         </button>
       </div>
@@ -297,7 +297,7 @@ function GradebookForm({
       <label className="mt-5 block sm:max-w-sm">
         <span className="text-sm font-semibold text-slate-800">Search by NPM or email</span>
         <span className="relative mt-1.5 block">
-          <Search className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-slate-400" aria-hidden="true" />
+          <MagnifyingGlass className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-slate-400" aria-hidden="true" />
           <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} className="min-h-11 w-full rounded-xl border border-slate-300 bg-white pl-9 pr-3 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-slate-100" placeholder="Search by NPM or email..." />
         </span>
       </label>

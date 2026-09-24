@@ -1,23 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Clock,
-  ChevronRight,
-  CalendarCheck,
-  Send,
-  Pin,
-  PinOff,
-  Trash2,
-  MessageSquare,
-  X,
-} from "lucide-react";
 import type {
   AnnouncementItem,
   AssignmentItem,
   ClassSessionItem,
 } from "../../api/admin.api";
 import type { Course } from "@/features/courses/types/course.type";
+import {
+  Clock,
+  CaretRight,
+  CalendarCheck,
+  PaperPlaneTilt,
+  PushPin,
+  PushPinSlash,
+  Trash,
+  ChatText,
+  X
+} from "@phosphor-icons/react";
 
 type CourseStreamTabProps = {
   course: Course;
@@ -123,7 +123,7 @@ export function CourseStreamTab({
                       <span className="font-semibold text-xs text-slate-800 block truncate group-hover:text-slate-900 group-hover:underline">
                         {a.title}
                       </span>
-                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-1" />
+                      <CaretRight className="w-3.5 h-3.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-1" />
                     </div>
                     <span className="text-[11px] text-slate-400 block mt-0.5 font-medium">
                       Due: {new Date(a.due_date!).toLocaleDateString()}
@@ -151,7 +151,7 @@ export function CourseStreamTab({
               <CalendarCheck className="w-4 h-4 text-slate-700" />
               <span>Next Session</span>
             </h4>
-            <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+            <CaretRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
           </div>
 
           {sessions.length === 0 ? (
@@ -166,7 +166,7 @@ export function CourseStreamTab({
               </span>
               <span className="text-[10px] font-semibold text-slate-600 inline-flex items-center gap-1 pt-1">
                 <span>Attendance register</span>
-                <ChevronRight className="w-3 h-3" />
+                <CaretRight className="w-3 h-3" />
               </span>
             </div>
           )}
@@ -204,7 +204,7 @@ export function CourseStreamTab({
                 onChange={(e) => setNewPinned(e.target.checked)}
                 className="rounded border-slate-300 text-slate-900 focus:ring-slate-900"
               />
-              <Pin className="w-3.5 h-3.5" />
+              <PushPin className="w-3.5 h-3.5" />
               <span>Pin to top</span>
             </label>
             <button
@@ -212,7 +212,7 @@ export function CourseStreamTab({
               disabled={isPosting || !newContent.trim()}
               className="apple-press px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-full shadow-xs transition-colors flex items-center gap-1.5 disabled:opacity-50"
             >
-              <Send className="w-3.5 h-3.5" />
+              <PaperPlaneTilt className="w-3.5 h-3.5" />
               <span>Post announcement</span>
             </button>
           </div>
@@ -250,7 +250,7 @@ export function CourseStreamTab({
                           <>
                             <span className="text-slate-300" aria-hidden="true">·</span>
                             <span className="text-xs font-bold text-amber-700 flex items-center gap-1">
-                              <Pin className="w-3 h-3" />
+                              <PushPin className="w-3 h-3" />
                               <span>Pinned</span>
                             </span>
                           </>
@@ -276,9 +276,9 @@ export function CourseStreamTab({
                       aria-label={ann.is_pinned ? "Unpin notice" : "Pin notice"}
                     >
                       {ann.is_pinned ? (
-                        <PinOff className="w-3.5 h-3.5" />
+                        <PushPinSlash className="w-3.5 h-3.5" />
                       ) : (
-                        <Pin className="w-3.5 h-3.5" />
+                        <PushPin className="w-3.5 h-3.5" />
                       )}
                       <span className="text-[10px]">
                         {ann.is_pinned ? "Unpin" : "Pin"}
@@ -291,7 +291,7 @@ export function CourseStreamTab({
                       title="Delete notice"
                       aria-label="Delete notice"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
@@ -303,7 +303,7 @@ export function CourseStreamTab({
                 {/* Discussion Comments */}
                 <div className="pl-12 pt-2 border-t border-slate-100 space-y-2">
                   <div className="text-[11px] font-semibold text-slate-500 flex items-center gap-1">
-                    <MessageSquare className="w-3 h-3" />
+                    <ChatText className="w-3 h-3" />
                     <span>
                       Comments ({ann.comments?.length || 0})
                     </span>
@@ -367,7 +367,7 @@ export function CourseStreamTab({
                       onClick={() => handleCommentSubmit(ann.id)}
                       className="apple-press px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-full flex items-center gap-1 shadow-xs"
                     >
-                      <Send className="w-3.5 h-3.5" />
+                      <PaperPlaneTilt className="w-3.5 h-3.5" />
                       <span>Send</span>
                     </button>
                   </div>

@@ -1,10 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  RotateCcw,
-  X
-} from "lucide-react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { useId, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -20,6 +16,10 @@ import {
   moduleUploadSchema,
   type ModuleUploadFormValues
 } from "../schemas/module.schema";
+import {
+  ArrowCounterClockwise,
+  X
+} from "@phosphor-icons/react";
 
 type ModuleUploadFormProps = {
   userId: string;
@@ -530,7 +530,7 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
                     disabled:cursor-not-allowed
                     disabled:opacity-60"
               >
-                <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                <ArrowCounterClockwise className="h-4 w-4" aria-hidden="true" />
                 Retry upload
               </button>
             </>
