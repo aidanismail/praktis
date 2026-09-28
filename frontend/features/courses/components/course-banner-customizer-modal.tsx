@@ -2,15 +2,7 @@
 
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  X,
-  Palette,
-  UploadCloud,
-  Check,
-  Trash2,
-  AlertCircle,
-  Loader2,
-} from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
 import { courseQueryKeys } from "../constants/course-query-keys";
 import { adminQueryKeys } from "@/features/admin/constants/admin-query-keys";
@@ -31,6 +23,14 @@ import {
   readFileAsDataUrl,
   type SavedCourseTheme,
 } from "../constants/banner-themes";
+import {
+  X,
+  Palette,
+  CloudArrowUp,
+  Check,
+  Trash,
+  WarningCircle
+} from "@phosphor-icons/react";
 
 type CourseBannerCustomizerModalProps = {
   isOpen: boolean;
@@ -193,14 +193,25 @@ export function CourseBannerCustomizerModal({
             )}
 
             <div className="relative z-10 flex items-start justify-between gap-2">
+<<<<<<< HEAD
               <span className="text-[11px] font-semibold uppercase tracking-wider text-white/90 drop-shadow-xs">
                 {course.code}
               </span>
 
               <div className="flex items-center gap-1.5">
+=======
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-white/90 drop-shadow-xs">
+                  {course.code}
+                </span>
+                <span className="text-white/40" aria-hidden="true">·</span>
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                 <span className="text-[11px] font-medium text-white/80">
                   {course.semester} {course.academic_year}
                 </span>
+              </div>
+
+              <div className="flex items-center gap-1.5">
 
                 {/* In-Preview Remove Image Icon Button */}
                 {customImageUrl && (
@@ -213,7 +224,7 @@ export function CourseBannerCustomizerModal({
                     className="p-1 rounded-lg bg-black/40 hover:bg-rose-600/90 text-white/80 hover:text-white backdrop-blur-xs transition-colors shadow-xs border border-white/10"
                     title="Remove custom banner image"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash className="w-3.5 h-3.5" />
                   </button>
                 )}
               </div>
@@ -250,7 +261,7 @@ export function CourseBannerCustomizerModal({
                 : "text-slate-500 hover:text-slate-900"
             }`}
           >
-            <UploadCloud className="w-3.5 h-3.5" />
+            <CloudArrowUp className="w-3.5 h-3.5" />
             <span>Upload Image {customImageUrl && "•"}</span>
           </button>
         </div>
@@ -325,14 +336,14 @@ export function CourseBannerCustomizerModal({
           <div className="space-y-3 animate-in fade-in duration-100">
             {uploadError && (
               <div className="p-3 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-800 flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                <WarningCircle className="w-4 h-4 text-rose-600 shrink-0" />
                 <span>{uploadError}</span>
               </div>
             )}
 
             <div className="border-2 border-dashed border-slate-200 hover:border-slate-400 rounded-2xl p-6 text-center bg-slate-50/50 transition-colors">
               <label className="cursor-pointer flex flex-col items-center justify-center gap-2 py-2">
-                <UploadCloud className="w-8 h-8 text-slate-400" />
+                <CloudArrowUp className="w-8 h-8 text-slate-400" />
                 <span className="text-xs font-semibold text-slate-800">
                   {isProcessingImage
                     ? "Processing image..."
@@ -379,7 +390,7 @@ export function CourseBannerCustomizerModal({
               disabled={isSubmitting || isProcessingImage}
               className="px-5 py-2 bg-slate-900 hover:bg-slate-800 disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-full text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5"
             >
-              {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+              {isSubmitting && <AsteriskLoader className="w-3.5 h-3.5" />}
               <span>{isSubmitting ? "Applying..." : "Apply Theme"}</span>
             </button>
           </div>

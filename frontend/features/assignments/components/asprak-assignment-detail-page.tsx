@@ -1,17 +1,28 @@
 "use client";
 
 import {
-  AlertCircle,
+  WarningCircle,
   ArrowLeft,
+<<<<<<< HEAD
   Loader2,
   RefreshCw
 } from "lucide-react";
+=======
+  ArrowsClockwise
+} from "@phosphor-icons/react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { getCourseDetailRoute, ROUTES } from "@/constants/routes";
 import { useAssignedCourses } from "@/features/courses/hooks/use-assigned-courses";
 import { ApiError } from "@/lib/api/client";
 import { useAuthStore } from "@/stores/auth-store";
-import { useAssignmentDetail } from "../hooks/use-course-assignments";
+import {
+  useAssignmentDetail,
+  useDeleteCourseAssignment
+} from "../hooks/use-course-assignments";
 import type { Assignment } from "../types/assignment.type";
 import { AssignmentEditor } from "./assignment-editor";
 import { AssignmentSubmissions } from "./assignment-submissions";
@@ -25,6 +36,8 @@ type AssignedAssignmentDetailProps = {
   userId: string;
   courseId: string;
   assignmentId: string;
+  /** When provided, the back button uses this callback instead of a Link href (in-dashboard context). */
+  onBack?: () => void;
 };
 
 const dateFormatter = new Intl.DateTimeFormat("en", {
@@ -47,14 +60,6 @@ function getAllowedFileTypes(value: string) {
     .filter((fileType) => fileType.length > 0);
 }
 
-function DetailPageFrame({ children }: { children: React.ReactNode }) {
-  return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl">{children}</div>
-    </main>
-  );
-}
-
 function LoadingPanel({ label }: { label: string }) {
   return (
     <div
@@ -62,8 +67,8 @@ function LoadingPanel({ label }: { label: string }) {
       aria-live="polite"
       className="flex min-h-72 items-center justify-center rounded-3xl border border-slate-200 bg-white"
     >
-      <Loader2
-        className="h-6 w-6 animate-spin text-slate-900"
+      <AsteriskLoader
+        className="h-6 w-6 text-slate-900"
         aria-hidden="true"
       />
       <span className="ml-3 text-sm text-slate-600">{label}</span>
@@ -77,6 +82,7 @@ type RequestErrorPanelProps = {
   fallbackLabel: string;
   onRetry: () => void;
   isRetrying: boolean;
+  onBack?: () => void;
 };
 
 function RequestErrorPanel({
@@ -84,7 +90,8 @@ function RequestErrorPanel({
   fallbackHref,
   fallbackLabel,
   onRetry,
-  isRetrying
+  isRetrying,
+  onBack
 }: RequestErrorPanelProps) {
   const status = error instanceof ApiError ? error.status : null;
 
@@ -114,7 +121,7 @@ function RequestErrorPanel({
       className="rounded-3xl border border-red-200 bg-red-50 p-6"
     >
       <div className="flex items-start gap-3">
-        <AlertCircle
+        <WarningCircle
           className="mt-0.5 h-5 w-5 shrink-0 text-red-600"
           aria-hidden="true"
         />
@@ -129,7 +136,7 @@ function RequestErrorPanel({
           {status === 401 ? (
             <Link
               href={ROUTES.login}
-              className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-red-700 px-4 text-sm font-semibold text-white"
+              className="mt-4 inline-flex min-h-11 items-center rounded-full bg-red-700 px-4 text-sm font-semibold text-white"
             >
               Go to sign in
             </Link>
@@ -138,9 +145,9 @@ function RequestErrorPanel({
               type="button"
               onClick={onRetry}
               disabled={isRetrying}
-              className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-red-700 px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-red-700 px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <RefreshCw
+              <ArrowsClockwise
                 className={
                   isRetrying ? "h-4 w-4 animate-spin" : "h-4 w-4"
                 }
@@ -148,10 +155,19 @@ function RequestErrorPanel({
               />
               Try again
             </button>
+          ) : onBack ? (
+            <button
+              type="button"
+              onClick={onBack}
+              className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              {fallbackLabel}
+            </button>
           ) : (
             <Link
               href={fallbackHref}
-              className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-red-700 px-4 text-sm font-semibold text-white"
+              className="mt-4 inline-flex min-h-11 items-center rounded-full bg-red-700 px-4 text-sm font-semibold text-white"
             >
               {fallbackLabel}
             </Link>
@@ -168,21 +184,21 @@ function AssignmentSummary({ assignment }: { assignment: Assignment }) {
   );
 
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-2 text-xs">
             <span
-              className={
-                assignment.is_published
-                  ? "rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800"
-                  : "rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800"
-              }
+              className={`font-semibold ${
+                assignment.is_published ? "text-slate-900" : "text-amber-700"
+              }`}
             >
               {assignment.is_published ? "Published" : "Draft"}
             </span>
 
-            <span className="text-xs text-slate-500">
+            <span className="text-slate-300" aria-hidden="true">·</span>
+
+            <span className="text-slate-500">
               Created{" "}
               <time dateTime={assignment.created_at}>
                 {formatDate(assignment.created_at)}
@@ -190,31 +206,47 @@ function AssignmentSummary({ assignment }: { assignment: Assignment }) {
             </span>
           </div>
 
-          <h1 className="mt-3 wrap-break-word text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+          <h1 className="mt-2.5 wrap-break-word text-xl font-bold tracking-tight text-slate-950 sm:text-2xl">
             {assignment.title}
           </h1>
         </div>
 
+<<<<<<< HEAD
         <span className="text-sm font-medium text-slate-500">
           {assignment.submissions_count}{" "}
+=======
+        <div className="text-xs text-slate-500 font-medium">
+          <span className="font-bold text-slate-900 tabular-nums">
+            {assignment.submissions_count}
+          </span>{" "}
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           {assignment.submissions_count === 1 ? "submission" : "submissions"}
         </span>
       </div>
 
       {assignment.description ? (
-        <p className="mt-5 whitespace-pre-wrap wrap-break-word text-sm leading-7 text-slate-700">
+        <p className="mt-3 whitespace-pre-wrap wrap-break-word text-sm leading-relaxed text-slate-600">
           {assignment.description}
         </p>
       ) : (
-        <p className="mt-5 text-sm italic text-slate-500">
+        <p className="mt-3 text-xs italic text-slate-400">
           No additional instructions.
         </p>
       )}
 
+<<<<<<< HEAD
       <dl className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-slate-100 pt-4 text-sm">
         <div>
           <dt className="inline text-slate-500">Due: </dt>
           <dd className="inline font-medium text-slate-900">
+=======
+      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-slate-100 pt-3.5 text-xs">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            Due
+          </span>
+          <span className="font-semibold text-slate-800">
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
             {assignment.due_date ? (
               <time dateTime={assignment.due_date}>
                 {formatDate(assignment.due_date)}
@@ -222,9 +254,10 @@ function AssignmentSummary({ assignment }: { assignment: Assignment }) {
             ) : (
               "No deadline"
             )}
-          </dd>
+          </span>
         </div>
 
+<<<<<<< HEAD
         <div>
           <dt className="inline text-slate-500">Points: </dt>
           <dd className="inline font-medium text-slate-900">
@@ -239,17 +272,61 @@ function AssignmentSummary({ assignment }: { assignment: Assignment }) {
           </dd>
         </div>
       </dl>
+=======
+        <span className="text-slate-200 hidden sm:inline" aria-hidden="true">|</span>
+
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            Max points
+          </span>
+          <span className="font-semibold text-slate-800 tabular-nums">
+            {assignment.max_points} pts
+          </span>
+        </div>
+
+        {allowedFileTypes.length > 0 && (
+          <>
+            <span className="text-slate-200 hidden sm:inline" aria-hidden="true">|</span>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Formats
+              </span>
+              <span className="font-semibold uppercase tracking-wide text-slate-700 text-[11px]">
+                {allowedFileTypes.join(", ")}
+              </span>
+            </div>
+          </>
+        )}
+      </div>
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
     </section>
   );
 }
 
-function AssignedAssignmentDetail({
+export function AssignedAssignmentDetail({
   userId,
   courseId,
-  assignmentId
+  assignmentId,
+  onBack
 }: AssignedAssignmentDetailProps) {
+  const router = useRouter();
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const deleteMutation = useDeleteCourseAssignment({ userId, courseId });
   const courseQuery = useAssignedCourses(userId);
   const course = (courseQuery.data ?? []).find((item) => item.id === courseId);
+
+  function handleDeleteAssignment() {
+    deleteMutation.reset();
+    deleteMutation.mutate(assignmentId, {
+      onSuccess: () => {
+        if (onBack) {
+          onBack();
+        } else {
+          router.push(getCourseDetailRoute(courseId, "assignments"));
+        }
+      }
+    });
+  }
 
   const courseVerified =
     !courseQuery.isPending && !courseQuery.isError && Boolean(course);
@@ -262,40 +339,44 @@ function AssignedAssignmentDetail({
   });
 
   if (courseQuery.isPending) {
-    return (
-      <DetailPageFrame>
-        <LoadingPanel label="Checking assigned course..." />
-      </DetailPageFrame>
-    );
+    return <LoadingPanel label="Checking assigned course..." />;
   }
 
   if (courseQuery.isError) {
     return (
-      <DetailPageFrame>
-        <RequestErrorPanel
-          error={courseQuery.error}
-          fallbackHref={ROUTES.dashboard}
-          fallbackLabel="Return to dashboard"
-          onRetry={() => void courseQuery.refetch()}
-          isRetrying={courseQuery.isFetching}
-        />
-      </DetailPageFrame>
+      <RequestErrorPanel
+        error={courseQuery.error}
+        fallbackHref={ROUTES.dashboard}
+        fallbackLabel="Return to dashboard"
+        onRetry={() => void courseQuery.refetch()}
+        isRetrying={courseQuery.isFetching}
+        onBack={onBack}
+      />
     );
   }
 
   if (!course) {
     return (
-      <DetailPageFrame>
-        <div
-          role="alert"
-          className="rounded-3xl border border-amber-200 bg-amber-50 p-6"
-        >
-          <h1 className="text-lg font-semibold text-amber-950">
-            Course is unavailable
-          </h1>
-          <p className="mt-2 text-sm leading-6 text-amber-800">
-            This course does not exist in your assigned practicum classes.
-          </p>
+      <div
+        role="alert"
+        className="rounded-3xl border border-amber-200 bg-amber-50 p-6"
+      >
+        <h1 className="text-lg font-semibold text-amber-950">
+          Course is unavailable
+        </h1>
+        <p className="mt-2 text-sm leading-6 text-amber-800">
+          This course does not exist in your assigned practicum classes.
+        </p>
+        {onBack ? (
+          <button
+            type="button"
+            onClick={onBack}
+            className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-amber-900 underline underline-offset-4"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            Return to dashboard
+          </button>
+        ) : (
           <Link
             href={ROUTES.dashboard}
             className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-amber-900 underline underline-offset-4"
@@ -303,30 +384,25 @@ function AssignedAssignmentDetail({
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             Return to dashboard
           </Link>
-        </div>
-      </DetailPageFrame>
+        )}
+      </div>
     );
   }
 
   if (assignmentQuery.isPending) {
-    return (
-      <DetailPageFrame>
-        <LoadingPanel label="Loading assignment details..." />
-      </DetailPageFrame>
-    );
+    return <LoadingPanel label="Loading assignment details..." />;
   }
 
   if (assignmentQuery.isError) {
     return (
-      <DetailPageFrame>
-        <RequestErrorPanel
-          error={assignmentQuery.error}
-          fallbackHref={getCourseDetailRoute(courseId, "assignments")}
-          fallbackLabel="Back to Assignments"
-          onRetry={() => void assignmentQuery.refetch()}
-          isRetrying={assignmentQuery.isFetching}
-        />
-      </DetailPageFrame>
+      <RequestErrorPanel
+        error={assignmentQuery.error}
+        fallbackHref={getCourseDetailRoute(courseId, "assignments")}
+        fallbackLabel="Back to Assignments"
+        onRetry={() => void assignmentQuery.refetch()}
+        isRetrying={assignmentQuery.isFetching}
+        onBack={onBack}
+      />
     );
   }
 
@@ -334,17 +410,26 @@ function AssignedAssignmentDetail({
 
   if (!assignment || assignment.course_id !== courseId) {
     return (
-      <DetailPageFrame>
-        <div
-          role="alert"
-          className="rounded-3xl border border-amber-200 bg-amber-50 p-6"
-        >
-          <h1 className="text-lg font-semibold text-amber-950">
-            Assignment is unavailable
-          </h1>
-          <p className="mt-2 text-sm text-amber-800">
-            The assignment does not belong to the selected course.
-          </p>
+      <div
+        role="alert"
+        className="rounded-3xl border border-amber-200 bg-amber-50 p-6"
+      >
+        <h1 className="text-lg font-semibold text-amber-950">
+          Assignment is unavailable
+        </h1>
+        <p className="mt-2 text-sm text-amber-800">
+          The assignment does not belong to the selected course.
+        </p>
+        {onBack ? (
+          <button
+            type="button"
+            onClick={onBack}
+            className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-amber-900 underline underline-offset-4"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            Back to Assignments
+          </button>
+        ) : (
           <Link
             href={getCourseDetailRoute(courseId, "assignments")}
             className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-amber-900 underline underline-offset-4"
@@ -352,12 +437,13 @@ function AssignedAssignmentDetail({
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             Back to Assignments
           </Link>
-        </div>
-      </DetailPageFrame>
+        )}
+      </div>
     );
   }
 
   return (
+<<<<<<< HEAD
     <DetailPageFrame>
       <Link
         href={getCourseDetailRoute(courseId, "assignments")}
@@ -368,6 +454,79 @@ function AssignedAssignmentDetail({
       </Link>
 
       <p className="mt-5 text-sm font-medium text-slate-600">
+=======
+    <div>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        {onBack ? (
+          <button
+            type="button"
+            onClick={onBack}
+            className="inline-flex min-h-11 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            Back to Assignments
+          </button>
+        ) : (
+          <Link
+            href={getCourseDetailRoute(courseId, "assignments")}
+            className="inline-flex min-h-11 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            Back to Assignments
+          </Link>
+        )}
+
+        {!isConfirmingDelete ? (
+          <button
+            type="button"
+            onClick={() => {
+              deleteMutation.reset();
+              setIsConfirmingDelete(true);
+            }}
+            disabled={deleteMutation.isPending}
+            className="inline-flex min-h-11 items-center rounded-full border border-slate-300 bg-white px-4 text-sm font-semibold text-red-700 transition hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:opacity-60"
+          >
+            Delete assignment
+          </button>
+        ) : null}
+      </div>
+
+      {isConfirmingDelete ? (
+        <div role="alert" className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4">
+          <p className="text-sm font-semibold text-red-950">Delete assignment?</p>
+          <p className="mt-1 text-sm text-red-800">
+            All student submissions and grading records for this assignment will be permanently deleted. This action cannot be undone.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setIsConfirmingDelete(false)}
+              disabled={deleteMutation.isPending}
+              className="rounded-full border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleDeleteAssignment}
+              disabled={deleteMutation.isPending}
+              className="rounded-full bg-red-700 px-3 py-2 text-sm font-semibold text-white hover:bg-red-800 disabled:opacity-60"
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+            </button>
+          </div>
+          {deleteMutation.isError ? (
+            <p className="mt-3 text-sm text-red-800">
+              {deleteMutation.error instanceof ApiError
+                ? deleteMutation.error.message
+                : "Unable to delete assignment. Please try again."}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
+      <p className="mt-5 text-sm font-semibold text-slate-700">
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
         {course.code} · {course.name}
       </p>
 
@@ -394,7 +553,7 @@ function AssignedAssignmentDetail({
           enabled={assignment.course_id === courseId}
         />
       </div>
-    </DetailPageFrame>
+    </div>
   );
 }
 
@@ -410,33 +569,39 @@ export function AsprakAssignmentDetailPage({
 
   if (user.role !== "asprak") {
     return (
-      <DetailPageFrame>
-        <div
-          role="alert"
-          className="rounded-3xl border border-amber-200 bg-amber-50 p-6"
-        >
-          <h1 className="text-lg font-semibold text-amber-950">
-            Asprak access required
-          </h1>
-          <p className="mt-2 text-sm leading-6 text-amber-800">
-            Assignment management is available only to Asprak accounts.
-          </p>
-          <Link
-            href={ROUTES.dashboard}
-            className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-amber-900 underline underline-offset-4"
+      <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-6xl">
+          <div
+            role="alert"
+            className="rounded-3xl border border-amber-200 bg-amber-50 p-6"
           >
-            Return to dashboard
-          </Link>
+            <h1 className="text-lg font-semibold text-amber-950">
+              Asprak access required
+            </h1>
+            <p className="mt-2 text-sm leading-6 text-amber-800">
+              Assignment management is available only to Asprak accounts.
+            </p>
+            <Link
+              href={ROUTES.dashboard}
+              className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-amber-900 underline underline-offset-4"
+            >
+              Return to dashboard
+            </Link>
+          </div>
         </div>
-      </DetailPageFrame>
+      </main>
     );
   }
 
   return (
-    <AssignedAssignmentDetail
-      userId={user.id}
-      courseId={courseId}
-      assignmentId={assignmentId}
-    />
+    <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl">
+        <AssignedAssignmentDetail
+          userId={user.id}
+          courseId={courseId}
+          assignmentId={assignmentId}
+        />
+      </div>
+    </main>
   );
 }

@@ -2,20 +2,19 @@
 
 import { useEffect, useState } from "react";
 import {
-  Download,
+  DownloadSimple,
   FileText,
   X,
-  AlertCircle,
-  CheckCircle2,
-  Search,
-  Trash2,
-  Globe,
+  MagnifyingGlass,
+  Trash,
+  GlobeSimple,
   Lock,
   Plus,
-  UploadCloud,
-  FileCheck,
+  CloudArrowUp,
+  FileArrowDown,
   Eye
-} from "lucide-react";
+} from "@phosphor-icons/react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import {
   fetchAdminModules,
   fetchAdminCourses,
@@ -28,6 +27,7 @@ import type { AdminModuleItem } from "../types/admin.type";
 import type { Course } from "@/features/courses/types/course.type";
 import { DocumentPreviewModal } from "@/components/ui/document-preview-modal";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 
 export function AdminModuleList() {
   const [modules, setModules] = useState<AdminModuleItem[]>([]);
@@ -404,45 +404,24 @@ export function AdminModuleList() {
   return (
     <div className="space-y-6">
       {/* Alert Notifications */}
-      <div aria-live="polite" aria-atomic="true" className="space-y-2">
-        {actionSuccess && (
-          <div
-            role="status"
-            className="rounded-2xl bg-slate-900 border border-slate-200 px-4 py-3 text-xs font-medium text-white flex items-center justify-between shadow-xs"
-          >
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-slate-300 shrink-0" />
-              <span>{actionSuccess}</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setActionSuccess(null)}
-              className="text-slate-400 hover:text-white"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        )}
-
-        {error && (
-          <div
-            role="alert"
-            className="rounded-2xl bg-rose-50 border border-rose-200 px-4 py-3 text-xs font-medium text-rose-800 flex items-center justify-between shadow-xs"
-          >
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-              <span>{error}</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setError(null)}
-              className="text-rose-600 hover:text-rose-900"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        )}
-      </div>
+      {(actionSuccess || error) && (
+        <div className="space-y-2">
+          {actionSuccess && (
+            <NotificationBanner
+              variant="success"
+              message={actionSuccess}
+              onClose={() => setActionSuccess(null)}
+            />
+          )}
+          {error && (
+            <NotificationBanner
+              variant="error"
+              message={error}
+              onClose={() => setError(null)}
+            />
+          )}
+        </div>
+      )}
 
       {/* Header & Filter Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -455,7 +434,7 @@ export function AdminModuleList() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 shadow-xs"
             />
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+            <MagnifyingGlass className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
           </div>
 
           <select
@@ -522,9 +501,10 @@ export function AdminModuleList() {
                     className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between cursor-pointer hover:bg-slate-100/70 transition-colors"
                   >
                     <div className="flex flex-wrap items-center gap-2.5">
-                      <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-900 text-white px-2.5 py-0.5 rounded-full">
+                      <span className="text-xs font-bold uppercase tracking-wider text-slate-900">
                         {course ? course.code : "N/A"}
                       </span>
+                      <span className="text-slate-300" aria-hidden="true">·</span>
                       <h3 className="font-bold text-xs text-slate-900">
                         {course ? course.name : "Unassigned Course"}
                       </h3>
@@ -538,10 +518,10 @@ export function AdminModuleList() {
                       {/* Course Active Status Badge */}
                       {course && (
                         <span
-                          className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                          className={`text-[11px] font-semibold ${
                             course.is_active
-                              ? "bg-emerald-100 text-emerald-700"
-                              : "bg-slate-200 text-slate-600"
+                              ? "text-slate-900"
+                              : "text-slate-500"
                           }`}
                         >
                           {course.is_active ? "Active" : "Archived"}
@@ -579,21 +559,22 @@ export function AdminModuleList() {
                                   <h4 className="font-bold text-xs text-slate-900 hover:underline">
                                     {mod.title}
                                   </h4>
+                                  <span className="text-slate-300" aria-hidden="true">·</span>
                                   <span
-                                    className={`px-2 py-0.2 rounded-full text-[10px] font-semibold flex items-center gap-1 ${
+                                    className={`text-xs font-semibold flex items-center gap-1 ${
                                       mod.is_published
-                                        ? "bg-slate-900 text-white"
-                                        : "bg-slate-100 text-slate-600 border border-slate-200"
+                                        ? "text-slate-900"
+                                        : "text-amber-700"
                                     }`}
                                   >
                                     {mod.is_published ? (
                                       <>
-                                        <Globe className="w-2.5 h-2.5" />
+                                        <GlobeSimple className="w-3 h-3" />
                                         <span>Published</span>
                                       </>
                                     ) : (
                                       <>
-                                        <Lock className="w-2.5 h-2.5" />
+                                        <Lock className="w-3 h-3" />
                                         <span>Draft</span>
                                       </>
                                     )}
@@ -629,7 +610,7 @@ export function AdminModuleList() {
                                         courseCode: course?.code
                                       })
                                     }
-                                    className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full text-xs flex items-center gap-1.5 transition-colors shadow-xs"
+                                    className="apple-press px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full text-xs flex items-center gap-1.5 transition-colors shadow-xs"
                                   >
                                     <Eye className="w-3.5 h-3.5" />
                                     <span>Preview</span>
@@ -638,9 +619,9 @@ export function AdminModuleList() {
                                   <a
                                     href={mod.download_url}
                                     download
-                                    className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                                    className="apple-press px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-colors"
                                   >
-                                    <Download className="w-3.5 h-3.5" />
+                                    <DownloadSimple className="w-3.5 h-3.5" />
                                     <span className="hidden sm:inline">
                                       Download
                                     </span>
@@ -652,7 +633,7 @@ export function AdminModuleList() {
                                 type="button"
                                 disabled={activeModuleId === mod.id}
                                 onClick={() => handleTogglePublish(mod)}
-                                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+                                className={`apple-press px-3 py-1.5 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 ${
                                   mod.is_published
                                     ? "border border-slate-200 text-slate-700 hover:bg-slate-100"
                                     : "bg-slate-900 text-white hover:bg-slate-800 shadow-xs"
@@ -665,10 +646,11 @@ export function AdminModuleList() {
                                 type="button"
                                 disabled={activeModuleId === mod.id}
                                 onClick={() => handleDelete(mod)}
-                                className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg text-xs transition-colors"
+                                className="apple-press p-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg text-xs transition-colors"
                                 title="Delete Module"
+                                aria-label="Delete module"
                               >
-                                <Trash2 className="w-3.5 h-3.5" />
+                                <Trash className="w-3.5 h-3.5" />
                               </button>
                             </div>
                           </div>
@@ -712,7 +694,8 @@ export function AdminModuleList() {
                   setShowUploadModal(false);
                   setUploadQueue([]);
                 }}
-                className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center text-xs"
+                className="apple-press w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center text-xs"
+                aria-label="Close modal"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -770,7 +753,7 @@ export function AdminModuleList() {
                   }`}
                 >
                   <label className="cursor-pointer flex flex-col items-center justify-center gap-1.5 py-2">
-                    <UploadCloud className="w-8 h-8 text-slate-400" />
+                    <CloudArrowUp className="w-8 h-8 text-slate-400" />
                     <span className="text-xs font-semibold text-slate-800">
                       Click to browse or drag and drop files here
                     </span>
@@ -826,7 +809,7 @@ export function AdminModuleList() {
                       >
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2 overflow-hidden">
-                            <FileCheck className="w-4 h-4 text-slate-800 shrink-0" />
+                            <FileArrowDown className="w-4 h-4 text-slate-800 shrink-0" />
                             <span className="font-semibold text-slate-900 truncate block text-[11px]">
                               {item.file.name}
                             </span>
@@ -839,10 +822,11 @@ export function AdminModuleList() {
                             <button
                               type="button"
                               onClick={() => removeQueueItem(item.id)}
-                              className="p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 shrink-0"
+                              className="apple-press p-1.5 text-rose-600 hover:text-rose-700 rounded-lg hover:bg-rose-50 shrink-0 transition-colors"
                               title="Remove file"
+                              aria-label={`Remove file ${item.file.name}`}
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              <Trash className="w-3.5 h-3.5" />
                             </button>
                           )}
                         </div>
@@ -901,7 +885,7 @@ export function AdminModuleList() {
                   </div>
                   <div className="w-full bg-slate-700 h-2 rounded-full overflow-hidden">
                     <div
-                      className="bg-emerald-400 h-full transition-all duration-300 rounded-full"
+                      className="bg-cyan-400 h-full transition-all duration-300 rounded-full shadow-[0_0_8px_rgba(34,211,238,0.5)]"
                       style={{
                         width: `${
                           (uploadProgress.current / uploadProgress.total) * 100
@@ -939,12 +923,12 @@ export function AdminModuleList() {
               >
                 {isUploading ? (
                   <>
-                    <span className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                    <AsteriskLoader className="w-3.5 h-3.5" />
                     <span>Uploading...</span>
                   </>
                 ) : (
                   <>
-                    <UploadCloud className="w-3.5 h-3.5" />
+                    <CloudArrowUp className="w-3.5 h-3.5" />
                     <span>
                       Upload {uploadQueue.length > 0 ? uploadQueue.length : ""}{" "}
                       Module{uploadQueue.length !== 1 ? "s" : ""}
@@ -985,7 +969,8 @@ export function AdminModuleList() {
               <button
                 type="button"
                 onClick={() => setSelectedModuleForDetail(null)}
-                className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-bold flex items-center justify-center transition-colors"
+                className="apple-press w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-bold flex items-center justify-center transition-colors"
+                aria-label="Close modal"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1041,10 +1026,7 @@ export function AdminModuleList() {
                   <span className="text-[10px] text-slate-400 uppercase font-semibold block">
                     Status
                   </span>
-                  <span className="font-semibold text-slate-900 flex items-center gap-1.5 mt-0.5">
-                    <span
-                      className={`w-2 h-2 rounded-full ${selectedModuleForDetail.is_published ? "bg-slate-900" : "bg-slate-400"}`}
-                    />
+                  <span className="font-semibold text-slate-900 block mt-0.5">
                     {selectedModuleForDetail.is_published
                       ? "Published to Students"
                       : "Draft (Hidden)"}
@@ -1096,7 +1078,7 @@ export function AdminModuleList() {
                         download
                         className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-full font-semibold flex items-center gap-1.5 transition-colors"
                       >
-                        <Download className="w-3.5 h-3.5" />
+                        <DownloadSimple className="w-3.5 h-3.5" />
                         <span>Download</span>
                       </a>
                     </>
@@ -1120,7 +1102,7 @@ export function AdminModuleList() {
                   onClick={() => handleDelete(selectedModuleForDetail)}
                   className="px-3 py-2 text-rose-600 hover:bg-rose-50 rounded-full font-semibold transition-colors flex items-center gap-1"
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
+                  <Trash className="w-3.5 h-3.5" />
                   <span>Delete</span>
                 </button>
               </div>

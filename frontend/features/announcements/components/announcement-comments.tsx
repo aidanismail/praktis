@@ -1,7 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, MessageCircle, Send, Trash2 } from "lucide-react";
+import { ChatCircle, PaperPlaneTilt, Trash } from "@phosphor-icons/react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import {
@@ -13,6 +14,7 @@ import {
   type AnnouncementCommentFormValues
 } from "../schemas/announcement.schema";
 import type { AnnouncementComment } from "../types/announcement.type";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 
 type AnnouncementCommentsProps = {
   userId: string;
@@ -69,7 +71,7 @@ export function AnnouncementComments({
   return (
     <div className="mt-5 border-t border-slate-200 pt-5">
       <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-        <MessageCircle className="h-4 w-4" aria-hidden="true" />
+        <ChatCircle className="h-4 w-4" aria-hidden="true" />
         Comments ({comments.length})
       </div>
 
@@ -129,7 +131,7 @@ export function AnnouncementComments({
                         }}
                         className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
                       >
-                        <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                        <Trash className="h-3.5 w-3.5" aria-hidden="true" />
                         Delete
                       </button>
                     )
@@ -147,9 +149,9 @@ export function AnnouncementComments({
       )}
 
       {deleteMutation.isError ? (
-        <p role="alert" className="mt-3 text-sm text-red-700">
-          {deleteMutation.error.message}
-        </p>
+        <div className="mt-3">
+          <NotificationBanner variant="error" message={deleteMutation.error.message} />
+        </div>
       ) : null}
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4">
@@ -165,7 +167,11 @@ export function AnnouncementComments({
               disabled={addMutation.isPending}
               aria-invalid={Boolean(form.formState.errors.content)}
               aria-describedby={form.formState.errors.content ? `${formId}-error` : undefined}
+<<<<<<< HEAD
               className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100 disabled:bg-slate-100"
+=======
+              className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:bg-slate-100"
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
               placeholder="Ask a question, add notes, or share feedback..."
               {...form.register("content")}
             />
@@ -181,22 +187,22 @@ export function AnnouncementComments({
             className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {addMutation.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              <AsteriskLoader className="h-4 w-4" />
             ) : (
-              <Send className="h-4 w-4" aria-hidden="true" />
+              <PaperPlaneTilt className="h-4 w-4" aria-hidden="true" />
             )}
             {addMutation.isPending ? "Posting..." : "Post"}
           </button>
         </div>
         {addMutation.isError ? (
-          <p role="alert" className="mt-2 text-sm text-red-700">
-            {addMutation.error.message}
-          </p>
+          <div className="mt-3">
+            <NotificationBanner variant="error" message={addMutation.error.message} />
+          </div>
         ) : null}
         {addMutation.isSuccess ? (
-          <p role="status" className="mt-2 text-sm text-emerald-700">
-            Comment posted!
-          </p>
+          <div className="mt-3">
+            <NotificationBanner variant="success" message="Comment posted!" />
+          </div>
         ) : null}
       </form>
     </div>

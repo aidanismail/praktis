@@ -1,11 +1,15 @@
 "use client";
 
+<<<<<<< HEAD
 import {
   AlertCircle,
   CheckCircle2,
   Download,
   Loader2
 } from "lucide-react";
+=======
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import { useEffect, useRef, useState } from "react";
 import { useCourseRoster } from "@/features/courses/hooks/use-course-roster";
 import { useSessionAttendance } from "@/features/attendance/hooks/use-session-attendance";
@@ -17,6 +21,12 @@ import type {
   SessionExportFormat,
   SessionExportKind
 } from "../types/export.type";
+import {
+  WarningCircle,
+  CheckCircle,
+  DownloadSimple,
+  Table
+} from "@phosphor-icons/react";
 
 type SessionExportPanelProps = {
   userId: string;
@@ -64,9 +74,9 @@ function ExportButtons({
             type="button"
             onClick={() => onDownload(kind, format)}
             disabled={disabled || activeDownload !== null}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold uppercase text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-semibold uppercase text-slate-700 transition hover:bg-slate-50 apple-press focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {active ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Download className="h-4 w-4" aria-hidden="true" />}
+            {active ? <AsteriskLoader className="h-3.5 w-3.5" aria-hidden="true" /> : <DownloadSimple className="h-3.5 w-3.5" aria-hidden="true" />}
             {active ? `Preparing ${format}` : format}
           </button>
         );
@@ -147,10 +157,22 @@ export function SessionExportPanel({
   }
 
   return (
+<<<<<<< HEAD
     <section aria-labelledby="session-exports-heading" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
       <div className="border-b border-slate-200 pb-4">
         <h2 id="session-exports-heading" className="text-xl font-semibold text-slate-950">Session exports</h2>
         <p className="mt-1 text-sm leading-6 text-slate-600">Download saved academic rows for this verified session only.</p>
+=======
+    <section aria-labelledby="session-exports-heading" className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+      <div className="flex items-start gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-700">
+          <Table className="h-5 w-5" aria-hidden="true" />
+        </span>
+        <div>
+          <h2 id="session-exports-heading" className="text-xl font-semibold text-slate-950">Session exports</h2>
+          <p className="mt-1 text-sm leading-6 text-slate-600">Download saved academic rows for this verified session only.</p>
+        </div>
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
       </div>
 
       <div className="mt-5 grid gap-4 lg:grid-cols-2">
@@ -203,21 +225,21 @@ export function SessionExportPanel({
 
       {rosterQuery.isError || attendanceQuery.isError || gradesQuery.isError ? (
         <p role="alert" className="mt-4 inline-flex items-start gap-2 text-sm text-amber-800">
-          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          <WarningCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
           One or more row counts could not be loaded. Unavailable export controls remain disabled.
         </p>
       ) : null}
 
       {errorMessage ? (
         <p role="alert" className="mt-4 inline-flex items-start gap-2 text-sm text-red-700">
-          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          <WarningCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
           {errorMessage}
         </p>
       ) : null}
 
       {successMessage ? (
-        <p role="status" aria-live="polite" className="mt-4 inline-flex items-center gap-2 text-sm text-emerald-700">
-          <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+        <p role="status" aria-live="polite" className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
+          <CheckCircle className="h-4 w-4 text-emerald-600 shrink-0" aria-hidden="true" />
           {successMessage}
         </p>
       ) : null}

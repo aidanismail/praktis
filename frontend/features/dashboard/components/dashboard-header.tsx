@@ -1,9 +1,20 @@
 "use client";
 
-import { Menu, ChevronRight } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
 import type { User } from "@/types/user.type";
 import type { Course } from "@/features/courses/types/course.type";
 import { ProductLogo } from "@/components/branding/product-logo";
+import { ROUTES } from "@/constants/routes";
+import {
+  List,
+  CaretRight
+} from "@phosphor-icons/react";
+
+export type CourseTabItem = {
+  id: string;
+  label: string;
+};
 
 type DashboardHeaderProps = {
   user: User;
@@ -13,9 +24,34 @@ type DashboardHeaderProps = {
   activeAssignmentTitle?: string | null;
   onBackToCourses?: () => void;
   onBackToCourseRoot?: () => void;
-  activeTab?: "stream" | "classwork" | "people" | "sessions";
-  onSelectTab?: (tab: "stream" | "classwork" | "people" | "sessions") => void;
+  activeTab?: string;
+  onSelectTab?: (tab: string) => void;
+  courseTabs?: CourseTabItem[];
+  onLogout?: () => void;
 };
+
+const DEFAULT_SUPERADMIN_TABS: CourseTabItem[] = [
+  { id: "stream", label: "Stream" },
+  { id: "classwork", label: "Classwork" },
+  { id: "people", label: "People" },
+  { id: "sessions", label: "Sessions & Attendance" },
+];
+
+const DEFAULT_ASPRAK_TABS: CourseTabItem[] = [
+  { id: "stream", label: "Stream" },
+  { id: "modules", label: "Modules" },
+  { id: "assignments", label: "Assignments" },
+  { id: "people", label: "People" },
+  { id: "sessions", label: "Sessions & Attendance" },
+];
+
+const DEFAULT_PRAKTIKAN_TABS: CourseTabItem[] = [
+  { id: "stream", label: "Stream" },
+  { id: "modules", label: "Modules" },
+  { id: "assignments", label: "Assignments" },
+  { id: "people", label: "People" },
+  { id: "sessions", label: "Attendance & Grades" },
+];
 
 export function DashboardHeader({
   user,
@@ -26,8 +62,47 @@ export function DashboardHeader({
   onBackToCourseRoot,
   activeTab = "stream",
   onSelectTab,
+  courseTabs,
+  onLogout,
 }: DashboardHeaderProps) {
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
   const initial = user.username.charAt(0).toUpperCase();
+
+  const effectiveTabs =
+    courseTabs ||
+    (user.role === "praktikan"
+      ? DEFAULT_PRAKTIKAN_TABS
+      : user.role === "asprak"
+        ? DEFAULT_ASPRAK_TABS
+        : DEFAULT_SUPERADMIN_TABS);
+
+  useEffect(() => {
+    if (!isUserMenuOpen) return;
+
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsUserMenuOpen(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsUserMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isUserMenuOpen]);
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-200 bg-white shadow-xs">
@@ -41,7 +116,7 @@ export function DashboardHeader({
             title="Toggle Navigation Menu"
             aria-label="Toggle Navigation Menu"
           >
-            <Menu className="w-5 h-5" />
+            <List className="w-5 h-5" />
           </button>
 
           <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-slate-800 min-w-0">
@@ -56,7 +131,7 @@ export function DashboardHeader({
 
             {activeCourse && (
               <>
-                <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+                <CaretRight className="w-4 h-4 text-slate-400 shrink-0" />
                 {activeAssignmentTitle ? (
                   <>
                     <button
@@ -67,7 +142,7 @@ export function DashboardHeader({
                     >
                       {activeCourse.code}
                     </button>
-                    <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <CaretRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                     <span className="font-bold text-slate-900 truncate max-w-[100px] sm:max-w-[180px] md:max-w-[240px]">
                       {activeAssignmentTitle}
                     </span>
@@ -82,22 +157,17 @@ export function DashboardHeader({
           </div>
         </div>
 
-        {/* Middle: Google Classroom Top-Bar Tabs (Desktop View >= md) */}
+        {/* Middle: Google Classroom Top-Bar Tabs — visible on all viewports */}
         {activeCourse && onSelectTab && !activeAssignmentTitle && (
-          <nav className="hidden md:flex items-center gap-1 h-full">
-            {[
-              { id: "stream", label: "Stream" },
-              { id: "classwork", label: "Classwork" },
-              { id: "people", label: "People" },
-              { id: "sessions", label: "Sessions & Attendance" },
-            ].map((tab) => {
+          <nav className="hidden md:flex items-center gap-1 h-full overflow-x-auto scrollbar-none">
+            {effectiveTabs.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
                 <button
                   key={tab.id}
                   type="button"
-                  onClick={() => onSelectTab(tab.id as "stream" | "classwork" | "people" | "sessions")}
-                  className={`h-full px-4 text-xs font-semibold border-b-2 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center justify-center relative ${
+                  onClick={() => onSelectTab(tab.id)}
+                  className={`h-full px-4 text-xs font-semibold border-b-2 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center justify-center relative shrink-0 ${
                     isActive
                       ? "border-slate-900 text-slate-900 font-bold"
                       : "border-transparent text-slate-500 hover:text-slate-900 hover:bg-slate-50/80"
@@ -113,35 +183,78 @@ export function DashboardHeader({
           </nav>
         )}
 
-        {/* Right: User Account Chip */}
-        <div className="flex items-center gap-2 shrink-0">
-          <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-2.5 sm:px-3 py-1.5 text-xs text-slate-700 shadow-xs">
+        {/* Right: User Account Chip & Dropdown */}
+        <div ref={userMenuRef} className="relative ml-auto flex items-center shrink-0">
+          <button
+            type="button"
+            onClick={() => setIsUserMenuOpen((prev) => !prev)}
+            aria-expanded={isUserMenuOpen}
+            aria-haspopup="true"
+            className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-2.5 sm:px-3 py-1.5 text-xs text-slate-700 shadow-xs hover:border-slate-300 hover:bg-slate-50 transition-colors"
+          >
             <div className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-900 text-[10px] font-bold text-white shrink-0">
               {initial}
             </div>
-            <span className="font-semibold text-slate-900 hidden sm:inline">{user.username}</span>
-            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700 capitalize">
+            <span className="font-semibold text-slate-900 hidden sm:inline">
+              {user.username}
+            </span>
+            <span className="text-slate-300 hidden sm:inline" aria-hidden="true">·</span>
+            <span className="text-[11px] font-medium text-slate-500 capitalize">
               {user.role}
             </span>
-          </div>
+          </button>
+
+          {isUserMenuOpen && (
+            <div className="absolute right-0 top-full mt-2 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-lg z-50 animate-in fade-in zoom-in-95 duration-150">
+              <div className="p-3 border-b border-slate-100">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                  Signed in as
+                </p>
+                <p className="text-sm font-bold text-slate-900 mt-0.5 truncate">
+                  {user.username}
+                </p>
+                <p className="text-xs text-slate-500 truncate">{user.email}</p>
+              </div>
+
+              <div className="py-1">
+                <Link
+                  href={ROUTES.changePassword}
+                  onClick={() => setIsUserMenuOpen(false)}
+                  className="flex w-full items-center rounded-xl px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                >
+                  Change password
+                </Link>
+              </div>
+
+              {onLogout && (
+                <div className="pt-1 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      onLogout();
+                    }}
+                    className="flex w-full items-center rounded-xl px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors"
+                  >
+                    Sign out
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
       {/* Mobile Sub-Header: Scrollable Horizontal Tabs for Course Workspace (< md) */}
       {activeCourse && onSelectTab && !activeAssignmentTitle && (
         <nav className="flex md:hidden items-center border-t border-slate-100 bg-white px-2 overflow-x-auto h-11 w-full shrink-0 gap-1 scrollbar-none">
-          {[
-            { id: "stream", label: "Stream" },
-            { id: "classwork", label: "Classwork" },
-            { id: "people", label: "People" },
-            { id: "sessions", label: "Sessions & Attendance" },
-          ].map((tab) => {
+          {effectiveTabs.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
                 type="button"
-                onClick={() => onSelectTab(tab.id as "stream" | "classwork" | "people" | "sessions")}
+                onClick={() => onSelectTab(tab.id)}
                 className={`h-full px-3 text-xs font-semibold border-b-2 whitespace-nowrap transition-all flex items-center justify-center shrink-0 ${
                   isActive
                     ? "border-slate-900 text-slate-900 font-bold"

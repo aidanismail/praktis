@@ -1,9 +1,14 @@
 "use client";
 
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { ApiError } from "@/lib/api/client";
 import type { CourseSession } from "@/features/sessions/types/session.type";
 import { useSetSessionGradePublication } from "../hooks/use-session-grades";
+import { NotificationBanner } from "@/components/ui/notification-banner";
+import {
+  Eye,
+  EyeSlash
+} from "@phosphor-icons/react";
 
 type GradePublicationControlsProps = {
   userId: string;
@@ -81,9 +86,12 @@ export function GradePublicationControls({
             {savedGradeCount} saved of {rosterCount} enrolled
           </p>
           {hasUnsavedChanges ? (
-            <p className="mt-2 text-sm text-amber-800">
-              Save or discard local grade changes before changing publication.
-            </p>
+            <div className="mt-2">
+              <NotificationBanner
+                variant="warning"
+                message="Save or discard local grade changes before changing publication."
+              />
+            </div>
           ) : null}
         </div>
 
@@ -92,9 +100,9 @@ export function GradePublicationControls({
             type="button"
             onClick={() => changePublication(false)}
             disabled={publicationMutation.isPending || hasUnsavedChanges}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white shadow-xs transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {publicationMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <EyeOff className="h-4 w-4" aria-hidden="true" />}
+            {publicationMutation.isPending ? <AsteriskLoader className="h-4 w-4" /> : <EyeSlash className="h-4 w-4" aria-hidden="true" />}
             {publicationMutation.isPending ? "Unpublishing..." : "Unpublish grades"}
           </button>
         ) : (
@@ -102,19 +110,23 @@ export function GradePublicationControls({
             type="button"
             onClick={() => changePublication(true)}
             disabled={publicationMutation.isPending || savedGradeCount === 0 || hasUnsavedChanges}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-brand px-4 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white shadow-xs transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {publicationMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
+            {publicationMutation.isPending ? <AsteriskLoader className="h-4 w-4" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
             {publicationMutation.isPending ? "Publishing..." : "Publish grades"}
           </button>
         )}
       </div>
 
-      {errorMessage ? <p role="alert" className="mt-3 text-sm text-red-700">{errorMessage}</p> : null}
+      {errorMessage ? (
+        <div className="mt-3">
+          <NotificationBanner variant="error" message={errorMessage} />
+        </div>
+      ) : null}
       {publicationMutation.isSuccess ? (
-        <p role="status" aria-live="polite" className="mt-3 text-sm text-emerald-700">
-          {publicationMutation.data.message}
-        </p>
+        <div className="mt-3">
+          <NotificationBanner variant="success" message={publicationMutation.data.message} />
+        </div>
       ) : null}
     </section>
   );

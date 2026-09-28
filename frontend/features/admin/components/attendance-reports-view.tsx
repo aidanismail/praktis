@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Lock, Unlock, X, AlertCircle, CheckCircle2, UserCheck } from "lucide-react";
 import {
   fetchAdminCourses,
   fetchCourseSessions,
@@ -13,6 +12,12 @@ import {
 } from "../api/admin.api";
 import type { Course } from "@/features/courses/types/course.type";
 import type { ClassSessionItem, StudentItem, AttendanceItem } from "../types/admin.type";
+import { NotificationBanner } from "@/components/ui/notification-banner";
+import {
+  Lock,
+  LockOpen,
+  UserCheck
+} from "@phosphor-icons/react";
 
 export function AttendanceReportsView() {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -248,45 +253,24 @@ export function AttendanceReportsView() {
   return (
     <div className="space-y-4">
       {/* Alert Notifications */}
-      <div aria-live="polite" aria-atomic="true" className="space-y-2">
-        {actionSuccess && (
-          <div
-            role="status"
-            className="rounded-xl bg-slate-900 border border-slate-200 px-4 py-3 text-xs font-medium text-white flex items-center justify-between shadow-xs"
-          >
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-slate-300 shrink-0" />
-              <span>{actionSuccess}</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setActionSuccess(null)}
-              className="text-slate-400 hover:text-white"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        )}
-
-        {error && (
-          <div
-            role="alert"
-            className="rounded-xl bg-rose-50 border border-rose-200 px-4 py-3 text-xs font-medium text-rose-800 flex items-center justify-between shadow-xs"
-          >
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-              <span>{error}</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setError(null)}
-              className="text-rose-600 hover:text-rose-900"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        )}
-      </div>
+      {(actionSuccess || error) && (
+        <div className="space-y-2">
+          {actionSuccess && (
+            <NotificationBanner
+              variant="success"
+              message={actionSuccess}
+              onClose={() => setActionSuccess(null)}
+            />
+          )}
+          {error && (
+            <NotificationBanner
+              variant="error"
+              message={error}
+              onClose={() => setError(null)}
+            />
+          )}
+        </div>
+      )}
 
       {/* Select Course & Session Filter Controls */}
       <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs space-y-4">
@@ -383,7 +367,7 @@ export function AttendanceReportsView() {
                   disabled={isUpdatingSession}
                   className="rounded-full bg-slate-900 px-4 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 shadow-xs disabled:opacity-50 transition-colors flex items-center gap-1.5"
                 >
-                  <Unlock className="w-3.5 h-3.5" />
+                  <LockOpen className="w-3.5 h-3.5" />
                   <span>{isUpdatingSession ? "..." : "Open Window"}</span>
                 </button>
               )}
@@ -391,23 +375,27 @@ export function AttendanceReportsView() {
           </div>
         )}
 
-        {/* Attendance Breakdown Pills */}
+        {/* Attendance Breakdown Metrics */}
         {selectedSessionId && (
-          <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-              Total: {summaryCounts.total}
+          <div className="flex flex-wrap items-center gap-3 border-t border-slate-100 pt-3 text-xs">
+            <span className="font-semibold text-slate-900">
+              Total <span className="font-bold">{summaryCounts.total}</span>
             </span>
-            <span className="rounded-full bg-slate-100 border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-900">
-              Hadir: {summaryCounts.hadir}
+            <span className="text-slate-300" aria-hidden="true">·</span>
+            <span className="font-semibold text-emerald-700">
+              Hadir <span className="font-bold">{summaryCounts.hadir}</span>
             </span>
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
-              Sakit: {summaryCounts.sakit}
+            <span className="text-slate-300" aria-hidden="true">·</span>
+            <span className="font-semibold text-amber-700">
+              Sakit <span className="font-bold">{summaryCounts.sakit}</span>
             </span>
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
-              Izin: {summaryCounts.izin}
+            <span className="text-slate-300" aria-hidden="true">·</span>
+            <span className="font-semibold text-sky-700">
+              Izin <span className="font-bold">{summaryCounts.izin}</span>
             </span>
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
-              Alfa: {summaryCounts.alfa}
+            <span className="text-slate-300" aria-hidden="true">·</span>
+            <span className="font-semibold text-rose-700">
+              Alfa <span className="font-bold">{summaryCounts.alfa}</span>
             </span>
           </div>
         )}
@@ -451,12 +439,16 @@ export function AttendanceReportsView() {
                       <td className="px-6 py-3.5 text-slate-500">{student.email}</td>
                       <td className="px-6 py-3.5">
                         <span
-                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold capitalize ${
+                          className={`text-xs font-semibold capitalize ${
                             status === "hadir"
-                              ? "bg-slate-100 text-slate-900 border border-slate-300"
-                              : status === "Belum Absen"
-                              ? "bg-slate-100 text-slate-500"
-                              : "bg-slate-100 text-slate-700 border border-slate-200"
+                              ? "text-emerald-700"
+                              : status === "sakit"
+                              ? "text-amber-700"
+                              : status === "izin"
+                              ? "text-sky-700"
+                              : status === "alfa"
+                              ? "text-rose-700"
+                              : "text-slate-400"
                           }`}
                         >
                           {status}

@@ -1,12 +1,21 @@
 "use client";
 
+<<<<<<< HEAD
 import { Palette, Pencil, ArrowLeft } from "lucide-react";
+=======
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import type { Course } from "@/features/courses/types/course.type";
 import {
   getThemeConfig,
   getPatternConfig,
   type SavedCourseTheme,
 } from "@/features/courses/constants/banner-themes";
+import {
+  CalendarBlank,
+  Palette,
+  PencilSimple,
+  ArrowLeft
+} from "@phosphor-icons/react";
 
 type CourseWorkspaceHeaderProps = {
   course: Course;
@@ -80,6 +89,7 @@ export function CourseWorkspaceHeader({
             <h1 className="text-2xl sm:text-3xl font-bold mt-1.5 text-white tracking-tight drop-shadow-xs">
               {course.name}
             </h1>
+<<<<<<< HEAD
             <p className="text-sm text-white/80 mt-2 drop-shadow-xs">
               Academic Year {course.academic_year} · Semester {course.semester}
             </p>
@@ -93,6 +103,25 @@ export function CourseWorkspaceHeader({
                 }`}
               />
               {course.is_active ? "Active" : "Archived"} · {enrolledCount} {enrolledCount === 1 ? "student" : "students"} · {staffCount} {staffCount === 1 ? "assistant" : "assistants"}
+=======
+            <p className="text-xs text-slate-200 mt-1.5 flex items-center gap-2 drop-shadow-xs">
+              <CalendarBlank className="w-4 h-4 text-white/70" />
+              <span>
+                Academic Year {course.academic_year} • Semester {course.semester}
+              </span>
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="px-3.5 py-1.5 rounded-full bg-white/10 border border-white/10 text-xs font-semibold text-white backdrop-blur-xs flex items-center gap-2">
+              <span className="font-bold uppercase tracking-wider text-[11px] text-white">
+                {course.is_active ? "Active" : "Archived"}
+              </span>
+              <span className="opacity-40">•</span>
+              <span>
+                {enrolledCount} {enrolledCount === 1 ? "student" : "students"} • {staffCount} {staffCount === 1 ? "assistant" : "assistants"}
+              </span>
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
             </span>
 
             <div className="flex items-center gap-2">
@@ -106,6 +135,7 @@ export function CourseWorkspaceHeader({
                 <span>Customize</span>
               </button>
 
+<<<<<<< HEAD
               <button
                 type="button"
                 onClick={onEditCourse}
@@ -115,6 +145,16 @@ export function CourseWorkspaceHeader({
                 <span>Edit</span>
               </button>
             </div>
+=======
+            <button
+              type="button"
+              onClick={onEditCourse}
+              className="rounded-full border border-white/20 bg-white/10 hover:bg-white/20 px-3.5 py-1.5 text-xs font-semibold text-white transition-colors flex items-center gap-1 backdrop-blur-xs shadow-xs"
+            >
+              <PencilSimple className="w-3 h-3" />
+              <span>Edit</span>
+            </button>
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           </div>
         </div>
       </div>

@@ -3,11 +3,9 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { ROUTES } from "@/constants/routes";
 import { useAuthStore } from "@/stores/auth-store";
-import { AsprakAssignmentDetailPage } from "./asprak-assignment-detail-page";
-import { PraktikanAssignmentDetailPage } from "./praktikan-assignment-detail-page";
 
 type Props = { courseId: string; assignmentId: string };
 
@@ -20,14 +18,20 @@ export function AssignmentDetailPage(props: Props) {
       router.replace(
         `/dashboard?tab=courses&courseId=${props.courseId}&workspaceTab=classwork&assignmentId=${props.assignmentId}`
       );
+    } else if (user?.role === "asprak" || user?.role === "praktikan") {
+      router.replace(
+        `/dashboard?tab=classes&courseId=${props.courseId}&workspaceTab=assignments&assignmentId=${props.assignmentId}`
+      );
     }
   }, [user, props.courseId, props.assignmentId, router]);
 
   if (!user) return null;
-  if (user.role === "asprak") return <AsprakAssignmentDetailPage {...props} />;
-  if (user.role === "praktikan") return <PraktikanAssignmentDetailPage {...props} />;
 
-  if (user.role === "superadmin") {
+  if (
+    user.role === "superadmin" ||
+    user.role === "asprak" ||
+    user.role === "praktikan"
+  ) {
     return (
       <main className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
         <div
@@ -35,9 +39,9 @@ export function AssignmentDetailPage(props: Props) {
           aria-live="polite"
           className="flex items-center gap-3 text-slate-600"
         >
-          <Loader2 className="h-5 w-5 animate-spin text-slate-900" />
+          <AsteriskLoader className="h-5 w-5 text-slate-900" />
           <span className="text-sm font-medium">
-            Redirecting to assignment submissions workspace...
+            Redirecting to assignment workspace...
           </span>
         </div>
       </main>

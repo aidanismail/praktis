@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+<<<<<<< HEAD
 import {
   AlertCircle,
   CheckCircle2,
@@ -8,6 +9,10 @@ import {
   RefreshCw,
   Search
 } from "lucide-react";
+=======
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
+import { NotificationBanner } from "@/components/ui/notification-banner";
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useCourseRoster } from "@/features/courses/hooks/use-course-roster";
@@ -25,6 +30,11 @@ import {
 } from "../hooks/use-session-grades";
 import type { SessionGrade } from "../types/grade.type";
 import { GradePublicationControls } from "./grade-publication-controls";
+import {
+  GraduationCap,
+  ArrowsClockwise,
+  MagnifyingGlass
+} from "@phosphor-icons/react";
 
 type SessionGradebookProps = {
   userId: string;
@@ -98,18 +108,20 @@ function GradeRequestError({
   isRetrying: boolean;
 }) {
   return (
-    <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-5">
-      <div className="flex items-start gap-3">
-        <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" aria-hidden="true" />
-        <div>
-          <p className="text-sm text-red-800">{message}</p>
-          <button type="button" onClick={onRetry} disabled={isRetrying} className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-xl bg-red-700 px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60">
-            <RefreshCw className={isRetrying ? "h-4 w-4 animate-spin" : "h-4 w-4"} aria-hidden="true" />
-            Try again
-          </button>
-        </div>
+    <NotificationBanner variant="error">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <span>{message}</span>
+        <button
+          type="button"
+          onClick={onRetry}
+          disabled={isRetrying}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1 text-xs font-semibold text-white hover:bg-slate-700 transition disabled:opacity-60"
+        >
+          <ArrowsClockwise className={isRetrying ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"} aria-hidden="true" />
+          Try again
+        </button>
       </div>
-    </div>
+    </NotificationBanner>
   );
 }
 
@@ -273,8 +285,8 @@ function GradebookForm({
       </dl>
 
       {isReadOnly ? (
-        <div className="mt-4 rounded-2xl border border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-900">
-          Published grades are read-only. Unpublish them first if you need to make changes.
+        <div className="mt-4">
+          <NotificationBanner variant="info" message="Published grades are read-only. Unpublish them first if you need to make changes." />
         </div>
       ) : (
         <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
@@ -283,21 +295,21 @@ function GradebookForm({
       )}
 
       {hasClearedSavedGrade ? (
-        <p role="alert" className="mt-3 text-sm text-amber-800">
-          Enter a score or reset any cleared fields before saving. Existing grades cannot be left blank.
-        </p>
+        <div className="mt-3">
+          <NotificationBanner variant="warning" message="Enter a score or reset any cleared fields before saving. Existing grades cannot be left blank." />
+        </div>
       ) : null}
 
       {unmatchedGrades.length > 0 ? (
-        <p role="alert" className="mt-3 text-sm text-amber-800">
-          {unmatchedGrades.length} saved grade {unmatchedGrades.length === 1 ? "score doesn&apos;t" : "scores don&apos;t"} match the current roster. No grades were reassigned.
-        </p>
+        <div className="mt-3">
+          <NotificationBanner variant="warning" message={`${unmatchedGrades.length} saved grade ${unmatchedGrades.length === 1 ? "score doesn't" : "scores don't"} match the current roster. No grades were reassigned.`} />
+        </div>
       ) : null}
 
       <label className="mt-5 block sm:max-w-sm">
         <span className="text-sm font-semibold text-slate-800">Search by NPM or email</span>
         <span className="relative mt-1.5 block">
-          <Search className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-slate-400" aria-hidden="true" />
+          <MagnifyingGlass className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-slate-400" aria-hidden="true" />
           <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} className="min-h-11 w-full rounded-xl border border-slate-300 bg-white pl-9 pr-3 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-slate-100" placeholder="Search by NPM or email..." />
         </span>
       </label>
@@ -343,18 +355,21 @@ function GradebookForm({
       )}
 
       <p className="mt-3 text-sm text-slate-600">{enteredCount} of {students.length} students have a score entered.</p>
-      {saveError ? <p role="alert" className="mt-3 text-sm text-red-700">{saveError}</p> : null}
+      {saveError ? (
+        <div className="mt-3">
+          <NotificationBanner variant="error" message={saveError} />
+        </div>
+      ) : null}
       {saveMutation.isSuccess ? (
-        <p role="status" aria-live="polite" className="mt-3 inline-flex items-center gap-2 text-sm text-emerald-700">
-          <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-          {saveMutation.data.message}
-        </p>
+        <div className="mt-3">
+          <NotificationBanner variant="success" message={saveMutation.data.message} />
+        </div>
       ) : null}
 
       {!isReadOnly ? (
         <div className="mt-5 flex flex-wrap gap-2">
-          <button type="submit" disabled={saveMutation.isPending || !form.formState.isDirty || enteredCount === 0 || hasClearedSavedGrade} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-brand px-4 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60">
-            {saveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
+          <button type="submit" disabled={saveMutation.isPending || !form.formState.isDirty || enteredCount === 0 || hasClearedSavedGrade} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white shadow-xs transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60">
+            {saveMutation.isPending ? <AsteriskLoader className="h-4 w-4" /> : null}
             {saveMutation.isPending ? "Saving..." : "Save draft grades"}
           </button>
           <button type="button" onClick={resetChanges} disabled={saveMutation.isPending || !form.formState.isDirty} className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-60">Reset changes</button>
@@ -382,15 +397,20 @@ export function SessionGradebook({
   }
 
   return (
+<<<<<<< HEAD
     <section aria-labelledby="session-gradebook-heading" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
       <div className="border-b border-slate-200 pb-4">
+=======
+    <section aria-labelledby="session-gradebook-heading" className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+      <div>
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
         <h2 id="session-gradebook-heading" className="text-xl font-semibold text-slate-950">Session gradebook</h2>
         <p className="mt-1 text-sm leading-6 text-slate-600">Save private draft scores, then publish them whenever you&apos;re ready.</p>
       </div>
 
       {rosterQuery.isPending || gradesQuery.isPending ? (
         <div role="status" aria-live="polite" className="mt-5 flex min-h-40 items-center justify-center rounded-2xl bg-slate-50">
-          <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+          <AsteriskLoader className="h-5 w-5" />
           <span className="ml-3 text-sm text-slate-600">Loading roster and saved grades...</span>
         </div>
       ) : null}

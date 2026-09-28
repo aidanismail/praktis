@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+<<<<<<< HEAD
 import {
   AlertCircle,
   CheckCircle2,
@@ -8,6 +9,10 @@ import {
   RefreshCw,
   Search
 } from "lucide-react";
+=======
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
+import { NotificationBanner } from "@/components/ui/notification-banner";
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useCourseRoster } from "@/features/courses/hooks/use-course-roster";
@@ -27,6 +32,11 @@ import type {
   AttendanceRecord,
   AttendanceStatus
 } from "../types/attendance.type";
+import {
+  ArrowsClockwise,
+  MagnifyingGlass,
+  Users
+} from "@phosphor-icons/react";
 
 type SessionAttendanceRegisterProps = {
   userId: string;
@@ -111,23 +121,20 @@ function AttendanceRequestError({
   isRetrying: boolean;
 }) {
   return (
-    <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-5">
-      <div className="flex items-start gap-3">
-        <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" aria-hidden="true" />
-        <div>
-          <p className="text-sm text-red-800">{message}</p>
-          <button
-            type="button"
-            onClick={onRetry}
-            disabled={isRetrying}
-            className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-xl bg-red-700 px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <RefreshCw className={isRetrying ? "h-4 w-4 animate-spin" : "h-4 w-4"} aria-hidden="true" />
-            Try again
-          </button>
-        </div>
+    <NotificationBanner variant="error">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <span>{message}</span>
+        <button
+          type="button"
+          onClick={onRetry}
+          disabled={isRetrying}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1 text-xs font-semibold text-white hover:bg-slate-700 transition disabled:opacity-60"
+        >
+          <ArrowsClockwise className={isRetrying ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"} aria-hidden="true" />
+          Try again
+        </button>
       </div>
-    </div>
+    </NotificationBanner>
   );
 }
 
@@ -330,19 +337,27 @@ function AttendanceRegisterForm({
         <label className="min-w-0 flex-1 sm:max-w-sm">
           <span className="text-sm font-semibold text-slate-800">Search by NPM or email</span>
           <span className="relative mt-1.5 block">
-            <Search className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-slate-400" aria-hidden="true" />
+            <MagnifyingGlass className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-slate-400" aria-hidden="true" />
             <input
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
+<<<<<<< HEAD
               className="min-h-11 w-full rounded-xl border border-slate-300 bg-white pl-9 pr-3 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-100"
+=======
+              className="min-h-11 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
               placeholder="Search by NPM or email..."
             />
           </span>
         </label>
 
         {isEditable ? (
+<<<<<<< HEAD
           <button type="button" onClick={setAllPresent} disabled={saveMutation.isPending || students.length === 0} className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60">
+=======
+          <button type="button" onClick={setAllPresent} disabled={saveMutation.isPending || students.length === 0} className="inline-flex min-h-11 items-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60">
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
             Set all to Hadir
           </button>
         ) : null}
@@ -379,7 +394,11 @@ function AttendanceRegisterForm({
                       saveMutation.reset();
                       onDirtyChange?.(true);
                     }}
+<<<<<<< HEAD
                     className="min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100"
+=======
+                    className="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100"
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                   >
                     <option value="">Not recorded</option>
                     {statusOptions.map((option) => (
@@ -394,12 +413,15 @@ function AttendanceRegisterForm({
         </ul>
       )}
 
-      {saveError ? <p role="alert" className="mt-4 text-sm text-red-700">{saveError}</p> : null}
+      {saveError ? (
+        <div className="mt-4">
+          <NotificationBanner variant="error" message={saveError} />
+        </div>
+      ) : null}
       {saveMutation.isSuccess ? (
-        <p role="status" aria-live="polite" className="mt-4 inline-flex items-center gap-2 text-sm text-emerald-700">
-          <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-          {saveMutation.data.message}
-        </p>
+        <div className="mt-4">
+          <NotificationBanner variant="success" message={saveMutation.data.message} />
+        </div>
       ) : null}
 
       {isEditable ? (
@@ -407,9 +429,13 @@ function AttendanceRegisterForm({
           <button
             type="submit"
             disabled={saveMutation.isPending || !form.formState.isDirty || counts.unrecorded > 0 || students.length === 0}
+<<<<<<< HEAD
             className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-brand px-4 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+=======
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white shadow-xs transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           >
-            {saveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
+            {saveMutation.isPending ? <AsteriskLoader className="h-4 w-4" /> : null}
             {saveMutation.isPending ? "Saving..." : "Save attendance"}
           </button>
           <button type="button" onClick={resetChanges} disabled={saveMutation.isPending || !form.formState.isDirty} className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-60">
@@ -438,15 +464,20 @@ export function SessionAttendanceRegister({
   const attendanceError = getRequestError(attendanceQuery.error, "attendance");
 
   return (
+<<<<<<< HEAD
     <section aria-labelledby="session-attendance-heading" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
       <div className="border-b border-slate-200 pb-4">
+=======
+    <section aria-labelledby="session-attendance-heading" className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+      <div>
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
         <h2 id="session-attendance-heading" className="text-xl font-semibold text-slate-950">Attendance register</h2>
         <p className="mt-1 text-sm leading-6 text-slate-600">Make sure every student has a status selected before saving.</p>
       </div>
 
       {rosterQuery.isPending || attendanceQuery.isPending ? (
         <div role="status" aria-live="polite" className="mt-5 flex min-h-40 items-center justify-center rounded-2xl bg-slate-50">
-          <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+          <AsteriskLoader className="h-5 w-5" />
           <span className="ml-3 text-sm text-slate-600">Loading roster and attendance...</span>
         </div>
       ) : null}

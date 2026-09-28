@@ -36,17 +36,9 @@ export function parseCourseWorkspaceTab(
   return "stream";
 }
 
-export function getDefaultDashboardByRole(role: UserRole) {
-  switch (role) {
-    case "superadmin":
-      return "/dashboard";
-    case "asprak":
-      return "/dashboard";
-    case "praktikan":
-      return "/dashboard";
-    default:
-      return "/dashboard";
-  }
+export function getDefaultDashboardByRole(role?: UserRole): string {
+  void role;
+  return ROUTES.dashboard;
 }
 
 export function getCourseDetailRoute(

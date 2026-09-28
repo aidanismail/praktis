@@ -1,12 +1,23 @@
 "use client";
 
 import {
+<<<<<<< HEAD
   AlertCircle,
   Download,
   Loader2,
   RefreshCw,
   Search
 } from "lucide-react";
+=======
+  WarningCircle,
+  DownloadSimple,
+  FileText,
+  ArrowsClockwise,
+  MagnifyingGlass,
+  Users
+} from "@phosphor-icons/react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ROUTES } from "@/constants/routes";
@@ -151,8 +162,8 @@ export function AssignmentSubmissions({
           aria-live="polite"
           className="mt-6 flex min-h-40 items-center justify-center"
         >
-          <Loader2
-            className="h-5 w-5 animate-spin text-slate-700"
+          <AsteriskLoader
+            className="h-5 w-5 text-slate-700"
             aria-hidden="true"
           />
           <span className="ml-3 text-sm text-slate-600">
@@ -197,7 +208,7 @@ export function AssignmentSubmissions({
             disabled={query.isFetching}
             className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-red-700 px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <RefreshCw
+            <ArrowsClockwise
               className={
                 query.isFetching ? "h-4 w-4 animate-spin" : "h-4 w-4"
               }
@@ -220,19 +231,25 @@ export function AssignmentSubmissions({
         <div>
           <h2
             id="assignment-submissions-heading"
-            className="text-lg font-semibold text-slate-950"
+            className="text-base sm:text-lg font-bold tracking-tight text-slate-950"
           >
             Praktikan submissions
+            <span className="ml-2 text-xs font-normal text-slate-500 tabular-nums">
+              ({submissions.length})
+            </span>
           </h2>
 
-          <p className="mt-1 text-sm leading-6 text-slate-600">
+          <p className="mt-0.5 text-xs text-slate-500">
             Review submitted files and provide private scores and feedback.
           </p>
         </div>
+<<<<<<< HEAD
 
         <span className="text-sm font-medium text-slate-500">
           {submissions.length} {submissions.length === 1 ? "submission" : "submissions"}
         </span>
+=======
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
       </div>
 
       {query.isFetching ? (
@@ -265,7 +282,7 @@ export function AssignmentSubmissions({
               </label>
 
               <div className="relative">
-                <Search
+                <MagnifyingGlass
                   className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-slate-400"
                   aria-hidden="true"
                 />
@@ -275,7 +292,11 @@ export function AssignmentSubmissions({
                   value={searchValue}
                   onChange={(event) => setSearchValue(event.target.value)}
                   placeholder="Search NPM or email"
+<<<<<<< HEAD
                   className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3 text-sm text-slate-950 outline-none focus:border-slate-900 focus:ring-4 focus:ring-slate-100"
+=======
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3 text-sm text-slate-950 outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                 />
               </div>
             </div>
@@ -294,7 +315,11 @@ export function AssignmentSubmissions({
                 onChange={(event) =>
                   setFilter(event.target.value as SubmissionFilter)
                 }
+<<<<<<< HEAD
                 className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none focus:border-slate-900 focus:ring-4 focus:ring-slate-100"
+=======
+                className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
               >
                 <option value="all">All submissions</option>
                 <option value="awaiting-grade">Awaiting grade</option>
@@ -308,7 +333,7 @@ export function AssignmentSubmissions({
               role="status"
               className="mt-6 rounded-2xl border border-dashed border-slate-300 px-6 py-10 text-center"
             >
-              <AlertCircle
+              <WarningCircle
                 className="mx-auto h-8 w-8 text-slate-400"
                 aria-hidden="true"
               />
@@ -334,22 +359,24 @@ export function AssignmentSubmissions({
                   >
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2 text-xs">
                           <span
                             className={
                               graded
-                                ? "rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800"
-                                : "rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800"
+                                ? "font-semibold text-slate-900"
+                                : "font-semibold text-amber-700"
                             }
                           >
                             {graded ? "Graded" : "Awaiting grade"}
                           </span>
 
+                          <span className="text-slate-300" aria-hidden="true">·</span>
+
                           <span
                             className={
                               submission.is_late
-                                ? "rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700"
-                                : "rounded-full bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-700"
+                                ? "font-semibold text-rose-700"
+                                : "font-medium text-slate-500"
                             }
                           >
                             {submission.is_late ? "Late" : "On time"}
@@ -420,7 +447,7 @@ export function AssignmentSubmissions({
                           aria-label={`Download submission from ${submission.student_username}`}
                           className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700"
                         >
-                          <Download className="h-4 w-4" aria-hidden="true" />
+                          <DownloadSimple className="h-4 w-4" aria-hidden="true" />
                           Download submission
                         </a>
                       ) : (
@@ -440,7 +467,11 @@ export function AssignmentSubmissions({
                             expanded ? null : submission.id
                           )
                         }
+<<<<<<< HEAD
                         className="inline-flex min-h-11 items-center rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+=======
+                        className="inline-flex min-h-11 items-center rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white shadow-xs transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                       >
                         {graded ? "Edit grade" : "Grade submission"}
                       </button>

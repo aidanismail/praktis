@@ -65,9 +65,14 @@ Thumbs.db
 .codex/
 .impeccable/
 .agents/*
-PLANS.MD
+.agent/*
+.gemini/*
 PLANS.md
+<<<<<<< HEAD
 AGENTS.md
+=======
+DESIGN.md
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 PRODUCT.md
 skills-lock.json
 .github/skills

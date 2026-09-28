@@ -1,4 +1,5 @@
 import asyncio
+import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
@@ -38,3 +39,25 @@ async def bulk_create_users(db: AsyncSession, users_data: list[dict]) -> int:
     await db.commit()
     
     return result.rowcount
+
+async def deactivate_user(db: AsyncSession, user_id: uuid.UUID) -> User | None:
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        return None
+    user.is_active = False
+    db.add(user)
+    await db.commit()
+    await db.refresh(user)
+    return user
+
+async def reactivate_user(db: AsyncSession, user_id: uuid.UUID) -> User | None:
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        return None
+    user.is_active = True
+    db.add(user)
+    await db.commit()
+    await db.refresh(user)
+    return user

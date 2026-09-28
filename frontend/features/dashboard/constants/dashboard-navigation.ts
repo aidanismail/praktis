@@ -21,7 +21,7 @@ export const DASHBOARD_NAVIGATION: Record<UserRole, DashboardNavItem[]> = {
     {
       id: "bulk-import",
       label: "Import",
-      description: "Batch-create student accounts with a simple CSV."
+      description: "Batch create student accounts."
     },
     {
       id: "modules",
@@ -47,8 +47,18 @@ export const DASHBOARD_NAVIGATION: Record<UserRole, DashboardNavItem[]> = {
       description: "Your practicum classes, lab sessions, and rosters."
     },
     {
+<<<<<<< HEAD
       id: "profile",
       label: "Profile",
+=======
+      id: "classes",
+      label: "My Practicum Classes",
+      description: "Your practicum classes, lab sessions, and rosters."
+    },
+    {
+      id: "profile",
+      label: "Profile & Security",
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
       description: "Your assistant identity and password security."
     }
   ],

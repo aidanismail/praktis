@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+<<<<<<< HEAD
 import {
   AlertCircle,
   ArrowLeft,
@@ -10,6 +11,10 @@ import {
   Palette
 } from "lucide-react";
 import { ROUTES, type CourseWorkspaceTab } from "@/constants/routes";
+=======
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
+import { ROUTES } from "@/constants/routes";
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import { ApiError } from "@/lib/api/client";
 import { useAuthStore } from "@/stores/auth-store";
 import { useAssignedCourses } from "../hooks/use-assigned-courses";
@@ -21,6 +26,13 @@ import {
   type SavedCourseTheme
 } from "../constants/banner-themes";
 import { CourseBannerCustomizerModal } from "./course-banner-customizer-modal";
+import {
+  WarningCircle,
+  ArrowLeft,
+  CalendarDots,
+  ArrowsClockwise,
+  Palette
+} from "@phosphor-icons/react";
 
 type AsprakCourseDetailPageProps = {
   courseId: string;
@@ -88,8 +100,8 @@ function AssignedCourseDetail({
           className="flex min-h-72 items-center justify-center
             rounded-2xl border border-slate-200 bg-white"
         >
-          <Loader2
-            className="h-6 w-6 animate-spin text-slate-900"
+          <AsteriskLoader
+            className="h-6 w-6 text-slate-900"
             aria-hidden="true"
           />
           <span className="ml-3 text-sm text-slate-600">
@@ -111,7 +123,7 @@ function AssignedCourseDetail({
           className="rounded-2xl border border-red-200 bg-red-50 p-6"
         >
           <div className="flex items-start gap-3">
-            <AlertCircle
+            <WarningCircle
               className="mt-0.5 h-5 w-5 shrink-0 text-red-600"
               aria-hidden="true"
             />
@@ -164,7 +176,7 @@ function AssignedCourseDetail({
                     hover:bg-red-100 disabled:cursor-not-allowed
                     disabled:opacity-60"
                 >
-                  <RefreshCw
+                  <ArrowsClockwise
                     className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`}
                     aria-hidden="true"
                   />
@@ -228,7 +240,7 @@ function AssignedCourseDetail({
           onClick={() => setShowCustomizeModal(true)}
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-3.5 py-1.5 rounded-xl shadow-xs transition-colors"
         >
-          <Palette className="h-3.5 w-3.5" />
+          <Palette className="h-3.5 w-3.5" aria-hidden="true" />
           <span>Customize Banner</span>
         </button>
       </div>
@@ -241,6 +253,8 @@ function AssignedCourseDetail({
         {courseTheme.imageUrl && (
           <>
             <div
+              role="presentation"
+              aria-hidden="true"
               className="absolute inset-0 bg-cover bg-center"
               style={{ backgroundImage: `url(${courseTheme.imageUrl})` }}
             />
@@ -256,11 +270,28 @@ function AssignedCourseDetail({
 
         <div className="relative z-10 flex flex-wrap items-start justify-between gap-4">
           <div>
+<<<<<<< HEAD
             <p className="text-xs font-semibold uppercase tracking-wider text-white/90 drop-shadow-xs">
               {course.code}
             </p>
 
             <h1 className="mt-1.5 text-2xl font-bold tracking-tight text-white sm:text-3xl drop-shadow-xs">
+=======
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-white/90 drop-shadow-xs">
+                {course.code}
+              </span>
+              <span className="text-white/40" aria-hidden="true">·</span>
+              <span className="text-xs font-semibold text-white/80">
+                {statusLabel}
+              </span>
+            </div>
+
+            <h1
+              className="mt-2 text-2xl font-bold
+              tracking-tight text-white sm:text-3xl drop-shadow-xs"
+            >
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
               {course.name}
             </h1>
 
@@ -268,6 +299,7 @@ function AssignedCourseDetail({
               Academic year {course.academic_year} · Semester {course.semester}
             </p>
           </div>
+<<<<<<< HEAD
 
           <div className="flex items-center gap-3">
             <span className="text-xs font-medium text-white/90">
@@ -284,6 +316,22 @@ function AssignedCourseDetail({
               <span>Customize</span>
             </button>
           </div>
+=======
+        </div>
+
+        <div
+          className="mt-6 flex flex-wrap gap-x-6 gap-y-2
+          border-t border-white/15 pt-5 text-sm text-slate-200 relative z-10"
+        >
+          <span className="inline-flex items-center gap-2">
+            <CalendarDots
+              className="h-4 w-4 text-white/70"
+              aria-hidden="true"
+            />
+            Academic year {course.academic_year}
+          </span>
+          <span>Semester {course.semester}</span>
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
         </div>
       </header>
 

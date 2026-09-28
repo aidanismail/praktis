@@ -1,6 +1,7 @@
 "use client";
 
-import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
+import { WarningCircle, ArrowsClockwise } from "@phosphor-icons/react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -74,10 +75,17 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
 
   if (currentUserQuery.isPending || (!user && !currentUserQuery.isError)) {
     return (
+<<<<<<< HEAD
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#080E21] via-[#0D1836] to-[#14234B] text-white">
         <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur">
           <Loader2 className="h-5 w-5 animate-spin text-sky-400" />
           <span className="text-sm text-slate-200">Checking session...</span>
+=======
+      <div className="flex min-h-screen items-center justify-center bg-brand text-white">
+        <div className="flex flex-col items-center gap-3.5 rounded-3xl border border-white/10 bg-white/5 px-8 py-6 backdrop-blur shadow-2xl">
+          <AsteriskLoader className="h-9 w-9 text-white" />
+          <span className="text-xs font-medium text-slate-300">Checking session...</span>
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
         </div>
       </div>
     );
@@ -92,7 +100,11 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
       return (
         <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#080E21] via-[#0D1836] to-[#14234B] text-white">
           <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur">
+<<<<<<< HEAD
             <Loader2 className="h-5 w-5 animate-spin text-sky-400" aria-hidden="true" />
+=======
+            <AsteriskLoader className="h-5 w-5 text-white" />
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
             <span className="text-sm text-slate-200">
               Returning to sign in...
             </span>
@@ -107,7 +119,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
           role="alert"
           className="w-full max-w-lg rounded-3xl border border-red-200 bg-white p-6 shadow-sm sm:p-8"
         >
-          <AlertCircle className="h-7 w-7 text-red-600" aria-hidden="true" />
+          <WarningCircle className="h-7 w-7 text-red-600" aria-hidden="true" />
           <h1 className="mt-4 text-xl font-semibold text-slate-950">
             We could not verify your session
           </h1>
@@ -121,7 +133,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
             disabled={currentUserQuery.isFetching}
             className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <RefreshCw
+            <ArrowsClockwise
               className={
                 currentUserQuery.isFetching
                   ? "h-4 w-4 animate-spin"

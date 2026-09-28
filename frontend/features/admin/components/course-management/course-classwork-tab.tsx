@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+<<<<<<< HEAD
 import {
   Download,
   Eye,
@@ -12,6 +13,9 @@ import {
   Users,
   X,
 } from "lucide-react";
+=======
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import type {
   Course,
   Assignment,
@@ -21,6 +25,20 @@ import type {
 } from "@/features/admin/types";
 import { createAndUploadMultipleModules } from "@/features/admin/api/admin.api";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
+import {
+  Trophy,
+  BookOpen,
+  DownloadSimple,
+  Eye,
+  FileArrowDown,
+  FileText,
+  PencilSimple,
+  Plus,
+  Trash,
+  CloudArrowUp,
+  Users,
+  X
+} from "@phosphor-icons/react";
 
 interface CourseClassworkTabProps {
   course: Course;
@@ -169,7 +187,7 @@ export function CourseClassworkTab({
             onClick={() => setShowUploadModal(true)}
             className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 text-xs font-semibold rounded-full shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
           >
-            <UploadCloud className="w-3.5 h-3.5" />
+            <CloudArrowUp className="w-3.5 h-3.5" />
             <span>Upload Module</span>
           </button>
           <button
@@ -186,8 +204,14 @@ export function CourseClassworkTab({
       {/* Section 1: Assignments */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
+<<<<<<< HEAD
           <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
             Assignments & Tasks ({assignments.length})
+=======
+          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+            <Trophy className="w-4 h-4 text-slate-700" />
+            <span>Assignments & Tasks ({assignments.length})</span>
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           </h4>
         </div>
 
@@ -202,6 +226,7 @@ export function CourseClassworkTab({
                 key={a.id}
                 className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 hover:border-slate-300 hover:shadow-xs transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
               >
+<<<<<<< HEAD
                 <div>
                   <h4 className="font-semibold text-sm text-slate-900">{a.title}</h4>
                   <p className="text-xs text-slate-500 mt-0.5">
@@ -214,6 +239,20 @@ export function CourseClassworkTab({
                         })}`
                       : "No due date"}
                   </p>
+=======
+                <div className="flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-800 shrink-0">
+                    <Trophy className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-xs text-slate-900">{a.title}</h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      {a.due_date
+                        ? `Due: ${new Date(a.due_date).toLocaleString()}`
+                        : "No due date"}
+                    </p>
+                  </div>
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                 </div>
 
                 <div className="flex items-center gap-2 self-end sm:self-center">
@@ -228,18 +267,28 @@ export function CourseClassworkTab({
                   <button
                     type="button"
                     onClick={() => onOpenEditAssignment(a)}
+<<<<<<< HEAD
                     className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg text-xs transition-colors"
+=======
+                    className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg text-xs apple-press transition-colors"
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                     title="Edit assignment"
+                    aria-label="Edit assignment"
                   >
-                    <Pencil className="w-3.5 h-3.5" />
+                    <PencilSimple className="w-3.5 h-3.5" />
                   </button>
                   <button
                     type="button"
                     onClick={() => onDeleteAssignment(a.id)}
+<<<<<<< HEAD
                     className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg text-xs transition-colors"
+=======
+                    className="p-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg text-xs apple-press transition-colors"
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                     title="Delete assignment"
+                    aria-label="Delete assignment"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
@@ -299,21 +348,36 @@ export function CourseClassworkTab({
                         className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs flex items-center gap-1.5 transition-colors"
                         title="Download original file"
                       >
-                        <Download className="w-3.5 h-3.5" />
+                        <DownloadSimple className="w-3.5 h-3.5" />
                         <span className="hidden sm:inline">Download</span>
                       </a>
                     </>
                   )}
+<<<<<<< HEAD
                   <span className="text-xs font-medium text-slate-500">
+=======
+                  <span
+                    className={`text-xs font-semibold ${
+                      m.is_published
+                        ? "text-slate-900"
+                        : "text-amber-700"
+                    }`}
+                  >
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                     {m.is_published ? "Published" : "Draft"}
                   </span>
                   <button
                     type="button"
                     onClick={() => onDeleteModule(m.id)}
+<<<<<<< HEAD
                     className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg text-xs transition-colors"
+=======
+                    className="p-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg text-xs apple-press transition-colors"
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                     title="Delete module"
+                    aria-label="Delete module"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
@@ -352,7 +416,8 @@ export function CourseClassworkTab({
                   setShowUploadModal(false);
                   setModUploadQueue([]);
                 }}
-                className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center text-xs"
+                className="apple-press w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center text-xs"
+                aria-label="Close modal"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -387,7 +452,7 @@ export function CourseClassworkTab({
                   }`}
                 >
                   <label className="cursor-pointer flex flex-col items-center justify-center gap-1.5 py-2">
-                    <UploadCloud className="w-8 h-8 text-slate-400" />
+                    <CloudArrowUp className="w-8 h-8 text-slate-400" />
                     <span className="text-xs font-semibold text-slate-800">
                       Click to browse or drag and drop files here
                     </span>
@@ -433,7 +498,7 @@ export function CourseClassworkTab({
                       >
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2 overflow-hidden">
-                            <FileCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <FileArrowDown className="w-4 h-4 text-cyan-600 shrink-0" />
                             <span className="font-semibold text-slate-900 text-xs truncate">
                               {item.file.name}
                             </span>
@@ -447,7 +512,9 @@ export function CourseClassworkTab({
                               onClick={() => {
                                 setModUploadQueue((prev) => prev.filter((_, i) => i !== idx));
                               }}
-                              className="p-1 rounded-full text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                              className="apple-press p-1.5 rounded-full text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition-colors"
+                              aria-label={`Remove ${item.file.name} from upload queue`}
+                              title="Remove item"
                             >
                               <X className="w-3.5 h-3.5" />
                             </button>
@@ -504,7 +571,7 @@ export function CourseClassworkTab({
                   </div>
                   <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
                     <div
-                      className="bg-emerald-400 h-full transition-all duration-200"
+                      className="bg-cyan-400 h-full transition-all duration-200 shadow-[0_0_8px_rgba(34,211,238,0.5)]"
                       style={{
                         width: `${
                           (modUploadProgress.current / modUploadProgress.total) * 100
@@ -542,12 +609,12 @@ export function CourseClassworkTab({
               >
                 {isUploadingMod ? (
                   <>
-                    <span className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                    <AsteriskLoader className="w-3.5 h-3.5" />
                     <span>Uploading...</span>
                   </>
                 ) : (
                   <>
-                    <UploadCloud className="w-3.5 h-3.5" />
+                    <CloudArrowUp className="w-3.5 h-3.5" />
                     <span>Upload {modUploadQueue.length} {modUploadQueue.length === 1 ? "module" : "modules"}</span>
                   </>
                 )}

@@ -1,13 +1,19 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+<<<<<<< HEAD
 import { Loader2, Pin } from "lucide-react";
+=======
+import { PushPin } from "@phosphor-icons/react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import { useForm } from "react-hook-form";
 import { useCreateCourseAnnouncement } from "../hooks/use-course-announcements";
 import {
   announcementSchema,
   type AnnouncementFormValues
 } from "../schemas/announcement.schema";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 
 type AnnouncementComposerProps = {
   userId: string;
@@ -40,6 +46,7 @@ export function AnnouncementComposer({
       aria-labelledby="announcement-composer-heading"
       className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs"
     >
+<<<<<<< HEAD
       <div>
         <h2
           id="announcement-composer-heading"
@@ -50,6 +57,20 @@ export function AnnouncementComposer({
         <p className="mt-0.5 text-xs text-slate-500">
           Share updates, reminders, or schedule changes with your class.
         </p>
+=======
+      <div className="flex items-start gap-3">
+        <div>
+          <h2
+            id="announcement-composer-heading"
+            className="font-semibold text-slate-950"
+          >
+            Post an announcement
+          </h2>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            Broadcast updates, reminders, or schedule changes to the entire class.
+          </p>
+        </div>
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
       </div>
 
       <form
@@ -58,15 +79,17 @@ export function AnnouncementComposer({
         aria-busy={mutation.isPending}
       >
         {mutation.isError ? (
-          <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
-            {mutation.error.message}
-          </p>
+          <NotificationBanner
+            variant="error"
+            message={mutation.error.message}
+          />
         ) : null}
 
         {mutation.isSuccess ? (
-          <p role="status" className="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-            Announcement posted!
-          </p>
+          <NotificationBanner
+            variant="success"
+            message="Announcement posted!"
+          />
         ) : null}
 
         <div className="space-y-2">
@@ -80,7 +103,11 @@ export function AnnouncementComposer({
             disabled={mutation.isPending}
             aria-invalid={Boolean(form.formState.errors.title)}
             aria-describedby={form.formState.errors.title ? "announcement-title-error" : undefined}
+<<<<<<< HEAD
             className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-900 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-50"
+=======
+            className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-50"
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
             placeholder="Title (e.g. Lab 3 guidelines updated)"
             {...form.register("title")}
           />
@@ -101,7 +128,11 @@ export function AnnouncementComposer({
             disabled={mutation.isPending}
             aria-invalid={Boolean(form.formState.errors.content)}
             aria-describedby={form.formState.errors.content ? "announcement-content-error" : undefined}
+<<<<<<< HEAD
             className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-900 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-50"
+=======
+            className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-50"
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
             placeholder="Share details, links, or instructions..."
             {...form.register("content")}
           />
@@ -120,18 +151,22 @@ export function AnnouncementComposer({
               className="h-4 w-4 rounded border-slate-300 accent-slate-900"
               {...form.register("is_pinned")}
             />
-            <Pin className="h-4 w-4" aria-hidden="true" />
+            <PushPin className="h-4 w-4" aria-hidden="true" />
             Pin to top of stream
           </label>
 
           <button
             type="submit"
             disabled={mutation.isPending}
+<<<<<<< HEAD
             className="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+=======
+            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60 shadow-xs"
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           >
             {mutation.isPending ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                <AsteriskLoader className="mr-2 h-4 w-4" />
                 Publishing...
               </>
             ) : (

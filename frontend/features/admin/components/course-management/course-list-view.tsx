@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+<<<<<<< HEAD
 import {
   LayoutGrid,
   List,
@@ -10,6 +11,8 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
+=======
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import type { Course } from "@/features/admin/types";
 import {
   getThemeConfig,
@@ -18,6 +21,16 @@ import {
   getCourseBannerTheme,
   type SavedCourseTheme,
 } from "@/features/courses/constants/banner-themes";
+import {
+  CaretRight,
+  SquaresFour,
+  ListBullets,
+  Palette,
+  PencilSimple,
+  Plus,
+  MagnifyingGlass,
+  Trash
+} from "@phosphor-icons/react";
 
 interface CourseListViewProps {
   courses: Course[];
@@ -67,7 +80,7 @@ export function CourseListView({
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 shadow-xs"
             />
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+            <MagnifyingGlass className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
           </div>
         </div>
 
@@ -83,7 +96,7 @@ export function CourseListView({
               }`}
               title="Grid View"
             >
-              <LayoutGrid className="w-3.5 h-3.5" />
+              <SquaresFour className="w-3.5 h-3.5" />
             </button>
             <button
               type="button"
@@ -95,7 +108,7 @@ export function CourseListView({
               }`}
               title="Table View"
             >
-              <List className="w-3.5 h-3.5" />
+              <ListBullets className="w-3.5 h-3.5" />
             </button>
           </div>
 
@@ -171,6 +184,7 @@ export function CourseListView({
                 </div>
 
                 {/* Card Body */}
+<<<<<<< HEAD
                 <div className="p-4 flex-1 flex flex-col justify-between space-y-4">
                   <div className="flex items-center justify-between text-xs text-slate-600">
                     <span className="font-medium text-slate-700">
@@ -189,6 +203,32 @@ export function CourseListView({
                   <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
                     <span className="text-slate-900 font-semibold group-hover:text-slate-950">
                       Open workspace
+=======
+                <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                  <div className="grid grid-cols-2 gap-2 text-xs text-slate-600">
+                    <div className="bg-slate-50 p-2.5 rounded-2xl border border-slate-100">
+                      <span className="text-[10px] text-slate-400 uppercase font-semibold block">
+                        Academic Period
+                      </span>
+                      <span className="font-medium text-slate-800">
+                        {course.academic_year}
+                      </span>
+                    </div>
+                    <div className="bg-slate-50 p-2.5 rounded-2xl border border-slate-100">
+                      <span className="text-[10px] text-slate-400 uppercase font-semibold block">
+                        Status
+                      </span>
+                      <span className="font-semibold text-slate-900 block mt-0.5">
+                        {course.is_active ? "Active" : "Archived"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <span className="text-slate-900 font-semibold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                      <span>Open course</span>
+                      <CaretRight className="w-3.5 h-3.5" />
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                     </span>
                     <div
                       className="flex items-center gap-1"
@@ -214,7 +254,7 @@ export function CourseListView({
                         className="p-1.5 hover:bg-slate-100 text-slate-500 rounded-lg text-xs transition-colors cursor-pointer"
                         title="Edit"
                       >
-                        <Pencil className="w-3.5 h-3.5" />
+                        <PencilSimple className="w-3.5 h-3.5" />
                       </button>
                       <button
                         type="button"
@@ -225,7 +265,7 @@ export function CourseListView({
                         className="p-1.5 hover:bg-rose-50 text-rose-500 rounded-lg text-xs transition-colors cursor-pointer"
                         title="Delete"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Trash className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
@@ -261,7 +301,7 @@ export function CourseListView({
                     <td className="p-3.5 text-slate-600">{c.academic_year}</td>
                     <td className="p-3.5 text-slate-600">{c.semester}</td>
                     <td className="p-3.5">
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-800 border border-slate-200">
+                      <span className={`font-semibold ${c.is_active ? "text-slate-900" : "text-slate-500"}`}>
                         {c.is_active ? "Active" : "Archived"}
                       </span>
                     </td>

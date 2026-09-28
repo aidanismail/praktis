@@ -4,9 +4,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError } from "@/lib/api/client";
 import {
   confirmCourseModuleUpload,
+  confirmModuleReplacement,
+  deleteCourseModule,
   listCourseModules,
   publishCourseModule,
   requestCourseModuleUpload,
+  requestModuleReplacement,
   unpublishCourseModule,
   updateCourseModule,
   uploadCourseModuleFile
@@ -125,3 +128,33 @@ export function useSetCourseModulePublication(scope: CourseModuleScope) {
     retry: false
   });
 }
+
+type ReplaceModuleFileVariables = {
+  moduleId: string;
+  file: File;
+};
+
+export function useDeleteCourseModule(scope: CourseModuleScope) {
+  const invalidate = useInvalidateCourseModules(scope);
+
+  return useMutation({
+    mutationFn: (moduleId: string) => deleteCourseModule(moduleId),
+    onSuccess: invalidate,
+    retry: false
+  });
+}
+
+export function useReplaceCourseModuleFile(scope: CourseModuleScope) {
+  const invalidate = useInvalidateCourseModules(scope);
+
+  return useMutation({
+    mutationFn: async ({ moduleId, file }: ReplaceModuleFileVariables) => {
+      const intent = await requestModuleReplacement(moduleId);
+      await uploadCourseModuleFile(intent.upload_url, file);
+      return confirmModuleReplacement(moduleId, intent.file_key);
+    },
+    onSuccess: invalidate,
+    retry: false
+  });
+}
+

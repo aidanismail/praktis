@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError } from "@/lib/api/client";
 import {
   createCourseAssignment,
+  deleteCourseAssignment,
   getCourseAssignment,
   gradeAssignmentSubmission,
   listAssignmentSubmissions,
@@ -205,3 +206,28 @@ export function useGradeAssignmentSubmission({
     retry: false
   });
 }
+
+export function useDeleteCourseAssignment(scope: CourseAssignmentScope) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (assignmentId: string) =>
+      deleteCourseAssignment(scope.courseId, assignmentId),
+    onSuccess: (_, deletedAssignmentId) => {
+      queryClient.setQueryData<Assignment[]>(
+        assignmentQueryKeys.course(scope.userId, scope.courseId),
+        (current) =>
+          current
+            ? current.filter((a) => a.id !== deletedAssignmentId)
+            : current
+      );
+
+      return queryClient.invalidateQueries({
+        queryKey: assignmentQueryKeys.course(scope.userId, scope.courseId),
+        exact: true
+      });
+    },
+    retry: false
+  });
+}
+

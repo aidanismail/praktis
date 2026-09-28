@@ -46,3 +46,10 @@ export function closeSessionAttendance(sessionId: string) {
     { method: "POST" }
   );
 }
+
+export function deleteCourseSession(sessionId: string) {
+  return apiClient<void>(API_ENDPOINTS.classSessions.delete(sessionId), {
+    method: "DELETE"
+  });
+}
+

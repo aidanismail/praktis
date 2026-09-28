@@ -1,10 +1,19 @@
 "use client";
 
 import Link from "next/link";
+<<<<<<< HEAD
 import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
+=======
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useCourseRoster } from "../hooks/use-course-roster";
+import {
+  WarningCircle,
+  ArrowsClockwise,
+  Users
+} from "@phosphor-icons/react";
 
 type CourseRosterProps = {
   userId: string;
@@ -51,7 +60,14 @@ export function CourseRoster({ userId, courseId }: CourseRosterProps) {
       aria-busy={isPending || isFetching}
       className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-xs"
     >
+<<<<<<< HEAD
       <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 pb-4">
+=======
+      <div
+        className="flex flex-wrap items-start justify-between
+        gap-4"
+      >
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
         <div>
           <h2
             id="course-roster-heading"
@@ -67,7 +83,11 @@ export function CourseRoster({ userId, courseId }: CourseRosterProps) {
         {!isPending && !isError ? (
           <span
             aria-live="polite"
+<<<<<<< HEAD
             className="text-sm font-medium text-slate-500"
+=======
+            className="text-xs font-semibold text-slate-500"
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           >
             {students.length} {students.length === 1 ? "student" : "students"}
           </span>
@@ -81,8 +101,8 @@ export function CourseRoster({ userId, courseId }: CourseRosterProps) {
           className="mt-6 flex min-h-40 items-center justify-center
             rounded-2xl border border-slate-200 bg-slate-50"
         >
-          <Loader2
-            className="h-5 w-5 animate-spin text-slate-900"
+          <AsteriskLoader
+            className="h-5 w-5 text-slate-900"
             aria-hidden="true"
           />
           <span className="ml-3 text-sm text-slate-600">
@@ -97,7 +117,7 @@ export function CourseRoster({ userId, courseId }: CourseRosterProps) {
           className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5"
         >
           <div className="flex items-start gap-3">
-            <AlertCircle
+            <WarningCircle
               className="mt-0.5 h-5 w-5 shrink-0 text-red-600"
               aria-hidden="true"
             />
@@ -139,7 +159,7 @@ export function CourseRoster({ userId, courseId }: CourseRosterProps) {
                     rounded-xl bg-red-700 px-4 py-2 text-sm font-medium text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:cursor-not-allowed
                     disabled:opacity-60"
                 >
-                  <RefreshCw
+                  <ArrowsClockwise
                     className={isFetching ? "h-4 w-4 animate-spin" : "h-4 w-4"}
                     aria-hidden="true"
                   />
@@ -178,6 +198,7 @@ export function CourseRoster({ userId, courseId }: CourseRosterProps) {
                 </span>
               </div>
 
+<<<<<<< HEAD
               <div className="min-w-0 text-sm text-slate-600">
                 <a
                   href={`mailto:${student.email}`}
@@ -185,6 +206,21 @@ export function CourseRoster({ userId, courseId }: CourseRosterProps) {
                 >
                   {student.email}
                 </a>
+=======
+              <div className="min-w-0">
+                <span
+                  className="text-xs font-semibold uppercase
+                  tracking-wide text-slate-500"
+                >
+                  Email
+                </span>
+                <span
+                  className="mt-1 block break-all text-sm
+                  text-slate-700"
+                >
+                  {student.email}
+                </span>
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
               </div>
             </li>
           ))}

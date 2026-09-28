@@ -1,9 +1,14 @@
 "use client";
 
+<<<<<<< HEAD
 import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
+=======
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 import {
   useCourseSessions,
   useCreateCourseSession,
@@ -13,6 +18,10 @@ import type { SessionFormValues } from "../schemas/session.schema";
 import type { CourseSession } from "../types/session.type";
 import { SessionCard } from "./session-card";
 import { SessionForm } from "./session-form";
+import {
+  CalendarDots,
+  ArrowsClockwise
+} from "@phosphor-icons/react";
 
 type CourseSessionsProps = {
   userId: string;
@@ -149,13 +158,17 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
             type="button"
             onClick={() => void sessionsQuery.refetch()}
             disabled={sessionsQuery.isFetching}
+<<<<<<< HEAD
             className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+=======
+            className="apple-press inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           >
-            <RefreshCw
+            <ArrowsClockwise
               className={
                 sessionsQuery.isFetching
-                  ? "h-4 w-4 animate-spin"
-                  : "h-4 w-4"
+                  ? "h-3.5 w-3.5 animate-spin"
+                  : "h-3.5 w-3.5"
               }
               aria-hidden="true"
             />
@@ -164,6 +177,7 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
         ) : null}
       </div>
 
+<<<<<<< HEAD
       {hasLoadedData && !accessError ? (
         <section
           aria-labelledby="create-session-heading"
@@ -191,35 +205,42 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
         </section>
       ) : null}
 
+=======
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
       {sessionsQuery.isPending ? (
         <div
           role="status"
           aria-live="polite"
           className="mt-5 flex min-h-48 items-center justify-center rounded-2xl border border-slate-200 bg-white"
         >
-          <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+          <AsteriskLoader className="h-5 w-5 text-slate-900" aria-hidden="true" />
           <span className="ml-3 text-sm text-slate-600">Loading class sessions...</span>
         </div>
       ) : null}
 
       {blockingError ? (
+<<<<<<< HEAD
         <div role="alert" className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-6">
           <div className="flex items-start gap-3">
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" aria-hidden="true" />
+=======
+        <div className="mt-5">
+          <NotificationBanner variant="error">
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
             <div>
-              <h3 className="font-semibold text-red-950">{errorTitle}</h3>
-              <p className="mt-1 text-sm leading-6 text-red-800">{errorDescription}</p>
+              <h3 className="font-semibold text-white">{errorTitle}</h3>
+              <p className="mt-1 text-xs text-slate-300">{errorDescription}</p>
               {status === 401 ? (
                 <Link
                   href={ROUTES.login}
-                  className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-red-700 px-4 text-sm font-semibold text-white"
+                  className="mt-3 inline-flex min-h-9 items-center rounded-lg bg-slate-800 border border-slate-700 px-3 text-xs font-semibold text-white hover:bg-slate-700 transition"
                 >
                   Go to sign in
                 </Link>
               ) : accessError ? (
                 <Link
                   href={ROUTES.dashboard}
-                  className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-red-900 underline underline-offset-4"
+                  className="mt-3 inline-flex min-h-9 items-center text-xs font-semibold text-slate-300 underline underline-offset-4 hover:text-white"
                 >
                   Return to dashboard
                 </Link>
@@ -228,61 +249,116 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
                   type="button"
                   onClick={() => void sessionsQuery.refetch()}
                   disabled={sessionsQuery.isFetching}
-                  className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-red-700 px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+                  className="mt-3 inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 text-xs font-semibold text-white hover:bg-slate-700 transition disabled:opacity-60"
                 >
-                  <RefreshCw className="h-4 w-4" aria-hidden="true" />
+                  <ArrowsClockwise className={sessionsQuery.isFetching ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"} aria-hidden="true" />
                   Try again
                 </button>
               )}
             </div>
-          </div>
+          </NotificationBanner>
         </div>
       ) : null}
 
       {!sessionsQuery.isPending && !blockingError ? (
         <>
           {refreshError ? (
-            <div role="alert" className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-              Couldn&apos;t refresh sessions right now. Showing previous schedule.
+            <div className="mt-5">
+              <NotificationBanner
+                variant="warning"
+                message="Couldn't refresh sessions right now. Showing previous schedule."
+              />
             </div>
           ) : null}
 
           {transitionError ? (
-            <div role="alert" className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-              {transitionError}
+            <div className="mt-5">
+              <NotificationBanner
+                variant="error"
+                message={transitionError}
+              />
             </div>
           ) : null}
 
           {transitionMutation.isSuccess ? (
-            <p role="status" aria-live="polite" className="mt-4 text-sm text-emerald-700">
-              {transitionMutation.data.message}
-            </p>
+            <div className="mt-4">
+              <NotificationBanner
+                variant="success"
+                message={transitionMutation.data.message}
+              />
+            </div>
           ) : null}
 
+<<<<<<< HEAD
           {sessions.length === 0 ? (
             <div role="status" className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
               <h3 className="text-base font-semibold text-slate-950">No sessions scheduled yet</h3>
               <p className="mt-1 text-sm text-slate-600">
                 Add your first lab session using the form above.
               </p>
+=======
+          <div className="mt-5 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+            {/* Left Column: Sessions list */}
+            <div className="lg:col-span-7 space-y-3">
+              {sessions.length === 0 ? (
+                <div role="status" className="rounded-2xl border border-dashed border-slate-200 bg-white/70 p-8 text-center">
+                  <CalendarDots className="mx-auto h-7 w-7 text-slate-300" aria-hidden="true" />
+                  <h3 className="mt-2 text-sm font-semibold text-slate-900">No sessions scheduled yet</h3>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Use the panel on the right to schedule your first lab session.
+                  </p>
+                </div>
+              ) : (
+                sessions.map((session) => (
+                  <SessionCard
+                    key={session.id}
+                    userId={userId}
+                    courseId={courseId}
+                    session={session}
+                    transitionPending={transitionMutation.isPending}
+                    transitioningSessionId={
+                      transitionMutation.variables?.sessionId ?? null
+                    }
+                    onTransition={transitionSession}
+                  />
+                ))
+              )}
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
             </div>
-          ) : (
-            <div className="mt-5 grid gap-4 lg:grid-cols-2">
-              {sessions.map((session) => (
-                <SessionCard
-                  key={session.id}
-                  userId={userId}
-                  courseId={courseId}
-                  session={session}
-                  transitionPending={transitionMutation.isPending}
-                  transitioningSessionId={
-                    transitionMutation.variables?.sessionId ?? null
-                  }
-                  onTransition={transitionSession}
-                />
-              ))}
+
+            {/* Right Column: Schedule a session panel (sticky) */}
+            <div className="lg:col-span-5 lg:sticky lg:top-4">
+              <section
+                aria-labelledby="create-session-heading"
+                className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xs"
+              >
+                <div>
+                  <h3 id="create-session-heading" className="text-sm font-bold tracking-tight text-slate-950">
+                    Schedule session
+                  </h3>
+                  <p className="mt-0.5 text-xs text-slate-500">
+                    Set up a lab date and topic for your students.
+                  </p>
+                </div>
+                <div className="mt-4">
+                  <SessionForm
+                    submitLabel="Schedule session"
+                    pendingLabel="Scheduling..."
+                    isPending={createMutation.isPending}
+                    error={createMutation.error}
+                    onSubmit={createSession}
+                    resetAfterSubmit
+                    compact
+                  />
+                </div>
+                {createMutation.isSuccess ? (
+                  <div className="mt-3">
+                    <NotificationBanner variant="success" message="Session scheduled!" />
+                  </div>
+                ) : null}
+              </section>
             </div>
-          )}
+          </div>
         </>
       ) : null}
     </section>

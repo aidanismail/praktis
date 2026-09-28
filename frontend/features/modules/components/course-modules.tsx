@@ -1,13 +1,25 @@
 "use client";
 
 import Link from "next/link";
+<<<<<<< HEAD
 import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
+=======
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useCourseModules } from "../hooks/use-course-modules";
 import { ModuleCard } from "./module-card";
 import { ModuleUploadForm } from "./module-upload-form";
+<<<<<<< HEAD
 
+=======
+import {
+  WarningCircleIcon,
+  BookOpenIcon,
+  ArrowsClockwiseIcon
+} from "@phosphor-icons/react";
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 type CourseModulesProps = {
   userId: string;
   courseId: string;
@@ -59,8 +71,9 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
 
   return (
     <section aria-labelledby="course-modules-heading" aria-busy={isFetching}>
-      <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="flex items-baseline justify-between border-b border-slate-200/80 pb-3">
         <div>
+<<<<<<< HEAD
           <p
             className="text-xs font-semibold uppercase tracking-wider
             text-slate-500"
@@ -68,14 +81,19 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
             Learning materials
           </p>
 
+=======
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           <h2
             id="course-modules-heading"
-            className="mt-1 text-xl font-semibold text-slate-950"
+            className="text-base sm:text-lg font-bold tracking-tight text-slate-950"
           >
             Course modules
+            <span className="ml-2 text-xs font-normal text-slate-500 tabular-nums">
+              ({modules.length})
+            </span>
           </h2>
 
-          <p className="mt-1 text-sm leading-6 text-slate-600">
+          <p className="mt-0.5 text-xs text-slate-500">
             {accessMode === "manage"
               ? "Upload, publish, and organize reading materials and lab manuals."
               : "Download lab manuals, guides, and reading materials."}
@@ -83,6 +101,7 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
         </div>
 
         {hasLoadedData && !isAccessError ? (
+<<<<<<< HEAD
           <div className="flex flex-wrap items-center gap-2">
             <span
               aria-live="polite"
@@ -91,32 +110,41 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
               {modules.length} {modules.length === 1 ? "module" : "modules"}
             </span>
 
+=======
+          <div className="flex items-center gap-2">
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
             <button
               type="button"
               onClick={() => void refetch()}
               disabled={isFetching}
+<<<<<<< HEAD
               className="inline-flex min-h-11 items-center gap-2 rounded-xl
                   border border-slate-200 bg-white px-3 text-sm font-semibold
                   text-slate-700 transition hover:bg-slate-50
                   focus-visible:outline-2 focus-visible:outline-offset-2
                   focus-visible:outline-slate-900
                   disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+=======
+              className="apple-press inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
             >
-              <RefreshCw
-                className={isFetching ? "h-4 w-4 animate-spin" : "h-4 w-4"}
+              <ArrowsClockwiseIcon
+                className={isFetching ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"}
                 aria-hidden="true"
               />
-
               {isFetching ? "Refreshing..." : "Refresh links"}
             </button>
           </div>
         ) : null}
       </div>
+<<<<<<< HEAD
 
       {hasLoadedData && !isAccessError && accessMode === "manage" ? (
         <ModuleUploadForm userId={userId} courseId={courseId} />
       ) : null}
 
+=======
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
       {isPending ? (
         <div
           role="status"
@@ -124,8 +152,8 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
           className="mt-5 flex min-h-48 items-center justify-center
               rounded-2xl border border-slate-200 bg-white"
         >
-          <Loader2
-            className="h-5 w-5 animate-spin text-slate-900"
+          <AsteriskLoader
+            className="h-5 w-5 text-slate-900"
             aria-hidden="true"
           />
           <span className="ml-3 text-sm text-slate-600">
@@ -141,7 +169,7 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
               bg-red-50 p-6"
         >
           <div className="flex items-start gap-3">
-            <AlertCircle
+            <WarningCircleIcon
               className="mt-0.5 h-5 w-5 shrink-0 text-red-600"
               aria-hidden="true"
             />
@@ -193,7 +221,7 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
                       focus-visible:outline-red-700
                       disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  <RefreshCw
+                  <ArrowsClockwiseIcon
                     className={isFetching ? "h-4 w-4 animate-spin" : "h-4 w-4"}
                     aria-hidden="true"
                   />
@@ -215,7 +243,7 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
                   border-amber-200 bg-amber-50 px-4 py-3"
             >
               <div className="flex items-start gap-2">
-                <AlertCircle
+                <WarningCircleIcon
                   className="mt-0.5 h-4 w-4 shrink-0
                       text-amber-700"
                   aria-hidden="true"
@@ -238,7 +266,7 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
                     focus-visible:outline-amber-700
                     disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <RefreshCw
+                <ArrowsClockwiseIcon
                   className={isFetching ? "h-4 w-4 animate-spin" : "h-4 w-4"}
                   aria-hidden="true"
                 />
@@ -257,6 +285,7 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
             </p>
           ) : null}
 
+<<<<<<< HEAD
           {modules.length === 0 ? (
             <div
               role="status"
@@ -269,18 +298,75 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
               <p className="mt-1 text-sm text-slate-600">
                 Lab manuals and reference guides will show up here once uploaded.
               </p>
+=======
+          {accessMode === "manage" ? (
+            <div className="mt-5 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+              {/* Left Column: Modules list */}
+              <div className="lg:col-span-7 space-y-3">
+                {modules.length === 0 ? (
+                  <div
+                    role="status"
+                    className="rounded-2xl border border-dashed border-slate-200 bg-white/70 p-8 text-center"
+                  >
+                    <BookOpenIcon
+                      className="mx-auto h-7 w-7 text-slate-300"
+                      aria-hidden="true"
+                    />
+                    <h3 className="mt-2 text-sm font-semibold text-slate-900">
+                      No modules uploaded yet
+                    </h3>
+                    <p className="mt-1 text-xs text-slate-500">
+                      Upload lab manuals or guides using the panel on the right.
+                    </p>
+                  </div>
+                ) : (
+                  modules.map((module) => (
+                    <ModuleCard
+                      key={module.id}
+                      userId={userId}
+                      courseId={courseId}
+                      module={module}
+                      accessMode={accessMode}
+                    />
+                  ))
+                )}
+              </div>
+
+              {/* Right Column: Upload panel (sticky) */}
+              <div className="lg:col-span-5 lg:sticky lg:top-4">
+                <ModuleUploadForm userId={userId} courseId={courseId} />
+              </div>
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
             </div>
           ) : (
-            <div className="mt-5 grid gap-4 lg:grid-cols-2">
-              {modules.map((module) => (
-                <ModuleCard
-                  key={module.id}
-                  userId={userId}
-                  courseId={courseId}
-                  module={module}
-                  accessMode={accessMode}
-                />
-              ))}
+            <div className="mt-5 max-w-3xl space-y-3">
+              {modules.length === 0 ? (
+                <div
+                  role="status"
+                  className="rounded-2xl border border-dashed border-slate-200 bg-white/70 p-8 text-center"
+                >
+                  <BookOpenIcon
+                    className="mx-auto h-7 w-7 text-slate-300"
+                    aria-hidden="true"
+                  />
+                  <h3 className="mt-2 text-sm font-semibold text-slate-900">
+                    No modules available yet
+                  </h3>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Lab manuals and guides will show up here once uploaded by instructors.
+                  </p>
+                </div>
+              ) : (
+                modules.map((module) => (
+                  <ModuleCard
+                    key={module.id}
+                    userId={userId}
+                    courseId={courseId}
+                    module={module}
+                    accessMode={accessMode}
+                  />
+                ))
+              )}
             </div>
           )}
         </>

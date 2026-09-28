@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { ApiError } from "@/lib/api/client";
@@ -11,6 +11,7 @@ import {
   type SubmissionGradeFormValues
 } from "../schemas/submission-grade.schema";
 import type { AssignmentSubmission } from "../types/assignment.type";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 
 type SubmissionGradeFormProps = {
   userId: string;
@@ -109,21 +110,17 @@ export function SubmissionGradeForm({
       className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4"
     >
       {mutation.isError ? (
-        <p
-          role="alert"
-          className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"
-        >
-          {getGradeErrorMessage(mutation.error, maxPoints)}
-        </p>
+        <NotificationBanner
+          variant="error"
+          message={getGradeErrorMessage(mutation.error, maxPoints)}
+        />
       ) : null}
 
       {mutation.isSuccess ? (
-        <p
-          role="status"
-          className="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
-        >
-          Grade recorded!
-        </p>
+        <NotificationBanner
+          variant="success"
+          message="Grade recorded!"
+        />
       ) : null}
 
       <div className="space-y-2">
@@ -143,7 +140,11 @@ export function SubmissionGradeForm({
           aria-describedby={
             form.formState.errors.score ? `${scoreId}-error` : undefined
           }
+<<<<<<< HEAD
           className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-slate-900 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100"
+=======
+          className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100"
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           {...form.register("score")}
         />
 
@@ -168,7 +169,11 @@ export function SubmissionGradeForm({
           rows={4}
           disabled={mutation.isPending}
           placeholder="Add constructive notes or feedback for the student..."
+<<<<<<< HEAD
           className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-900 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100"
+=======
+          className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100"
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           {...form.register("feedback")}
         />
       </div>
@@ -189,13 +194,16 @@ export function SubmissionGradeForm({
         <button
           type="submit"
           disabled={mutation.isPending}
+<<<<<<< HEAD
           className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand px-5 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+=======
+          className="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-5 text-sm font-semibold text-white shadow-xs transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
         >
           {mutation.isPending ? (
             <>
-              <Loader2
-                className="mr-2 h-4 w-4 animate-spin"
-                aria-hidden="true"
+              <AsteriskLoader
+                className="mr-2 h-4 w-4"
               />
               Saving...
             </>

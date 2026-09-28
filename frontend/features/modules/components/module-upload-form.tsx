@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+<<<<<<< HEAD
 import {
   AlertCircle,
   CheckCircle2,
@@ -8,9 +9,13 @@ import {
   RotateCcw,
   X
 } from "lucide-react";
+=======
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import { useId, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { ApiError } from "@/lib/api/client";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 import {
   useConfirmCourseModuleUpload,
   useRequestCourseModuleUpload,
@@ -21,6 +26,10 @@ import {
   moduleUploadSchema,
   type ModuleUploadFormValues
 } from "../schemas/module.schema";
+import {
+  ArrowCounterClockwise,
+  X
+} from "@phosphor-icons/react";
 
 type ModuleUploadFormProps = {
   userId: string;
@@ -293,11 +302,16 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
   return (
     <section
       aria-labelledby={`module-upload-heading-${generatedId}`}
+<<<<<<< HEAD
       className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-xs sm:p-6"
+=======
+      className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xs"
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
     >
       <div>
         <h3
           id={`module-upload-heading-${generatedId}`}
+<<<<<<< HEAD
           className="text-base font-semibold text-slate-950"
         >
           Upload a module
@@ -305,6 +319,15 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
 
         <p className="mt-1 text-sm leading-6 text-slate-600">
           Upload lab guides or manuals (PDF or DOCX, up to 25 MiB). Saved as a draft until published.
+=======
+          className="text-sm font-bold tracking-tight text-slate-950"
+        >
+          Upload module
+        </h3>
+
+        <p className="mt-0.5 text-xs text-slate-500">
+          Upload PDF or DOCX (up to 25 MiB). Saved as draft until published.
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
         </p>
       </div>
 
@@ -312,7 +335,7 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
         noValidate
         onSubmit={form.handleSubmit(startUpload)}
         aria-busy={isBusy}
-        className="mt-5 space-y-5"
+        className="mt-4 space-y-3.5"
       >
         {busyMessage ? (
           <p
@@ -321,60 +344,47 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
             className="flex items-center gap-2 rounded-xl
                 bg-slate-100 px-4 py-3 text-sm text-slate-700"
           >
-            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            <AsteriskLoader className="h-4 w-4" />
             {busyMessage}
           </p>
         ) : null}
 
         {stage === "failed" && errorMessage ? (
-          <div
+          <NotificationBanner
             id={statusId}
-            role="alert"
             tabIndex={-1}
-            className="rounded-xl border border-red-200
-                bg-red-50 px-4 py-3"
+            variant="error"
           >
-            <div className="flex items-start gap-2">
-              <AlertCircle
-                className="mt-0.5 h-4 w-4 shrink-0
-                    text-red-600"
-                aria-hidden="true"
-              />
-              <p className="text-sm leading-6 text-red-800">{errorMessage}</p>
+            <div>
+              <div>{errorMessage}</div>
+              {failedStage === "confirm" ? (
+                <div className="mt-1 text-xs text-slate-300">
+                  Confirmation may have completed even if its response was
+                  interrupted. Refresh the module list before starting a separate
+                  upload.
+                </div>
+              ) : null}
             </div>
-
-            {failedStage === "confirm" ? (
-              <p className="mt-2 text-xs leading-5 text-red-700">
-                Confirmation may have completed even if its response was
-                interrupted. Refresh the module list before starting a separate
-                upload.
-              </p>
-            ) : null}
-          </div>
+          </NotificationBanner>
         ) : null}
 
         {stage === "complete" ? (
-          <p
+          <NotificationBanner
             id={statusId}
-            role="status"
             tabIndex={-1}
-            className="flex items-center gap-2 rounded-xl
-                bg-emerald-50 px-4 py-3 text-sm
-                text-emerald-800"
-          >
-            <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-            Module uploaded! Saved as draft.
-          </p>
+            variant="success"
+            message="Module uploaded! Saved as draft."
+          />
         ) : null}
 
         <fieldset
           disabled={fieldsDisabled}
-          className="space-y-5 disabled:opacity-70"
+          className="space-y-3.5 disabled:opacity-70"
         >
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <label
               htmlFor={`module-upload-title-${generatedId}`}
-              className="text-sm font-medium text-slate-800"
+              className="text-xs font-semibold text-slate-700"
             >
               Title
             </label>
@@ -390,12 +400,17 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
                   ? `module-upload-title-error-${generatedId}`
                   : undefined
               }
-              className="h-11 w-full rounded-xl border
-                  border-slate-200 bg-white px-3 text-sm
-                  text-slate-950 outline-none transition
+              className="h-9 w-full rounded-lg border
+                  border-slate-200 bg-white px-3 text-xs
+                  text-slate-900 outline-none transition
                   placeholder:text-slate-400
+<<<<<<< HEAD
                   focus:border-slate-900
                   focus:ring-4 focus:ring-slate-100
+=======
+                  focus:border-slate-400
+                  focus:ring-2 focus:ring-slate-100
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                   disabled:cursor-not-allowed
                   disabled:bg-slate-50"
               {...form.register("title")}
@@ -404,27 +419,27 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
             {form.formState.errors.title ? (
               <p
                 id={`module-upload-title-error-${generatedId}`}
-                className="text-sm text-red-600"
+                className="text-xs text-red-600"
               >
                 {form.formState.errors.title.message}
               </p>
             ) : null}
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <label
               htmlFor={`module-upload-description-${generatedId}`}
-              className="text-sm font-medium text-slate-800"
+              className="text-xs font-semibold text-slate-700"
             >
               Description
-              <span className="ml-1 font-normal text-slate-500">
+              <span className="ml-1 font-normal text-slate-400">
                 (optional)
               </span>
             </label>
 
             <textarea
               id={`module-upload-description-${generatedId}`}
-              rows={4}
+              rows={3}
               maxLength={500}
               placeholder="Summarize what students should learn."
               aria-invalid={Boolean(form.formState.errors.description)}
@@ -433,12 +448,21 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
                   ? `module-upload-description-error-${generatedId}`
                   : undefined
               }
+<<<<<<< HEAD
               className="w-full resize-none rounded-xl border
                   border-slate-200 bg-white px-3 py-3 text-sm
                   leading-6 text-slate-950 outline-none transition
                   placeholder:text-slate-400
                   focus:border-sky-500
                   focus:ring-4 focus:ring-sky-100
+=======
+              className="w-full resize-y rounded-lg border
+                  border-slate-200 bg-white px-3 py-2 text-xs
+                  leading-5 text-slate-900 outline-none transition
+                  placeholder:text-slate-400
+                  focus:border-slate-400
+                  focus:ring-2 focus:ring-slate-100
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                   disabled:cursor-not-allowed
                   disabled:bg-slate-50"
               {...form.register("description")}
@@ -447,17 +471,17 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
             {form.formState.errors.description ? (
               <p
                 id={`module-upload-description-error-${generatedId}`}
-                className="text-sm text-red-600"
+                className="text-xs text-red-600"
               >
                 {form.formState.errors.description.message}
               </p>
             ) : null}
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <label
               htmlFor={`module-upload-file-${generatedId}`}
-              className="text-sm font-medium text-slate-800"
+              className="text-xs font-semibold text-slate-700"
             >
               Module file
             </label>
@@ -480,6 +504,7 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
                       ? `module-upload-file-error-${generatedId}`
                       : `module-upload-file-help-${generatedId}`
                   }
+<<<<<<< HEAD
                   className="block min-h-11 w-full rounded-xl
                       border border-slate-200 bg-white px-3 py-2
                       text-sm text-slate-700
@@ -490,15 +515,24 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
                       focus-visible:outline-2
                       focus-visible:outline-offset-2
                       focus-visible:outline-slate-900
+=======
+                  className="block w-full text-xs text-slate-700
+                      file:mr-3 file:rounded-md file:border-0
+                      file:bg-slate-100 file:px-2.5 file:py-1
+                      file:text-xs file:font-semibold
+                      file:text-slate-700 hover:file:bg-slate-200
+                      focus-visible:outline-none
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                       disabled:cursor-not-allowed
-                      disabled:bg-slate-50"
+                      disabled:bg-slate-50
+                      border border-slate-200 rounded-lg p-1 bg-slate-50/50"
                 />
               )}
             />
 
             <p
               id={`module-upload-file-help-${generatedId}`}
-              className="text-xs leading-5 text-slate-500"
+              className="text-[11px] leading-4 text-slate-400"
             >
               PDF or DOCX, up to 25 MiB.
             </p>
@@ -506,7 +540,7 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
             {form.formState.errors.file ? (
               <p
                 id={`module-upload-file-error-${generatedId}`}
-                className="text-sm text-red-600"
+                className="text-xs text-red-600"
               >
                 {form.formState.errors.file.message}
               </p>
@@ -547,7 +581,7 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
                     disabled:cursor-not-allowed
                     disabled:opacity-60"
               >
-                <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                <ArrowCounterClockwise className="h-4 w-4" aria-hidden="true" />
                 Retry upload
               </button>
             </>
@@ -555,6 +589,7 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
           <button
             type="submit"
             disabled={isBusy || stage === "failed"}
+<<<<<<< HEAD
             className="inline-flex min-h-11 items-center
                 justify-center rounded-xl bg-brand px-5
                 text-sm font-semibold text-white transition
@@ -563,12 +598,14 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
                 focus-visible:outline-slate-900
                 disabled:cursor-not-allowed
                 disabled:opacity-60 cursor-pointer"
+=======
+            className="apple-press inline-flex items-center justify-center rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60 shadow-xs"
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           >
             {isBusy ? (
               <>
-                <Loader2
-                  className="mr-2 h-4 w-4 animate-spin"
-                  aria-hidden="true"
+                <AsteriskLoader
+                  className="mr-1.5 h-3.5 w-3.5"
                 />
                 Uploading...
               </>

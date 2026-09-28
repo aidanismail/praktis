@@ -2,17 +2,21 @@
 
 import Link from "next/link";
 import {
+<<<<<<< HEAD
   AlertCircle,
+=======
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
   BookOpen,
-  ChevronRight,
+  Users,
+  CloudArrowUp,
+  CaretRight,
   FileText,
-  RefreshCw,
-  UploadCloud,
-  Users
-} from "lucide-react";
+  ArrowsClockwise,
+} from "@phosphor-icons/react";
 import { ROUTES } from "@/constants/routes";
 import type { Course } from "@/features/courses/types/course.type";
 import { ApiError } from "@/lib/api/client";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 import { useAdminOverview } from "../hooks/use-admin-overview";
 
 type AdminSectionId = "courses" | "users" | "bulk-import" | "modules";
@@ -66,9 +70,9 @@ const ADMIN_AREAS = [
   },
   {
     id: "bulk-import",
-    label: "import",
+    label: "Bulk import accounts",
     description: "Import student accounts in batch via CSV or Excel",
-    icon: UploadCloud
+    icon: CloudArrowUp
   },
   {
     id: "modules",
@@ -111,18 +115,6 @@ function canRetryError(error: unknown) {
   return !isAccessError(error);
 }
 
-function getToneClass(tone: StatusTone) {
-  switch (tone) {
-    case "positive":
-      return "bg-emerald-500";
-    case "warning":
-      return "bg-amber-500";
-    case "negative":
-      return "bg-red-500";
-    default:
-      return "bg-slate-400";
-  }
-}
 
 function formatCheckedTime(timestamp: number) {
   return new Intl.DateTimeFormat("en-GB", {
@@ -182,32 +174,25 @@ function SummaryMetric({
 
 function InlineDataError({ title, message, onRetry }: InlineDataErrorProps) {
   return (
-    <div role="alert" className="p-6">
-      <div className="flex items-start gap-3">
-        <AlertCircle
-          className="mt-0.5 h-5 w-5 shrink-0 text-red-600"
-          aria-hidden="true"
-        />
-
-        <div>
-          <h4 className="font-semibold text-slate-950">{title}</h4>
-          <p className="mt-1 text-sm leading-6 text-slate-600">{message}</p>
-
+    <div className="p-4">
+      <NotificationBanner variant="error">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
+          <div>
+            <h4 className="font-semibold text-white">{title}</h4>
+            <p className="mt-0.5 text-xs text-slate-300">{message}</p>
+          </div>
           {onRetry ? (
             <button
               type="button"
               onClick={onRetry}
-              className="mt-3 inline-flex items-center gap-2 rounded-lg border
-                border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-
-                slate-800 transition hover:bg-slate-50 focus-visible:outline-2
-                focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+              className="inline-flex items-center gap-1.5 rounded-full bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-700 shrink-0 apple-press"
             >
-              <RefreshCw className="h-4 w-4" aria-hidden="true" />
+              <ArrowsClockwise className="h-3.5 w-3.5" aria-hidden="true" />
               Try again
             </button>
           ) : null}
         </div>
-      </div>
+      </NotificationBanner>
     </div>
   );
 }
@@ -217,13 +202,16 @@ function StatusRow({ label, value, tone }: StatusRowProps) {
     <div className="flex items-center justify-between gap-4 py-3">
       <dt className="text-sm text-slate-500">{label}</dt>
       <dd
-        className="flex items-center gap-2 text-sm font-medium text-slate-
-        900"
+        className={`text-sm font-semibold ${
+          tone === "positive"
+            ? "text-slate-900"
+            : tone === "warning"
+            ? "text-amber-700"
+            : tone === "negative"
+            ? "text-rose-700"
+            : "text-slate-600"
+        }`}
       >
-        <span
-          className={`h-2 w-2 shrink-0 rounded-full ${getToneClass(tone)}`}
-          aria-hidden="true"
-        />
         {value}
       </dd>
     </div>
@@ -307,90 +295,66 @@ export function AdminOverview({
       ) : null}
 
       {accessError ? (
-        <div
-          role="alert"
-          className="rounded-xl border border-red-200 bg-red-50 p-5"
-        >
-          <div className="flex items-start gap-3">
-            <AlertCircle
-              className="mt-0.5 h-5 w-5 shrink-0 text-red-600"
-              aria-hidden="true"
-            />
-
+        <NotificationBanner variant="error">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full">
             <div>
-              <h3 className="font-semibold text-red-950">
+              <h3 className="font-semibold text-white">
                 {accessError.status === 401
                   ? "Your session expired"
                   : "Access restricted"}
               </h3>
 
-              <p className="mt-1 text-sm leading-6 text-red-800">
+              <p className="mt-0.5 text-xs text-slate-300">
                 {accessError.status === 401
                   ? "Please sign in again to access administrative data."
                   : "This section requires a Superadmin account."}
               </p>
-
-              {accessError.status === 401 ? (
-                <Link
-                  href={ROUTES.login}
-                  className="mt-3 inline-flex rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
-                >
-                  Sign in
-                </Link>
-              ) : null}
             </div>
+
+            {accessError.status === 401 ? (
+              <Link
+                href={ROUTES.login}
+                className="inline-flex rounded-full bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-700 shrink-0 apple-press"
+              >
+                Sign in
+              </Link>
+            ) : null}
           </div>
-        </div>
+        </NotificationBanner>
       ) : null}
 
       {hasRefreshError && !accessError ? (
-        <div
-          role="alert"
-          className="flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-950 sm:flex-row sm:items-center sm:justify-between"
-        >
-          <p className="text-sm leading-6">
-            Couldn&apos;t refresh some data. Showing the latest saved information.
-          </p>
+        <NotificationBanner variant="warning">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between w-full">
+            <span>Couldn&apos;t refresh some data. Showing the latest saved information.</span>
 
-          <button
-            type="button"
-            onClick={() => void refreshAll()}
-            disabled={isRefreshing}
-            className="shrink-0 text-sm font-semibold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-800 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            Retry refresh
-          </button>
-        </div>
+            <button
+              type="button"
+              onClick={() => void refreshAll()}
+              disabled={isRefreshing}
+              className="inline-flex items-center rounded-full bg-slate-800 border border-slate-700 px-3 py-1 text-xs font-semibold text-white hover:bg-slate-700 transition disabled:opacity-60 shrink-0 apple-press"
+            >
+              Retry refresh
+            </button>
+          </div>
+        </NotificationBanner>
       ) : null}
 
       <section aria-labelledby="operational-summary-heading">
         <div
           className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
         >
-          <div>
-            <h3
-              id="operational-summary-heading"
-              className="text-lg font-semibold text-slate-950"
-            >
-              Operational summary
-            </h3>
-            <p className="mt-1 text-sm leading-6 text-slate-500">
-              A quick snapshot of active courses and community members.
-            </p>
-          </div>
-
           <button
             type="button"
             onClick={() => void refreshAll()}
             disabled={isRefreshing}
-            className="inline-flex min-h-10 items-center justify-center gap-2
-              self-start rounded-lg border border-slate-300 bg-white px-4 py-2
-              text-sm font-semibold text-slate-800 transition hover:bg-slate-50
-              focus-visible:outline-2 focus-visible:outline-offset-2 focus-
-              visible:outline-slate-900 disabled:cursor-not-allowed
+            className="apple-press inline-flex min-h-10 items-center justify-center gap-2
+              self-start rounded-full border border-slate-200 bg-white px-4 py-2
+              text-sm font-semibold text-slate-700 transition hover:bg-slate-50
+              focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed
               disabled:opacity-60 sm:self-auto"
           >
-            <RefreshCw
+            <ArrowsClockwise
               className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
               aria-hidden="true"
             />
@@ -462,7 +426,7 @@ export function AdminOverview({
                 className="hidden shrink-0 items-center gap-1 text-sm font-semibold text-slate-700 underline-offset-4 hover:text-slate-950 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 sm:inline-flex"
               >
                 View all
-                <ChevronRight className="h-4 w-4" aria-hidden="true" />
+                <CaretRight className="h-4 w-4" aria-hidden="true" />
               </button>
             ) : null}
           </div>
@@ -507,7 +471,7 @@ export function AdminOverview({
                 <button
                   type="button"
                   onClick={() => onNavigateToNavItem("courses")}
-                  className="mt-4 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+                  className="apple-press mt-4 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
                 >
                   Open Course Management
                 </button>
@@ -527,7 +491,7 @@ export function AdminOverview({
                 <button
                   type="button"
                   onClick={() => onNavigateToNavItem("courses")}
-                  className="mt-4 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+                  className="apple-press mt-4 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
                 >
                   View historical courses
                 </button>
@@ -573,7 +537,7 @@ export function AdminOverview({
                           </span>
                         </span>
 
-                        <ChevronRight
+                        <CaretRight
                           className="h-4 w-4 shrink-0 text-slate-400 transition
                             group-hover:translate-x-0.5 group-hover:text-slate-
                             700"
@@ -647,10 +611,6 @@ export function AdminOverview({
           ) : health ? (
             <>
               <div className="mt-6 flex items-center gap-3">
-                <span
-                  className={`h-3 w-3 rounded-full ${getToneClass(platformTone)}`}
-                  aria-hidden="true"
-                />
                 <span className="text-xl font-semibold text-slate-950">
                   {platformLabel}
                 </span>
@@ -775,7 +735,7 @@ export function AdminOverview({
                   </span>
                 </span>
 
-                <ChevronRight
+                <CaretRight
                   className="h-4 w-4 shrink-0 text-slate-400 transition group-
                     hover:translate-x-0.5 group-hover:text-slate-700"
                   aria-hidden="true"

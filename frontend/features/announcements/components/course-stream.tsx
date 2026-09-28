@@ -1,7 +1,12 @@
 "use client";
 
 import Link from "next/link";
+<<<<<<< HEAD
 import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
+=======
+import { WarningCircle, ArrowsClockwise } from "@phosphor-icons/react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useCourseAnnouncements } from "../hooks/use-course-announcements";
@@ -36,7 +41,7 @@ export function CourseStream({ userId, courseId, viewerRole }: CourseStreamProps
         aria-live="polite"
         className="flex min-h-56 items-center justify-center rounded-3xl border border-slate-200 bg-white"
       >
-        <Loader2 className="h-5 w-5 animate-spin text-slate-900" aria-hidden="true" />
+        <AsteriskLoader className="h-5 w-5 text-slate-900" aria-hidden="true" />
         <span className="ml-3 text-sm text-slate-600">Loading announcements...</span>
       </div>
     );
@@ -60,7 +65,7 @@ export function CourseStream({ userId, courseId, viewerRole }: CourseStreamProps
     return (
       <div role="alert" className="rounded-3xl border border-red-200 bg-red-50 p-6">
         <div className="flex items-start gap-3">
-          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" aria-hidden="true" />
+          <WarningCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" aria-hidden="true" />
           <div>
             <h2 className="font-semibold text-red-950">{title}</h2>
             <p className="mt-1 text-sm leading-6 text-red-800">{description}</p>
@@ -87,7 +92,7 @@ export function CourseStream({ userId, courseId, viewerRole }: CourseStreamProps
                 disabled={isFetching}
                 className="mt-4 inline-flex items-center gap-2 rounded-xl bg-red-700 px-4 py-2 text-sm font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <RefreshCw
+                <ArrowsClockwise
                   className={isFetching ? "h-4 w-4 animate-spin" : "h-4 w-4"}
                   aria-hidden="true"
                 />
@@ -108,16 +113,24 @@ export function CourseStream({ userId, courseId, viewerRole }: CourseStreamProps
 
       <div className="mt-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="text-xl font-semibold text-slate-950">Course Stream</h2>
-          <p className="mt-1 text-sm text-slate-600">
+          <h2 className="text-base sm:text-lg font-bold tracking-tight text-slate-950">
+            Course stream
+            <span className="ml-2 text-xs font-normal text-slate-500 tabular-nums">
+              ({announcements.length})
+            </span>
+          </h2>
+          <p className="mt-0.5 text-xs text-slate-500">
             {viewerRole === "asprak"
               ? "Share notes, updates, and reminders. Pinned posts stay right at the top."
               : "Stay in the loop with updates and reminders from your instructors."}
           </p>
         </div>
+<<<<<<< HEAD
         <span className="text-xs font-medium text-slate-500" aria-live="polite">
           {announcements.length} {announcements.length === 1 ? "announcement" : "announcements"}
         </span>
+=======
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
       </div>
 
       {isFetching ? (
@@ -127,8 +140,13 @@ export function CourseStream({ userId, courseId, viewerRole }: CourseStreamProps
       ) : null}
 
       {announcements.length === 0 ? (
+<<<<<<< HEAD
         <div role="status" className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
           <h3 className="text-base font-semibold text-slate-950">No announcements yet</h3>
+=======
+        <div role="status" className="mt-5 rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
+          <h3 className="mt-3 font-semibold text-slate-950">No announcements yet</h3>
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           <p className="mt-1 text-sm text-slate-600">
             {viewerRole === "asprak"
               ? "Got an update or reminder for the class? Post the first announcement above."

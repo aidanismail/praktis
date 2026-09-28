@@ -1,23 +1,34 @@
 "use client";
 
+<<<<<<< HEAD
 import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
+=======
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useCourseAssignments } from "../hooks/use-course-assignments";
 import { AssignmentCard } from "./assignment-card";
 import { AssignmentComposer } from "./assignment-composer";
+import {
+  WarningCircle,
+  Clipboard,
+  ArrowsClockwise
+} from "@phosphor-icons/react";
 
 type CourseAssignmentsProps = {
   courseId: string;
   userId: string;
   viewerRole: "asprak" | "praktikan";
+  onSelectAssignment?: (id: string) => void;
 };
 
 export function CourseAssignments({
   userId,
   courseId,
-  viewerRole
+  viewerRole,
+  onSelectAssignment
 }: CourseAssignmentsProps) {
   const {
     data: assignments = [],
@@ -41,25 +52,25 @@ export function CourseAssignments({
       <div
         role="status"
         aria-live="polite"
-        className="flex min-h-56 items-center justify-center rounded-3xl border border-slate-200 bg-white"
+        className="flex min-h-56 items-center justify-center rounded-2xl border border-slate-200 bg-white"
       >
-        <Loader2
-          className="h-5 w-5 animate-spin text-slate-900"
+        <AsteriskLoader
+          className="h-5 w-5 text-slate-900"
           aria-hidden="true"
         />
-        <span className="ml-3 text-sm text-slate-600">
-          Getting assignments ready...
+        <span className="ml-3 text-xs font-medium text-slate-600">
+          Loading assignments...
         </span>
       </div>
     );
   }
 
   if (isError) {
-    let title = "Couldn't load assignments";
-    let description = "Couldn't reach the server. Let's try that again.";
+    let title = "Unable to load assignments";
+    let description = "Unable to connect to the server. Please try again.";
 
     if (isUnauthorized) {
-      title = "You've been signed out";
+      title = "Your session has expired";
       description = "Please sign in again to continue.";
     } else if (isForbidden) {
       title = "Access restricted";
@@ -73,10 +84,10 @@ export function CourseAssignments({
     return (
       <div
         role="alert"
-        className="rounded-3xl border border-red-200 bg-red-50 p-6"
+        className="rounded-2xl border border-red-200 bg-red-50 p-6"
       >
         <div className="flex items-start gap-3">
-          <AlertCircle
+          <WarningCircle
             className="mt-0.5 h-5 w-5 shrink-0 text-red-600"
             aria-hidden="true"
           />
@@ -88,7 +99,7 @@ export function CourseAssignments({
             {isUnauthorized ? (
               <Link
                 href={ROUTES.login}
-                className="mt-4 inline-flex rounded-xl bg-red-700 px-4 py-2 text-sm font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
+                className="mt-4 inline-flex rounded-full bg-red-700 px-4 py-2 text-xs font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
               >
                 Go to sign in
               </Link>
@@ -97,7 +108,7 @@ export function CourseAssignments({
             {isForbidden || isNotFound ? (
               <Link
                 href={ROUTES.dashboard}
-                className="mt-4 inline-flex text-sm font-semibold text-red-900 underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
+                className="mt-4 inline-flex text-xs font-semibold text-red-900 underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
               >
                 Return to dashboard
               </Link>
@@ -108,10 +119,10 @@ export function CourseAssignments({
                 type="button"
                 onClick={() => void refetch()}
                 disabled={isFetching}
-                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-red-700 px-4 py-2 text-sm font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-red-700 px-4 py-2 text-xs font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <RefreshCw
-                  className={isFetching ? "h-4 w-4 animate-spin" : "h-4 w-4"}
+                <ArrowsClockwise
+                  className={isFetching ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"}
                   aria-hidden="true"
                 />
                 {isFetching ? "Retrying..." : "Try again"}
@@ -123,59 +134,137 @@ export function CourseAssignments({
     );
   }
 
-  return (
-    <div aria-busy={isFetching}>
-      {viewerRole === "asprak" ? (
-        <AssignmentComposer userId={userId} courseId={courseId} />
-      ) : null}
+  // 2-column layout for Asprak (List left, Create right); clean single-column for Praktikan
+  if (viewerRole === "asprak") {
+    return (
+      <div aria-busy={isFetching}>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+          {/* Left Column: Assessment list */}
+          <div className="lg:col-span-7 space-y-4">
+            <div className="flex items-baseline justify-between border-b border-slate-200/80 pb-3">
+              <div>
+                <h2 className="text-base sm:text-lg font-bold tracking-tight text-slate-950">
+                  Assignments
+                  <span className="ml-2 text-xs font-normal text-slate-500 tabular-nums">
+                    ({assignments.length})
+                  </span>
+                </h2>
+                <p className="mt-0.5 text-xs text-slate-500">
+                  Manage prompts, deadlines, and submissions.
+                </p>
+              </div>
 
-      <div
-        className={`${viewerRole === "asprak" ? "mt-6 " : ""}flex flex-wrap items-end justify-between gap-3`}
-      >
+              {isFetching ? (
+                <span role="status" className="text-xs text-slate-400 font-medium">
+                  Updating...
+                </span>
+              ) : null}
+            </div>
+
+            {assignments.length === 0 ? (
+              <div
+                role="status"
+                className="rounded-2xl border border-dashed border-slate-200 bg-white/70 p-8 text-center"
+              >
+                <Clipboard
+                  className="mx-auto h-7 w-7 text-slate-300"
+                  aria-hidden="true"
+                />
+                <h3 className="mt-2 text-sm font-semibold text-slate-900">
+                  No assignments yet
+                </h3>
+                <p className="mt-1 text-xs text-slate-500">
+                  Use the create panel on the right to draft your first assignment.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {assignments.map((assignment) => (
+                  <AssignmentCard
+                    key={assignment.id}
+                    assignment={assignment}
+                    viewerRole={viewerRole}
+                    userId={userId}
+                    onSelectAssignment={onSelectAssignment}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Right Column: Create assignment panel (sticky) */}
+          <div className="lg:col-span-5 lg:sticky lg:top-4">
+            <AssignmentComposer userId={userId} courseId={courseId} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Praktikan layout
+  return (
+    <div aria-busy={isFetching} className="max-w-3xl space-y-4">
+      <div className="flex items-baseline justify-between border-b border-slate-200/80 pb-3">
         <div>
-          <h2 className="text-xl font-semibold text-slate-950">Assignments</h2>
-          <p className="mt-1 text-sm text-slate-600">
-            {viewerRole === "asprak"
-              ? "Manage drafts, deadlines, and submissions across the class."
-              : "Track upcoming tasks, instructions, and your submission progress."}
+          <h2 className="text-base sm:text-lg font-bold tracking-tight text-slate-950">
+            Assignments
+            <span className="ml-2 text-xs font-normal text-slate-500 tabular-nums">
+              ({assignments.length})
+            </span>
+          </h2>
+          <p className="mt-0.5 text-xs text-slate-500">
+            Track upcoming tasks, instructions, and your submission progress.
           </p>
         </div>
 
+<<<<<<< HEAD
         <span
           aria-live="polite"
           className="text-xs font-medium text-slate-500"
         >
           {assignments.length} {assignments.length === 1 ? "assignment" : "assignments"}
         </span>
+=======
+        {isFetching ? (
+          <span role="status" className="text-xs text-slate-400 font-medium">
+            Updating...
+          </span>
+        ) : null}
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
       </div>
-
-      {isFetching ? (
-        <p role="status" className="mt-3 text-sm text-slate-500">
-          Refreshing assignments...
-        </p>
-      ) : null}
 
       {assignments.length === 0 ? (
         <div
           role="status"
+<<<<<<< HEAD
           className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center"
         >
           <h3 className="text-base font-semibold text-slate-950">
             No assignments yet
+=======
+          className="rounded-2xl border border-dashed border-slate-200 bg-white/70 p-8 text-center"
+        >
+          <Clipboard
+            className="mx-auto h-7 w-7 text-slate-300"
+            aria-hidden="true"
+          />
+          <h3 className="mt-2 text-sm font-semibold text-slate-900">
+            No assignments posted yet
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           </h3>
-          <p className="mt-1 text-sm text-slate-600">
-            {viewerRole === "asprak"
-              ? "Ready to create a task? Use the form above to add an assignment."
-              : "No assignments posted yet. You're all caught up!"}
+          <p className="mt-1 text-xs text-slate-500">
+            No assignments have been published for this course yet.
           </p>
         </div>
       ) : (
-        <div className="mt-5 space-y-5">
+        <div className="space-y-3">
           {assignments.map((assignment) => (
             <AssignmentCard
               key={assignment.id}
               assignment={assignment}
               viewerRole={viewerRole}
+              userId={userId}
+              onSelectAssignment={onSelectAssignment}
             />
           ))}
         </div>

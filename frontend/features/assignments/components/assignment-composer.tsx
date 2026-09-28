@@ -1,7 +1,11 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+<<<<<<< HEAD
 import { Loader2 } from "lucide-react";
+=======
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import { useForm, useWatch } from "react-hook-form";
 import { ApiError } from "@/lib/api/client";
 import { useCreateCourseAssignment } from "../hooks/use-course-assignments";
@@ -11,6 +15,7 @@ import {
 } from "../schemas/assignment.schema";
 import { ASSIGNMENT_FILE_TYPES } from "../types/assignment.type";
 import { AssignmentFormFields } from "./assignment-form-fields";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 
 type AssignmentComposerProps = {
   userId: string;
@@ -94,61 +99,75 @@ export function AssignmentComposer({
   return (
     <section
       aria-labelledby="assignment-composer-heading"
+<<<<<<< HEAD
       className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs"
+=======
+      className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xs"
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
     >
       <div>
         <h2
           id="assignment-composer-heading"
+<<<<<<< HEAD
           className="text-lg font-semibold text-slate-950"
         >
           Create an assignment
         </h2>
         <p className="mt-1 text-sm leading-6 text-slate-600">
           Draft your prompt or release it directly to students.
+=======
+          className="text-sm font-bold tracking-tight text-slate-950"
+        >
+          Create assignment
+        </h2>
+
+        <p className="mt-0.5 text-xs text-slate-500">
+          Draft your task prompt or release directly to students.
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
         </p>
       </div>
 
       <form
         noValidate
         onSubmit={form.handleSubmit(onSubmit)}
-        className="mt-5 space-y-5"
+        className="mt-4 space-y-3.5"
         aria-busy={mutation.isPending}
       >
         {mutation.isError ? (
-          <p
-            role="alert"
-            className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"
-          >
-            {getCreateErrorMessage(mutation.error)}
-          </p>
+          <NotificationBanner
+            variant="error"
+            message={getCreateErrorMessage(mutation.error)}
+          />
         ) : null}
 
         {mutation.isSuccess ? (
-          <p
-            role="status"
-            className="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
-          >
-            Assignment created!
-          </p>
+          <NotificationBanner
+            variant="success"
+            message="Assignment created!"
+          />
         ) : null}
 
         <AssignmentFormFields
           form={form}
           idPrefix="assignment-create"
           disabled={mutation.isPending}
+          compact
         />
 
-        <div className="flex justify-end">
+        <div className="flex justify-end pt-1">
           <button
             type="submit"
             disabled={mutation.isPending}
+<<<<<<< HEAD
             className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand px-5 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+=======
+            className="apple-press inline-flex items-center justify-center rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60 shadow-xs"
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           >
             {mutation.isPending ? (
               <>
-                <Loader2
-                  className="mr-2 h-4 w-4 animate-spin"
-                  aria-hidden="true"
+                <AsteriskLoader
+                  className="mr-1.5 h-3.5 w-3.5"
                 />
                 Creating...
               </>

@@ -1,15 +1,25 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
+<<<<<<< HEAD
 import { AlertCircle, RefreshCw } from "lucide-react";
+=======
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import { getCourseDetailRoute, ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useAssignedCourses } from "../hooks/use-assigned-courses";
 import type { Course } from "../types/course.type";
 import { AsprakCourseCard } from "./asprak-course-card";
+import { sortCourses } from "../utils/sort-courses";
+import {
+  WarningCircle,
+  ArrowsClockwise
+} from "@phosphor-icons/react";
 
 type AsprakCourseListProps = {
   userId: string;
+  onNavigateToCourse?: (courseId: string) => void;
 };
 
 type CourseGroupProps = {
@@ -17,23 +27,16 @@ type CourseGroupProps = {
   title: string;
   description: string;
   courses: Course[];
+  onNavigateToCourse?: (courseId: string) => void;
 };
 
-function sortCourses(courses: Course[]) {
-  return [...courses].sort((first, second) => {
-    const yearComparison = second.academic_year.localeCompare(
-      first.academic_year
-    );
-
-    if (yearComparison !== 0) {
-      return yearComparison;
-    }
-
-    return first.code.localeCompare(second.code);
-  });
-}
-
-function CourseGroup({ id, title, description, courses }: CourseGroupProps) {
+function CourseGroup({
+  id,
+  title,
+  description,
+  courses,
+  onNavigateToCourse
+}: CourseGroupProps) {
   if (courses.length === 0) {
     return null;
   }
@@ -52,10 +55,14 @@ function CourseGroup({ id, title, description, courses }: CourseGroupProps) {
           <li key={course.id}>
             <Link
               href={getCourseDetailRoute(course.id)}
-              aria-label={`Open ${course.code} ${course.name},
-  ${course.academic_year} semester ${course.semester}`}
-              className="block h-full rounded-2xl transition
-  hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+              onClick={(e) => {
+                if (onNavigateToCourse) {
+                  e.preventDefault();
+                  onNavigateToCourse(course.id);
+                }
+              }}
+              aria-label={`Open ${course.code} ${course.name}, ${course.academic_year} semester ${course.semester}`}
+              className="block h-full rounded-2xl transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
             >
               <AsprakCourseCard course={course} />
             </Link>
@@ -83,7 +90,10 @@ function CourseListLoading() {
   );
 }
 
-export function AsprakCourseList({ userId }: AsprakCourseListProps) {
+export function AsprakCourseList({
+  userId,
+  onNavigateToCourse
+}: AsprakCourseListProps) {
   const {
     data: courses = [],
     error,
@@ -92,6 +102,15 @@ export function AsprakCourseList({ userId }: AsprakCourseListProps) {
     isPending,
     refetch
   } = useAssignedCourses(userId);
+
+  const activeCourses = useMemo(
+    () => sortCourses(courses.filter((course) => course.is_active)),
+    [courses]
+  );
+  const historicalCourses = useMemo(
+    () => sortCourses(courses.filter((course) => !course.is_active)),
+    [courses]
+  );
 
   if (isPending) {
     return <CourseListLoading />;
@@ -107,7 +126,7 @@ export function AsprakCourseList({ userId }: AsprakCourseListProps) {
         className="rounded-2xl border border-red-200 bg-red-50 p-6"
       >
         <div className="flex items-start gap-3">
-          <AlertCircle
+          <WarningCircle
             className="mt-0.5 h-5 w-5 shrink-0 text-red-600"
             aria-hidden="true"
           />
@@ -118,15 +137,15 @@ export function AsprakCourseList({ userId }: AsprakCourseListProps) {
                 ? "You've been signed out"
                 : isForbidden
                   ? "Access restricted"
-                  : "Couldn't load your classes"}
+                  : "Unable to load classes"}
             </h3>
 
             <p className="mt-2 text-sm leading-6 text-red-800">
               {isUnauthorized
                 ? "Please sign in again to view your assigned classes."
                 : isForbidden
-                  ? "You don't have instructor access to these classes yet. Check in with your admin."
-                  : "Couldn't reach the server. Let's try that again."}
+                  ? "You do not have instructor access to these classes. Please contact an administrator."
+                  : "Unable to reach the server. Please check your connection and try again."}
             </p>
 
             {isUnauthorized ? (
@@ -145,7 +164,7 @@ export function AsprakCourseList({ userId }: AsprakCourseListProps) {
                 disabled={isFetching}
                 className="mt-4 inline-flex items-center gap-2 rounded-xl bg-red-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <RefreshCw
+                <ArrowsClockwise
                   className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`}
                   aria-hidden="true"
                 />
@@ -164,30 +183,28 @@ export function AsprakCourseList({ userId }: AsprakCourseListProps) {
         role="status"
         className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center"
       >
+<<<<<<< HEAD
         <h3 className="text-base font-semibold text-slate-950">
+=======
+        <h3 className="font-semibold text-slate-950">
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           No classes assigned yet
         </h3>
         <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-500">
-          Your account doesn&apos;t have any classes assigned for this term yet. Check with your admin if this looks unexpected.
+          Your account does not have any classes assigned for this term yet. Please contact an administrator if you believe this is an error.
         </p>
       </div>
     );
   }
-
-  const activeCourses = sortCourses(
-    courses.filter((course) => course.is_active)
-  );
-  const historicalCourses = sortCourses(
-    courses.filter((course) => !course.is_active)
-  );
 
   return (
     <div className="space-y-8">
       <CourseGroup
         id="active-practicum-classes"
         title="Active classes"
-        description="Classes currently in session and ready for grading, attendance, and coursework."
+        description="Classes currently in session."
         courses={activeCourses}
+        onNavigateToCourse={onNavigateToCourse}
       />
 
       <CourseGroup
@@ -195,6 +212,7 @@ export function AsprakCourseList({ userId }: AsprakCourseListProps) {
         title="Past classes"
         description="Previous course terms kept for records and reference."
         courses={historicalCourses}
+        onNavigateToCourse={onNavigateToCourse}
       />
     </div>
   );

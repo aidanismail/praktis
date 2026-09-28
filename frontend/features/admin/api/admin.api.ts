@@ -128,6 +128,18 @@ export async function resetUserPassword(userId: string, newPassword?: string): P
   });
 }
 
+export async function deactivateUser(userId: string): Promise<{ message: string }> {
+  return apiClient<{ message: string }>(API_ENDPOINTS.auth.deleteUser(userId), {
+    method: "DELETE",
+  });
+}
+
+export async function reactivateUser(userId: string): Promise<{ message: string }> {
+  return apiClient<{ message: string }>(API_ENDPOINTS.auth.reactivateUser(userId), {
+    method: "POST",
+  });
+}
+
 export async function fetchAdminModules(): Promise<AdminModuleItem[]> {
   return apiClient<AdminModuleItem[]>(API_ENDPOINTS.modules.list);
 }

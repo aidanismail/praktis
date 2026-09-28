@@ -1,7 +1,16 @@
 import type { User } from "@/types/user.type";
+import type { Course } from "@/features/courses/types/course.type";
 import type { DashboardNavItem } from "../constants/dashboard-navigation";
 import { DashboardPlaceholderCard } from "./dashboard-placeholder-card";
 import { AsprakCourseList } from "@/features/courses/components/asprak-course-list";
+<<<<<<< HEAD
+=======
+import { AsprakCourseOverview } from "@/features/courses/components/asprak-course-overview";
+import {
+  AsprakCourseWorkspace,
+  type AsprakWorkspaceTab
+} from "@/features/courses/components/asprak-course-workspace";
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import { AdminOverview } from "@/features/admin/components/admin-overview";
 import { UserManagement } from "@/features/admin/components/user-management";
 import { BulkImportForm } from "@/features/admin/components/bulk-import-form";
@@ -10,22 +19,37 @@ import { AttendanceReportsView } from "@/features/admin/components/attendance-re
 import { GradeExportsView } from "@/features/admin/components/grade-exports-view";
 import { CourseManagement } from "@/features/admin/components/course-management";
 import { PraktikanCourseList } from "@/features/courses/components/praktikan-course-list";
+<<<<<<< HEAD
+=======
+import {
+  PraktikanCourseWorkspace,
+  type PraktikanWorkspaceTab
+} from "@/features/courses/components/praktikan-course-workspace";
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import { PraktikanAttendanceHistory } from "@/features/attendance/components/praktikan-attendance-history";
 import { PraktikanGradeHistory } from "@/features/grades/components/praktikan-grade-history";
-import { PraktikanProfile } from "@/features/profile/components/praktikan-profile";
+import { UserProfile } from "@/features/profile/components/user-profile";
 
 type RoleDashboardProps = {
   user: User;
   activeItem: DashboardNavItem;
   onNavigateToCourse: (courseId: string) => void;
   onNavigateToNavItem: (itemId: string) => void;
+  activeCourse?: Course | null;
+  workspaceTab?: string;
+  assignmentId?: string | null;
+  sessionId?: string | null;
 };
 
 export function RoleDashboard({
   user,
   activeItem,
   onNavigateToCourse,
-  onNavigateToNavItem
+  onNavigateToNavItem,
+  activeCourse,
+  workspaceTab,
+  assignmentId,
+  sessionId
 }: RoleDashboardProps) {
   const renderContent = () => {
     if (user.role === "superadmin") {
@@ -61,6 +85,7 @@ export function RoleDashboard({
     }
 
     if (user.role === "asprak") {
+<<<<<<< HEAD
       if (activeItem.id === "profile") {
         return <PraktikanProfile user={user} />;
       }
@@ -68,8 +93,65 @@ export function RoleDashboard({
     }
 
     if (user.role === "praktikan") {
+=======
+      if (activeItem.id === "overview") {
+        return (
+          <AsprakCourseOverview
+            userId={user.id}
+            onNavigateToCourse={onNavigateToCourse}
+          />
+        );
+      }
+
+>>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
       if (activeItem.id === "classes") {
-        return <PraktikanCourseList userId={user.id} />;
+        if (activeCourse) {
+          return (
+            <AsprakCourseWorkspace
+              userId={user.id}
+              course={activeCourse}
+              workspaceTab={
+                (workspaceTab as AsprakWorkspaceTab) || "stream"
+              }
+              assignmentId={assignmentId}
+              sessionId={sessionId}
+            />
+          );
+        }
+        return (
+          <AsprakCourseList
+            userId={user.id}
+            onNavigateToCourse={onNavigateToCourse}
+          />
+        );
+      }
+
+      if (activeItem.id === "profile") {
+        return <UserProfile user={user} />;
+      }
+    }
+
+    if (user.role === "praktikan") {
+      if (activeItem.id === "classes") {
+        if (activeCourse) {
+          return (
+            <PraktikanCourseWorkspace
+              user={user}
+              course={activeCourse}
+              workspaceTab={
+                (workspaceTab as PraktikanWorkspaceTab) || "stream"
+              }
+              assignmentId={assignmentId}
+              sessionId={sessionId}
+            />
+          );
+        }
+        return (
+          <PraktikanCourseList
+            userId={user.id}
+            onNavigateToCourse={onNavigateToCourse}
+          />
+        );
       }
 
       if (activeItem.id === "attendance") {
@@ -81,7 +163,7 @@ export function RoleDashboard({
       }
 
       if (activeItem.id === "profile") {
-        return <PraktikanProfile user={user} />;
+        return <UserProfile user={user} />;
       }
     }
 
@@ -93,7 +175,5 @@ export function RoleDashboard({
     );
   };
 
-  return (
-    <section className="space-y-6 max-w-7xl mx-auto">{renderContent()}</section>
-  );
+  return <>{renderContent()}</>;
 }

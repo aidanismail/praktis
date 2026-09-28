@@ -91,3 +91,13 @@ export function gradeAssignmentSubmission(
     }
   );
 }
+
+export function deleteCourseAssignment(courseId: string, assignmentId: string) {
+  return apiClient<void>(
+    API_ENDPOINTS.assignments.delete(courseId, assignmentId),
+    {
+      method: "DELETE"
+    }
+  );
+}
+
