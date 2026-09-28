@@ -33,7 +33,6 @@ export function AsprakCourseCard({ course }: AsprakCourseCardProps) {
         )}
 
         <div className="relative z-10">
-<<<<<<< HEAD
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-white/90 drop-shadow-xs">
               {course.code}
@@ -43,16 +42,6 @@ export function AsprakCourseCard({ course }: AsprakCourseCardProps) {
                 Archived
               </span>
             ) : null}
-=======
-          <div className="flex items-center gap-2 text-[11px]">
-            <span className="font-bold text-white uppercase tracking-wider text-[10px] drop-shadow-xs">
-              {course.code}
-            </span>
-            <span className="text-white/40" aria-hidden="true">·</span>
-            <span className="font-medium text-white/80 text-[11px]">
-              {statusLabel}
-            </span>
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           </div>
 
           <h3 className="mt-2 text-lg font-bold text-white line-clamp-1 drop-shadow-xs">
@@ -62,11 +51,7 @@ export function AsprakCourseCard({ course }: AsprakCourseCardProps) {
       </div>
 
       {/* Card Body & Footer */}
-<<<<<<< HEAD
       <div className="p-4 flex items-center justify-between border-t border-slate-100 text-xs text-slate-600 bg-white">
-=======
-      <div className="p-4 flex flex-wrap gap-x-5 gap-y-2 border-t border-slate-100 text-xs text-slate-600 bg-white">
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
         <span className="font-medium text-slate-700">
           Academic year {course.academic_year}
         </span>

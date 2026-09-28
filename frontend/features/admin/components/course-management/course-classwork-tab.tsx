@@ -1,21 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-<<<<<<< HEAD
-import {
-  Download,
-  Eye,
-  FileCheck,
-  Pencil,
-  Plus,
-  Trash2,
-  UploadCloud,
-  Users,
-  X,
-} from "lucide-react";
-=======
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import type {
   Course,
   Assignment,
@@ -204,14 +190,9 @@ export function CourseClassworkTab({
       {/* Section 1: Assignments */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-<<<<<<< HEAD
-          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-            Assignments & Tasks ({assignments.length})
-=======
           <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
             <Trophy className="w-4 h-4 text-slate-700" />
             <span>Assignments & Tasks ({assignments.length})</span>
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           </h4>
         </div>
 
@@ -226,20 +207,6 @@ export function CourseClassworkTab({
                 key={a.id}
                 className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 hover:border-slate-300 hover:shadow-xs transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
               >
-<<<<<<< HEAD
-                <div>
-                  <h4 className="font-semibold text-sm text-slate-900">{a.title}</h4>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    {a.due_date
-                      ? `Due ${new Date(a.due_date).toLocaleDateString("en", {
-                          month: "short",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit"
-                        })}`
-                      : "No due date"}
-                  </p>
-=======
                 <div className="flex items-center gap-3.5">
                   <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-800 shrink-0">
                     <Trophy className="w-5 h-5" />
@@ -252,7 +219,6 @@ export function CourseClassworkTab({
                         : "No due date"}
                     </p>
                   </div>
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                 </div>
 
                 <div className="flex items-center gap-2 self-end sm:self-center">
@@ -267,11 +233,7 @@ export function CourseClassworkTab({
                   <button
                     type="button"
                     onClick={() => onOpenEditAssignment(a)}
-<<<<<<< HEAD
-                    className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg text-xs transition-colors"
-=======
                     className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg text-xs apple-press transition-colors"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                     title="Edit assignment"
                     aria-label="Edit assignment"
                   >
@@ -280,11 +242,7 @@ export function CourseClassworkTab({
                   <button
                     type="button"
                     onClick={() => onDeleteAssignment(a.id)}
-<<<<<<< HEAD
-                    className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg text-xs transition-colors"
-=======
                     className="p-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg text-xs apple-press transition-colors"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                     title="Delete assignment"
                     aria-label="Delete assignment"
                   >
@@ -353,9 +311,6 @@ export function CourseClassworkTab({
                       </a>
                     </>
                   )}
-<<<<<<< HEAD
-                  <span className="text-xs font-medium text-slate-500">
-=======
                   <span
                     className={`text-xs font-semibold ${
                       m.is_published
@@ -363,17 +318,12 @@ export function CourseClassworkTab({
                         : "text-amber-700"
                     }`}
                   >
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                     {m.is_published ? "Published" : "Draft"}
                   </span>
                   <button
                     type="button"
                     onClick={() => onDeleteModule(m.id)}
-<<<<<<< HEAD
-                    className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg text-xs transition-colors"
-=======
                     className="p-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg text-xs apple-press transition-colors"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                     title="Delete module"
                     aria-label="Delete module"
                   >

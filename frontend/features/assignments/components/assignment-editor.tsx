@@ -186,11 +186,7 @@ export function AssignmentEditor({
             onClick={startEditing}
             aria-expanded={false}
             aria-controls="assignment-edit-form"
-<<<<<<< HEAD
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
-=======
             className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           >
             Edit assignment
           </button>
@@ -240,11 +236,7 @@ export function AssignmentEditor({
             <button
               type="submit"
               disabled={mutation.isPending}
-<<<<<<< HEAD
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand px-5 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
-=======
               className="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-5 text-sm font-semibold text-white shadow-xs transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
             >
               {mutation.isPending ? (
                 <>

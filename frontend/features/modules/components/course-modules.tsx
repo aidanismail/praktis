@@ -1,25 +1,17 @@
 "use client";
 
 import Link from "next/link";
-<<<<<<< HEAD
-import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
-=======
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useCourseModules } from "../hooks/use-course-modules";
 import { ModuleCard } from "./module-card";
 import { ModuleUploadForm } from "./module-upload-form";
-<<<<<<< HEAD
-
-=======
 import {
   WarningCircleIcon,
   BookOpenIcon,
   ArrowsClockwiseIcon
 } from "@phosphor-icons/react";
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 type CourseModulesProps = {
   userId: string;
   courseId: string;
@@ -73,16 +65,6 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
     <section aria-labelledby="course-modules-heading" aria-busy={isFetching}>
       <div className="flex items-baseline justify-between border-b border-slate-200/80 pb-3">
         <div>
-<<<<<<< HEAD
-          <p
-            className="text-xs font-semibold uppercase tracking-wider
-            text-slate-500"
-          >
-            Learning materials
-          </p>
-
-=======
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           <h2
             id="course-modules-heading"
             className="text-base sm:text-lg font-bold tracking-tight text-slate-950"
@@ -101,32 +83,12 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
         </div>
 
         {hasLoadedData && !isAccessError ? (
-<<<<<<< HEAD
-          <div className="flex flex-wrap items-center gap-2">
-            <span
-              aria-live="polite"
-              className="text-xs font-medium text-slate-500"
-            >
-              {modules.length} {modules.length === 1 ? "module" : "modules"}
-            </span>
-
-=======
           <div className="flex items-center gap-2">
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
             <button
               type="button"
               onClick={() => void refetch()}
               disabled={isFetching}
-<<<<<<< HEAD
-              className="inline-flex min-h-11 items-center gap-2 rounded-xl
-                  border border-slate-200 bg-white px-3 text-sm font-semibold
-                  text-slate-700 transition hover:bg-slate-50
-                  focus-visible:outline-2 focus-visible:outline-offset-2
-                  focus-visible:outline-slate-900
-                  disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
-=======
               className="apple-press inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
             >
               <ArrowsClockwiseIcon
                 className={isFetching ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"}
@@ -137,14 +99,6 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
           </div>
         ) : null}
       </div>
-<<<<<<< HEAD
-
-      {hasLoadedData && !isAccessError && accessMode === "manage" ? (
-        <ModuleUploadForm userId={userId} courseId={courseId} />
-      ) : null}
-
-=======
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
       {isPending ? (
         <div
           role="status"
@@ -285,20 +239,6 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
             </p>
           ) : null}
 
-<<<<<<< HEAD
-          {modules.length === 0 ? (
-            <div
-              role="status"
-              className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center"
-            >
-              <h3 className="text-base font-semibold text-slate-950">
-                No modules uploaded yet
-              </h3>
-
-              <p className="mt-1 text-sm text-slate-600">
-                Lab manuals and reference guides will show up here once uploaded.
-              </p>
-=======
           {accessMode === "manage" ? (
             <div className="mt-5 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
               {/* Left Column: Modules list */}
@@ -336,7 +276,6 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
               <div className="lg:col-span-5 lg:sticky lg:top-4">
                 <ModuleUploadForm userId={userId} courseId={courseId} />
               </div>
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
             </div>
           ) : (
             <div className="mt-5 max-w-3xl space-y-3">

@@ -1,12 +1,8 @@
 "use client";
 
 import Link from "next/link";
-<<<<<<< HEAD
-import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
-=======
 import { WarningCircle, ArrowsClockwise } from "@phosphor-icons/react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useCourseAnnouncements } from "../hooks/use-course-announcements";
@@ -125,12 +121,6 @@ export function CourseStream({ userId, courseId, viewerRole }: CourseStreamProps
               : "Stay in the loop with updates and reminders from your instructors."}
           </p>
         </div>
-<<<<<<< HEAD
-        <span className="text-xs font-medium text-slate-500" aria-live="polite">
-          {announcements.length} {announcements.length === 1 ? "announcement" : "announcements"}
-        </span>
-=======
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
       </div>
 
       {isFetching ? (
@@ -140,13 +130,8 @@ export function CourseStream({ userId, courseId, viewerRole }: CourseStreamProps
       ) : null}
 
       {announcements.length === 0 ? (
-<<<<<<< HEAD
-        <div role="status" className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
-          <h3 className="text-base font-semibold text-slate-950">No announcements yet</h3>
-=======
         <div role="status" className="mt-5 rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
           <h3 className="mt-3 font-semibold text-slate-950">No announcements yet</h3>
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           <p className="mt-1 text-sm text-slate-600">
             {viewerRole === "asprak"
               ? "Got an update or reminder for the class? Post the first announcement above."

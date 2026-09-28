@@ -20,12 +20,6 @@ const fileTypeLabels: Record<AssignmentFileType, string> = {
   docx: "DOCX"
 };
 
-<<<<<<< HEAD
-const inputClassName =
-  "h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-900 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-50";
-
-=======
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 export function AssignmentFormFields({
   form,
   idPrefix,
@@ -84,17 +78,12 @@ export function AssignmentFormFields({
           id={descriptionId}
           rows={compact ? 3 : 5}
           disabled={disabled}
-<<<<<<< HEAD
-          placeholder="Explain the task, expected output, and submission requirements..."
-          className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100 disabled:cursor-not-allowed disabled:bg-slate-50"
-=======
           placeholder="Brief task description and submission rules..."
           className={
             compact
               ? "w-full resize-y rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs leading-5 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-50"
               : "w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-50"
           }
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           {...form.register("description")}
         />
       </div>
@@ -177,11 +166,7 @@ export function AssignmentFormFields({
                 type="checkbox"
                 value={fileType}
                 disabled={disabled}
-<<<<<<< HEAD
-                className="h-4 w-4 rounded border-slate-300 accent-slate-900"
-=======
                 className="h-3.5 w-3.5 rounded border-slate-300 text-slate-900 accent-slate-900"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                 {...form.register("allowed_file_types")}
               />
               <span className="font-semibold text-slate-800">
@@ -211,11 +196,7 @@ export function AssignmentFormFields({
             id={publicationId}
             type="checkbox"
             disabled={disabled}
-<<<<<<< HEAD
-            className="mt-1 h-4 w-4 rounded border-slate-300 accent-slate-900"
-=======
             className="mt-0.5 h-3.5 w-3.5 rounded border-slate-300 text-slate-900 accent-slate-900"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
             {...form.register("is_published")}
           />
           <span>

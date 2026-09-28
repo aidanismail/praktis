@@ -199,11 +199,7 @@ export function AnnouncementCard({
               disabled={updateMutation.isPending}
               aria-invalid={Boolean(form.formState.errors.title)}
               aria-describedby={form.formState.errors.title ? `edit-title-${announcement.id}-error` : undefined}
-<<<<<<< HEAD
-              className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-100 disabled:bg-slate-50"
-=======
               className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:bg-slate-50"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
               {...form.register("title")}
             />
             {form.formState.errors.title ? (
@@ -220,11 +216,7 @@ export function AnnouncementCard({
               disabled={updateMutation.isPending}
               aria-invalid={Boolean(form.formState.errors.content)}
               aria-describedby={form.formState.errors.content ? `edit-content-${announcement.id}-error` : undefined}
-<<<<<<< HEAD
-              className="w-full resize-none rounded-xl border border-slate-200 px-3 py-3 text-sm leading-6 outline-none focus:border-slate-900 focus:ring-4 focus:ring-slate-100 disabled:bg-slate-50"
-=======
               className="w-full resize-y rounded-xl border border-slate-200 px-3 py-3 text-sm leading-6 outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:bg-slate-50"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
               {...form.register("content")}
             />
             {form.formState.errors.content ? (
@@ -247,11 +239,7 @@ export function AnnouncementCard({
           <button
             type="submit"
             disabled={updateMutation.isPending}
-<<<<<<< HEAD
-            className="inline-flex min-h-10 items-center rounded-xl bg-brand px-4 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:opacity-60"
-=======
             className="inline-flex min-h-10 items-center rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white hover:bg-slate-800 shadow-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:opacity-60"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           >
             {updateMutation.isPending ? (
               <AsteriskLoader className="mr-2 h-4 w-4" />

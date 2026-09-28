@@ -8,16 +8,6 @@ type PraktikanCourseMembershipProps = { user: User };
 
 export function PraktikanCourseMembership({ user }: PraktikanCourseMembershipProps) {
   return (
-<<<<<<< HEAD
-    <section aria-labelledby="membership-heading" className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
-      <div className="border-b border-slate-200 pb-4">
-        <h2 id="membership-heading" className="text-xl font-semibold text-slate-950">
-          Your Enrollment
-        </h2>
-        <p className="mt-1 text-sm text-slate-600">
-          Enrolled as <span className="font-mono font-medium text-slate-900">{user.username}</span> ({user.email})
-        </p>
-=======
     <section
       aria-labelledby="membership-heading"
       className="mt-6 rounded-3xl border border-slate-200 bg-white p-5 shadow-xs sm:p-6"
@@ -43,7 +33,6 @@ export function PraktikanCourseMembership({ user }: PraktikanCourseMembershipPro
             available in the Praktikan workspace.
           </p>
         </div>
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
       </div>
 
       <p className="mt-4 text-sm leading-6 text-slate-500">

@@ -1,10 +1,6 @@
 "use client";
 
-<<<<<<< HEAD
-import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
-=======
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
@@ -158,11 +154,7 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
             type="button"
             onClick={() => void sessionsQuery.refetch()}
             disabled={sessionsQuery.isFetching}
-<<<<<<< HEAD
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
-=======
             className="apple-press inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           >
             <ArrowsClockwise
               className={
@@ -177,36 +169,6 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
         ) : null}
       </div>
 
-<<<<<<< HEAD
-      {hasLoadedData && !accessError ? (
-        <section
-          aria-labelledby="create-session-heading"
-          className="mt-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-xs sm:p-6"
-        >
-          <h3 id="create-session-heading" className="font-semibold text-slate-950">
-            Schedule a session
-          </h3>
-          <p className="mt-1 mb-4 text-sm text-slate-600">
-            Set up a lab date, title, and topic for your students.
-          </p>
-          <SessionForm
-            submitLabel="Schedule session"
-            pendingLabel="Scheduling..."
-            isPending={createMutation.isPending}
-            error={createMutation.error}
-            onSubmit={createSession}
-            resetAfterSubmit
-          />
-          {createMutation.isSuccess ? (
-            <p role="status" aria-live="polite" className="mt-3 text-sm text-emerald-700">
-              Session scheduled!
-            </p>
-          ) : null}
-        </section>
-      ) : null}
-
-=======
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
       {sessionsQuery.isPending ? (
         <div
           role="status"
@@ -219,14 +181,8 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
       ) : null}
 
       {blockingError ? (
-<<<<<<< HEAD
-        <div role="alert" className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-6">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" aria-hidden="true" />
-=======
         <div className="mt-5">
           <NotificationBanner variant="error">
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
             <div>
               <h3 className="font-semibold text-white">{errorTitle}</h3>
               <p className="mt-1 text-xs text-slate-300">{errorDescription}</p>
@@ -289,14 +245,6 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
             </div>
           ) : null}
 
-<<<<<<< HEAD
-          {sessions.length === 0 ? (
-            <div role="status" className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
-              <h3 className="text-base font-semibold text-slate-950">No sessions scheduled yet</h3>
-              <p className="mt-1 text-sm text-slate-600">
-                Add your first lab session using the form above.
-              </p>
-=======
           <div className="mt-5 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
             {/* Left Column: Sessions list */}
             <div className="lg:col-span-7 space-y-3">
@@ -323,7 +271,6 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
                   />
                 ))
               )}
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
             </div>
 
             {/* Right Column: Schedule a session panel (sticky) */}

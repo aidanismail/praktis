@@ -3,15 +3,9 @@
 import {
   WarningCircle,
   ArrowLeft,
-<<<<<<< HEAD
-  Loader2,
-  RefreshCw
-} from "lucide-react";
-=======
   ArrowsClockwise
 } from "@phosphor-icons/react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -211,17 +205,12 @@ function AssignmentSummary({ assignment }: { assignment: Assignment }) {
           </h1>
         </div>
 
-<<<<<<< HEAD
-        <span className="text-sm font-medium text-slate-500">
-          {assignment.submissions_count}{" "}
-=======
         <div className="text-xs text-slate-500 font-medium">
           <span className="font-bold text-slate-900 tabular-nums">
             {assignment.submissions_count}
           </span>{" "}
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           {assignment.submissions_count === 1 ? "submission" : "submissions"}
-        </span>
+        </div>
       </div>
 
       {assignment.description ? (
@@ -234,19 +223,12 @@ function AssignmentSummary({ assignment }: { assignment: Assignment }) {
         </p>
       )}
 
-<<<<<<< HEAD
-      <dl className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-slate-100 pt-4 text-sm">
-        <div>
-          <dt className="inline text-slate-500">Due: </dt>
-          <dd className="inline font-medium text-slate-900">
-=======
       <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-slate-100 pt-3.5 text-xs">
         <div className="flex items-center gap-2">
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
             Due
           </span>
           <span className="font-semibold text-slate-800">
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
             {assignment.due_date ? (
               <time dateTime={assignment.due_date}>
                 {formatDate(assignment.due_date)}
@@ -257,22 +239,6 @@ function AssignmentSummary({ assignment }: { assignment: Assignment }) {
           </span>
         </div>
 
-<<<<<<< HEAD
-        <div>
-          <dt className="inline text-slate-500">Points: </dt>
-          <dd className="inline font-medium text-slate-900">
-            {assignment.max_points} max
-          </dd>
-        </div>
-
-        <div>
-          <dt className="inline text-slate-500">Formats: </dt>
-          <dd className="inline font-medium uppercase text-slate-900">
-            {allowedFileTypes.length > 0 ? allowedFileTypes.join(", ") : "None listed"}
-          </dd>
-        </div>
-      </dl>
-=======
         <span className="text-slate-200 hidden sm:inline" aria-hidden="true">|</span>
 
         <div className="flex items-center gap-2">
@@ -298,7 +264,6 @@ function AssignmentSummary({ assignment }: { assignment: Assignment }) {
           </>
         )}
       </div>
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
     </section>
   );
 }
@@ -443,18 +408,6 @@ export function AssignedAssignmentDetail({
   }
 
   return (
-<<<<<<< HEAD
-    <DetailPageFrame>
-      <Link
-        href={getCourseDetailRoute(courseId, "assignments")}
-        className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-xs transition hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        Back to Assignments
-      </Link>
-
-      <p className="mt-5 text-sm font-medium text-slate-600">
-=======
     <div>
       <div className="flex flex-wrap items-center justify-between gap-4">
         {onBack ? (
@@ -526,7 +479,6 @@ export function AssignedAssignmentDetail({
       ) : null}
 
       <p className="mt-5 text-sm font-semibold text-slate-700">
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
         {course.code} · {course.name}
       </p>
 

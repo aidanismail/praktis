@@ -1,18 +1,6 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-<<<<<<< HEAD
-import {
-  LayoutGrid,
-  List,
-  Palette,
-  Pencil,
-  Plus,
-  Search,
-  Trash2,
-} from "lucide-react";
-=======
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import type { Course } from "@/features/admin/types";
 import {
   getThemeConfig,
@@ -184,26 +172,6 @@ export function CourseListView({
                 </div>
 
                 {/* Card Body */}
-<<<<<<< HEAD
-                <div className="p-4 flex-1 flex flex-col justify-between space-y-4">
-                  <div className="flex items-center justify-between text-xs text-slate-600">
-                    <span className="font-medium text-slate-700">
-                      Academic year {course.academic_year}
-                    </span>
-                    <span className="flex items-center gap-1.5 font-medium text-slate-600">
-                      <span
-                        className={`w-1.5 h-1.5 rounded-full ${
-                          course.is_active ? "bg-emerald-500" : "bg-slate-400"
-                        } inline-block`}
-                      />
-                      {course.is_active ? "Active" : "Archived"}
-                    </span>
-                  </div>
-
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-                    <span className="text-slate-900 font-semibold group-hover:text-slate-950">
-                      Open workspace
-=======
                 <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                   <div className="grid grid-cols-2 gap-2 text-xs text-slate-600">
                     <div className="bg-slate-50 p-2.5 rounded-2xl border border-slate-100">
@@ -228,7 +196,6 @@ export function CourseListView({
                     <span className="text-slate-900 font-semibold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
                       <span>Open course</span>
                       <CaretRight className="w-3.5 h-3.5" />
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                     </span>
                     <div
                       className="flex items-center gap-1"

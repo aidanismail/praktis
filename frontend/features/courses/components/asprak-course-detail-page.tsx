@@ -2,19 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-<<<<<<< HEAD
-import {
-  AlertCircle,
-  ArrowLeft,
-  Loader2,
-  RefreshCw,
-  Palette
-} from "lucide-react";
-import { ROUTES, type CourseWorkspaceTab } from "@/constants/routes";
-=======
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
-import { ROUTES } from "@/constants/routes";
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
+import { ROUTES, type CourseWorkspaceTab } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useAuthStore } from "@/stores/auth-store";
 import { useAssignedCourses } from "../hooks/use-assigned-courses";
@@ -270,13 +259,6 @@ function AssignedCourseDetail({
 
         <div className="relative z-10 flex flex-wrap items-start justify-between gap-4">
           <div>
-<<<<<<< HEAD
-            <p className="text-xs font-semibold uppercase tracking-wider text-white/90 drop-shadow-xs">
-              {course.code}
-            </p>
-
-            <h1 className="mt-1.5 text-2xl font-bold tracking-tight text-white sm:text-3xl drop-shadow-xs">
-=======
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold uppercase tracking-wider text-white/90 drop-shadow-xs">
                 {course.code}
@@ -291,32 +273,9 @@ function AssignedCourseDetail({
               className="mt-2 text-2xl font-bold
               tracking-tight text-white sm:text-3xl drop-shadow-xs"
             >
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
               {course.name}
             </h1>
-
-            <p className="mt-2 text-sm text-white/80">
-              Academic year {course.academic_year} · Semester {course.semester}
-            </p>
           </div>
-<<<<<<< HEAD
-
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-medium text-white/90">
-              {statusLabel}
-            </span>
-
-            <button
-              type="button"
-              onClick={() => setShowCustomizeModal(true)}
-              className="rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 px-3 py-1.5 text-xs font-semibold text-white transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
-              title="Customize course banner"
-            >
-              <Palette className="w-3.5 h-3.5" />
-              <span>Customize</span>
-            </button>
-          </div>
-=======
         </div>
 
         <div
@@ -331,7 +290,6 @@ function AssignedCourseDetail({
             Academic year {course.academic_year}
           </span>
           <span>Semester {course.semester}</span>
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
         </div>
       </header>
 

@@ -1,16 +1,6 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-<<<<<<< HEAD
-import {
-  Download,
-  Lock,
-  Plus,
-  Unlock,
-  Users,
-} from "lucide-react";
-=======
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import type {
   Course,
   CourseSession,
@@ -144,11 +134,7 @@ export function CourseSessionsTab({
         <button
           type="button"
           onClick={() => setShowCreateModal(true)}
-<<<<<<< HEAD
-          className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
-=======
           className="apple-press px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-full shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
         >
           <Plus className="w-3.5 h-3.5" />
           <span>Add Session</span>
@@ -171,14 +157,9 @@ export function CourseSessionsTab({
                 <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <span className="font-bold text-xs text-slate-900 block">{s.title}</span>
-<<<<<<< HEAD
-                    <span className="text-[11px] text-slate-500 mt-0.5 block">
-                      {s.date}
-=======
                     <span className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
                       <CalendarBlank className="w-3 h-3" />
                       <span>Date: {s.date}</span>
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                     </span>
                   </div>
 
@@ -186,11 +167,7 @@ export function CourseSessionsTab({
                     <button
                       type="button"
                       onClick={() => setInspectingSessionId(isInspecting ? null : s.id)}
-<<<<<<< HEAD
-                      className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
-=======
                       className={`apple-press px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                         isInspecting
                           ? "bg-slate-900 text-white"
                           : "bg-slate-100 text-slate-700 hover:bg-slate-200"
@@ -203,11 +180,7 @@ export function CourseSessionsTab({
                     <button
                       type="button"
                       onClick={() => handleToggleWindow(s)}
-<<<<<<< HEAD
-                      className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
-=======
                       className={`apple-press px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                         s.attendance_status === "OPEN"
                           ? "bg-rose-50 text-rose-700 hover:bg-rose-100"
                           : "bg-slate-100 text-slate-700 hover:bg-slate-200"
@@ -228,11 +201,7 @@ export function CourseSessionsTab({
 
                     <a
                       href={getAttendanceExportUrl(s.id, "csv")}
-<<<<<<< HEAD
-                      className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl text-xs flex items-center gap-1 transition-colors"
-=======
                       className="apple-press px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-full text-xs flex items-center gap-1 transition-colors"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                     >
                       <DownloadSimple className="w-3.5 h-3.5" />
                       <span>CSV</span>
@@ -289,11 +258,7 @@ export function CourseSessionsTab({
                                         type="button"
                                         onClick={() => handleUpdateRecord(st.id, statusOption)}
                                         disabled={isUpdatingThis}
-<<<<<<< HEAD
-                                        className={`px-3 py-1 text-[10px] font-semibold capitalize rounded-lg transition-all cursor-pointer ${
-=======
                                         className={`apple-press px-3 py-1 text-[10px] font-semibold capitalize rounded-full transition-all cursor-pointer ${
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                                           isCurrent
                                             ? ATTENDANCE_STATUS_STYLES[statusOption]
                                             : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900"
@@ -365,22 +330,14 @@ export function CourseSessionsTab({
               <button
                 type="button"
                 onClick={() => setShowCreateModal(false)}
-<<<<<<< HEAD
-                className="px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 cursor-pointer"
-=======
                 className="apple-press px-4 py-2 border border-slate-200 rounded-full text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-<<<<<<< HEAD
-                className="px-5 py-2 bg-slate-900 text-white rounded-xl text-xs font-semibold hover:bg-slate-800 shadow-xs cursor-pointer"
-=======
                 className="apple-press px-5 py-2 bg-slate-900 text-white rounded-full text-xs font-semibold hover:bg-slate-800 shadow-xs cursor-pointer"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
               >
                 {isSubmitting ? "Saving..." : "Add Session"}
               </button>

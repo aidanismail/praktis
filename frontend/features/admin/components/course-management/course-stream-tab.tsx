@@ -1,18 +1,6 @@
 "use client";
 
 import { useState } from "react";
-<<<<<<< HEAD
-import {
-  ChevronRight,
-  Send,
-  Pin,
-  PinOff,
-  Trash2,
-  MessageSquare,
-  X,
-} from "lucide-react";
-=======
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import type {
   AnnouncementItem,
   AssignmentItem,
@@ -257,12 +245,6 @@ export function CourseStreamTab({
                           {ann.title}
                         </h4>
                         {ann.is_pinned && (
-<<<<<<< HEAD
-                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700">
-                            <Pin className="w-3 h-3" />
-                            <span>Pinned</span>
-                          </span>
-=======
                           <>
                             <span className="text-slate-300" aria-hidden="true">·</span>
                             <span className="text-xs font-bold text-amber-700 flex items-center gap-1">
@@ -270,7 +252,6 @@ export function CourseStreamTab({
                               <span>Pinned</span>
                             </span>
                           </>
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                         )}
                       </div>
                       <p className="text-[11px] text-slate-400 mt-0.5">

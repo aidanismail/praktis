@@ -1,11 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-<<<<<<< HEAD
-import { Loader2 } from "lucide-react";
-=======
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import { useForm, useWatch } from "react-hook-form";
 import { ApiError } from "@/lib/api/client";
 import { useCreateCourseAssignment } from "../hooks/use-course-assignments";
@@ -99,23 +95,11 @@ export function AssignmentComposer({
   return (
     <section
       aria-labelledby="assignment-composer-heading"
-<<<<<<< HEAD
-      className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs"
-=======
       className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xs"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
     >
       <div>
         <h2
           id="assignment-composer-heading"
-<<<<<<< HEAD
-          className="text-lg font-semibold text-slate-950"
-        >
-          Create an assignment
-        </h2>
-        <p className="mt-1 text-sm leading-6 text-slate-600">
-          Draft your prompt or release it directly to students.
-=======
           className="text-sm font-bold tracking-tight text-slate-950"
         >
           Create assignment
@@ -123,7 +107,6 @@ export function AssignmentComposer({
 
         <p className="mt-0.5 text-xs text-slate-500">
           Draft your task prompt or release directly to students.
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
         </p>
       </div>
 
@@ -158,11 +141,7 @@ export function AssignmentComposer({
           <button
             type="submit"
             disabled={mutation.isPending}
-<<<<<<< HEAD
-            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand px-5 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
-=======
             className="apple-press inline-flex items-center justify-center rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60 shadow-xs"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           >
             {mutation.isPending ? (
               <>

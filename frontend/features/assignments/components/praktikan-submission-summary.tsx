@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import { Download } from "lucide-react";
-=======
 import { NotificationBanner } from "@/components/ui/notification-banner";
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import type { AssignmentSubmission } from "../types/assignment.type";
 import {
   DownloadSimple,
@@ -39,13 +35,6 @@ export function PraktikanSubmissionSummary({
 }: PraktikanSubmissionSummaryProps) {
   if (!submission) {
     return (
-<<<<<<< HEAD
-      <section aria-labelledby="my-submission-heading" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
-        <h2 id="my-submission-heading" className="text-base font-semibold text-slate-950">Your submission</h2>
-        <div role="status" className="mt-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center">
-          <p className="font-semibold text-slate-900">Nothing turned in yet</p>
-          <p className="mt-1 text-sm text-slate-600">Ready? Drop your file or browse below to turn in your work.</p>
-=======
       <section
         aria-labelledby="my-submission-heading"
         className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs"
@@ -62,53 +51,12 @@ export function PraktikanSubmissionSummary({
           <p className="mt-1 text-xs text-slate-500">
             Ready? Drop your file or browse below to turn in your work.
           </p>
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
         </div>
       </section>
     );
   }
 
   return (
-<<<<<<< HEAD
-    <section aria-labelledby="my-submission-heading" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 pb-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Your work</p>
-          <h2 id="my-submission-heading" className="mt-0.5 text-base font-semibold text-slate-950">Your submission</h2>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className={submission.is_late ? "rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700" : "rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700"}>
-            {submission.is_late ? "Late" : "On time"}
-          </span>
-          <span className="text-xs text-slate-500 font-medium">
-            {submission.status}
-          </span>
-        </div>
-      </div>
-      <dl className="mt-2 divide-y divide-slate-100">
-        <div className="flex flex-col py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-          <dt className="text-sm text-slate-500">File</dt>
-          <dd className="text-sm font-medium text-slate-950">
-            {submission.file_name} <span className="text-xs text-slate-400 font-normal">({formatFileSize(submission.file_size)})</span>
-          </dd>
-        </div>
-        <div className="flex flex-col py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-          <dt className="text-sm text-slate-500">Submitted</dt>
-          <dd className="text-sm font-medium text-slate-950">
-            <time dateTime={submission.submitted_at}>{formatDate(submission.submitted_at)}</time>
-          </dd>
-        </div>
-        <div className="flex flex-col py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-          <dt className="text-sm text-slate-500">Score</dt>
-          <dd className="text-sm font-semibold text-slate-950">
-            {submission.score === null ? "Grading in progress" : `${submission.score} / ${maxPoints}`}
-          </dd>
-        </div>
-        <div className="flex flex-col py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-          <dt className="text-sm text-slate-500">Graded</dt>
-          <dd className="text-sm font-medium text-slate-950">
-            {submission.graded_at ? <time dateTime={submission.graded_at}>{formatDate(submission.graded_at)}</time> : "Pending review"}
-=======
     <section
       aria-labelledby="my-submission-heading"
       className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs"
@@ -168,7 +116,6 @@ export function PraktikanSubmissionSummary({
             ) : (
               <span className="text-emerald-700 font-bold font-mono">{submission.score}</span>
             )}
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           </dd>
         </div>
 
@@ -185,11 +132,6 @@ export function PraktikanSubmissionSummary({
       </dl>
 
       {submission.feedback ? (
-<<<<<<< HEAD
-        <div className="mt-4 rounded-xl border border-slate-200 p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-            Feedback from assistant
-=======
         <div className="mt-4 border-l-2 border-slate-900 pl-3.5 py-1">
           <p className="flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-wider text-slate-400">
             <ChatText className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
@@ -197,26 +139,9 @@ export function PraktikanSubmissionSummary({
           </p>
           <p className="mt-1.5 whitespace-pre-wrap wrap-break-word text-xs leading-relaxed text-slate-700">
             {submission.feedback}
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           </p>
         </div>
       ) : null}
-<<<<<<< HEAD
-      {submission.download_url ? (
-        <a
-          href={submission.download_url}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-5 inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-300 px-4 text-sm font-semibold text-slate-800 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700"
-        >
-          <Download className="h-4 w-4" aria-hidden="true" />Download submitted file
-        </a>
-      ) : (
-        <p role="status" className="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800">
-          Your file is safely stored, but the download link is taking a moment. Refresh in a bit.
-        </p>
-      )}
-=======
 
       <div className="mt-5">
         {submission.download_url ? (
@@ -236,7 +161,6 @@ export function PraktikanSubmissionSummary({
           />
         )}
       </div>
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
     </section>
   );
 }

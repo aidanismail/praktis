@@ -77,15 +77,11 @@ export function LoginForm() {
               type="text"
               placeholder="e.g. 140810230075"
               autoComplete="username"
-<<<<<<< HEAD
-              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 pl-10 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
-=======
               aria-invalid={Boolean(form.formState.errors.username)}
               aria-describedby={
                 form.formState.errors.username ? "username-error" : undefined
               }
               className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 pl-10 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
               {...form.register("username")}
             />
           </div>
@@ -113,26 +109,18 @@ export function LoginForm() {
               type={showPassword ? "text" : "password"}
               placeholder="Enter your password"
               autoComplete="current-password"
-<<<<<<< HEAD
-              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 pl-10 pr-10 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
-=======
               aria-invalid={Boolean(form.formState.errors.password)}
               aria-describedby={
                 form.formState.errors.password ? "password-error" : undefined
               }
               className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 pl-10 pr-11 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
               {...form.register("password")}
             />
 
             <button
               type="button"
               onClick={() => setShowPassword((value) => !value)}
-<<<<<<< HEAD
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md text-slate-400 transition hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-200"
-=======
               className="absolute right-1 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-lg text-slate-400 transition hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? (
@@ -153,11 +141,7 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={loginMutation.isPending}
-<<<<<<< HEAD
-          className="flex h-11 w-full cursor-pointer items-center justify-center rounded-xl bg-brand px-4 text-sm font-medium text-white transition hover:bg-[#122044] disabled:cursor-not-allowed disabled:opacity-70"
-=======
           className="flex h-11 w-full cursor-pointer items-center justify-center rounded-full bg-slate-900 px-4 text-sm font-semibold text-white apple-press transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-70"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
         >
           {loginMutation.isPending ? (
             <>

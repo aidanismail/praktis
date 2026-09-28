@@ -2,10 +2,6 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-<<<<<<< HEAD
-import { AlertCircle, RefreshCw } from "lucide-react";
-=======
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import { getCourseDetailRoute, ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useAssignedCourses } from "../hooks/use-assigned-courses";
@@ -183,11 +179,7 @@ export function AsprakCourseList({
         role="status"
         className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center"
       >
-<<<<<<< HEAD
-        <h3 className="text-base font-semibold text-slate-950">
-=======
         <h3 className="font-semibold text-slate-950">
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           No classes assigned yet
         </h3>
         <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-500">

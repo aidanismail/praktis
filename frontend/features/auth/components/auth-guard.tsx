@@ -75,17 +75,10 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
 
   if (currentUserQuery.isPending || (!user && !currentUserQuery.isError)) {
     return (
-<<<<<<< HEAD
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#080E21] via-[#0D1836] to-[#14234B] text-white">
-        <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur">
-          <Loader2 className="h-5 w-5 animate-spin text-sky-400" />
-          <span className="text-sm text-slate-200">Checking session...</span>
-=======
       <div className="flex min-h-screen items-center justify-center bg-brand text-white">
         <div className="flex flex-col items-center gap-3.5 rounded-3xl border border-white/10 bg-white/5 px-8 py-6 backdrop-blur shadow-2xl">
           <AsteriskLoader className="h-9 w-9 text-white" />
           <span className="text-xs font-medium text-slate-300">Checking session...</span>
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
         </div>
       </div>
     );
@@ -100,11 +93,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
       return (
         <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#080E21] via-[#0D1836] to-[#14234B] text-white">
           <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur">
-<<<<<<< HEAD
-            <Loader2 className="h-5 w-5 animate-spin text-sky-400" aria-hidden="true" />
-=======
             <AsteriskLoader className="h-5 w-5 text-white" />
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
             <span className="text-sm text-slate-200">
               Returning to sign in...
             </span>

@@ -216,7 +216,6 @@ export function DashboardShell({ user }: DashboardShellProps) {
             </div>
           ) : null}
 
-<<<<<<< HEAD
           {!activeCourse && activeItem.id !== "classes" && activeItem.id !== "courses" && (
             <div className="mb-5 sm:mb-6">
               <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
@@ -227,9 +226,6 @@ export function DashboardShell({ user }: DashboardShellProps) {
               </p>
             </div>
           )}
-
-=======
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           <RoleDashboard
             activeItem={activeItem}
             user={user}

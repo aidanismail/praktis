@@ -1,11 +1,7 @@
 "use client";
 
 import Link from "next/link";
-<<<<<<< HEAD
-import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
-=======
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useCourseRoster } from "../hooks/use-course-roster";
@@ -60,14 +56,10 @@ export function CourseRoster({ userId, courseId }: CourseRosterProps) {
       aria-busy={isPending || isFetching}
       className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-xs"
     >
-<<<<<<< HEAD
-      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 pb-4">
-=======
       <div
         className="flex flex-wrap items-start justify-between
         gap-4"
       >
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
         <div>
           <h2
             id="course-roster-heading"
@@ -83,11 +75,7 @@ export function CourseRoster({ userId, courseId }: CourseRosterProps) {
         {!isPending && !isError ? (
           <span
             aria-live="polite"
-<<<<<<< HEAD
-            className="text-sm font-medium text-slate-500"
-=======
             className="text-xs font-semibold text-slate-500"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           >
             {students.length} {students.length === 1 ? "student" : "students"}
           </span>
@@ -198,15 +186,6 @@ export function CourseRoster({ userId, courseId }: CourseRosterProps) {
                 </span>
               </div>
 
-<<<<<<< HEAD
-              <div className="min-w-0 text-sm text-slate-600">
-                <a
-                  href={`mailto:${student.email}`}
-                  className="hover:text-slate-950 hover:underline"
-                >
-                  {student.email}
-                </a>
-=======
               <div className="min-w-0">
                 <span
                   className="text-xs font-semibold uppercase
@@ -220,7 +199,6 @@ export function CourseRoster({ userId, courseId }: CourseRosterProps) {
                 >
                   {student.email}
                 </span>
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
               </div>
             </li>
           ))}

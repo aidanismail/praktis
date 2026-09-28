@@ -1,18 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-<<<<<<< HEAD
-import {
-  AlertCircle,
-  CheckCircle2,
-  Loader2,
-  RefreshCw,
-  Search
-} from "lucide-react";
-=======
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { NotificationBanner } from "@/components/ui/notification-banner";
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useCourseRoster } from "@/features/courses/hooks/use-course-roster";
@@ -397,13 +387,8 @@ export function SessionGradebook({
   }
 
   return (
-<<<<<<< HEAD
-    <section aria-labelledby="session-gradebook-heading" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
-      <div className="border-b border-slate-200 pb-4">
-=======
     <section aria-labelledby="session-gradebook-heading" className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
       <div>
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
         <h2 id="session-gradebook-heading" className="text-xl font-semibold text-slate-950">Session gradebook</h2>
         <p className="mt-1 text-sm leading-6 text-slate-600">Save private draft scores, then publish them whenever you&apos;re ready.</p>
       </div>

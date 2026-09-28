@@ -2,10 +2,6 @@
 
 import Link from "next/link";
 import {
-<<<<<<< HEAD
-  AlertCircle,
-=======
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
   BookOpen,
   Users,
   CloudArrowUp,

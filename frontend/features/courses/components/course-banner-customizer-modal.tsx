@@ -193,19 +193,11 @@ export function CourseBannerCustomizerModal({
             )}
 
             <div className="relative z-10 flex items-start justify-between gap-2">
-<<<<<<< HEAD
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-white/90 drop-shadow-xs">
-                {course.code}
-              </span>
-
-              <div className="flex items-center gap-1.5">
-=======
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-white/90 drop-shadow-xs">
                   {course.code}
                 </span>
                 <span className="text-white/40" aria-hidden="true">·</span>
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                 <span className="text-[11px] font-medium text-white/80">
                   {course.semester} {course.academic_year}
                 </span>

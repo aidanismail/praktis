@@ -27,11 +27,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-<<<<<<< HEAD
 /* Remove default browser resize handle on textareas */
 textarea {
   resize: none;
-=======
+}
+
 /* Hide scrollbar while preserving scroll functionality */
 .scrollbar-none {
   -ms-overflow-style: none;
@@ -39,7 +39,6 @@ textarea {
 }
 .scrollbar-none::-webkit-scrollbar {
   display: none;
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 }
 
 /* ==========================================================================

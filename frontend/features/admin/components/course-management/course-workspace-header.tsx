@@ -1,9 +1,5 @@
 "use client";
 
-<<<<<<< HEAD
-import { Palette, Pencil, ArrowLeft } from "lucide-react";
-=======
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import type { Course } from "@/features/courses/types/course.type";
 import {
   getThemeConfig,
@@ -89,21 +85,6 @@ export function CourseWorkspaceHeader({
             <h1 className="text-2xl sm:text-3xl font-bold mt-1.5 text-white tracking-tight drop-shadow-xs">
               {course.name}
             </h1>
-<<<<<<< HEAD
-            <p className="text-sm text-white/80 mt-2 drop-shadow-xs">
-              Academic Year {course.academic_year} · Semester {course.semester}
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="text-xs font-medium text-white/80">
-              <span
-                className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${
-                  course.is_active ? "bg-emerald-400" : "bg-amber-400"
-                }`}
-              />
-              {course.is_active ? "Active" : "Archived"} · {enrolledCount} {enrolledCount === 1 ? "student" : "students"} · {staffCount} {staffCount === 1 ? "assistant" : "assistants"}
-=======
             <p className="text-xs text-slate-200 mt-1.5 flex items-center gap-2 drop-shadow-xs">
               <CalendarBlank className="w-4 h-4 text-white/70" />
               <span>
@@ -121,7 +102,6 @@ export function CourseWorkspaceHeader({
               <span>
                 {enrolledCount} {enrolledCount === 1 ? "student" : "students"} • {staffCount} {staffCount === 1 ? "assistant" : "assistants"}
               </span>
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
             </span>
 
             <div className="flex items-center gap-2">
@@ -135,17 +115,6 @@ export function CourseWorkspaceHeader({
                 <span>Customize</span>
               </button>
 
-<<<<<<< HEAD
-              <button
-                type="button"
-                onClick={onEditCourse}
-                className="rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 px-3 py-1.5 text-xs font-semibold text-white transition-colors flex items-center gap-1 shadow-xs"
-              >
-                <Pencil className="w-3 h-3" />
-                <span>Edit</span>
-              </button>
-            </div>
-=======
             <button
               type="button"
               onClick={onEditCourse}
@@ -154,10 +123,10 @@ export function CourseWorkspaceHeader({
               <PencilSimple className="w-3 h-3" />
               <span>Edit</span>
             </button>
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

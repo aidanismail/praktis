@@ -1,14 +1,5 @@
 "use client";
 
-<<<<<<< HEAD
-import {
-  Clock3,
-  Lock,
-  Pencil,
-  Radio
-} from "lucide-react";
-=======
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { getSessionDetailRoute } from "@/constants/routes";
@@ -46,8 +37,6 @@ function formatSessionDate(value: string) {
     : dateFormatter.format(date);
 }
 
-<<<<<<< HEAD
-=======
 const statusTextColors = {
   SCHEDULED: "text-sky-700 font-semibold",
   OPEN: "text-slate-900 font-semibold",
@@ -55,7 +44,6 @@ const statusTextColors = {
   UNKNOWN: "text-amber-700 font-medium"
 } as const;
 
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 const statusLabels = {
   SCHEDULED: "Scheduled",
   OPEN: "Attendance open",
@@ -107,26 +95,6 @@ export function SessionCard({
   }
 
   return (
-<<<<<<< HEAD
-    <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition hover:border-slate-300">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2 text-xs text-slate-500">
-            <span
-              className={`font-semibold ${
-                status === "OPEN"
-                  ? "text-emerald-700"
-                  : "text-slate-600"
-              }`}
-            >
-              {statusLabels[status]}
-            </span>
-            <span>·</span>
-            <time dateTime={session.date}>{formatSessionDate(session.date)}</time>
-          </div>
-
-          <h3 className="mt-1.5 wrap-break-word text-base font-semibold text-slate-950">
-=======
     <article className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xs transition-all hover:border-slate-300 hover:shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
@@ -140,7 +108,6 @@ export function SessionCard({
             </time>
           </div>
           <h3 className="mt-2 wrap-break-word text-sm sm:text-base font-bold text-slate-950 tracking-tight">
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
             {session.title}
           </h3>
         </div>
@@ -241,11 +208,7 @@ export function SessionCard({
             type="button"
             onClick={() => onTransition(session.id, "open")}
             disabled={transitionPending}
-<<<<<<< HEAD
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
-=======
             className="apple-press inline-flex items-center rounded-full bg-slate-900 px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           >
             {isThisTransitioning
               ? status === "CLOSED"
@@ -270,11 +233,7 @@ export function SessionCard({
 
         <Link
           href={getSessionDetailRoute(courseId, session.id)}
-<<<<<<< HEAD
-          className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700"
-=======
           className="apple-press inline-flex items-center rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
         >
           Open workspace
         </Link>

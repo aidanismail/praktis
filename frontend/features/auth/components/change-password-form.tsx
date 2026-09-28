@@ -93,23 +93,6 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
             Current password
           </label>
 
-<<<<<<< HEAD
-          <input
-            id="current_password"
-            type="password"
-            placeholder="Enter your current password"
-            autoComplete="current-password"
-            disabled={changePasswordMutation.isPending}
-            aria-invalid={Boolean(form.formState.errors.current_password)}
-            aria-describedby={
-              form.formState.errors.current_password
-                ? "current-password-error"
-                : undefined
-            }
-            className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
-            {...form.register("current_password")}
-          />
-=======
           <div className="relative">
             <input
               id="current_password"
@@ -145,7 +128,6 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
               )}
             </button>
           </div>
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 
           {form.formState.errors.current_password ? (
             <p id="current-password-error" className="text-sm text-red-600">
@@ -170,17 +152,12 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
               autoComplete="new-password"
               disabled={changePasswordMutation.isPending}
               aria-invalid={Boolean(form.formState.errors.new_password)}
-<<<<<<< HEAD
-              aria-describedby={form.formState.errors.new_password ? "new-password-error" : undefined}
-              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 pr-10 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
-=======
               aria-describedby={
                 form.formState.errors.new_password
                   ? "new-password-error"
                   : undefined
               }
               className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 pr-11 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
               {...form.register("new_password")}
             />
 
@@ -188,15 +165,10 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
               type="button"
               onClick={() => setShowNewPassword((value) => !value)}
               disabled={changePasswordMutation.isPending}
-<<<<<<< HEAD
-              className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-200 disabled:opacity-60"
-              aria-label={showPassword ? "Hide password" : "Show password"}
-=======
               className="absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 disabled:opacity-60"
               aria-label={
                 showNewPassword ? "Hide new password" : "Show new password"
               }
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
             >
               {showNewPassword ? (
                 <EyeSlash className="h-4 w-4" />
@@ -221,19 +193,6 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
             Confirm new password
           </label>
 
-<<<<<<< HEAD
-          <input
-            id="confirm_password"
-            type={showPassword ? "text" : "password"}
-            placeholder="Repeat your new password"
-            autoComplete="new-password"
-            disabled={changePasswordMutation.isPending}
-            aria-invalid={Boolean(form.formState.errors.confirm_password)}
-            aria-describedby={form.formState.errors.confirm_password ? "confirm-password-error" : undefined}
-            className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
-            {...form.register("confirm_password")}
-          />
-=======
           <div className="relative">
             <input
               id="confirm_password"
@@ -269,7 +228,6 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
               )}
             </button>
           </div>
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 
           {form.formState.errors.confirm_password ? (
             <p id="confirm-password-error" className="text-sm text-red-600">
@@ -281,11 +239,7 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
         <button
           type="submit"
           disabled={changePasswordMutation.isPending}
-<<<<<<< HEAD
-          className="flex h-11 w-full items-center justify-center rounded-xl bg-brand px-4 text-sm font-medium text-white transition hover:bg-[#122044] disabled:cursor-not-allowed disabled:opacity-70"
-=======
           className="flex h-11 w-full cursor-pointer items-center justify-center rounded-full bg-slate-900 px-4 text-sm font-semibold text-white apple-press transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-70"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
         >
           {changePasswordMutation.isPending ? (
             <>

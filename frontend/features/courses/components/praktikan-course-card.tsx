@@ -1,8 +1,5 @@
-<<<<<<< HEAD
-=======
 "use client";
 
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import type { Course } from "../types/course.type";
 import {
   getThemeConfig,
@@ -23,16 +20,10 @@ export function PraktikanCourseCard({ course }: PraktikanCourseCardProps) {
   const patternCfg = getPatternConfig(cTheme.patternId);
 
   return (
-<<<<<<< HEAD
-    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs transition hover:shadow-md">
-      <div
-        className={`relative min-h-28 p-5 text-white ${
-=======
     <article className="group bg-white rounded-3xl border border-slate-200 shadow-xs apple-card-hover overflow-hidden cursor-pointer flex flex-col justify-between h-full">
       {/* Customizable Card Header Banner */}
       <div
         className={`${
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           !cTheme.imageUrl ? theme.gradientClass : "bg-slate-900"
         } p-5 text-white relative overflow-hidden`}
       >
@@ -50,31 +41,6 @@ export function PraktikanCourseCard({ course }: PraktikanCourseCardProps) {
             className={`absolute inset-0 pointer-events-none ${patternCfg.overlayClass}`}
           />
         )}
-<<<<<<< HEAD
-
-        <div className="relative z-10 flex items-start justify-between">
-          <span className="text-xs font-semibold uppercase tracking-wider text-white/90 drop-shadow-xs">
-            {course.code}
-          </span>
-          {!course.is_active ? (
-            <span className="text-xs font-medium text-white/70">
-              Archived
-            </span>
-          ) : null}
-        </div>
-        <h3 className="relative z-10 mt-2 line-clamp-1 text-lg font-bold tracking-tight text-white drop-shadow-xs">
-          {course.name}
-        </h3>
-      </div>
-
-      <div className="flex flex-1 flex-col justify-between p-4 bg-white text-xs">
-        <p className="text-slate-600 font-medium">
-          Academic year {course.academic_year} · Semester {course.semester}
-        </p>
-        <span className="mt-4 inline-flex items-center text-sm font-semibold text-slate-900 group-hover:text-slate-700">
-          Open practicum class
-        </span>
-=======
         <div className="relative z-10">
           <div className="flex items-center gap-2 text-[11px]">
             <span className="text-[10px] font-bold uppercase tracking-wider text-white/90 drop-shadow-xs">
@@ -121,7 +87,6 @@ export function PraktikanCourseCard({ course }: PraktikanCourseCardProps) {
             Semester {course.semester}
           </span>
         </div>
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
       </div>
     </article>
   );

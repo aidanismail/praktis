@@ -1,14 +1,6 @@
 "use client";
 
 import {
-<<<<<<< HEAD
-  AlertCircle,
-  Download,
-  Loader2,
-  RefreshCw,
-  Search
-} from "lucide-react";
-=======
   WarningCircle,
   DownloadSimple,
   FileText,
@@ -17,7 +9,6 @@ import {
   Users
 } from "@phosphor-icons/react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ROUTES } from "@/constants/routes";
@@ -243,13 +234,6 @@ export function AssignmentSubmissions({
             Review submitted files and provide private scores and feedback.
           </p>
         </div>
-<<<<<<< HEAD
-
-        <span className="text-sm font-medium text-slate-500">
-          {submissions.length} {submissions.length === 1 ? "submission" : "submissions"}
-        </span>
-=======
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
       </div>
 
       {query.isFetching ? (
@@ -292,11 +276,7 @@ export function AssignmentSubmissions({
                   value={searchValue}
                   onChange={(event) => setSearchValue(event.target.value)}
                   placeholder="Search NPM or email"
-<<<<<<< HEAD
-                  className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3 text-sm text-slate-950 outline-none focus:border-slate-900 focus:ring-4 focus:ring-slate-100"
-=======
                   className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3 text-sm text-slate-950 outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                 />
               </div>
             </div>
@@ -315,11 +295,7 @@ export function AssignmentSubmissions({
                 onChange={(event) =>
                   setFilter(event.target.value as SubmissionFilter)
                 }
-<<<<<<< HEAD
-                className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none focus:border-slate-900 focus:ring-4 focus:ring-slate-100"
-=======
                 className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
               >
                 <option value="all">All submissions</option>
                 <option value="awaiting-grade">Awaiting grade</option>
@@ -467,11 +443,7 @@ export function AssignmentSubmissions({
                             expanded ? null : submission.id
                           )
                         }
-<<<<<<< HEAD
-                        className="inline-flex min-h-11 items-center rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
-=======
                         className="inline-flex min-h-11 items-center rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white shadow-xs transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                       >
                         {graded ? "Edit grade" : "Grade submission"}
                       </button>

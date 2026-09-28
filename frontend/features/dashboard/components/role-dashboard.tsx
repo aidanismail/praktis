@@ -3,14 +3,11 @@ import type { Course } from "@/features/courses/types/course.type";
 import type { DashboardNavItem } from "../constants/dashboard-navigation";
 import { DashboardPlaceholderCard } from "./dashboard-placeholder-card";
 import { AsprakCourseList } from "@/features/courses/components/asprak-course-list";
-<<<<<<< HEAD
-=======
 import { AsprakCourseOverview } from "@/features/courses/components/asprak-course-overview";
 import {
   AsprakCourseWorkspace,
   type AsprakWorkspaceTab
 } from "@/features/courses/components/asprak-course-workspace";
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import { AdminOverview } from "@/features/admin/components/admin-overview";
 import { UserManagement } from "@/features/admin/components/user-management";
 import { BulkImportForm } from "@/features/admin/components/bulk-import-form";
@@ -19,13 +16,10 @@ import { AttendanceReportsView } from "@/features/admin/components/attendance-re
 import { GradeExportsView } from "@/features/admin/components/grade-exports-view";
 import { CourseManagement } from "@/features/admin/components/course-management";
 import { PraktikanCourseList } from "@/features/courses/components/praktikan-course-list";
-<<<<<<< HEAD
-=======
 import {
   PraktikanCourseWorkspace,
   type PraktikanWorkspaceTab
 } from "@/features/courses/components/praktikan-course-workspace";
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import { PraktikanAttendanceHistory } from "@/features/attendance/components/praktikan-attendance-history";
 import { PraktikanGradeHistory } from "@/features/grades/components/praktikan-grade-history";
 import { UserProfile } from "@/features/profile/components/user-profile";
@@ -85,15 +79,6 @@ export function RoleDashboard({
     }
 
     if (user.role === "asprak") {
-<<<<<<< HEAD
-      if (activeItem.id === "profile") {
-        return <PraktikanProfile user={user} />;
-      }
-      return <AsprakCourseList userId={user.id} />;
-    }
-
-    if (user.role === "praktikan") {
-=======
       if (activeItem.id === "overview") {
         return (
           <AsprakCourseOverview
@@ -103,7 +88,6 @@ export function RoleDashboard({
         );
       }
 
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
       if (activeItem.id === "classes") {
         if (activeCourse) {
           return (

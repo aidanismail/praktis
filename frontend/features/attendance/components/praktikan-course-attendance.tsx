@@ -1,11 +1,7 @@
 "use client";
 
-<<<<<<< HEAD
-import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
-=======
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { NotificationBanner } from "@/components/ui/notification-banner";
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import { useCourseSessions } from "@/features/sessions/hooks/use-course-sessions";
 import { getSessionAttendanceStatus } from "@/features/sessions/types/session.type";
 import { usePersonalAttendance } from "../hooks/use-personal-attendance";
@@ -41,48 +37,6 @@ function formatDate(value: string) {
 export function PraktikanCourseAttendance({ userId, courseId }: Props) {
   const sessionsQuery = useCourseSessions({ userId, courseId, enabled: true });
   const attendanceQuery = usePersonalAttendance(userId);
-<<<<<<< HEAD
-  if (sessionsQuery.isPending || attendanceQuery.isPending) return <div role="status" className="flex min-h-56 items-center justify-center rounded-2xl border border-slate-200 bg-white"><Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" /><span className="ml-3 text-sm text-slate-600">Loading sessions and attendance...</span></div>;
-  if (sessionsQuery.isError || attendanceQuery.isError) return <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-6"><AlertCircle className="h-5 w-5 text-red-600" aria-hidden="true" /><h2 className="mt-3 font-semibold text-red-950">Couldn&apos;t load sessions or attendance</h2><p className="mt-1 text-sm text-red-800">Something went wrong while fetching the schedule. Let&apos;s give it another shot.</p><button type="button" onClick={() => { void sessionsQuery.refetch(); void attendanceQuery.refetch(); }} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-red-700 px-4 text-sm font-semibold text-white"><RefreshCw className="h-4 w-4" aria-hidden="true" />Try again</button></div>;
-  const attendance = new Map((attendanceQuery.data ?? []).filter((row) => row.course_id === courseId).map((row) => [row.session_id, row]));
-  const sessions = [...(sessionsQuery.data ?? [])].sort((a, b) => a.date.localeCompare(b.date));
-
-  return (
-    <section aria-labelledby="praktikan-sessions-heading">
-      <div className="border-b border-slate-200 pb-4">
-        <h2 id="praktikan-sessions-heading" className="text-xl font-semibold text-slate-950">Sessions &amp; Attendance</h2>
-        <p className="mt-1 text-sm text-slate-600">Track your class schedule and personal attendance records for each session.</p>
-      </div>
-      {sessions.length === 0 ? (
-        <div role="status" className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
-          <h3 className="text-base font-semibold text-slate-950">No sessions scheduled yet</h3>
-          <p className="mt-1 text-sm text-slate-600">Upcoming lab sessions and attendance windows will show up here once created.</p>
-        </div>
-      ) : (
-        <div className="mt-5 grid gap-4 lg:grid-cols-2">
-          {sessions.map((session) => {
-            const record = attendance.get(session.id);
-            const windowState = getSessionAttendanceStatus(session.attendance_status);
-            return (
-              <article key={session.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <h3 className="font-semibold text-slate-950">{session.title}</h3>
-                    <p className="mt-1 text-sm text-slate-600"><time dateTime={session.date}>{formatDate(session.date)}</time></p>
-                  </div>
-                  <span className="text-xs text-slate-500 font-medium">
-                    Window: {windowState === "UNKNOWN" ? "Unavailable" : windowState.toLowerCase()}
-                  </span>
-                </div>
-                <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
-                  <span className="text-xs text-slate-500">Attendance</span>
-                  {record ? (
-                    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${styles[record.status]}`}>
-                      {labels[record.status]}
-                    </span>
-                  ) : (
-                    <span className="text-xs text-slate-400">Not recorded yet</span>
-=======
 
   if (sessionsQuery.isPending || attendanceQuery.isPending) {
     return (
@@ -187,7 +141,6 @@ export function PraktikanCourseAttendance({ userId, courseId }: Props) {
                     <span className="text-slate-400 font-medium">
                       Not recorded yet
                     </span>
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
                   )}
                 </div>
               </article>

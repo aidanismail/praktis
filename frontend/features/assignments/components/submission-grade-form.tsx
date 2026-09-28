@@ -140,11 +140,7 @@ export function SubmissionGradeForm({
           aria-describedby={
             form.formState.errors.score ? `${scoreId}-error` : undefined
           }
-<<<<<<< HEAD
-          className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-slate-900 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100"
-=======
           className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           {...form.register("score")}
         />
 
@@ -169,11 +165,7 @@ export function SubmissionGradeForm({
           rows={4}
           disabled={mutation.isPending}
           placeholder="Add constructive notes or feedback for the student..."
-<<<<<<< HEAD
-          className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-900 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100"
-=======
           className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           {...form.register("feedback")}
         />
       </div>
@@ -194,11 +186,7 @@ export function SubmissionGradeForm({
         <button
           type="submit"
           disabled={mutation.isPending}
-<<<<<<< HEAD
-          className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand px-5 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
-=======
           className="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-5 text-sm font-semibold text-white shadow-xs transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
         >
           {mutation.isPending ? (
             <>

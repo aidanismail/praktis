@@ -113,11 +113,7 @@ export function SessionForm({
               form.formState.errors.title ? `${titleId}-error` : undefined
             }
             {...form.register("title")}
-<<<<<<< HEAD
-            className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-900 focus:ring-2 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100"
-=======
             className={inputCls}
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
             placeholder="e.g. Session 1: Getting Started"
           />
           {form.formState.errors.title ? (
@@ -147,11 +143,7 @@ export function SessionForm({
               form.formState.errors.date ? `${dateId}-error` : undefined
             }
             {...form.register("date")}
-<<<<<<< HEAD
-            className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100"
-=======
             className={inputCls}
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           />
           {form.formState.errors.date ? (
             <p
@@ -171,22 +163,7 @@ export function SessionForm({
         </p>
       ) : null}
 
-<<<<<<< HEAD
-      <div className="mt-4 flex flex-wrap gap-2">
-        <button
-          type="submit"
-          disabled={isPending}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-brand px-4 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
-        >
-          {isPending ? (
-            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-          ) : null}
-          {isPending ? pendingLabel : submitLabel}
-        </button>
-
-=======
       <div className="flex flex-wrap items-center justify-end gap-2 pt-1">
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
         {onCancel ? (
           <button
             type="button"

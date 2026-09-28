@@ -1,15 +1,6 @@
 "use client";
 
-<<<<<<< HEAD
-import {
-  AlertCircle,
-  ArrowLeft,
-  Loader2,
-  RefreshCw
-} from "lucide-react";
-=======
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -148,12 +139,6 @@ function SessionHeader({ session, course }: { session: CourseSession; course?: C
     : "bg-brand";
 
   return (
-<<<<<<< HEAD
-    <header className="rounded-2xl bg-gradient-to-r from-[#080E21] via-[#0E1A38] to-[#162750] p-6 text-white shadow-xs sm:p-8">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-wider text-white/80">
-=======
     <header className={`rounded-3xl p-6 text-white shadow-sm relative overflow-hidden sm:p-8 ${bannerGradient}`}>
       {courseTheme?.imageUrl && (
         <>
@@ -173,24 +158,11 @@ function SessionHeader({ session, course }: { session: CourseSession; course?: C
       <div className="relative z-10 flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-wider text-slate-300">
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
             Session workspace
           </p>
           <h1 className="mt-2 wrap-break-word text-2xl font-bold tracking-tight sm:text-3xl">
             {session.title}
           </h1>
-<<<<<<< HEAD
-          <time dateTime={session.date} className="mt-2 block text-sm text-white/90">
-            {session.date}
-          </time>
-        </div>
-        <div className="space-y-1 text-left sm:text-right">
-          <span className="block text-xs font-medium text-white/90">
-            {label}
-          </span>
-          <span className="block text-xs text-white/70">
-            Grades {session.grades_published ? "published" : "draft"}
-=======
           <p className="mt-2 text-sm text-slate-300">
             <time dateTime={session.date}>{session.date}</time>
           </p>
@@ -205,7 +177,6 @@ function SessionHeader({ session, course }: { session: CourseSession; course?: C
               : "bg-amber-500/20 border-amber-400/30 text-amber-200"
           }`}>
             {gradesLabel}
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           </span>
         </div>
       </div>
@@ -269,12 +240,6 @@ export function AssignedSessionDetail({
 
   if (!course) {
     return (
-<<<<<<< HEAD
-      <PageFrame>
-        <div role="alert" className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
-          <h1 className="text-lg font-semibold text-amber-950">Course is unavailable</h1>
-          <p className="mt-2 text-sm text-amber-800">This course is not part of your assigned practicum classes.</p>
-=======
       <div role="alert" className="rounded-3xl border border-amber-200 bg-amber-50 p-6">
         <h1 className="text-lg font-semibold text-amber-950">Course is unavailable</h1>
         <p className="mt-2 text-sm text-amber-800">This course is not part of your assigned practicum classes.</p>
@@ -283,7 +248,6 @@ export function AssignedSessionDetail({
             Return to dashboard
           </button>
         ) : (
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           <Link href={ROUTES.dashboard} className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-amber-900 underline underline-offset-4">
             Return to dashboard
           </Link>
@@ -314,12 +278,6 @@ export function AssignedSessionDetail({
 
   if (!session) {
     return (
-<<<<<<< HEAD
-      <PageFrame>
-        <div role="alert" className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
-          <h1 className="text-lg font-semibold text-amber-950">Session is unavailable</h1>
-          <p className="mt-2 text-sm text-amber-800">This session does not belong to the selected assigned course.</p>
-=======
       <div role="alert" className="rounded-3xl border border-amber-200 bg-amber-50 p-6">
         <h1 className="text-lg font-semibold text-amber-950">Session is unavailable</h1>
         <p className="mt-2 text-sm text-amber-800">This session does not belong to the selected assigned course.</p>
@@ -329,7 +287,6 @@ export function AssignedSessionDetail({
             Back to sessions
           </button>
         ) : (
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           <Link href={getCourseDetailRoute(courseId, "sessions")} className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-amber-900 underline underline-offset-4">
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             Back to sessions
@@ -347,19 +304,6 @@ export function AssignedSessionDetail({
   }
 
   return (
-<<<<<<< HEAD
-    <PageFrame>
-      <Link href={getCourseDetailRoute(courseId, "sessions")} onClick={confirmBackNavigation} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-xs transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900">
-        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        Back to Sessions &amp; Attendance
-      </Link>
-      <p className="mt-5 text-sm font-medium text-slate-600">
-        {course.code} · {course.name}
-      </p>
-      <div className="mt-4 space-y-6">
-        <SessionHeader session={session} />
-        
-=======
     <div>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <button
@@ -451,7 +395,6 @@ export function AssignedSessionDetail({
       </p>
       <div className="mt-4 space-y-6">
         <SessionHeader session={session} course={course} />
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
         <SessionAttendanceRegister
           userId={userId}
           courseId={courseId}

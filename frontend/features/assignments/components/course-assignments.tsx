@@ -1,10 +1,6 @@
 "use client";
 
-<<<<<<< HEAD
-import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
-=======
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
 import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
@@ -217,31 +213,16 @@ export function CourseAssignments({
           </p>
         </div>
 
-<<<<<<< HEAD
-        <span
-          aria-live="polite"
-          className="text-xs font-medium text-slate-500"
-        >
-          {assignments.length} {assignments.length === 1 ? "assignment" : "assignments"}
-        </span>
-=======
         {isFetching ? (
           <span role="status" className="text-xs text-slate-400 font-medium">
             Updating...
           </span>
         ) : null}
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
       </div>
 
       {assignments.length === 0 ? (
         <div
           role="status"
-<<<<<<< HEAD
-          className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center"
-        >
-          <h3 className="text-base font-semibold text-slate-950">
-            No assignments yet
-=======
           className="rounded-2xl border border-dashed border-slate-200 bg-white/70 p-8 text-center"
         >
           <Clipboard
@@ -250,7 +231,6 @@ export function CourseAssignments({
           />
           <h3 className="mt-2 text-sm font-semibold text-slate-900">
             No assignments posted yet
->>>>>>> 2aeaa1505e827562a47f8f2ffea40134cd06c5fe
           </h3>
           <p className="mt-1 text-xs text-slate-500">
             No assignments have been published for this course yet.
