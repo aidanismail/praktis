@@ -2,7 +2,6 @@ import type { User } from "@/types/user.type";
 import type { DashboardNavItem } from "../constants/dashboard-navigation";
 import { DashboardPlaceholderCard } from "./dashboard-placeholder-card";
 import { AsprakCourseList } from "@/features/courses/components/asprak-course-list";
-import { AsprakCourseOverview } from "@/features/courses/components/asprak-course-overview";
 import { AdminOverview } from "@/features/admin/components/admin-overview";
 import { UserManagement } from "@/features/admin/components/user-management";
 import { BulkImportForm } from "@/features/admin/components/bulk-import-form";
@@ -11,7 +10,6 @@ import { AttendanceReportsView } from "@/features/admin/components/attendance-re
 import { GradeExportsView } from "@/features/admin/components/grade-exports-view";
 import { CourseManagement } from "@/features/admin/components/course-management";
 import { PraktikanCourseList } from "@/features/courses/components/praktikan-course-list";
-import { PraktikanCourseOverview } from "@/features/courses/components/praktikan-course-overview";
 import { PraktikanAttendanceHistory } from "@/features/attendance/components/praktikan-attendance-history";
 import { PraktikanGradeHistory } from "@/features/grades/components/praktikan-grade-history";
 import { PraktikanProfile } from "@/features/profile/components/praktikan-profile";
@@ -63,25 +61,13 @@ export function RoleDashboard({
     }
 
     if (user.role === "asprak") {
-      if (activeItem.id === "overview") {
-        return <AsprakCourseOverview userId={user.id} />;
+      if (activeItem.id === "profile") {
+        return <PraktikanProfile user={user} />;
       }
-
-      if (activeItem.id === "classes") {
-        return <AsprakCourseList userId={user.id} />;
-      }
+      return <AsprakCourseList userId={user.id} />;
     }
 
     if (user.role === "praktikan") {
-      if (activeItem.id === "overview") {
-        return (
-          <PraktikanCourseOverview
-            userId={user.id}
-            onViewClasses={() => onNavigateToNavItem("classes")}
-          />
-        );
-      }
-
       if (activeItem.id === "classes") {
         return <PraktikanCourseList userId={user.id} />;
       }

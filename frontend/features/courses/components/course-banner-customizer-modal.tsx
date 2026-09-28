@@ -193,12 +193,12 @@ export function CourseBannerCustomizerModal({
             )}
 
             <div className="relative z-10 flex items-start justify-between gap-2">
-              <span className={`text-[10px] font-bold uppercase tracking-wider ${themeCfg.badgeBg} px-2.5 py-0.5 rounded-full backdrop-blur-xs`}>
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-white/90 drop-shadow-xs">
                 {course.code}
               </span>
 
               <div className="flex items-center gap-1.5">
-                <span className="text-[11px] font-medium bg-white/10 px-2.5 py-0.5 rounded-lg border border-white/10 backdrop-blur-xs">
+                <span className="text-[11px] font-medium text-white/80">
                   {course.semester} {course.academic_year}
                 </span>
 

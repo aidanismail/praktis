@@ -3,11 +3,9 @@
 import {
   AlertCircle,
   Download,
-  FileText,
   Loader2,
   RefreshCw,
-  Search,
-  Users
+  Search
 } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -216,9 +214,9 @@ export function AssignmentSubmissions({
     <section
       aria-labelledby="assignment-submissions-heading"
       aria-busy={query.isFetching}
-      className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+      className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs"
     >
-      <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
           <h2
             id="assignment-submissions-heading"
@@ -232,7 +230,7 @@ export function AssignmentSubmissions({
           </p>
         </div>
 
-        <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
+        <span className="text-sm font-medium text-slate-500">
           {submissions.length} {submissions.length === 1 ? "submission" : "submissions"}
         </span>
       </div>
@@ -248,11 +246,7 @@ export function AssignmentSubmissions({
           role="status"
           className="mt-6 rounded-2xl border border-dashed border-slate-300 px-6 py-12 text-center"
         >
-          <Users
-            className="mx-auto h-9 w-9 text-slate-400"
-            aria-hidden="true"
-          />
-          <h3 className="mt-3 font-semibold text-slate-950">
+          <h3 className="text-base font-semibold text-slate-950">
             No submissions yet
           </h3>
           <p className="mt-1 text-sm text-slate-600">
@@ -281,7 +275,7 @@ export function AssignmentSubmissions({
                   value={searchValue}
                   onChange={(event) => setSearchValue(event.target.value)}
                   placeholder="Search NPM or email"
-                  className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3 text-sm text-slate-950 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50"
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3 text-sm text-slate-950 outline-none focus:border-slate-900 focus:ring-4 focus:ring-slate-100"
                 />
               </div>
             </div>
@@ -300,7 +294,7 @@ export function AssignmentSubmissions({
                 onChange={(event) =>
                   setFilter(event.target.value as SubmissionFilter)
                 }
-                className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50"
+                className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none focus:border-slate-900 focus:ring-4 focus:ring-slate-100"
               >
                 <option value="all">All submissions</option>
                 <option value="awaiting-grade">Awaiting grade</option>
@@ -385,24 +379,20 @@ export function AssignmentSubmissions({
                       </div>
                     </div>
 
-                    <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-                      <div className="rounded-xl bg-slate-50 p-3">
-                        <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                          File
-                        </dt>
-                        <dd className="mt-1 wrap-break-word text-slate-900">
+                    <dl className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-slate-600">
+                      <div>
+                        <dt className="inline text-slate-500">File: </dt>
+                        <dd className="inline font-medium text-slate-900">
                           {submission.file_name}
-                        </dd>
-                        <dd className="mt-1 text-xs text-slate-500">
-                          {formatFileSize(submission.file_size)}
-                        </dd>
+                        </dd>{" "}
+                        <span className="text-xs text-slate-400">
+                          ({formatFileSize(submission.file_size)})
+                        </span>
                       </div>
 
-                      <div className="rounded-xl bg-slate-50 p-3">
-                        <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                          Submitted
-                        </dt>
-                        <dd className="mt-1 text-slate-900">
+                      <div>
+                        <dt className="inline text-slate-500">Submitted: </dt>
+                        <dd className="inline text-slate-900">
                           <time dateTime={submission.submitted_at}>
                             {formatDate(submission.submitted_at)}
                           </time>
@@ -411,11 +401,11 @@ export function AssignmentSubmissions({
                     </dl>
 
                     {submission.feedback ? (
-                      <div className="mt-4 rounded-xl bg-slate-50 p-3">
+                      <div className="mt-3 border-t border-slate-100 pt-3">
                         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                           Private feedback
                         </p>
-                        <p className="mt-2 whitespace-pre-wrap wrap-break-word text-sm leading-6 text-slate-700">
+                        <p className="mt-1 whitespace-pre-wrap wrap-break-word text-sm text-slate-700">
                           {submission.feedback}
                         </p>
                       </div>
@@ -434,8 +424,7 @@ export function AssignmentSubmissions({
                           Download submission
                         </a>
                       ) : (
-                        <span className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-100 px-4 text-sm text-slate-500">
-                          <FileText className="h-4 w-4" aria-hidden="true" />
+                        <span className="inline-flex min-h-11 items-center rounded-xl bg-slate-100 px-4 text-sm text-slate-500">
                           Download unavailable
                         </span>
                       )}
@@ -451,7 +440,7 @@ export function AssignmentSubmissions({
                             expanded ? null : submission.id
                           )
                         }
-                        className="inline-flex min-h-11 items-center rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
+                        className="inline-flex min-h-11 items-center rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
                       >
                         {graded ? "Edit grade" : "Grade submission"}
                       </button>

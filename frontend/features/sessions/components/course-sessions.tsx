@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, CalendarRange, Loader2, RefreshCw } from "lucide-react";
+import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
@@ -130,7 +130,7 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
     <section aria-labelledby="course-sessions-heading" aria-busy={sessionsQuery.isFetching}>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
             Schedule &amp; attendance
           </p>
           <h2
@@ -149,7 +149,7 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
             type="button"
             onClick={() => void sessionsQuery.refetch()}
             disabled={sessionsQuery.isFetching}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
           >
             <RefreshCw
               className={
@@ -167,7 +167,7 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
       {hasLoadedData && !accessError ? (
         <section
           aria-labelledby="create-session-heading"
-          className="mt-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+          className="mt-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-xs sm:p-6"
         >
           <h3 id="create-session-heading" className="font-semibold text-slate-950">
             Schedule a session
@@ -195,7 +195,7 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
         <div
           role="status"
           aria-live="polite"
-          className="mt-5 flex min-h-48 items-center justify-center rounded-3xl border border-slate-200 bg-white"
+          className="mt-5 flex min-h-48 items-center justify-center rounded-2xl border border-slate-200 bg-white"
         >
           <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
           <span className="ml-3 text-sm text-slate-600">Loading class sessions...</span>
@@ -203,7 +203,7 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
       ) : null}
 
       {blockingError ? (
-        <div role="alert" className="mt-5 rounded-3xl border border-red-200 bg-red-50 p-6">
+        <div role="alert" className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-6">
           <div className="flex items-start gap-3">
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" aria-hidden="true" />
             <div>
@@ -260,9 +260,8 @@ export function CourseSessions({ userId, courseId }: CourseSessionsProps) {
           ) : null}
 
           {sessions.length === 0 ? (
-            <div role="status" className="mt-5 rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
-              <CalendarRange className="mx-auto h-9 w-9 text-slate-400" aria-hidden="true" />
-              <h3 className="mt-3 font-semibold text-slate-950">No sessions scheduled yet</h3>
+            <div role="status" className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
+              <h3 className="text-base font-semibold text-slate-950">No sessions scheduled yet</h3>
               <p className="mt-1 text-sm text-slate-600">
                 Add your first lab session using the form above.
               </p>

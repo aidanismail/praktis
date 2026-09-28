@@ -3,12 +3,8 @@
 import {
   AlertCircle,
   ArrowLeft,
-  CalendarClock,
-  FileText,
-  Gauge,
   Loader2,
-  RefreshCw,
-  Users
+  RefreshCw
 } from "lucide-react";
 import Link from "next/link";
 import { getCourseDetailRoute, ROUTES } from "@/constants/routes";
@@ -199,11 +195,10 @@ function AssignmentSummary({ assignment }: { assignment: Assignment }) {
           </h1>
         </div>
 
-        <div className="inline-flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700">
-          <Users className="h-4 w-4" aria-hidden="true" />
+        <span className="text-sm font-medium text-slate-500">
           {assignment.submissions_count}{" "}
           {assignment.submissions_count === 1 ? "submission" : "submissions"}
-        </div>
+        </span>
       </div>
 
       {assignment.description ? (
@@ -216,13 +211,10 @@ function AssignmentSummary({ assignment }: { assignment: Assignment }) {
         </p>
       )}
 
-      <dl className="mt-6 grid gap-3 sm:grid-cols-3">
-        <div className="rounded-2xl bg-slate-50 p-4">
-          <dt className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-            <CalendarClock className="h-4 w-4" aria-hidden="true" />
-            Due
-          </dt>
-          <dd className="mt-2 text-sm font-medium text-slate-900">
+      <dl className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-slate-100 pt-4 text-sm">
+        <div>
+          <dt className="inline text-slate-500">Due: </dt>
+          <dd className="inline font-medium text-slate-900">
             {assignment.due_date ? (
               <time dateTime={assignment.due_date}>
                 {formatDate(assignment.due_date)}
@@ -233,34 +225,17 @@ function AssignmentSummary({ assignment }: { assignment: Assignment }) {
           </dd>
         </div>
 
-        <div className="rounded-2xl bg-slate-50 p-4">
-          <dt className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-            <Gauge className="h-4 w-4" aria-hidden="true" />
-            Points
-          </dt>
-          <dd className="mt-2 text-sm font-medium text-slate-900">
-            {assignment.max_points} maximum
+        <div>
+          <dt className="inline text-slate-500">Points: </dt>
+          <dd className="inline font-medium text-slate-900">
+            {assignment.max_points} max
           </dd>
         </div>
 
-        <div className="rounded-2xl bg-slate-50 p-4">
-          <dt className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-            <FileText className="h-4 w-4" aria-hidden="true" />
-            Formats
-          </dt>
-          <dd className="mt-2 flex flex-wrap gap-1.5">
-            {allowedFileTypes.length > 0 ? (
-              allowedFileTypes.map((fileType) => (
-                <span
-                  key={fileType}
-                  className="rounded-lg bg-white px-2 py-1 text-xs font-semibold uppercase text-slate-700"
-                >
-                  {fileType}
-                </span>
-              ))
-            ) : (
-              <span className="text-sm text-slate-600">None listed</span>
-            )}
+        <div>
+          <dt className="inline text-slate-500">Formats: </dt>
+          <dd className="inline font-medium uppercase text-slate-900">
+            {allowedFileTypes.length > 0 ? allowedFileTypes.join(", ") : "None listed"}
           </dd>
         </div>
       </dl>
@@ -386,13 +361,13 @@ function AssignedAssignmentDetail({
     <DetailPageFrame>
       <Link
         href={getCourseDetailRoute(courseId, "assignments")}
-        className="inline-flex min-h-11 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+        className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-xs transition hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         Back to Assignments
       </Link>
 
-      <p className="mt-5 text-sm font-medium text-emerald-700">
+      <p className="mt-5 text-sm font-medium text-slate-600">
         {course.code} · {course.name}
       </p>
 

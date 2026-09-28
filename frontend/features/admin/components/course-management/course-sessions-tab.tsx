@@ -2,8 +2,6 @@
 
 import React, { useState, useMemo } from "react";
 import {
-  Calendar,
-  Clock,
   Download,
   Lock,
   Plus,
@@ -121,14 +119,13 @@ export function CourseSessionsTab({
     <div className="space-y-5">
       {/* Action Bar Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-          <Clock className="w-4 h-4 text-slate-700" />
-          <span>Class Sessions & Live Attendance</span>
+        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+          Class Sessions & Live Attendance
         </h3>
         <button
           type="button"
           onClick={() => setShowCreateModal(true)}
-          className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-full shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+          className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>Add Session</span>
@@ -136,7 +133,7 @@ export function CourseSessionsTab({
       </div>
 
       {sessions.length === 0 ? (
-        <div className="text-center p-8 bg-white border border-dashed border-slate-200 rounded-3xl text-xs text-slate-400">
+        <div className="text-center p-8 bg-white border border-dashed border-slate-200 rounded-2xl text-xs text-slate-400">
           No lab sessions scheduled yet. Click &quot;Add Session&quot; to plan one.
         </div>
       ) : (
@@ -146,14 +143,13 @@ export function CourseSessionsTab({
             return (
               <div
                 key={s.id}
-                className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden"
+                className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden"
               >
                 <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <span className="font-bold text-xs text-slate-900 block">{s.title}</span>
-                    <span className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
-                      <Calendar className="w-3 h-3" />
-                      <span>Date: {s.date}</span>
+                    <span className="text-[11px] text-slate-500 mt-0.5 block">
+                      {s.date}
                     </span>
                   </div>
 
@@ -161,7 +157,7 @@ export function CourseSessionsTab({
                     <button
                       type="button"
                       onClick={() => setInspectingSessionId(isInspecting ? null : s.id)}
-                      className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
                         isInspecting
                           ? "bg-slate-900 text-white"
                           : "bg-slate-100 text-slate-700 hover:bg-slate-200"
@@ -174,7 +170,7 @@ export function CourseSessionsTab({
                     <button
                       type="button"
                       onClick={() => handleToggleWindow(s)}
-                      className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
                         s.attendance_status === "OPEN"
                           ? "border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100"
                           : "bg-slate-100 text-slate-700 hover:bg-slate-200"
@@ -195,7 +191,7 @@ export function CourseSessionsTab({
 
                     <a
                       href={getAttendanceExportUrl(s.id, "csv")}
-                      className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-full text-xs flex items-center gap-1 transition-colors"
+                      className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl text-xs flex items-center gap-1 transition-colors"
                     >
                       <Download className="w-3.5 h-3.5" />
                       <span>CSV</span>
@@ -252,7 +248,7 @@ export function CourseSessionsTab({
                                         type="button"
                                         onClick={() => handleUpdateRecord(st.id, statusOption)}
                                         disabled={isUpdatingThis}
-                                        className={`px-3 py-1 text-[10px] font-semibold capitalize rounded-full transition-all cursor-pointer ${
+                                        className={`px-3 py-1 text-[10px] font-semibold capitalize rounded-lg transition-all cursor-pointer ${
                                           isCurrent
                                             ? "bg-slate-900 text-white shadow-xs"
                                             : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -288,7 +284,7 @@ export function CourseSessionsTab({
         >
           <form
             onSubmit={handleCreateSubmit}
-            className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4 animate-apple-modal"
+            className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4 animate-apple-modal"
           >
             <h4 id="create-session-modal-title" className="font-bold text-sm text-slate-900">
               Schedule a Session
@@ -324,14 +320,14 @@ export function CourseSessionsTab({
               <button
                 type="button"
                 onClick={() => setShowCreateModal(false)}
-                className="px-4 py-2 border border-slate-200 rounded-full text-xs font-semibold text-slate-600 cursor-pointer"
+                className="px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-5 py-2 bg-slate-900 text-white rounded-full text-xs font-semibold hover:bg-slate-800 shadow-xs cursor-pointer"
+                className="px-5 py-2 bg-slate-900 text-white rounded-xl text-xs font-semibold hover:bg-slate-800 shadow-xs cursor-pointer"
               >
                 {isSubmitting ? "Saving..." : "Add Session"}
               </button>

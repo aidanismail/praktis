@@ -1,18 +1,15 @@
 "use client";
 
-import type { CourseWorkspaceTab } from "@/constants/routes";
-
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   AlertCircle,
   ArrowLeft,
-  CalendarDays,
   Loader2,
   RefreshCw,
   Palette
 } from "lucide-react";
-import { ROUTES } from "@/constants/routes";
+import { ROUTES, type CourseWorkspaceTab } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useAuthStore } from "@/stores/auth-store";
 import { useAssignedCourses } from "../hooks/use-assigned-courses";
@@ -89,7 +86,7 @@ function AssignedCourseDetail({
           role="status"
           aria-live="polite"
           className="flex min-h-72 items-center justify-center
-            rounded-3xl border border-slate-200 bg-white"
+            rounded-2xl border border-slate-200 bg-white"
         >
           <Loader2
             className="h-6 w-6 animate-spin text-slate-900"
@@ -111,7 +108,7 @@ function AssignedCourseDetail({
       <DetailPageFrame>
         <div
           role="alert"
-          className="rounded-3xl border border-red-200 bg-red-50 p-6"
+          className="rounded-2xl border border-red-200 bg-red-50 p-6"
         >
           <div className="flex items-start gap-3">
             <AlertCircle
@@ -140,7 +137,7 @@ function AssignedCourseDetail({
                 <Link
                   href={ROUTES.login}
                   className="mt-4 inline-flex items-center gap-2
-                    rounded-full bg-red-950 px-4 py-2 text-sm font-semibold
+                    rounded-xl bg-red-950 px-4 py-2 text-sm font-semibold
                     text-white transition hover:bg-red-900"
                 >
                   Return to sign in
@@ -162,7 +159,7 @@ function AssignedCourseDetail({
                   onClick={() => refetch()}
                   disabled={isFetching}
                   className="mt-4 inline-flex items-center gap-2
-                    rounded-full border border-red-300 bg-white px-4 py-2
+                    rounded-xl border border-red-300 bg-white px-4 py-2
                     text-sm font-semibold text-red-950 transition
                     hover:bg-red-100 disabled:cursor-not-allowed
                     disabled:opacity-60"
@@ -220,9 +217,7 @@ function AssignedCourseDetail({
       <div className="flex items-center justify-between">
         <Link
           href={ROUTES.dashboard}
-          className="inline-flex items-center gap-2 text-sm
-            font-medium text-slate-600 hover:text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2
-            focus-visible:outline-slate-900 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-full shadow-xs transition-colors"
+          className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 bg-white border border-slate-200 hover:bg-slate-50 px-3.5 py-1.5 rounded-xl shadow-xs transition-colors"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           Back to dashboard
@@ -231,7 +226,7 @@ function AssignedCourseDetail({
         <button
           type="button"
           onClick={() => setShowCustomizeModal(true)}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-full shadow-xs transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-3.5 py-1.5 rounded-xl shadow-xs transition-colors"
         >
           <Palette className="h-3.5 w-3.5" />
           <span>Customize Banner</span>
@@ -239,7 +234,7 @@ function AssignedCourseDetail({
       </div>
 
       <header
-        className={`mt-5 rounded-3xl p-6 sm:p-8 text-white shadow-xs relative overflow-hidden ${
+        className={`mt-4 rounded-2xl p-6 sm:p-8 text-white shadow-xs relative overflow-hidden ${
           !courseTheme.imageUrl ? themeCfg.gradientClass : "bg-slate-900"
         }`}
       >
@@ -261,37 +256,34 @@ function AssignedCourseDetail({
 
         <div className="relative z-10 flex flex-wrap items-start justify-between gap-4">
           <div>
-            <span
-              className={`text-xs font-bold uppercase tracking-wider ${themeCfg.badgeBg} px-3 py-1 rounded-full backdrop-blur-xs`}
-            >
+            <p className="text-xs font-semibold uppercase tracking-wider text-white/90 drop-shadow-xs">
               {course.code}
-            </span>
+            </p>
 
-            <h1
-              className="mt-3 text-2xl font-bold
-              tracking-tight text-white sm:text-3xl drop-shadow-xs"
-            >
+            <h1 className="mt-1.5 text-2xl font-bold tracking-tight text-white sm:text-3xl drop-shadow-xs">
               {course.name}
             </h1>
+
+            <p className="mt-2 text-sm text-white/80">
+              Academic year {course.academic_year} · Semester {course.semester}
+            </p>
           </div>
 
-          <span className="rounded-full bg-white/15 px-3.5 py-1 text-xs font-semibold text-white border border-white/10 backdrop-blur-xs">
-            {statusLabel}
-          </span>
-        </div>
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-medium text-white/90">
+              {statusLabel}
+            </span>
 
-        <div
-          className="mt-6 flex flex-wrap gap-x-6 gap-y-2
-          border-t border-white/15 pt-5 text-sm text-slate-200 relative z-10"
-        >
-          <span className="inline-flex items-center gap-2">
-            <CalendarDays
-              className="h-4 w-4 text-white/70"
-              aria-hidden="true"
-            />
-            Academic year {course.academic_year}
-          </span>
-          <span>Semester {course.semester}</span>
+            <button
+              type="button"
+              onClick={() => setShowCustomizeModal(true)}
+              className="rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 px-3 py-1.5 text-xs font-semibold text-white transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
+              title="Customize course banner"
+            >
+              <Palette className="w-3.5 h-3.5" />
+              <span>Customize</span>
+            </button>
+          </div>
         </div>
       </header>
 

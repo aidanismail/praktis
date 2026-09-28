@@ -193,7 +193,7 @@ export function DashboardShell({ user }: DashboardShellProps) {
             </div>
           ) : null}
 
-          {!activeCourse && (
+          {!activeCourse && activeItem.id !== "classes" && activeItem.id !== "courses" && (
             <div className="mb-5 sm:mb-6">
               <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
                 {activeItem.label}

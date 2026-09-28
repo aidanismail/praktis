@@ -2,9 +2,7 @@
 
 import { useState } from "react";
 import {
-  Clock,
   ChevronRight,
-  CalendarCheck,
   Send,
   Pin,
   PinOff,
@@ -90,9 +88,8 @@ export function CourseStreamTab({
         {/* Upcoming Deadlines Card */}
         <div className="bg-white rounded-3xl border border-slate-200 p-5 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
-            <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-              <Clock className="w-4 h-4 text-slate-700" />
-              <span>Upcoming</span>
+            <h4 className="text-xs font-bold text-slate-900">
+              Upcoming
             </h4>
             {assignments.length > 0 && (
               <button
@@ -147,9 +144,8 @@ export function CourseStreamTab({
           title="Go to session attendance management"
         >
           <div className="flex items-center justify-between">
-            <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-              <CalendarCheck className="w-4 h-4 text-slate-700" />
-              <span>Next Session</span>
+            <h4 className="text-xs font-bold text-slate-900">
+              Next Session
             </h4>
             <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
           </div>
@@ -246,7 +242,7 @@ export function CourseStreamTab({
                           {ann.title}
                         </h4>
                         {ann.is_pinned && (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-900 text-white flex items-center gap-1">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700">
                             <Pin className="w-3 h-3" />
                             <span>Pinned</span>
                           </span>

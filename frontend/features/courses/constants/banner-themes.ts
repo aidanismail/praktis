@@ -21,17 +21,17 @@ export type SavedCourseTheme = {
 export const BANNER_THEMES: BannerTheme[] = [
   {
     id: "midnight",
-    label: "Midnight Slate",
-    gradientClass: "bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900",
-    badgeBg: "bg-white/15 text-white",
-    previewColor: "#0f172a",
+    label: "A* Midnight Navy",
+    gradientClass: "bg-gradient-to-r from-[#080E21] via-[#0E1A38] to-[#162750]",
+    badgeBg: "bg-sky-400/20 text-sky-200",
+    previewColor: "#080E21",
   },
   {
     id: "ocean",
-    label: "Deep Ocean Blue",
-    gradientClass: "bg-gradient-to-r from-blue-950 via-indigo-900 to-slate-900",
-    badgeBg: "bg-blue-400/20 text-blue-100",
-    previewColor: "#172554",
+    label: "Ice Cyan & Navy",
+    gradientClass: "bg-gradient-to-r from-[#0A1128] via-[#0F3460] to-[#164E63]",
+    badgeBg: "bg-cyan-400/20 text-cyan-200",
+    previewColor: "#0A1128",
   },
   {
     id: "emerald",

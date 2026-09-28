@@ -47,7 +47,7 @@ function CourseStat({ label, value, helper, icon: Icon }: CourseStatProps) {
             {value}
           </p>
         </div>
-        <span className="rounded-xl bg-emerald-50 p-2.5 text-emerald-700">
+        <span className="rounded-xl bg-slate-100 p-2.5 text-slate-700">
           <Icon className="h-5 w-5" aria-hidden="true" />
         </span>
       </div>

@@ -3,9 +3,6 @@
 import {
   AlertCircle,
   ArrowLeft,
-  CalendarClock,
-  FileText,
-  Gauge,
   Loader2,
   RefreshCw
 } from "lucide-react";
@@ -75,7 +72,7 @@ export function PraktikanAssignmentDetailPage({
       <PageFrame>
         <div
           role="alert"
-          className="rounded-3xl border border-amber-200 bg-amber-50 p-6"
+          className="rounded-2xl border border-amber-200 bg-amber-50 p-6"
         >
           <h1 className="font-semibold text-amber-950">
             Praktikan access required
@@ -96,7 +93,7 @@ export function PraktikanAssignmentDetailPage({
       <PageFrame>
         <div
           role="status"
-          className="flex min-h-72 items-center justify-center rounded-3xl border border-slate-200 bg-white"
+          className="flex min-h-72 items-center justify-center rounded-2xl border border-slate-200 bg-white"
         >
           <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
           <span className="ml-3 text-sm text-slate-600">
@@ -119,7 +116,7 @@ export function PraktikanAssignmentDetailPage({
       <PageFrame>
         <div
           role="alert"
-          className="rounded-3xl border border-amber-200 bg-amber-50 p-6"
+          className="rounded-2xl border border-amber-200 bg-amber-50 p-6"
         >
           <AlertCircle className="h-5 w-5 text-amber-700" aria-hidden="true" />
           <h1 className="mt-3 font-semibold text-amber-950">
@@ -156,7 +153,7 @@ export function PraktikanAssignmentDetailPage({
       <PageFrame>
         <div
           role="status"
-          className="flex min-h-72 items-center justify-center rounded-3xl border border-slate-200 bg-white"
+          className="flex min-h-72 items-center justify-center rounded-2xl border border-slate-200 bg-white"
         >
           <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
           <span className="ml-3 text-sm text-slate-600">
@@ -185,7 +182,7 @@ export function PraktikanAssignmentDetailPage({
       <PageFrame>
         <div
           role="alert"
-          className="rounded-3xl border border-red-200 bg-red-50 p-6"
+          className="rounded-2xl border border-red-200 bg-red-50 p-6"
         >
           <h1 className="font-semibold text-red-950">
             Assignment unavailable
@@ -232,13 +229,13 @@ export function PraktikanAssignmentDetailPage({
       </Link>
 
       <div className="mt-4 space-y-5">
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs sm:p-7">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800">
+              <span className="text-xs font-semibold text-slate-500">
                 Published
               </span>
-              <p className="mt-3 text-sm font-medium text-emerald-700">
+              <p className="mt-2 text-sm font-medium text-slate-600">
                 {course.code} · {course.name}
               </p>
               <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
@@ -257,13 +254,10 @@ export function PraktikanAssignmentDetailPage({
             </p>
           )}
 
-          <dl className="mt-6 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <dt className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                <CalendarClock className="h-4 w-4" aria-hidden="true" />
-                Due
-              </dt>
-              <dd className="mt-2 text-sm font-medium text-slate-900">
+          <dl className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-slate-100 pt-4 text-sm">
+            <div>
+              <dt className="inline text-slate-500">Due: </dt>
+              <dd className="inline font-medium text-slate-900">
                 {assignment.due_date ? (
                   <time dateTime={assignment.due_date}>
                     {formatDate(assignment.due_date)}
@@ -274,22 +268,16 @@ export function PraktikanAssignmentDetailPage({
               </dd>
             </div>
 
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <dt className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                <Gauge className="h-4 w-4" aria-hidden="true" />
-                Points
-              </dt>
-              <dd className="mt-2 text-sm font-medium text-slate-900">
-                {assignment.max_points} maximum
+            <div>
+              <dt className="inline text-slate-500">Points: </dt>
+              <dd className="inline font-medium text-slate-900">
+                {assignment.max_points} max
               </dd>
             </div>
 
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <dt className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                <FileText className="h-4 w-4" aria-hidden="true" />
-                Formats
-              </dt>
-              <dd className="mt-2 text-sm font-medium uppercase text-slate-900">
+            <div>
+              <dt className="inline text-slate-500">Formats: </dt>
+              <dd className="inline font-medium uppercase text-slate-900">
                 {allowedFileTypes.join(", ") || "None supported"}
               </dd>
             </div>

@@ -97,7 +97,7 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
                 ? "current-password-error"
                 : undefined
             }
-            className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+            className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
             {...form.register("current_password")}
           />
 
@@ -125,7 +125,7 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
               disabled={changePasswordMutation.isPending}
               aria-invalid={Boolean(form.formState.errors.new_password)}
               aria-describedby={form.formState.errors.new_password ? "new-password-error" : undefined}
-              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 pr-10 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 pr-10 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
               {...form.register("new_password")}
             />
 
@@ -133,7 +133,7 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
               type="button"
               onClick={() => setShowPassword((value) => !value)}
               disabled={changePasswordMutation.isPending}
-              className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-300 disabled:opacity-60"
+              className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-200 disabled:opacity-60"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? (
@@ -167,7 +167,7 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
             disabled={changePasswordMutation.isPending}
             aria-invalid={Boolean(form.formState.errors.confirm_password)}
             aria-describedby={form.formState.errors.confirm_password ? "confirm-password-error" : undefined}
-            className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+            className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
             {...form.register("confirm_password")}
           />
 
@@ -181,7 +181,7 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
         <button
           type="submit"
           disabled={changePasswordMutation.isPending}
-          className="flex h-11 w-full items-center justify-center rounded-xl bg-slate-900 px-4 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
+          className="flex h-11 w-full items-center justify-center rounded-xl bg-brand px-4 text-sm font-medium text-white transition hover:bg-[#122044] disabled:cursor-not-allowed disabled:opacity-70"
         >
           {changePasswordMutation.isPending ? (
             <>

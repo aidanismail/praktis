@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   AlertCircle,
   CheckCircle2,
-  FileUp,
   Loader2,
   RotateCcw,
   X
@@ -294,30 +293,19 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
   return (
     <section
       aria-labelledby={`module-upload-heading-${generatedId}`}
-      className="mt-5 rounded-3xl border border-slate-200
-          bg-white p-5 shadow-sm sm:p-6"
+      className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-xs sm:p-6"
     >
-      <div className="flex items-start gap-3">
-        <span
-          className="flex h-10 w-10 shrink-0 items-center
-              justify-center rounded-xl bg-emerald-50
-              text-emerald-700"
+      <div>
+        <h3
+          id={`module-upload-heading-${generatedId}`}
+          className="text-base font-semibold text-slate-950"
         >
-          <FileUp className="h-5 w-5" aria-hidden="true" />
-        </span>
+          Upload a module
+        </h3>
 
-        <div>
-          <h3
-            id={`module-upload-heading-${generatedId}`}
-            className="font-semibold text-slate-950"
-          >
-            Upload a module
-          </h3>
-
-          <p className="mt-1 text-sm leading-6 text-slate-600">
-            Upload lab guides or manuals (PDF or DOCX, up to 25 MiB). Saved as a draft until published.
-          </p>
-        </div>
+        <p className="mt-1 text-sm leading-6 text-slate-600">
+          Upload lab guides or manuals (PDF or DOCX, up to 25 MiB). Saved as a draft until published.
+        </p>
       </div>
 
       <form
@@ -406,8 +394,8 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
                   border-slate-200 bg-white px-3 text-sm
                   text-slate-950 outline-none transition
                   placeholder:text-slate-400
-                  focus:border-emerald-500
-                  focus:ring-4 focus:ring-emerald-50
+                  focus:border-slate-900
+                  focus:ring-4 focus:ring-slate-100
                   disabled:cursor-not-allowed
                   disabled:bg-slate-50"
               {...form.register("title")}
@@ -445,12 +433,12 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
                   ? `module-upload-description-error-${generatedId}`
                   : undefined
               }
-              className="w-full resize-y rounded-xl border
+              className="w-full resize-none rounded-xl border
                   border-slate-200 bg-white px-3 py-3 text-sm
                   leading-6 text-slate-950 outline-none transition
                   placeholder:text-slate-400
-                  focus:border-emerald-500
-                  focus:ring-4 focus:ring-emerald-50
+                  focus:border-sky-500
+                  focus:ring-4 focus:ring-sky-100
                   disabled:cursor-not-allowed
                   disabled:bg-slate-50"
               {...form.register("description")}
@@ -501,7 +489,7 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
                       file:text-slate-700
                       focus-visible:outline-2
                       focus-visible:outline-offset-2
-                      focus-visible:outline-emerald-700
+                      focus-visible:outline-slate-900
                       disabled:cursor-not-allowed
                       disabled:bg-slate-50"
                 />
@@ -568,13 +556,13 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
             type="submit"
             disabled={isBusy || stage === "failed"}
             className="inline-flex min-h-11 items-center
-                justify-center rounded-xl bg-emerald-700 px-5
+                justify-center rounded-xl bg-brand px-5
                 text-sm font-semibold text-white transition
-                hover:bg-emerald-800 focus-visible:outline-2
+                hover:bg-slate-800 focus-visible:outline-2
                 focus-visible:outline-offset-2
-                focus-visible:outline-emerald-700
+                focus-visible:outline-slate-900
                 disabled:cursor-not-allowed
-                disabled:opacity-60"
+                disabled:opacity-60 cursor-pointer"
           >
             {isBusy ? (
               <>

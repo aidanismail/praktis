@@ -67,7 +67,7 @@ export function LoginForm() {
               type="text"
               placeholder="e.g. 140810230075"
               autoComplete="username"
-              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 pl-10 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 pl-10 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
               {...form.register("username")}
             />
           </div>
@@ -95,14 +95,14 @@ export function LoginForm() {
               type={showPassword ? "text" : "password"}
               placeholder="Enter your password"
               autoComplete="current-password"
-              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 pl-10 pr-10 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 pl-10 pr-10 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
               {...form.register("password")}
             />
 
             <button
               type="button"
               onClick={() => setShowPassword((value) => !value)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md text-slate-400 transition hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-300"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md text-slate-400 transition hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-200"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? (
@@ -123,7 +123,7 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={loginMutation.isPending}
-          className="flex h-11 w-full cursor-pointer items-center justify-center rounded-xl bg-brand px-4 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
+          className="flex h-11 w-full cursor-pointer items-center justify-center rounded-xl bg-brand px-4 text-sm font-medium text-white transition hover:bg-[#122044] disabled:cursor-not-allowed disabled:opacity-70"
         >
           {loginMutation.isPending ? (
             <>

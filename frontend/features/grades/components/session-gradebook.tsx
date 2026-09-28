@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   AlertCircle,
   CheckCircle2,
-  GraduationCap,
   Loader2,
   RefreshCw,
   Search
@@ -260,16 +259,18 @@ function GradebookForm({
 
   return (
     <form onSubmit={form.handleSubmit(submitGrades)} noValidate>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div className="rounded-2xl bg-slate-50 p-4">
-          <span className="block text-2xl font-bold text-slate-950">{grades.length}</span>
-          <span className="text-sm text-slate-600">saved grades</span>
+      <dl className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+        <div>
+          <dt className="inline text-slate-500">Saved grades: </dt>
+          <dd className="inline font-semibold text-slate-950">{grades.length}</dd>
         </div>
-        <div className="rounded-2xl bg-slate-50 p-4">
-          <span className="block text-2xl font-bold text-slate-950">{students.length - grades.filter((grade) => studentById.has(grade.student_id)).length}</span>
-          <span className="text-sm text-slate-600">ungraded students</span>
+        <div>
+          <dt className="inline text-slate-500">Ungraded: </dt>
+          <dd className="inline font-semibold text-slate-950">
+            {students.length - grades.filter((grade) => studentById.has(grade.student_id)).length}
+          </dd>
         </div>
-      </div>
+      </dl>
 
       {isReadOnly ? (
         <div className="mt-4 rounded-2xl border border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-900">
@@ -381,15 +382,10 @@ export function SessionGradebook({
   }
 
   return (
-    <section aria-labelledby="session-gradebook-heading" className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-      <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-700">
-          <GraduationCap className="h-5 w-5" aria-hidden="true" />
-        </span>
-        <div>
-          <h2 id="session-gradebook-heading" className="text-xl font-semibold text-slate-950">Session gradebook</h2>
-          <p className="mt-1 text-sm leading-6 text-slate-600">Save private draft scores, then publish them whenever you&apos;re ready.</p>
-        </div>
+    <section aria-labelledby="session-gradebook-heading" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+      <div className="border-b border-slate-200 pb-4">
+        <h2 id="session-gradebook-heading" className="text-xl font-semibold text-slate-950">Session gradebook</h2>
+        <p className="mt-1 text-sm leading-6 text-slate-600">Save private draft scores, then publish them whenever you&apos;re ready.</p>
       </div>
 
       {rosterQuery.isPending || gradesQuery.isPending ? (
@@ -426,8 +422,7 @@ export function SessionGradebook({
           </div>
         ) : (
           <div role="status" className="mt-5 rounded-2xl border border-dashed border-slate-300 p-8 text-center">
-            <GraduationCap className="mx-auto h-8 w-8 text-slate-400" aria-hidden="true" />
-            <h3 className="mt-3 font-semibold text-slate-950">No students enrolled yet</h3>
+            <h3 className="text-base font-semibold text-slate-950">No students enrolled yet</h3>
             <p className="mt-1 text-sm text-slate-600">Session grades can be recorded once students join this course.</p>
           </div>
         )

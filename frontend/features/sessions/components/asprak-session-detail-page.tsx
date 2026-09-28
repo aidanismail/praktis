@@ -3,10 +3,8 @@
 import {
   AlertCircle,
   ArrowLeft,
-  CalendarDays,
   Loader2,
-  RefreshCw,
-  ShieldCheck
+  RefreshCw
 } from "lucide-react";
 import Link from "next/link";
 import { useState, type MouseEvent } from "react";
@@ -115,28 +113,27 @@ function SessionHeader({ session }: { session: CourseSession }) {
         ? "Attendance closed"
         : status === "SCHEDULED"
           ? "Scheduled"
-          : "Unknown attendance state";
+          : "Attendance not scheduled";
 
   return (
-    <header className="rounded-3xl bg-brand p-6 text-white shadow-sm sm:p-8">
+    <header className="rounded-2xl bg-gradient-to-r from-[#080E21] via-[#0E1A38] to-[#162750] p-6 text-white shadow-xs sm:p-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-wider text-emerald-300">
+          <p className="text-xs font-semibold uppercase tracking-wider text-white/80">
             Session workspace
           </p>
           <h1 className="mt-2 wrap-break-word text-2xl font-bold tracking-tight sm:text-3xl">
             {session.title}
           </h1>
-          <p className="mt-3 inline-flex items-center gap-2 text-sm text-slate-300">
-            <CalendarDays className="h-4 w-4" aria-hidden="true" />
-            <time dateTime={session.date}>{session.date}</time>
-          </p>
+          <time dateTime={session.date} className="mt-2 block text-sm text-white/90">
+            {session.date}
+          </time>
         </div>
-        <div className="space-y-2 text-right">
-          <span className="block rounded-full bg-white/10 px-3 py-1 text-xs font-semibold">
+        <div className="space-y-1 text-left sm:text-right">
+          <span className="block text-xs font-medium text-white/90">
             {label}
           </span>
-          <span className="block text-xs text-slate-300">
+          <span className="block text-xs text-white/70">
             Grades {session.grades_published ? "published" : "draft"}
           </span>
         </div>
@@ -181,7 +178,7 @@ function AssignedSessionDetail({
   if (!course) {
     return (
       <PageFrame>
-        <div role="alert" className="rounded-3xl border border-amber-200 bg-amber-50 p-6">
+        <div role="alert" className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
           <h1 className="text-lg font-semibold text-amber-950">Course is unavailable</h1>
           <p className="mt-2 text-sm text-amber-800">This course is not part of your assigned practicum classes.</p>
           <Link href={ROUTES.dashboard} className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-amber-900 underline underline-offset-4">
@@ -216,7 +213,7 @@ function AssignedSessionDetail({
   if (!session) {
     return (
       <PageFrame>
-        <div role="alert" className="rounded-3xl border border-amber-200 bg-amber-50 p-6">
+        <div role="alert" className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
           <h1 className="text-lg font-semibold text-amber-950">Session is unavailable</h1>
           <p className="mt-2 text-sm text-amber-800">This session does not belong to the selected assigned course.</p>
           <Link href={getCourseDetailRoute(courseId, "sessions")} className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-amber-900 underline underline-offset-4">
@@ -239,26 +236,16 @@ function AssignedSessionDetail({
 
   return (
     <PageFrame>
-      <Link href={getCourseDetailRoute(courseId, "sessions")} onClick={confirmBackNavigation} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900">
+      <Link href={getCourseDetailRoute(courseId, "sessions")} onClick={confirmBackNavigation} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-xs transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900">
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         Back to Sessions &amp; Attendance
       </Link>
-      <p className="mt-5 text-sm font-medium text-emerald-700">
+      <p className="mt-5 text-sm font-medium text-slate-600">
         {course.code} · {course.name}
       </p>
       <div className="mt-4 space-y-6">
         <SessionHeader session={session} />
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm" aria-labelledby="verified-session-heading">
-          <div className="flex items-start gap-3">
-            <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" aria-hidden="true" />
-            <div>
-              <h2 id="verified-session-heading" className="font-semibold text-slate-950">Verified session context</h2>
-              <p className="mt-1 text-sm leading-6 text-slate-600">
-                Attendance, grades, and exports load only after this session is confirmed in your assigned course list.
-              </p>
-            </div>
-          </div>
-        </section>
+        
         <SessionAttendanceRegister
           userId={userId}
           courseId={courseId}

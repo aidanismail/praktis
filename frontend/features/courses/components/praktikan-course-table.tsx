@@ -39,7 +39,7 @@ export function PraktikanCourseTable({ courses }: PraktikanCourseTableProps) {
                 <Link
                   href={getCourseDetailRoute(course.id)}
                   aria-label={`Open ${course.name}`}
-                  className="inline-flex min-h-11 items-center gap-2 rounded-xl px-3 font-semibold text-emerald-700 hover:bg-emerald-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-xl px-3 font-semibold text-slate-900 hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
                 >
                   Open <MoveRight className="h-4 w-4" aria-hidden="true" />
                 </Link>

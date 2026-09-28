@@ -2,7 +2,6 @@
 
 import React, { useState, useMemo } from "react";
 import {
-  ChevronRight,
   LayoutGrid,
   List,
   Palette,
@@ -136,7 +135,7 @@ export function CourseListView({
                 onClick={() => onOpenWorkspace(course)}
                 className="group bg-white rounded-3xl border border-slate-200 shadow-xs apple-card-hover overflow-hidden cursor-pointer flex flex-col justify-between"
               >
-                {/* Customizable Card Header Banner */}
+                {/* Card Header Banner */}
                 <div
                   className={`${
                     !cTheme.imageUrl ? themeCfg.gradientClass : "bg-slate-900"
@@ -158,51 +157,38 @@ export function CourseListView({
                   )}
                   <div className="relative z-10 flex items-start justify-between">
                     <div>
-                      <span
-                        className={`text-[10px] font-bold uppercase tracking-wider ${themeCfg.badgeBg} px-2 py-0.5 rounded-md backdrop-blur-xs`}
-                      >
+                      <span className="text-xs font-semibold uppercase tracking-wider text-white/90">
                         {course.code}
                       </span>
-                      <h3 className="text-sm font-bold mt-2 text-white group-hover:underline line-clamp-1 drop-shadow-xs">
+                      <h3 className="text-base font-bold mt-1 text-white group-hover:underline line-clamp-1 drop-shadow-xs">
                         {course.name}
                       </h3>
                     </div>
-                    <span className="text-[11px] font-medium bg-white/10 px-2 py-0.5 rounded-lg border border-white/10 backdrop-blur-xs">
-                      {course.semester} {course.academic_year}
+                    <span className="text-xs font-medium text-white/80">
+                      Semester {course.semester}
                     </span>
                   </div>
                 </div>
 
                 {/* Card Body */}
-                <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                  <div className="grid grid-cols-2 gap-2 text-xs text-slate-600">
-                    <div className="bg-slate-50 p-2.5 rounded-2xl border border-slate-100">
-                      <span className="text-[10px] text-slate-400 uppercase font-semibold block">
-                        Academic Period
-                      </span>
-                      <span className="font-medium text-slate-800">
-                        {course.academic_year}
-                      </span>
-                    </div>
-                    <div className="bg-slate-50 p-2.5 rounded-2xl border border-slate-100">
-                      <span className="text-[10px] text-slate-400 uppercase font-semibold block">
-                        Status
-                      </span>
-                      <span className="font-medium text-slate-800 flex items-center gap-1.5">
-                        <span
-                          className={`w-1.5 h-1.5 rounded-full ${
-                            course.is_active ? "bg-emerald-500" : "bg-slate-400"
-                          } inline-block`}
-                        />
-                        {course.is_active ? "Active" : "Archived"}
-                      </span>
-                    </div>
+                <div className="p-4 flex-1 flex flex-col justify-between space-y-4">
+                  <div className="flex items-center justify-between text-xs text-slate-600">
+                    <span className="font-medium text-slate-700">
+                      Academic year {course.academic_year}
+                    </span>
+                    <span className="flex items-center gap-1.5 font-medium text-slate-600">
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          course.is_active ? "bg-emerald-500" : "bg-slate-400"
+                        } inline-block`}
+                      />
+                      {course.is_active ? "Active" : "Archived"}
+                    </span>
                   </div>
 
                   <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-                    <span className="text-slate-900 font-semibold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
-                      <span>Open course</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
+                    <span className="text-slate-900 font-semibold group-hover:text-slate-950">
+                      Open workspace
                     </span>
                     <div
                       className="flex items-center gap-1"

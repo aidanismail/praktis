@@ -6,8 +6,7 @@ import {
   CheckCircle2,
   Loader2,
   RefreshCw,
-  Search,
-  Users
+  Search
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
@@ -296,7 +295,7 @@ function AttendanceRegisterForm({
 
   return (
     <form onSubmit={form.handleSubmit(submitAttendance)} noValidate>
-      <div className="grid gap-3 sm:grid-cols-5">
+      <dl className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
         {[
           ["Recorded", students.length - counts.unrecorded],
           ["Hadir", counts.hadir],
@@ -304,12 +303,12 @@ function AttendanceRegisterForm({
           ["Izin", counts.izin],
           ["Alfa", counts.alfa]
         ].map(([label, value]) => (
-          <div key={label} className="rounded-2xl bg-slate-50 p-3 text-center">
-            <span className="block text-lg font-bold text-slate-950">{value}</span>
-            <span className="text-xs font-medium text-slate-600">{label}</span>
+          <div key={label}>
+            <dt className="inline text-slate-500">{label}: </dt>
+            <dd className="inline font-semibold text-slate-950">{value}</dd>
           </div>
         ))}
-      </div>
+      </dl>
 
       <p className="mt-3 text-sm text-slate-600" aria-live="polite">
         {counts.unrecorded} of {students.length} students still need attendance recorded.
@@ -336,14 +335,14 @@ function AttendanceRegisterForm({
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              className="min-h-11 w-full rounded-xl border border-slate-300 bg-white pl-9 pr-3 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+              className="min-h-11 w-full rounded-xl border border-slate-300 bg-white pl-9 pr-3 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-100"
               placeholder="Search by NPM or email..."
             />
           </span>
         </label>
 
         {isEditable ? (
-          <button type="button" onClick={setAllPresent} disabled={saveMutation.isPending || students.length === 0} className="inline-flex min-h-11 items-center rounded-xl border border-emerald-300 bg-emerald-50 px-4 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60">
+          <button type="button" onClick={setAllPresent} disabled={saveMutation.isPending || students.length === 0} className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60">
             Set all to Hadir
           </button>
         ) : null}
@@ -380,7 +379,7 @@ function AttendanceRegisterForm({
                       saveMutation.reset();
                       onDirtyChange?.(true);
                     }}
-                    className="min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:bg-slate-100"
+                    className="min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100"
                   >
                     <option value="">Not recorded</option>
                     {statusOptions.map((option) => (
@@ -408,7 +407,7 @@ function AttendanceRegisterForm({
           <button
             type="submit"
             disabled={saveMutation.isPending || !form.formState.isDirty || counts.unrecorded > 0 || students.length === 0}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-brand px-4 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {saveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
             {saveMutation.isPending ? "Saving..." : "Save attendance"}
@@ -439,15 +438,10 @@ export function SessionAttendanceRegister({
   const attendanceError = getRequestError(attendanceQuery.error, "attendance");
 
   return (
-    <section aria-labelledby="session-attendance-heading" className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-      <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
-          <Users className="h-5 w-5" aria-hidden="true" />
-        </span>
-        <div>
-          <h2 id="session-attendance-heading" className="text-xl font-semibold text-slate-950">Attendance register</h2>
-          <p className="mt-1 text-sm leading-6 text-slate-600">Make sure every student has a status selected before saving.</p>
-        </div>
+    <section aria-labelledby="session-attendance-heading" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+      <div className="border-b border-slate-200 pb-4">
+        <h2 id="session-attendance-heading" className="text-xl font-semibold text-slate-950">Attendance register</h2>
+        <p className="mt-1 text-sm leading-6 text-slate-600">Make sure every student has a status selected before saving.</p>
       </div>
 
       {rosterQuery.isPending || attendanceQuery.isPending ? (
@@ -485,8 +479,7 @@ export function SessionAttendanceRegister({
           </div>
         ) : (
           <div role="status" className="mt-5 rounded-2xl border border-dashed border-slate-300 p-8 text-center">
-            <Users className="mx-auto h-8 w-8 text-slate-400" aria-hidden="true" />
-            <h3 className="mt-3 font-semibold text-slate-950">No students enrolled yet</h3>
+            <h3 className="text-base font-semibold text-slate-950">No students enrolled yet</h3>
             <p className="mt-1 text-sm text-slate-600">Once students join this course, you can take attendance here.</p>
           </div>
         )

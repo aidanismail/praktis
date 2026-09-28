@@ -4,7 +4,6 @@ import {
   AlertCircle,
   CheckCircle2,
   Download,
-  FileSpreadsheet,
   Loader2
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -148,15 +147,10 @@ export function SessionExportPanel({
   }
 
   return (
-    <section aria-labelledby="session-exports-heading" className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-      <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-700">
-          <FileSpreadsheet className="h-5 w-5" aria-hidden="true" />
-        </span>
-        <div>
-          <h2 id="session-exports-heading" className="text-xl font-semibold text-slate-950">Session exports</h2>
-          <p className="mt-1 text-sm leading-6 text-slate-600">Download saved academic rows for this verified session only.</p>
-        </div>
+    <section aria-labelledby="session-exports-heading" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+      <div className="border-b border-slate-200 pb-4">
+        <h2 id="session-exports-heading" className="text-xl font-semibold text-slate-950">Session exports</h2>
+        <p className="mt-1 text-sm leading-6 text-slate-600">Download saved academic rows for this verified session only.</p>
       </div>
 
       <div className="mt-5 grid gap-4 lg:grid-cols-2">

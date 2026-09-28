@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AlertCircle, BookOpen, RefreshCw } from "lucide-react";
+import { AlertCircle, RefreshCw } from "lucide-react";
 import { getCourseDetailRoute, ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useAssignedCourses } from "../hooks/use-assigned-courses";
@@ -164,11 +164,7 @@ export function AsprakCourseList({ userId }: AsprakCourseListProps) {
         role="status"
         className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center"
       >
-        <BookOpen
-          className="mx-auto h-8 w-8 text-slate-400"
-          aria-hidden="true"
-        />
-        <h3 className="mt-4 font-semibold text-slate-950">
+        <h3 className="text-base font-semibold text-slate-950">
           No classes assigned yet
         </h3>
         <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-500">

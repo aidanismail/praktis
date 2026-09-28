@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { AlertCircle, BookOpen, Loader2, RefreshCw } from "lucide-react";
+import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useCourseModules } from "../hooks/use-course-modules";
 import { ModuleCard } from "./module-card";
 import { ModuleUploadForm } from "./module-upload-form";
+
 type CourseModulesProps = {
   userId: string;
   courseId: string;
@@ -62,7 +63,7 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
         <div>
           <p
             className="text-xs font-semibold uppercase tracking-wider
-            text-emerald-700"
+            text-slate-500"
           >
             Learning materials
           </p>
@@ -85,8 +86,7 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
           <div className="flex flex-wrap items-center gap-2">
             <span
               aria-live="polite"
-              className="rounded-full bg-slate-100 px-3 py-1 text-sm
-                  font-medium text-slate-700"
+              className="text-xs font-medium text-slate-500"
             >
               {modules.length} {modules.length === 1 ? "module" : "modules"}
             </span>
@@ -99,8 +99,8 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
                   border border-slate-200 bg-white px-3 text-sm font-semibold
                   text-slate-700 transition hover:bg-slate-50
                   focus-visible:outline-2 focus-visible:outline-offset-2
-                  focus-visible:outline-emerald-700
-                  disabled:cursor-not-allowed disabled:opacity-60"
+                  focus-visible:outline-slate-900
+                  disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
             >
               <RefreshCw
                 className={isFetching ? "h-4 w-4 animate-spin" : "h-4 w-4"}
@@ -112,15 +112,17 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
           </div>
         ) : null}
       </div>
+
       {hasLoadedData && !isAccessError && accessMode === "manage" ? (
         <ModuleUploadForm userId={userId} courseId={courseId} />
       ) : null}
+
       {isPending ? (
         <div
           role="status"
           aria-live="polite"
           className="mt-5 flex min-h-48 items-center justify-center
-              rounded-3xl border border-slate-200 bg-white"
+              rounded-2xl border border-slate-200 bg-white"
         >
           <Loader2
             className="h-5 w-5 animate-spin text-slate-900"
@@ -135,7 +137,7 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
       {showBlockingError ? (
         <div
           role="alert"
-          className="mt-5 rounded-3xl border border-red-200
+          className="mt-5 rounded-2xl border border-red-200
               bg-red-50 p-6"
         >
           <div className="flex items-start gap-3">
@@ -258,15 +260,9 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
           {modules.length === 0 ? (
             <div
               role="status"
-              className="mt-5 rounded-3xl border border-dashed
-                  border-slate-300 bg-white px-6 py-12 text-center"
+              className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center"
             >
-              <BookOpen
-                className="mx-auto h-9 w-9 text-slate-400"
-                aria-hidden="true"
-              />
-
-              <h3 className="mt-3 font-semibold text-slate-950">
+              <h3 className="text-base font-semibold text-slate-950">
                 No modules uploaded yet
               </h3>
 

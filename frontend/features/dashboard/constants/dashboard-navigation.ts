@@ -9,13 +9,8 @@ export type DashboardNavItem = {
 export const DASHBOARD_NAVIGATION: Record<UserRole, DashboardNavItem[]> = {
   superadmin: [
     {
-      id: "overview",
-      label: "Overview",
-      description: "Platform stats, active courses, and quick actions."
-    },
-    {
       id: "courses",
-      label: "Course Management",
+      label: "Courses",
       description: "Set up practicum offerings, terms, and course staff."
     },
     {
@@ -47,31 +42,26 @@ export const DASHBOARD_NAVIGATION: Record<UserRole, DashboardNavItem[]> = {
 
   asprak: [
     {
-      id: "overview",
-      label: "Overview",
-      description: "What's happening across your assigned classes."
+      id: "classes",
+      label: "Classes",
+      description: "Your practicum classes, lab sessions, and rosters."
     },
     {
-      id: "classes",
-      label: "My Practicum Classes",
-      description: "Your practicum classes, lab sessions, and rosters."
+      id: "profile",
+      label: "Profile",
+      description: "Your assistant identity and password security."
     }
   ],
 
   praktikan: [
     {
-      id: "overview",
-      label: "Overview",
-      description: "Your current classes, upcoming deadlines, and progress."
-    },
-    {
       id: "classes",
-      label: "My Practicum Classes",
+      label: "Classes",
       description: "Course materials, assignments, and announcements."
     },
     {
       id: "attendance",
-      label: "Attendance Status",
+      label: "Attendance",
       description: "Your attendance record across all lab sessions."
     },
     {

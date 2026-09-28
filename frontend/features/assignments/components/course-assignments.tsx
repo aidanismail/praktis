@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, ClipboardList, Loader2, RefreshCw } from "lucide-react";
+import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
@@ -143,7 +143,7 @@ export function CourseAssignments({
 
         <span
           aria-live="polite"
-          className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700"
+          className="text-xs font-medium text-slate-500"
         >
           {assignments.length} {assignments.length === 1 ? "assignment" : "assignments"}
         </span>
@@ -158,13 +158,9 @@ export function CourseAssignments({
       {assignments.length === 0 ? (
         <div
           role="status"
-          className="mt-5 rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center"
+          className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center"
         >
-          <ClipboardList
-            className="mx-auto h-9 w-9 text-slate-400"
-            aria-hidden="true"
-          />
-          <h3 className="mt-3 font-semibold text-slate-950">
+          <h3 className="text-base font-semibold text-slate-950">
             No assignments yet
           </h3>
           <p className="mt-1 text-sm text-slate-600">

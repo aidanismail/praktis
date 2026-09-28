@@ -1,8 +1,6 @@
 "use client";
 
 import {
-  ArrowRight,
-  CalendarDays,
   Clock3,
   Lock,
   Pencil,
@@ -40,13 +38,6 @@ function formatSessionDate(value: string) {
     ? "Date unavailable"
     : dateFormatter.format(date);
 }
-
-const statusStyles = {
-  SCHEDULED: "bg-sky-50 text-sky-800",
-  OPEN: "bg-emerald-50 text-emerald-800",
-  CLOSED: "bg-slate-100 text-slate-700",
-  UNKNOWN: "bg-amber-50 text-amber-900"
-} as const;
 
 const statusLabels = {
   SCHEDULED: "Scheduled",
@@ -97,21 +88,26 @@ export function SessionCard({
   }
 
   return (
-    <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+    <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition hover:border-slate-300">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <span
-            className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${statusStyles[status]}`}
-          >
-            {statusLabels[status]}
-          </span>
-          <h3 className="mt-3 wrap-break-word text-lg font-semibold text-slate-950">
+          <div className="flex items-center gap-2 text-xs text-slate-500">
+            <span
+              className={`font-semibold ${
+                status === "OPEN"
+                  ? "text-emerald-700"
+                  : "text-slate-600"
+              }`}
+            >
+              {statusLabels[status]}
+            </span>
+            <span>·</span>
+            <time dateTime={session.date}>{formatSessionDate(session.date)}</time>
+          </div>
+
+          <h3 className="mt-1.5 wrap-break-word text-base font-semibold text-slate-950">
             {session.title}
           </h3>
-          <p className="mt-2 inline-flex items-center gap-2 text-sm text-slate-600">
-            <CalendarDays className="h-4 w-4" aria-hidden="true" />
-            <time dateTime={session.date}>{formatSessionDate(session.date)}</time>
-          </p>
         </div>
 
         <button
@@ -161,7 +157,7 @@ export function SessionCard({
             type="button"
             onClick={() => onTransition(session.id, "open")}
             disabled={transitionPending}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
           >
             {isThisTransitioning ? (
               <Clock3 className="h-4 w-4 animate-pulse" aria-hidden="true" />
@@ -196,10 +192,9 @@ export function SessionCard({
 
         <Link
           href={getSessionDetailRoute(courseId, session.id)}
-          className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700"
+          className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700"
         >
           Open workspace
-          <ArrowRight className="h-4 w-4" aria-hidden="true" />
         </Link>
       </div>
     </article>

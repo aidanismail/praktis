@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ClipboardPlus, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
 import { ApiError } from "@/lib/api/client";
 import { useCreateCourseAssignment } from "../hooks/use-course-assignments";
@@ -94,25 +94,18 @@ export function AssignmentComposer({
   return (
     <section
       aria-labelledby="assignment-composer-heading"
-      className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+      className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs"
     >
-      <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
-          <ClipboardPlus className="h-5 w-5" aria-hidden="true" />
-        </span>
-
-        <div>
-          <h2
-            id="assignment-composer-heading"
-            className="font-semibold text-slate-950"
-          >
-            Create an assignment
-          </h2>
-
-          <p className="mt-1 text-sm leading-6 text-slate-600">
-            Draft your prompt or release it directly to students.
-          </p>
-        </div>
+      <div>
+        <h2
+          id="assignment-composer-heading"
+          className="text-lg font-semibold text-slate-950"
+        >
+          Create an assignment
+        </h2>
+        <p className="mt-1 text-sm leading-6 text-slate-600">
+          Draft your prompt or release it directly to students.
+        </p>
       </div>
 
       <form
@@ -149,7 +142,7 @@ export function AssignmentComposer({
           <button
             type="submit"
             disabled={mutation.isPending}
-            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-700 px-5 text-sm font-semibold text-white transition hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand px-5 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {mutation.isPending ? (
               <>

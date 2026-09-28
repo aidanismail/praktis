@@ -2,12 +2,9 @@
 
 import React, { useState } from "react";
 import {
-  Award,
-  BookOpen,
   Download,
   Eye,
   FileCheck,
-  FileText,
   Pencil,
   Plus,
   Trash2,
@@ -189,14 +186,13 @@ export function CourseClassworkTab({
       {/* Section 1: Assignments */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-            <Award className="w-4 h-4 text-slate-700" />
-            <span>Assignments & Tasks ({assignments.length})</span>
+          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+            Assignments & Tasks ({assignments.length})
           </h4>
         </div>
 
         {assignments.length === 0 ? (
-          <div className="text-center p-8 bg-white border border-dashed border-slate-200 rounded-3xl text-xs text-slate-400">
+          <div className="text-center p-8 bg-white border border-dashed border-slate-200 rounded-2xl text-xs text-slate-400">
             No assignments yet. Click &quot;Create Assignment&quot; to post coursework.
           </div>
         ) : (
@@ -206,25 +202,25 @@ export function CourseClassworkTab({
                 key={a.id}
                 className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 hover:border-slate-300 hover:shadow-xs transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
               >
-                <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-800 shrink-0">
-                    <Award className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-xs text-slate-900">{a.title}</h4>
-                    <p className="text-[11px] text-slate-500 mt-0.5">
-                      {a.due_date
-                        ? `Due: ${new Date(a.due_date).toLocaleString()}`
-                        : "No due date"}
-                    </p>
-                  </div>
+                <div>
+                  <h4 className="font-semibold text-sm text-slate-900">{a.title}</h4>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    {a.due_date
+                      ? `Due ${new Date(a.due_date).toLocaleDateString("en", {
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit"
+                        })}`
+                      : "No due date"}
+                  </p>
                 </div>
 
                 <div className="flex items-center gap-2 self-end sm:self-center">
                   <button
                     type="button"
                     onClick={() => onOpenSubmissions(a)}
-                    className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full text-xs flex items-center gap-1.5 apple-press transition-colors shadow-xs"
+                    className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl text-xs flex items-center gap-1.5 transition-colors shadow-xs"
                   >
                     <Users className="w-3.5 h-3.5" />
                     <span>Submissions</span>
@@ -232,7 +228,7 @@ export function CourseClassworkTab({
                   <button
                     type="button"
                     onClick={() => onOpenEditAssignment(a)}
-                    className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg text-xs apple-press transition-colors"
+                    className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg text-xs transition-colors"
                     title="Edit assignment"
                   >
                     <Pencil className="w-3.5 h-3.5" />
@@ -240,7 +236,7 @@ export function CourseClassworkTab({
                   <button
                     type="button"
                     onClick={() => onDeleteAssignment(a.id)}
-                    className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg text-xs apple-press transition-colors"
+                    className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg text-xs transition-colors"
                     title="Delete assignment"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -255,14 +251,13 @@ export function CourseClassworkTab({
       {/* Section 2: Learning Modules */}
       <div className="space-y-3 pt-4 border-t border-slate-200">
         <div className="flex items-center justify-between">
-          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-            <BookOpen className="w-4 h-4 text-slate-700" />
-            <span>Learning Materials & Modules ({modules.length})</span>
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+            Learning Materials &amp; Modules ({modules.length})
           </h4>
         </div>
 
         {modules.length === 0 ? (
-          <div className="text-center p-8 bg-white border border-dashed border-slate-200 rounded-3xl text-xs text-slate-400">
+          <div className="text-center p-8 bg-white border border-dashed border-slate-200 rounded-2xl text-xs text-slate-400">
             No learning modules uploaded yet. Click &quot;Upload Module&quot; to add guides and docs.
           </div>
         ) : (
@@ -272,16 +267,11 @@ export function CourseClassworkTab({
                 key={m.id}
                 className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 hover:border-slate-300 hover:shadow-xs transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
               >
-                <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 shrink-0">
-                    <FileText className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-xs text-slate-900">{m.title}</h4>
-                    <p className="text-[11px] text-slate-500 mt-0.5">
-                      {m.description || "No description yet."}
-                    </p>
-                  </div>
+                <div>
+                  <h4 className="font-semibold text-sm text-slate-900">{m.title}</h4>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    {m.description || "No description provided."}
+                  </p>
                 </div>
 
                 <div className="flex items-center gap-2 self-end sm:self-center">
@@ -297,7 +287,7 @@ export function CourseClassworkTab({
                             courseCode: course.code,
                           })
                         }
-                        className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full text-xs flex items-center gap-1.5 transition-colors shadow-xs"
+                        className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl text-xs flex items-center gap-1.5 transition-colors shadow-xs"
                       >
                         <Eye className="w-3.5 h-3.5" />
                         <span>Preview</span>
@@ -306,7 +296,7 @@ export function CourseClassworkTab({
                       <a
                         href={m.download_url}
                         download
-                        className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-full text-xs flex items-center gap-1.5 transition-colors"
+                        className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs flex items-center gap-1.5 transition-colors"
                         title="Download original file"
                       >
                         <Download className="w-3.5 h-3.5" />
@@ -314,19 +304,13 @@ export function CourseClassworkTab({
                       </a>
                     </>
                   )}
-                  <span
-                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${
-                      m.is_published
-                        ? "bg-slate-100 text-slate-800 border border-slate-200"
-                        : "bg-slate-50 text-slate-500 border border-slate-200"
-                    }`}
-                  >
+                  <span className="text-xs font-medium text-slate-500">
                     {m.is_published ? "Published" : "Draft"}
                   </span>
                   <button
                     type="button"
                     onClick={() => onDeleteModule(m.id)}
-                    className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg text-xs apple-press transition-colors"
+                    className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg text-xs transition-colors"
                     title="Delete module"
                   >
                     <Trash2 className="w-3.5 h-3.5" />

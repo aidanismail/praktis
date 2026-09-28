@@ -137,7 +137,7 @@ export function ModuleEditor({ userId, courseId, module }: ModuleEditorProps) {
                 text-slate-800 transition hover:bg-slate-50
                 focus-visible:outline-2
                 focus-visible:outline-offset-2
-                focus-visible:outline-emerald-700"
+                focus-visible:outline-slate-900"
           >
             <Pencil className="h-4 w-4" aria-hidden="true" />
             Edit details
@@ -182,8 +182,8 @@ export function ModuleEditor({ userId, courseId, module }: ModuleEditorProps) {
               className="h-11 w-full rounded-xl border
                   border-slate-200 bg-white px-3 text-sm
                   text-slate-950 outline-none transition
-                  focus:border-emerald-500 focus:ring-4
-                  focus:ring-emerald-50
+                  focus:border-slate-900 focus:ring-4
+                  focus:ring-slate-100
                   disabled:cursor-not-allowed
                   disabled:bg-slate-100"
               {...form.register("title")}
@@ -217,11 +217,11 @@ export function ModuleEditor({ userId, courseId, module }: ModuleEditorProps) {
                   ? `${descriptionId}-error`
                   : undefined
               }
-              className="w-full resize-y rounded-xl border
+              className="w-full resize-none rounded-xl border
                   border-slate-200 bg-white px-3 py-3 text-sm
                   leading-6 text-slate-950 outline-none transition
-                  focus:border-emerald-500 focus:ring-4
-                  focus:ring-emerald-50
+                  focus:border-sky-500 focus:ring-4
+                  focus:ring-sky-100
                   disabled:cursor-not-allowed
                   disabled:bg-slate-100"
               {...form.register("description")}
@@ -256,14 +256,14 @@ export function ModuleEditor({ userId, courseId, module }: ModuleEditorProps) {
               type="submit"
               disabled={mutation.isPending}
               className="inline-flex min-h-11 items-center
-                  justify-center rounded-xl bg-emerald-700
+                  justify-center rounded-xl bg-brand
                   px-5 text-sm font-semibold text-white
-                  transition hover:bg-emerald-800
+                  transition hover:bg-slate-800
                   focus-visible:outline-2
                   focus-visible:outline-offset-2
-                  focus-visible:outline-emerald-700
+                  focus-visible:outline-slate-900
                   disabled:cursor-not-allowed
-                  disabled:opacity-60"
+                  disabled:opacity-60 cursor-pointer"
             >
               {mutation.isPending ? (
                 <>
