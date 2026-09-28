@@ -294,6 +294,7 @@ export function CourseManagement() {
     max_points: number;
     allowed_file_types: string;
     due_date?: string | null;
+    allow_late_submissions?: boolean;
   }) => {
     try {
       if (editingAssignment) {

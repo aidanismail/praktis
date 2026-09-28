@@ -137,16 +137,7 @@ export function PraktikanAttendanceHistory({ userId }: Props) {
 
   return (
     <section aria-labelledby="attendance-history-heading" aria-busy={query.isFetching} className="space-y-6">
-      {/* Header & Refresh */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Attendance Log</p>
-          <h1 id="attendance-history-heading" className="mt-1 text-2xl font-bold tracking-tight text-slate-950">
-            My Attendance
-          </h1>
-          <p className="mt-1 text-xs text-slate-500">Keep track of your presence across all practicum meetings.</p>
-        </div>
-
         <button
           type="button"
           aria-label="Refresh attendance"
@@ -159,7 +150,6 @@ export function PraktikanAttendanceHistory({ userId }: Props) {
         </button>
       </div>
 
-      {/* Clean Filters & Segmented Status Bar (No Chunky Analytics Cards) */}
       <div className="space-y-3">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="w-full sm:w-auto flex-1 max-w-sm">

@@ -108,12 +108,10 @@ export function ProductLogo({
     const rxEnd = returnDeltaX;
     const ryEnd = returnDeltaY;
 
-    // Upward arc bow height during flight
     const bow = Math.min(80, Math.max(35, (ryStart - ryEnd) * 0.15));
 
     for (let i = 0; i <= RECOVER_STEPS; i++) {
       const p = i / RECOVER_STEPS;
-      // Apple-like smooth exponential ease-out
       const t = 1 - Math.pow(1 - p, 2.6);
 
       const x = rxStart + (rxEnd - rxStart) * t;

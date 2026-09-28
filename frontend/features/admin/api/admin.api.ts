@@ -88,6 +88,7 @@ export type AssignmentItem = {
   max_points: number;
   allowed_file_types: string;
   is_published: boolean;
+  allow_late_submissions: boolean;
   created_at: string;
   submissions_count: number;
   my_submission: SubmissionItem | null;
@@ -433,6 +434,7 @@ export async function createAssignment(
     max_points?: number;
     allowed_file_types?: string;
     is_published?: boolean;
+    allow_late_submissions?: boolean;
   }
 ): Promise<AssignmentItem> {
   return apiClient<AssignmentItem>(API_ENDPOINTS.assignments.create(courseId), {
@@ -451,6 +453,7 @@ export async function updateAssignment(
     max_points: number;
     allowed_file_types: string;
     is_published: boolean;
+    allow_late_submissions: boolean;
   }>
 ): Promise<AssignmentItem> {
   return apiClient<AssignmentItem>(API_ENDPOINTS.assignments.update(courseId, assignmentId), {

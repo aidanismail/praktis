@@ -179,6 +179,7 @@ async def list_assignments(
                 max_points=a.max_points,
                 allowed_file_types=a.allowed_file_types,
                 is_published=a.is_published,
+                allow_late_submissions=a.allow_late_submissions,
                 created_at=a.created_at.isoformat(),
                 submissions_count=sub_counts.get(a.id, 0),
                 my_submission=my_sub_resp,
@@ -226,6 +227,7 @@ async def create_assignment(
         max_points=payload.max_points,
         allowed_file_types=payload.allowed_file_types,
         is_published=payload.is_published,
+        allow_late_submissions=payload.allow_late_submissions,
         created_by=current_user.id,
     )
     db.add(new_assignment)
@@ -242,6 +244,7 @@ async def create_assignment(
         max_points=new_assignment.max_points,
         allowed_file_types=new_assignment.allowed_file_types,
         is_published=new_assignment.is_published,
+        allow_late_submissions=new_assignment.allow_late_submissions,
         created_at=new_assignment.created_at.isoformat(),
         submissions_count=0,
         my_submission=None,
@@ -300,6 +303,7 @@ async def get_assignment(
         max_points=assignment.max_points,
         allowed_file_types=assignment.allowed_file_types,
         is_published=assignment.is_published,
+        allow_late_submissions=assignment.allow_late_submissions,
         created_at=assignment.created_at.isoformat(),
         submissions_count=submissions_count,
         my_submission=my_sub_resp,
@@ -351,6 +355,7 @@ async def update_assignment(
         max_points=assignment.max_points,
         allowed_file_types=assignment.allowed_file_types,
         is_published=assignment.is_published,
+        allow_late_submissions=assignment.allow_late_submissions,
         created_at=assignment.created_at.isoformat(),
         submissions_count=submissions_count,
         my_submission=None,
@@ -439,6 +444,20 @@ async def submit_assignment(
     if not assignment or not assignment.is_published:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Assignment not found")
 
+    now = datetime.datetime.now(datetime.timezone.utc)
+    is_late = False
+    if assignment.due_date:
+        due = assignment.due_date
+        if due.tzinfo is None:
+            due = due.replace(tzinfo=datetime.timezone.utc)
+        if now > due:
+            if not assignment.allow_late_submissions:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Submissions are closed because the deadline for this assignment has passed.",
+                )
+            is_late = True
+
     ext = os.path.splitext(file.filename or "")[1].lower().lstrip(".")
     allowed = [t.strip().lower().lstrip(".") for t in assignment.allowed_file_types.split(",")]
     if ext not in allowed:
@@ -489,15 +508,6 @@ async def submit_assignment(
         Key=file_key,
         Body=content,
     )
-
-    now = datetime.datetime.now(datetime.timezone.utc)
-    is_late = False
-    if assignment.due_date:
-        due = assignment.due_date
-        if due.tzinfo is None:
-            due = due.replace(tzinfo=datetime.timezone.utc)
-        if now > due:
-            is_late = True
 
     try:
         sub_res = await db.execute(

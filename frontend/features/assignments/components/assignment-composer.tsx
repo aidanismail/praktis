@@ -24,7 +24,8 @@ const defaultValues: AssignmentFormValues = {
   due_date: "",
   max_points: 100,
   allowed_file_types: [...ASSIGNMENT_FILE_TYPES],
-  is_published: false
+  is_published: false,
+  allow_late_submissions: true
 };
 
 function getCreateErrorMessage(error: Error) {
@@ -84,7 +85,8 @@ export function AssignmentComposer({
             : null,
         max_points: values.max_points,
         allowed_file_types: values.allowed_file_types.join(","),
-        is_published: values.is_published
+        is_published: values.is_published,
+        allow_late_submissions: values.allow_late_submissions
       },
       {
         onSuccess: () => form.reset(defaultValues)

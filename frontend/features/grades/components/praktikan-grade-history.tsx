@@ -124,16 +124,7 @@ export function PraktikanGradeHistory({ userId }: Props) {
 
   return (
     <section aria-labelledby="grade-history-heading" aria-busy={query.isFetching} className="space-y-6">
-      {/* Header & Refresh */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Academic Record</p>
-          <h1 id="grade-history-heading" className="mt-1 text-2xl font-bold tracking-tight text-slate-950">
-            My Grades
-          </h1>
-          <p className="mt-1 text-xs text-slate-500">Scores published by your lab instructors appear here.</p>
-        </div>
-
         <button
           type="button"
           aria-label="Refresh grades"
@@ -146,7 +137,6 @@ export function PraktikanGradeHistory({ userId }: Props) {
         </button>
       </div>
 
-      {/* Metrics */}
       <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs">
           <dt className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Graded Items</dt>
@@ -161,7 +151,6 @@ export function PraktikanGradeHistory({ userId }: Props) {
         </div>
       </dl>
 
-      {/* Filter Bar */}
       <div className="flex flex-col sm:flex-row gap-3">
         <select
           id="grade-course-filter"
@@ -182,7 +171,6 @@ export function PraktikanGradeHistory({ userId }: Props) {
         </select>
       </div>
 
-      {/* Records */}
       {visible.length === 0 ? (
         <div
           role="status"

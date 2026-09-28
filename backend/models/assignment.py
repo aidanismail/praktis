@@ -19,6 +19,7 @@ class Assignment(Base):
     max_points: Mapped[int] = mapped_column(Integer, default=100)
     allowed_file_types: Mapped[str] = mapped_column(String(100), default="pdf,zip,docx")
     is_published: Mapped[bool] = mapped_column(Boolean, default=True)
+    allow_late_submissions: Mapped[bool] = mapped_column(Boolean, default=True)
     created_by: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), index=True)
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.datetime.now(datetime.timezone.utc))
 

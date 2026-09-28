@@ -193,6 +193,7 @@ export function useCourseWorkspace(courseId: string | null) {
       max_points?: number;
       allowed_file_types?: string;
       is_published?: boolean;
+      allow_late_submissions?: boolean;
     }) => createAssignment(cid, data),
     onSuccess: invalidateAssignments,
   });
@@ -210,6 +211,7 @@ export function useCourseWorkspace(courseId: string | null) {
         max_points: number;
         allowed_file_types: string;
         is_published: boolean;
+        allow_late_submissions: boolean;
       }>;
     }) => updateAssignment(cid, assignmentId, data),
     onSuccess: invalidateAssignments,

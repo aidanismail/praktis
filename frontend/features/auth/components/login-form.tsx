@@ -44,9 +44,6 @@ export function LoginForm() {
         <h1 className="text-2xl font-semibold tracking-tight text-slate-950">
           Sign in to Praktis
         </h1>
-        <p className="mt-1.5 text-sm text-slate-500">
-          Welcome back! Enter your details to jump into your labs.
-        </p>
       </div>
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">

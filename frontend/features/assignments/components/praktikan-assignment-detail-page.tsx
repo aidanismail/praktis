@@ -248,6 +248,10 @@ export function PraktikanAssignmentDetailPage({
   const allowedFileTypes = getAllowedAssignmentFileTypes(
     assignment.allowed_file_types
   );
+  const isPastDueDate = Boolean(
+    assignment.due_date && new Date(assignment.due_date).getTime() < Date.now()
+  );
+  const isSubmissionLocked = !assignment.allow_late_submissions && isPastDueDate;
 
   return (
     <PageFrame isEmbedded={isEmbedded}>
@@ -344,6 +348,24 @@ export function PraktikanAssignmentDetailPage({
                     </div>
                   </>
                 )}
+
+                <span className="text-slate-300 hidden sm:inline" aria-hidden="true">
+                  ·
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold uppercase tracking-wider text-[10px] text-slate-400">
+                    Late Submissions:
+                  </span>
+                  <span
+                    className={`font-semibold ${
+                      assignment.allow_late_submissions
+                        ? "text-slate-800"
+                        : "text-amber-700"
+                    }`}
+                  >
+                    {assignment.allow_late_submissions ? "Allowed" : "Not accepted"}
+                  </span>
+                </div>
               </div>
             </section>
           </div>
@@ -361,6 +383,7 @@ export function PraktikanAssignmentDetailPage({
               assignmentId={assignmentId}
               allowedFileTypes={allowedFileTypes}
               hasSubmission={Boolean(assignment.my_submission)}
+              isLocked={isSubmissionLocked}
             />
           </div>
         </div>

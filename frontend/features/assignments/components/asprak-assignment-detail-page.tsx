@@ -263,6 +263,22 @@ function AssignmentSummary({ assignment }: { assignment: Assignment }) {
             </div>
           </>
         )}
+
+        <span className="text-slate-200 hidden sm:inline" aria-hidden="true">|</span>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            Late submissions
+          </span>
+          <span
+            className={`font-semibold text-[11px] ${
+              assignment.allow_late_submissions
+                ? "text-slate-700"
+                : "text-amber-700"
+            }`}
+          >
+            {assignment.allow_late_submissions ? "Allowed" : "Blocked after deadline"}
+          </span>
+        </div>
       </div>
     </section>
   );

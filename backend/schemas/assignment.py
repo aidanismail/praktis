@@ -11,6 +11,7 @@ class AssignmentCreate(BaseModel):
     max_points: int = Field(100, ge=1, le=1000, description="Maximum points possible.")
     allowed_file_types: str = Field("pdf,zip,docx", description="Comma-separated allowed extensions.")
     is_published: bool = Field(True, description="Whether assignment is published to students.")
+    allow_late_submissions: bool = Field(True, description="Whether late submissions are permitted.")
 
 
 class AssignmentUpdate(BaseModel):
@@ -20,6 +21,7 @@ class AssignmentUpdate(BaseModel):
     max_points: int | None = Field(None, ge=1, le=1000, description="Maximum points possible.")
     allowed_file_types: str | None = Field(None, description="Allowed file extensions.")
     is_published: bool | None = Field(None, description="Publish status.")
+    allow_late_submissions: bool | None = Field(None, description="Whether late submissions are permitted.")
 
 
 class SubmissionResponse(BaseModel):
@@ -55,6 +57,7 @@ class AssignmentResponse(BaseModel):
     max_points: int = Field(..., description="Max points.")
     allowed_file_types: str = Field(..., description="Allowed file types.")
     is_published: bool = Field(..., description="Publish status.")
+    allow_late_submissions: bool = Field(True, description="Whether late submissions are permitted.")
     created_at: str = Field(..., description="Creation timestamp.")
     submissions_count: int = Field(0, description="Total submissions count.")
     my_submission: SubmissionResponse | None = Field(None, description="Current user's submission if Praktikan.")

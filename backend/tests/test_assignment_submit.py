@@ -394,6 +394,26 @@ async def test_submit_late(client, db, _setup):
 
 
 @pytest.mark.asyncio
+async def test_submit_after_due_date_blocked_when_late_disallowed(client, db, _setup):
+    s = _setup
+    set_auth(client, s["student"])
+
+    s["assignment"].due_date = datetime.datetime(
+        2020, 1, 1, tzinfo=datetime.timezone.utc
+    )
+    s["assignment"].allow_late_submissions = False
+    await db.commit()
+
+    resp = await client.post(
+        _submit_url(s["course"].id, s["assignment"].id),
+        files={"file": ("late.pdf", _valid_pdf(), "application/pdf")},
+    )
+
+    assert resp.status_code == 400
+    assert "Submissions are closed" in resp.json()["detail"]
+
+
+@pytest.mark.asyncio
 async def test_submit_on_time(client, db, _setup):
     s = _setup
     set_auth(client, s["student"])

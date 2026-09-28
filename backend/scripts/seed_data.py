@@ -67,18 +67,11 @@ async def seed_data():
                 )
                 db.add(user)
                 await db.flush()
+                await db.commit()
                 print(f"[Users] Created: {user.username} ({user.role})")
             else:
                 print(f"[Users] Exists: {user.username}")
-
-            user_map[u_data["username"]] = user(
-                    select(Enrollment).where(
-                        Enrollment.course_id == course.id,
-                        Enrollment.student_id == student.id,
-                    )
-                )
-
-        db.commit()
+            
         print("Done Seeding")
 
 

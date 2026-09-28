@@ -32,6 +32,7 @@ export function AssignmentFormFields({
   const maxPointsId = `${idPrefix}-max-points`;
   const fileTypesHelpId = `${idPrefix}-file-types-help`;
   const fileTypesErrorId = `${idPrefix}-file-types-error`;
+  const lateSubmissionsId = `${idPrefix}-allow-late-submissions`;
   const publicationId = `${idPrefix}-published`;
 
   const inputCls = compact
@@ -182,6 +183,41 @@ export function AssignmentFormFields({
           </p>
         ) : null}
       </fieldset>
+
+      <div
+        className={`border border-slate-200 bg-slate-50/70 ${
+          compact ? "rounded-xl p-3" : "rounded-2xl p-4"
+        }`}
+      >
+        <label
+          htmlFor={lateSubmissionsId}
+          className="inline-flex cursor-pointer items-start gap-2.5"
+        >
+          <input
+            id={lateSubmissionsId}
+            type="checkbox"
+            disabled={disabled}
+            className="mt-0.5 h-3.5 w-3.5 rounded border-slate-300 text-slate-900 accent-slate-900"
+            {...form.register("allow_late_submissions")}
+          />
+          <span>
+            <span
+              className={`block font-semibold text-slate-900 ${
+                compact ? "text-xs" : "text-sm font-medium text-slate-800"
+              }`}
+            >
+              Allow late submissions
+            </span>
+            <span
+              className={`block text-slate-500 ${
+                compact ? "text-[11px] leading-4" : "mt-0.5 text-xs leading-5"
+              }`}
+            >
+              Uncheck to block submissions once the due date has passed.
+            </span>
+          </span>
+        </label>
+      </div>
 
       <div
         className={`border border-slate-200 bg-slate-50/70 ${

@@ -18,6 +18,7 @@ interface CourseAssignmentModalProps {
     max_points: number;
     allowed_file_types: string;
     due_date?: string | null;
+    allow_late_submissions?: boolean;
   }) => Promise<void>;
   isSubmitting?: boolean;
 }
@@ -60,6 +61,9 @@ function AssignmentFormInner({
     editingAssignment?.allowed_file_types ?? "pdf,zip"
   );
   const [dueDate, setDueDate] = useState(formatDatetimeLocal(editingAssignment?.due_date));
+  const [allowLateSubmissions, setAllowLateSubmissions] = useState<boolean>(
+    editingAssignment?.allow_late_submissions ?? true
+  );
   const [formError, setFormError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -74,6 +78,7 @@ function AssignmentFormInner({
         max_points: maxPoints,
         allowed_file_types: allowedTypes,
         due_date: dueDate ? new Date(dueDate).toISOString() : null,
+        allow_late_submissions: allowLateSubmissions,
       });
     } catch (err: unknown) {
       setFormError(
@@ -206,6 +211,22 @@ function AssignmentFormInner({
             onChange={(e) => setDueDate(e.target.value)}
             className="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-slate-900 transition-shadow duration-150"
           />
+        </div>
+
+        <div className="flex items-start gap-2.5 p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+          <input
+            type="checkbox"
+            id="allow-late-submissions"
+            checked={allowLateSubmissions}
+            onChange={(e) => setAllowLateSubmissions(e.target.checked)}
+            className="mt-0.5 h-3.5 w-3.5 rounded border-slate-300 text-slate-900 accent-slate-900"
+          />
+          <label htmlFor="allow-late-submissions" className="cursor-pointer">
+            <span className="block font-semibold text-slate-800">Allow late submissions</span>
+            <span className="block text-[11px] text-slate-500">
+              Uncheck to block submissions once the due date has passed.
+            </span>
+          </label>
         </div>
       </div>
 

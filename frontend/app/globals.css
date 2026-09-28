@@ -27,12 +27,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Remove default browser resize handle on textareas */
 textarea {
   resize: none;
 }
 
-/* Hide scrollbar while preserving scroll functionality */
 .scrollbar-none {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -40,10 +38,6 @@ textarea {
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
-
-/* ==========================================================================
-   Apple-Grade Fluid Motion System (Subdued, Physical, Natural)
-   ========================================================================== */
 
 :root {
   --ease-apple: cubic-bezier(0.16, 1, 0.3, 1);
@@ -105,7 +99,6 @@ textarea {
   animation: appleSheetUp 280ms var(--ease-apple) forwards;
 }
 
-/* Tactile press feedback on buttons and chips */
 .apple-press {
   transition: transform 140ms var(--ease-apple), opacity 140ms ease;
 }
@@ -113,7 +106,6 @@ textarea {
   transform: scale(0.97);
 }
 
-/* Subtle card elevation on hover */
 .apple-card-hover {
   transition: transform 220ms var(--ease-apple), box-shadow 220ms var(--ease-apple), border-color 220ms ease;
 }
@@ -121,7 +113,6 @@ textarea {
   transform: translateY(-2px);
 }
 
-/* Branded Asterisk Spinner Animation */
 @keyframes asteriskSpin {
   from {
     transform: rotate(0deg);
@@ -136,7 +127,6 @@ textarea {
   transform-origin: center;
 }
 
-/* Easter Egg: Logo Asterisk Delight Animations */
 @keyframes asteriskDislodge1 {
   0% { transform: translate(-50%, -50%) rotate(0deg); }
   50% { transform: translate(-50%, -50%) rotate(-14deg) scale(1.08); }
@@ -188,7 +178,6 @@ textarea {
   filter: drop-shadow(0 0 1.5px rgba(15, 23, 42, 0.95)) drop-shadow(0 4px 12px rgba(15, 23, 42, 0.35));
 }
 
-/* Respect user's motion preference (WCAG AA standard) */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -198,7 +187,6 @@ textarea {
     scroll-behavior: auto !important;
   }
 
-  /* Neutralize physical displacement transforms while preserving color/opacity feedback */
   .animate-apple-modal,
   .animate-apple-fade,
   .animate-apple-sheet,

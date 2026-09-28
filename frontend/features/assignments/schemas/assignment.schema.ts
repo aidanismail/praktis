@@ -92,7 +92,8 @@ export const assignmentSchema = z.object({
   allowed_file_types: z
     .array(z.enum(ASSIGNMENT_FILE_TYPES))
     .min(1, "Select at least one allowed file type"),
-  is_published: z.boolean()
+  is_published: z.boolean(),
+  allow_late_submissions: z.boolean()
 });
 
 export type AssignmentFormValues = z.infer<typeof assignmentSchema>;

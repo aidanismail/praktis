@@ -30,6 +30,7 @@ export type Assignment = {
   max_points: number;
   allowed_file_types: string;
   is_published: boolean;
+  allow_late_submissions: boolean;
   created_at: string;
   submissions_count: number;
   my_submission: AssignmentSubmission | null;
@@ -42,6 +43,7 @@ export type CreateAssignmentPayload = {
   max_points: number;
   allowed_file_types: string;
   is_published: boolean;
+  allow_late_submissions?: boolean;
 };
 
 export type UpdateAssignmentPayload = {
@@ -51,6 +53,7 @@ export type UpdateAssignmentPayload = {
   max_points?: number;
   allowed_file_types?: string;
   is_published?: boolean;
+  allow_late_submissions?: boolean;
 };
 
 export type GradeSubmissionPayload = {

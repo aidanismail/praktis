@@ -59,7 +59,8 @@ function getFormValues(assignment: Assignment): AssignmentFormValues {
     due_date: toLocalDateTime(assignment.due_date),
     max_points: assignment.max_points,
     allowed_file_types: getAllowedFileTypes(assignment.allowed_file_types),
-    is_published: assignment.is_published
+    is_published: assignment.is_published,
+    allow_late_submissions: assignment.allow_late_submissions ?? true
   };
 }
 
@@ -145,7 +146,8 @@ export function AssignmentEditor({
             : null,
         max_points: values.max_points,
         allowed_file_types: values.allowed_file_types.join(","),
-        is_published: values.is_published
+        is_published: values.is_published,
+        allow_late_submissions: values.allow_late_submissions
       },
       {
         onSuccess: (updatedAssignment) => {

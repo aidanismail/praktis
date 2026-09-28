@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FileArrowUp, ArrowCounterClockwise } from "@phosphor-icons/react";
+import { FileArrowUp, ArrowCounterClockwise, LockKey } from "@phosphor-icons/react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -21,6 +21,7 @@ type PraktikanAssignmentUploadFormProps = {
   courseId: string;
   hasSubmission: boolean;
   userId: string;
+  isLocked?: boolean;
 };
 
 const ACCEPTED_FILE_TYPES: Record<AssignmentFileType, string> = {
@@ -31,7 +32,11 @@ const ACCEPTED_FILE_TYPES: Record<AssignmentFileType, string> = {
 
 function getSubmissionErrorMessage(error: Error) {
   if (!(error instanceof ApiError)) {
-    return "Couldn't upload your file due to a connection issue. Your file is still selected—try submitting again.";
+    return "Couldn't upload your file due to a connection issue. Your file is still selected, please try submitting again.";
+  }
+
+  if (error.message && error.message !== "Request failed") {
+    return error.message;
   }
 
   switch (error.status) {
@@ -50,7 +55,7 @@ function getSubmissionErrorMessage(error: Error) {
     case 422:
       return "The upload couldn't be processed. Make sure the file isn't empty or damaged.";
     default:
-      return "Upload didn't go through. Your file is still selected—give it another try.";
+      return "Upload didn't go through. Your file is still selected, please try again.";
   }
 }
 
@@ -60,6 +65,7 @@ export function PraktikanAssignmentUploadForm({
   courseId,
   hasSubmission,
   userId,
+  isLocked = false,
 }: PraktikanAssignmentUploadFormProps) {
   const inputId = useId();
   const successStatusRef = useRef<HTMLDivElement>(null);
@@ -81,6 +87,29 @@ export function PraktikanAssignmentUploadForm({
   useEffect(() => {
     if (successMessage) successStatusRef.current?.focus();
   }, [successMessage]);
+
+  if (isLocked) {
+    return (
+      <section
+        aria-labelledby="assignment-upload-locked-heading"
+        className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs sm:p-8"
+      >
+        <div className="flex items-start gap-4">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-50 text-amber-700">
+            <LockKey className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <div>
+            <h2 id="assignment-upload-locked-heading" className="text-lg font-bold text-slate-950">
+              Submissions closed
+            </h2>
+            <p className="mt-1 text-xs leading-relaxed text-slate-500">
+              The deadline for this assignment has passed, and late submissions are not accepted.
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   if (allowedFileTypes.length === 0) {
     return (
