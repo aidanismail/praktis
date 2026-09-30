@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 ARG NODE_VERSION=22-alpine
-ARG PNPM_VERSION=11.1.2
+ARG PNPM_VERSION=12.8.1
 
 # shared pnpm toolchain
 FROM node:${NODE_VERSION} AS pnpm-base
@@ -10,6 +10,9 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 ENV PNPM_HOME=/pnpm
 ENV PATH="${PNPM_HOME}:${PATH}"
+ENV CI=true
+ENV PNPM_CONFIG_CONFIRM_MODULES_PURGE=false
+
 RUN npm install --global corepack@latest && \
     corepack enable && \
     corepack install --global pnpm@${PNPM_VERSION}
