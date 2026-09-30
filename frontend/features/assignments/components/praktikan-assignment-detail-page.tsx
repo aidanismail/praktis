@@ -12,11 +12,12 @@ import { getAllowedAssignmentFileTypes } from "../schemas/assignment.schema";
 import { PraktikanAssignmentUploadForm } from "./praktikan-assignment-upload-form";
 import { PraktikanSubmissionSummary } from "./praktikan-submission-summary";
 import {
-  ArrowLeft,
-  CalendarCheck,
-  FileText,
-  ArrowsClockwise
+  ArrowLeftIcon,
+  CalendarCheckIcon,
+  FileTextIcon,
+  ArrowsClockwiseIcon
 } from "@phosphor-icons/react";
+import { useEffect, useState } from "react";
 
 type PraktikanAssignmentDetailPageProps = {
   assignmentId: string;
@@ -34,6 +35,21 @@ function formatDate(value: string) {
   return Number.isNaN(date.getTime())
     ? "Date unavailable"
     : dateFormatter.format(date);
+}
+
+function useTime() {
+  const [time, setTime] = useState(() => new Date());
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(id);
+
+  }, [])
+
+  return time;
 }
 
 function PageFrame({
@@ -68,9 +84,9 @@ export function PraktikanAssignmentDetailPage({
   );
   const courseVerified = Boolean(
     user?.role === "praktikan" &&
-      !coursesQuery.isPending &&
-      !coursesQuery.isError &&
-      course
+    !coursesQuery.isPending &&
+    !coursesQuery.isError &&
+    course
   );
   const assignmentQuery = useAssignmentDetail({
     userId: user?.id ?? "",
@@ -79,8 +95,8 @@ export function PraktikanAssignmentDetailPage({
     enabled: courseVerified,
   });
 
+  const time = useTime();
   if (!user) return null;
-
   const isEmbedded = Boolean(onBack);
 
   if (user.role !== "praktikan") {
@@ -144,7 +160,7 @@ export function PraktikanAssignmentDetailPage({
                 onClick={() => void coursesQuery.refetch()}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700 transition shrink-0"
               >
-                <ArrowsClockwise className="h-3.5 w-3.5" aria-hidden="true" />
+                <ArrowsClockwiseIcon className="h-3.5 w-3.5" aria-hidden="true" />
                 Try again
               </button>
             ) : onBack ? (
@@ -153,7 +169,7 @@ export function PraktikanAssignmentDetailPage({
                 onClick={onBack}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700 transition shrink-0"
               >
-                <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+                <ArrowLeftIcon className="h-3.5 w-3.5" aria-hidden="true" />
                 Back to Assignments
               </button>
             ) : (
@@ -161,7 +177,7 @@ export function PraktikanAssignmentDetailPage({
                 href={ROUTES.dashboard}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700 transition shrink-0"
               >
-                <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+                <ArrowLeftIcon className="h-3.5 w-3.5" aria-hidden="true" />
                 Back to dashboard
               </Link>
             )}
@@ -217,7 +233,7 @@ export function PraktikanAssignmentDetailPage({
                 onClick={() => void assignmentQuery.refetch()}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700 transition shrink-0"
               >
-                <ArrowsClockwise className="h-3.5 w-3.5" aria-hidden="true" />
+                <ArrowsClockwiseIcon className="h-3.5 w-3.5" aria-hidden="true" />
                 Try again
               </button>
             ) : onBack ? (
@@ -226,7 +242,7 @@ export function PraktikanAssignmentDetailPage({
                 onClick={onBack}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700 transition shrink-0"
               >
-                <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+                <ArrowLeftIcon className="h-3.5 w-3.5" aria-hidden="true" />
                 Back to Assignments
               </button>
             ) : (
@@ -234,7 +250,7 @@ export function PraktikanAssignmentDetailPage({
                 href={getCourseDetailRoute(courseId, "assignments")}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700 transition shrink-0"
               >
-                <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+                <ArrowLeftIcon className="h-3.5 w-3.5" aria-hidden="true" />
                 Back to Assignments
               </Link>
             )}
@@ -249,7 +265,7 @@ export function PraktikanAssignmentDetailPage({
     assignment.allowed_file_types
   );
   const isPastDueDate = Boolean(
-    assignment.due_date && new Date(assignment.due_date).getTime() < Date.now()
+    assignment.due_date && new Date(assignment.due_date).getTime() < time.getTime()
   );
   const isSubmissionLocked = !assignment.allow_late_submissions && isPastDueDate;
 
@@ -264,7 +280,7 @@ export function PraktikanAssignmentDetailPage({
               onClick={onBack}
               className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-full shadow-xs apple-press transition-colors cursor-pointer"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeftIcon className="w-4 h-4" />
               <span>Back to Assignments</span>
             </button>
           ) : (
@@ -272,7 +288,7 @@ export function PraktikanAssignmentDetailPage({
               href={getCourseDetailRoute(courseId, "assignments")}
               className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-full shadow-xs apple-press transition-colors"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeftIcon className="w-4 h-4" />
               <span>Back to Assignments</span>
             </Link>
           )}
@@ -317,7 +333,7 @@ export function PraktikanAssignmentDetailPage({
               {/* Clean Typographic Metadata Layout (No Card Boxes, No Points) */}
               <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2.5 border-t border-slate-100 pt-5 text-xs text-slate-600">
                 <div className="flex items-center gap-2">
-                  <CalendarCheck className="h-4 w-4 text-slate-400 shrink-0" aria-hidden="true" />
+                  <CalendarCheckIcon className="h-4 w-4 text-slate-400 shrink-0" aria-hidden="true" />
                   <span className="font-semibold uppercase tracking-wider text-[10px] text-slate-400">
                     Due:
                   </span>
@@ -338,7 +354,7 @@ export function PraktikanAssignmentDetailPage({
                       ·
                     </span>
                     <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-slate-400 shrink-0" aria-hidden="true" />
+                      <FileTextIcon className="h-4 w-4 text-slate-400 shrink-0" aria-hidden="true" />
                       <span className="font-semibold uppercase tracking-wider text-[10px] text-slate-400">
                         Accepted Formats:
                       </span>
@@ -357,11 +373,10 @@ export function PraktikanAssignmentDetailPage({
                     Late Submissions:
                   </span>
                   <span
-                    className={`font-semibold ${
-                      assignment.allow_late_submissions
-                        ? "text-slate-800"
-                        : "text-amber-700"
-                    }`}
+                    className={`font-semibold ${assignment.allow_late_submissions
+                      ? "text-slate-800"
+                      : "text-amber-700"
+                      }`}
                   >
                     {assignment.allow_late_submissions ? "Allowed" : "Not accepted"}
                   </span>

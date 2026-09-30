@@ -6,9 +6,8 @@ import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useCourseRoster } from "../hooks/use-course-roster";
 import {
-  WarningCircle,
-  ArrowsClockwise,
-  Users
+  WarningCircleIcon,
+  ArrowsClockwiseIcon
 } from "@phosphor-icons/react";
 
 type CourseRosterProps = {
@@ -105,7 +104,7 @@ export function CourseRoster({ userId, courseId }: CourseRosterProps) {
           className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5"
         >
           <div className="flex items-start gap-3">
-            <WarningCircle
+            <WarningCircleIcon
               className="mt-0.5 h-5 w-5 shrink-0 text-red-600"
               aria-hidden="true"
             />
@@ -147,7 +146,7 @@ export function CourseRoster({ userId, courseId }: CourseRosterProps) {
                     rounded-xl bg-red-700 px-4 py-2 text-sm font-medium text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:cursor-not-allowed
                     disabled:opacity-60"
                 >
-                  <ArrowsClockwise
+                  <ArrowsClockwiseIcon
                     className={isFetching ? "h-4 w-4 animate-spin" : "h-4 w-4"}
                     aria-hidden="true"
                   />

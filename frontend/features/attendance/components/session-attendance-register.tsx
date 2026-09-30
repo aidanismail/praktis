@@ -23,9 +23,8 @@ import type {
   AttendanceStatus
 } from "../types/attendance.type";
 import {
-  ArrowsClockwise,
-  MagnifyingGlass,
-  Users
+  ArrowsClockwiseIcon,
+  MagnifyingGlassIcon,
 } from "@phosphor-icons/react";
 
 type SessionAttendanceRegisterProps = {
@@ -120,7 +119,7 @@ function AttendanceRequestError({
           disabled={isRetrying}
           className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1 text-xs font-semibold text-white hover:bg-slate-700 transition disabled:opacity-60"
         >
-          <ArrowsClockwise className={isRetrying ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"} aria-hidden="true" />
+          <ArrowsClockwiseIcon className={isRetrying ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"} aria-hidden="true" />
           Try again
         </button>
       </div>
@@ -327,7 +326,7 @@ function AttendanceRegisterForm({
         <label className="min-w-0 flex-1 sm:max-w-sm">
           <span className="text-sm font-semibold text-slate-800">Search by NPM or email</span>
           <span className="relative mt-1.5 block">
-            <MagnifyingGlass className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-slate-400" aria-hidden="true" />
+            <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-slate-400" aria-hidden="true" />
             <input
               type="search"
               value={search}

@@ -9,14 +9,12 @@ import type {
 } from "@/features/admin/types";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
 import {
-  WarningCircle,
-  GraduationCap,
-  MagnifyingGlass,
-  Trash,
-  UserCheck,
-  UserMinus,
-  UserPlus,
-  Users,
+  WarningCircleIcon,
+  MagnifyingGlassIcon,
+  TrashIcon,
+  UserCheckIcon,
+  UserMinusIcon,
+  UserPlusIcon,
   X
 } from "@phosphor-icons/react";
 
@@ -263,7 +261,7 @@ export function CoursePeopleTab({
             onChange={(e) => setPeopleSearch(e.target.value)}
             className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 shadow-xs"
           />
-          <MagnifyingGlass className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+          <MagnifyingGlassIcon className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
         </div>
 
         <div className="flex items-center gap-2 self-end sm:self-auto">
@@ -278,7 +276,7 @@ export function CoursePeopleTab({
             }}
             className="apple-press px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-full flex items-center gap-1.5 transition-colors cursor-pointer"
           >
-            <UserPlus className="w-3.5 h-3.5" />
+            <UserPlusIcon className="w-3.5 h-3.5" />
             <span>Assign Assistant</span>
           </button>
           <button
@@ -292,7 +290,7 @@ export function CoursePeopleTab({
             }}
             className="apple-press px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs rounded-full shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
           >
-            <UserPlus className="w-3.5 h-3.5" />
+            <UserPlusIcon className="w-3.5 h-3.5" />
             <span>Enroll Students</span>
           </button>
         </div>
@@ -337,7 +335,7 @@ export function CoursePeopleTab({
                     title="Remove assistant from course"
                     aria-label="Remove assistant from course"
                   >
-                    <Trash className="w-3.5 h-3.5" />
+                    <TrashIcon className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
@@ -383,7 +381,7 @@ export function CoursePeopleTab({
                     title="Unenroll student"
                     aria-label={`Unenroll student ${st.username}`}
                   >
-                    <UserMinus className="w-3.5 h-3.5" />
+                    <UserMinusIcon className="w-3.5 h-3.5" />
                     <span className="text-[10px] hidden sm:inline">Unenroll</span>
                   </button>
                 </div>
@@ -433,7 +431,7 @@ export function CoursePeopleTab({
             {/* In-Modal Error Banner */}
             {enrollModalError && (
               <div className="rounded-2xl bg-rose-50 border border-rose-200 p-3.5 text-xs text-rose-800 flex items-start gap-2.5 animate-in fade-in slide-in-from-top-1 duration-150">
-                <WarningCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                <WarningCircleIcon className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                 <div className="flex-1">
                   <span className="font-bold block text-rose-900">Enrollment Notice</span>
                   <span className="text-rose-700 leading-relaxed">{enrollModalError}</span>
@@ -535,7 +533,7 @@ export function CoursePeopleTab({
                           <span className="text-xs font-semibold text-slate-600 capitalize">
                             {userItem.role}
                           </span>
-                          <UserCheck className="w-3.5 h-3.5 text-slate-400" />
+                          <UserCheckIcon className="w-3.5 h-3.5 text-slate-400" />
                         </div>
                       </button>
                     );

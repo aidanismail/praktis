@@ -13,11 +13,9 @@ import { createAndUploadMultipleModules } from "@/features/admin/api/admin.api";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
 import {
   Trophy,
-  BookOpen,
   DownloadSimple,
   Eye,
   FileArrowDown,
-  FileText,
   PencilSimple,
   Plus,
   Trash,
