@@ -50,7 +50,7 @@ export function DocumentPreviewModal({
       aria-labelledby="document-preview-title"
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-3 sm:p-6 animate-in fade-in duration-150"
     >
-      <div className="relative flex h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl border border-slate-200">
+      <div className="relative flex h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl bg-white shadow-xl border border-slate-200">
         {/* Top Header Toolbar */}
         <div className="flex items-center justify-between border-b border-slate-200 bg-white px-5 py-3.5 shrink-0">
           <div className="flex items-center gap-3 overflow-hidden">

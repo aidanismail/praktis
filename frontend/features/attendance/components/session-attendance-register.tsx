@@ -291,24 +291,38 @@ function AttendanceRegisterForm({
 
   return (
     <form onSubmit={form.handleSubmit(submitAttendance)} noValidate>
-      <dl className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-        {[
-          ["Recorded", students.length - counts.unrecorded],
-          ["Hadir", counts.hadir],
-          ["Sakit", counts.sakit],
-          ["Izin", counts.izin],
-          ["Alfa", counts.alfa]
-        ].map(([label, value]) => (
-          <div key={label}>
-            <dt className="inline text-slate-500">{label}: </dt>
-            <dd className="inline font-semibold text-slate-950">{value}</dd>
-          </div>
-        ))}
-      </dl>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <dl className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+          {[
+            ["Recorded", students.length - counts.unrecorded],
+            ["Hadir", counts.hadir],
+            ["Sakit", counts.sakit],
+            ["Izin", counts.izin],
+            ["Alfa", counts.alfa]
+          ].map(([label, value]) => (
+            <div key={label}>
+              <dt className="inline text-slate-500">{label}: </dt>
+              <dd className="inline font-semibold text-slate-950">{value}</dd>
+            </div>
+          ))}
+        </dl>
 
-      <p className="mt-3 text-sm text-slate-600" aria-live="polite">
-        {counts.unrecorded} of {students.length} students still need attendance recorded.
-      </p>
+        {isEditable ? (
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="submit"
+              disabled={saveMutation.isPending || !form.formState.isDirty || counts.unrecorded > 0 || students.length === 0}
+              className="inline-flex min-h-9 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white shadow-xs transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {saveMutation.isPending ? <AsteriskLoader className="h-4 w-4" /> : null}
+              {saveMutation.isPending ? "Saving..." : "Save attendance"}
+            </button>
+            <button type="button" onClick={resetChanges} disabled={saveMutation.isPending || !form.formState.isDirty} className="inline-flex min-h-9 items-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-60">
+              Reset
+            </button>
+          </div>
+        ) : null}
+      </div>
 
       {!isEditable ? (
         <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
@@ -322,7 +336,7 @@ function AttendanceRegisterForm({
         </div>
       ) : null}
 
-      <div className="mt-5 flex flex-wrap items-end justify-between gap-3">
+      <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
         <label className="min-w-0 flex-1 sm:max-w-sm">
           <span className="text-sm font-semibold text-slate-800">Search by NPM or email</span>
           <span className="relative mt-1.5 block">
@@ -345,11 +359,11 @@ function AttendanceRegisterForm({
       </div>
 
       {visibleIndexes.length === 0 ? (
-        <div role="status" className="mt-5 rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-600">
+        <div role="status" className="mt-4 rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-600">
           No students match this search.
         </div>
       ) : (
-        <ul className="mt-5 divide-y divide-slate-200 overflow-hidden rounded-2xl border border-slate-200">
+        <ul className="mt-4 max-h-96 divide-y divide-slate-200 overflow-y-auto overscroll-contain rounded-2xl border border-slate-200">
           {visibleIndexes.map(({ field, index, student }) => {
             if (!student) return null;
             const registration = form.register(`records.${index}.status`);
@@ -400,22 +414,6 @@ function AttendanceRegisterForm({
           <NotificationBanner variant="success" message={saveMutation.data.message} />
         </div>
       ) : null}
-
-      {isEditable ? (
-        <div className="mt-5 flex flex-wrap gap-2">
-          <button
-            type="submit"
-            disabled={saveMutation.isPending || !form.formState.isDirty || counts.unrecorded > 0 || students.length === 0}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white shadow-xs transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {saveMutation.isPending ? <AsteriskLoader className="h-4 w-4" /> : null}
-            {saveMutation.isPending ? "Saving..." : "Save attendance"}
-          </button>
-          <button type="button" onClick={resetChanges} disabled={saveMutation.isPending || !form.formState.isDirty} className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-60">
-            Reset changes
-          </button>
-        </div>
-      ) : null}
     </form>
   );
 }
@@ -437,14 +435,9 @@ export function SessionAttendanceRegister({
   const attendanceError = getRequestError(attendanceQuery.error, "attendance");
 
   return (
-    <section aria-labelledby="session-attendance-heading" className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-      <div>
-        <h2 id="session-attendance-heading" className="text-xl font-semibold text-slate-950">Attendance register</h2>
-        <p className="mt-1 text-sm leading-6 text-slate-600">Make sure every student has a status selected before saving.</p>
-      </div>
-
+    <section aria-label="Attendance register" className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
       {rosterQuery.isPending || attendanceQuery.isPending ? (
-        <div role="status" aria-live="polite" className="mt-5 flex min-h-40 items-center justify-center rounded-2xl bg-slate-50">
+        <div role="status" aria-live="polite" className="flex min-h-40 items-center justify-center rounded-2xl bg-slate-50">
           <AsteriskLoader className="h-5 w-5" />
           <span className="ml-3 text-sm text-slate-600">Loading roster and attendance...</span>
         </div>
@@ -464,20 +457,18 @@ export function SessionAttendanceRegister({
 
       {!rosterQuery.isPending && !attendanceQuery.isPending && !rosterError && !attendanceError ? (
         rosterQuery.data && rosterQuery.data.length > 0 ? (
-          <div className="mt-5">
-            <AttendanceRegisterForm
-              userId={userId}
-              courseId={courseId}
-              session={session}
-              students={rosterQuery.data}
-              records={attendanceQuery.data ?? []}
-              onRosterRefresh={() => rosterQuery.refetch()}
-              onAttendanceRefresh={() => attendanceQuery.refetch()}
-              onDirtyChange={onDirtyChange}
-            />
-          </div>
+          <AttendanceRegisterForm
+            userId={userId}
+            courseId={courseId}
+            session={session}
+            students={rosterQuery.data}
+            records={attendanceQuery.data ?? []}
+            onRosterRefresh={() => rosterQuery.refetch()}
+            onAttendanceRefresh={() => attendanceQuery.refetch()}
+            onDirtyChange={onDirtyChange}
+          />
         ) : (
-          <div role="status" className="mt-5 rounded-2xl border border-dashed border-slate-300 p-8 text-center">
+          <div role="status" className="rounded-2xl border border-dashed border-slate-300 p-8 text-center">
             <h3 className="text-base font-semibold text-slate-950">No students enrolled yet</h3>
             <p className="mt-1 text-sm text-slate-600">Once students join this course, you can take attendance here.</p>
           </div>

@@ -448,7 +448,7 @@ export function ProductLogo({
             >
               {stage === "fallen" && (
                 <div className="absolute -top-7 right-0 whitespace-nowrap rounded-full bg-slate-900/90 backdrop-blur-xs px-2.5 py-0.5 text-[10px] font-medium text-white shadow-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                  Click to return ↺
+                  Click to return
                 </div>
               )}
               <span className="w-full h-full flex items-center justify-center transition-transform duration-200 group-hover:scale-115">

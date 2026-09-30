@@ -3,7 +3,6 @@
 import { CourseStream } from "@/features/announcements/components/course-stream";
 import { CourseAssignments } from "@/features/assignments/components/course-assignments";
 import { PraktikanCourseAttendance } from "@/features/attendance/components/praktikan-course-attendance";
-import { PraktikanCourseGrades } from "@/features/grades/components/praktikan-course-grades";
 import { CourseModules } from "@/features/modules/components/course-modules";
 import type { CourseWorkspaceTab } from "@/constants/routes";
 import type { User } from "@/types/user.type";
@@ -101,10 +100,9 @@ export function PraktikanCourseWorkspaceTabs({
           id={sessionIds.panelId}
           role="tabpanel"
           aria-labelledby={sessionIds.tabId}
-          className="mt-6 space-y-10 focus:outline-none"
+          className="mt-6 focus:outline-none"
         >
           <PraktikanCourseAttendance userId={user.id} courseId={courseId} />
-          <PraktikanCourseGrades userId={user.id} courseId={courseId} />
         </div>
       ) : null}
     </section>

@@ -418,7 +418,7 @@ export function CourseSubmissionsView({
         >
           <form
             onSubmit={handleGradeSubmit}
-            className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4"
+            className="bg-white rounded-3xl border border-slate-200 p-6 w-full max-w-md shadow-xl space-y-4"
           >
             <h4 id="grade-submission-modal-title" className="font-bold text-sm text-slate-900">
               Grade {selectedSubForGrade.student_username}

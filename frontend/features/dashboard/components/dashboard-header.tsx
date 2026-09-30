@@ -50,7 +50,7 @@ const DEFAULT_PRAKTIKAN_TABS: CourseTabItem[] = [
   { id: "modules", label: "Modules" },
   { id: "assignments", label: "Assignments" },
   { id: "people", label: "People" },
-  { id: "sessions", label: "Attendance & Grades" },
+  { id: "sessions", label: "Sessions & Attendance" },
 ];
 
 export function DashboardHeader({

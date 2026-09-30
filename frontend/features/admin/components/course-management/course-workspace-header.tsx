@@ -79,13 +79,13 @@ export function CourseWorkspaceHeader({
 
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-white/90 drop-shadow-xs">
+            <p className="text-xs font-semibold uppercase tracking-wider text-white/90">
               {course.code}
             </p>
-            <h1 className="text-2xl sm:text-3xl font-bold mt-1.5 text-white tracking-tight drop-shadow-xs">
+            <h1 className="text-2xl sm:text-3xl font-bold mt-1.5 text-white tracking-tight">
               {course.name}
             </h1>
-            <p className="text-xs text-slate-200 mt-1.5 flex items-center gap-2 drop-shadow-xs">
+            <p className="text-xs text-slate-200 mt-1.5 flex items-center gap-2">
               <CalendarBlank className="w-4 h-4 text-white/70" />
               <span>
                 Academic Year {course.academic_year} • Semester {course.semester}

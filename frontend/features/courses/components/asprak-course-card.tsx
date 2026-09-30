@@ -34,7 +34,7 @@ export function AsprakCourseCard({ course }: AsprakCourseCardProps) {
 
         <div className="relative z-10">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-white/90 drop-shadow-xs">
+            <span className="text-xs font-semibold uppercase tracking-wider text-white/90">
               {course.code}
             </span>
             {!course.is_active ? (
@@ -44,7 +44,7 @@ export function AsprakCourseCard({ course }: AsprakCourseCardProps) {
             ) : null}
           </div>
 
-          <h3 className="mt-2 text-lg font-bold text-white line-clamp-1 drop-shadow-xs">
+          <h3 className="mt-2 text-lg font-bold text-white line-clamp-1">
             {course.name}
           </h3>
         </div>

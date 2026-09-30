@@ -43,7 +43,7 @@ export function PraktikanCourseCard({ course }: PraktikanCourseCardProps) {
         )}
         <div className="relative z-10">
           <div className="flex items-center gap-2 text-[11px]">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-white/90 drop-shadow-xs">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-white/90">
               {course.code}
             </span>
             <span className="text-white/40" aria-hidden="true">·</span>
@@ -51,7 +51,7 @@ export function PraktikanCourseCard({ course }: PraktikanCourseCardProps) {
               {course.semester} {course.academic_year}
             </span>
           </div>
-          <h3 className="text-sm font-bold mt-2 text-white group-hover:underline line-clamp-1 drop-shadow-xs">
+          <h3 className="text-sm font-bold mt-2 text-white group-hover:underline line-clamp-1">
             {course.name}
           </h3>
         </div>

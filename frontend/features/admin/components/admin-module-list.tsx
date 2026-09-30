@@ -676,7 +676,7 @@ export function AdminModuleList() {
         >
           <form
             onSubmit={handleUploadSubmit}
-            className="bg-white rounded-3xl p-6 w-full max-w-xl shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] flex flex-col"
+            className="bg-white rounded-3xl border border-slate-200 p-6 w-full max-w-xl shadow-xl space-y-4 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] flex flex-col"
           >
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 shrink-0">
               <div>
@@ -950,7 +950,7 @@ export function AdminModuleList() {
           aria-labelledby="admin-module-detail-title"
           className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4"
         >
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             {/* Modal Header Banner */}
             <div className="p-5 bg-linear-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-between">
               <div className="flex items-center gap-3">

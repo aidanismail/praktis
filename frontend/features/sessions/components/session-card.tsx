@@ -169,9 +169,7 @@ export function SessionCard({
           </div>
           {deleteMutation.isError ? (
             <p className="mt-3 text-sm text-red-800">
-              {deleteMutation.error instanceof ApiError && deleteMutation.error.status === 400
-                ? deleteMutation.error.message || "Cannot delete session with published grades. Unpublish grades first."
-                : deleteMutation.error.message || "Unable to delete session. Please try again."}
+              {deleteMutation.error.message || "Unable to delete session. Please try again."}
             </p>
           ) : null}
         </div>

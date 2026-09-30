@@ -138,11 +138,10 @@ export function CourseUpcomingWidget({
 
         {upcomingAssignments.length === 0 ? (
           <div className="py-3 text-center">
-            <CheckCircle className="w-6 h-6 text-emerald-500 mx-auto" weight="fill" />
+            <CheckCircle className="w-5 h-5 text-slate-400 mx-auto" />
             <p className="mt-1.5 text-xs font-medium text-slate-600">
               No assignments due soon
             </p>
-            <p className="text-[11px] text-slate-400">All caught up!</p>
           </div>
         ) : (
           <div className="space-y-1.5 pt-1">
@@ -244,9 +243,8 @@ export function CourseUpcomingWidget({
               </span>
 
               {nextSession.attendance_status === "OPEN" ? (
-                <span className="inline-flex items-center gap-1.5 font-semibold text-[10px] uppercase tracking-wide text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2.5 py-0.5 rounded-full">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 shrink-0" aria-hidden="true" />
-                  Open Now
+                <span className="inline-flex items-center font-semibold text-[10px] uppercase tracking-wide text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2.5 py-0.5 rounded-full">
+                  Open
                 </span>
               ) : nextSession.attendance_status === "CLOSED" ? (
                 <span className="inline-flex items-center font-medium text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">

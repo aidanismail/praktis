@@ -147,7 +147,7 @@ export function PraktikanGradeHistory({ userId }: Props) {
           <dd className="mt-1 text-2xl sm:text-3xl font-bold text-slate-950">
             {average === null ? "—" : formatScore(average)}
           </dd>
-          <p className="mt-1 text-[11px] text-slate-400">Calculated from published session scores</p>
+          <p className="mt-1 text-[11px] text-slate-400">Calculated from published scores</p>
         </div>
       </dl>
 
