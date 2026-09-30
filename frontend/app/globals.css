@@ -19,8 +19,13 @@
   }
 }
 
+html,
 body {
-  background: var(--background);
+  overscroll-behavior-y: none;
+  background-color: #f8f9fa;
+}
+
+body {
   color: var(--foreground);
   font-family: var(--font-dm-sans), Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;

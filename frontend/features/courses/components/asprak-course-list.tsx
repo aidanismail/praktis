@@ -46,7 +46,7 @@ function CourseGroup({
         <p className="mt-1 text-sm text-slate-500">{description}</p>
       </div>
 
-      <ul className="mt-4 grid gap-4 lg:grid-cols-2">
+      <ul className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {courses.map((course) => (
           <li key={course.id}>
             <Link
@@ -58,7 +58,7 @@ function CourseGroup({
                 }
               }}
               aria-label={`Open ${course.code} ${course.name}, ${course.academic_year} semester ${course.semester}`}
-              className="block h-full rounded-2xl transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+              className="block h-full rounded-3xl transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
             >
               <AsprakCourseCard course={course} />
             </Link>
@@ -74,11 +74,11 @@ function CourseListLoading() {
     <div role="status" aria-live="polite">
       <span className="sr-only">Loading your classes...</span>
 
-      <div className="grid gap-4 lg:grid-cols-2" aria-hidden="true">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" aria-hidden="true">
         {[0, 1, 2].map((item) => (
           <div
             key={item}
-            className="h-44 animate-pulse rounded-2xl border border-slate-200 bg-slate-100"
+            className="h-44 animate-pulse rounded-3xl border border-slate-200 bg-slate-100"
           />
         ))}
       </div>

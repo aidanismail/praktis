@@ -10,7 +10,6 @@ import { CourseAssignments } from "@/features/assignments/components/course-assi
 import { AssignedAssignmentDetail } from "@/features/assignments/components/asprak-assignment-detail-page";
 import { CourseRoster } from "./course-roster";
 import { CourseSessions } from "@/features/sessions/components/course-sessions";
-import { AssignedSessionDetail } from "@/features/sessions/components/asprak-session-detail-page";
 import {
   getThemeConfig,
   getPatternConfig,
@@ -143,18 +142,6 @@ export function AsprakCourseWorkspace({
         courseId={course.id}
         assignmentId={assignmentId}
         onBack={handleBackFromAssignment}
-      />
-    );
-  }
-
-  if (sessionId) {
-    return (
-      <AssignedSessionDetail
-        userId={userId}
-        courseId={course.id}
-        sessionId={sessionId}
-        course={course}
-        onBack={handleBackFromSession}
       />
     );
   }
@@ -332,6 +319,7 @@ export function AsprakCourseWorkspace({
         <CourseSessions
           userId={userId}
           courseId={course.id}
+          initialInspectingSessionId={sessionId}
         />
       )}
 
