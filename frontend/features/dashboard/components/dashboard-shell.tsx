@@ -8,6 +8,8 @@ import { useAdminCourses } from "@/features/admin/hooks/use-admin-courses";
 import { useCourseWorkspace } from "@/features/admin/hooks/use-admin-course-workspace";
 import { useAssignedCourses } from "@/features/courses/hooks/use-assigned-courses";
 import { useEnrolledCourses } from "@/features/courses/hooks/use-enrolled-courses";
+import { useAssignmentDetail } from "@/features/assignments/hooks/use-course-assignments";
+import { useCourseSessions } from "@/features/sessions/hooks/use-course-sessions";
 import { DASHBOARD_NAVIGATION } from "../constants/dashboard-navigation";
 import { DashboardHeader } from "./dashboard-header";
 import { DashboardSidebar } from "./dashboard-sidebar";
@@ -53,6 +55,21 @@ export function DashboardShell({ user }: DashboardShellProps) {
   // Fetch enrolled courses for praktikan
   const enrolledCoursesQuery = useEnrolledCourses(user.role === "praktikan" ? user.id : "");
 
+  // Fetch assignment detail for active assignment title in breadcrumbs
+  const assignmentDetailQuery = useAssignmentDetail({
+    userId: user.id,
+    courseId: courseIdParam ?? "",
+    assignmentId: assignmentIdParam ?? "",
+    enabled: !isSuperadmin && Boolean(courseIdParam && assignmentIdParam),
+  });
+
+  // Fetch sessions for active session title in breadcrumbs
+  const sessionsQuery = useCourseSessions({
+    userId: user.id,
+    courseId: courseIdParam ?? "",
+    enabled: !isSuperadmin && Boolean(courseIdParam && sessionIdParam),
+  });
+
   const activeCourse = useMemo(() => {
     if (!courseIdParam) return null;
     if (isSuperadmin) {
@@ -87,13 +104,21 @@ export function DashboardShell({ user }: DashboardShellProps) {
         const found = assignments.find((a) => a.id === assignmentIdParam);
         return found ? found.title : "Submissions";
       }
-      return "Assignment";
+      return assignmentDetailQuery.data?.title ?? "Assignment";
     }
     if (sessionIdParam) {
-      return "Session";
+      const found = sessionsQuery.data?.find((s) => s.id === sessionIdParam);
+      return found ? found.title : "Session";
     }
     return null;
-  }, [isSuperadmin, assignmentIdParam, sessionIdParam, assignments]);
+  }, [
+    isSuperadmin,
+    assignmentIdParam,
+    sessionIdParam,
+    assignments,
+    assignmentDetailQuery.data?.title,
+    sessionsQuery.data,
+  ]);
 
   const activeItem =
     navigationItems.find((item) => item.id === activeItemId) ??
@@ -191,7 +216,7 @@ export function DashboardShell({ user }: DashboardShellProps) {
           onCloseMobile={() => setIsMobileSidebarOpen(false)}
         />
 
-        <main className="flex-1 min-w-0 p-3 sm:p-6 lg:p-8 max-w-5xl mx-auto w-full">
+        <main className={`flex-1 min-w-0 p-3 sm:p-6 lg:p-8 mx-auto w-full ${activeCourse ? "max-w-6xl" : "max-w-5xl"}`}>
           {logoutMutation.isError ? (
             <div id="logout-error-message" className="mb-5">
               <NotificationBanner

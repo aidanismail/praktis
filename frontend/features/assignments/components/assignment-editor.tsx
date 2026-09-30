@@ -22,6 +22,8 @@ type AssignmentEditorProps = {
   userId: string;
   courseId: string;
   assignment: Assignment;
+  isEditing?: boolean;
+  onClose?: () => void;
 };
 
 function toLocalDateTime(value: string | null) {
@@ -91,9 +93,12 @@ function getUpdateErrorMessage(error: Error) {
 export function AssignmentEditor({
   userId,
   courseId,
-  assignment
+  assignment,
+  isEditing: isEditingProp,
+  onClose
 }: AssignmentEditorProps) {
-  const [isEditing, setIsEditing] = useState(false);
+  const [internalIsEditing, setInternalIsEditing] = useState(false);
+  const isEditing = isEditingProp !== undefined ? isEditingProp : internalIsEditing;
   const editButtonId = `assignment-edit-trigger-${assignment.id}`;
   const titleInputId = `assignment-edit-${assignment.id}-title`;
 
@@ -115,7 +120,7 @@ export function AssignmentEditor({
   function startEditing() {
     mutation.reset();
     form.reset(getFormValues(assignment));
-    setIsEditing(true);
+    setInternalIsEditing(true);
 
     requestAnimationFrame(() => {
       document.getElementById(titleInputId)?.focus();
@@ -125,11 +130,14 @@ export function AssignmentEditor({
   function cancelEditing() {
     mutation.reset();
     form.reset(getFormValues(assignment));
-    setIsEditing(false);
-
-    requestAnimationFrame(() => {
-      document.getElementById(editButtonId)?.focus();
-    });
+    if (onClose) {
+      onClose();
+    } else {
+      setInternalIsEditing(false);
+      requestAnimationFrame(() => {
+        document.getElementById(editButtonId)?.focus();
+      });
+    }
   }
 
   function onSubmit(values: AssignmentFormValues) {
@@ -152,14 +160,21 @@ export function AssignmentEditor({
       {
         onSuccess: (updatedAssignment) => {
           form.reset(getFormValues(updatedAssignment));
-          setIsEditing(false);
-
-          requestAnimationFrame(() => {
-            document.getElementById(editButtonId)?.focus();
-          });
+          if (onClose) {
+            onClose();
+          } else {
+            setInternalIsEditing(false);
+            requestAnimationFrame(() => {
+              document.getElementById(editButtonId)?.focus();
+            });
+          }
         }
       }
     );
+  }
+
+  if (isEditingProp !== undefined && !isEditingProp) {
+    return null;
   }
 
   return (
@@ -181,7 +196,7 @@ export function AssignmentEditor({
           </p>
         </div>
 
-        {!isEditing ? (
+        {isEditingProp === undefined && !isEditing ? (
           <button
             id={editButtonId}
             type="button"
