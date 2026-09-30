@@ -107,7 +107,6 @@ export function DashboardHeader({
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-200 bg-white shadow-xs">
       <div className="flex h-16 w-full items-center gap-5 px-4 sm:px-6">
-        {/* Left: Hamburger & Google Classroom Breadcrumbs */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             type="button"
@@ -157,7 +156,6 @@ export function DashboardHeader({
           </div>
         </div>
 
-        {/* Middle: Google Classroom Top-Bar Tabs — visible on all viewports */}
         {activeCourse && onSelectTab && !activeAssignmentTitle && (
           <nav className="hidden md:flex items-center gap-1 h-full overflow-x-auto scrollbar-none">
             {effectiveTabs.map((tab) => {
@@ -183,7 +181,6 @@ export function DashboardHeader({
           </nav>
         )}
 
-        {/* Right: User Account Chip & Dropdown */}
         <div ref={userMenuRef} className="relative ml-auto flex items-center shrink-0">
           <button
             type="button"
@@ -245,7 +242,6 @@ export function DashboardHeader({
         </div>
       </div>
 
-      {/* Mobile Sub-Header: Scrollable Horizontal Tabs for Course Workspace (< md) */}
       {activeCourse && onSelectTab && !activeAssignmentTitle && (
         <nav className="flex md:hidden items-center border-t border-slate-100 bg-white px-2 overflow-x-auto h-11 w-full shrink-0 gap-1 scrollbar-none">
           {effectiveTabs.map((tab) => {

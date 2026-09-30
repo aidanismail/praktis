@@ -244,8 +244,8 @@ export function CourseUpcomingWidget({
               </span>
 
               {nextSession.attendance_status === "OPEN" ? (
-                <span className="inline-flex items-center gap-1.5 font-bold text-[10px] uppercase tracking-wide text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                <span className="inline-flex items-center gap-1.5 font-semibold text-[10px] uppercase tracking-wide text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2.5 py-0.5 rounded-full">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 shrink-0" aria-hidden="true" />
                   Open Now
                 </span>
               ) : nextSession.attendance_status === "CLOSED" ? (

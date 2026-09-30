@@ -107,6 +107,16 @@ export function PraktikanCourseWorkspace({
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   }, [pathname, router, searchParams]);
 
+  if (assignmentId) {
+    return (
+      <PraktikanAssignmentDetailPage
+        courseId={course.id}
+        assignmentId={assignmentId}
+        onBack={handleBackFromAssignment}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Top back button & breadcrumbs */}
@@ -250,22 +260,15 @@ export function PraktikanCourseWorkspace({
         />
       )}
 
-      {/* Assignments Tab: Submissions View or Assignments List */}
-      {workspaceTab === "assignments" &&
-        (assignmentId ? (
-          <PraktikanAssignmentDetailPage
-            courseId={course.id}
-            assignmentId={assignmentId}
-            onBack={handleBackFromAssignment}
-          />
-        ) : (
-          <CourseAssignments
-            userId={user.id}
-            courseId={course.id}
-            viewerRole="praktikan"
-            onSelectAssignment={handleSelectAssignment}
-          />
-        ))}
+      {/* Assignments Tab: Assignments List */}
+      {workspaceTab === "assignments" && (
+        <CourseAssignments
+          userId={user.id}
+          courseId={course.id}
+          viewerRole="praktikan"
+          onSelectAssignment={handleSelectAssignment}
+        />
+      )}
 
       {/* People Tab: Enrolled Student Membership Details */}
       {workspaceTab === "people" && (

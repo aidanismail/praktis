@@ -130,10 +130,34 @@ export function AsprakCourseWorkspace({
 
   const handleBackFromSession = useCallback(() => {
     const params = new URLSearchParams(searchParams.toString());
+    params.set("workspaceTab", "sessions");
     params.delete("sessionId");
     params.delete("assignmentId");
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   }, [pathname, router, searchParams]);
+
+  if (assignmentId) {
+    return (
+      <AssignedAssignmentDetail
+        userId={userId}
+        courseId={course.id}
+        assignmentId={assignmentId}
+        onBack={handleBackFromAssignment}
+      />
+    );
+  }
+
+  if (sessionId) {
+    return (
+      <AssignedSessionDetail
+        userId={userId}
+        courseId={course.id}
+        sessionId={sessionId}
+        course={course}
+        onBack={handleBackFromSession}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -285,23 +309,14 @@ export function AsprakCourseWorkspace({
         />
       )}
 
-      {/* Assignments Tab: Submissions View or Assignments List */}
+      {/* Assignments Tab: Assignments List */}
       {workspaceTab === "assignments" && (
-        assignmentId ? (
-          <AssignedAssignmentDetail
-            userId={userId}
-            courseId={course.id}
-            assignmentId={assignmentId}
-            onBack={handleBackFromAssignment}
-          />
-        ) : (
-          <CourseAssignments
-            userId={userId}
-            courseId={course.id}
-            viewerRole="asprak"
-            onSelectAssignment={handleSelectAssignment}
-          />
-        )
+        <CourseAssignments
+          userId={userId}
+          courseId={course.id}
+          viewerRole="asprak"
+          onSelectAssignment={handleSelectAssignment}
+        />
       )}
 
       {/* People Tab: Enrolled Students & Assigned Staff */}
@@ -312,22 +327,12 @@ export function AsprakCourseWorkspace({
         />
       )}
 
-      {/* Sessions Tab: Session Detail Register or Session List */}
+      {/* Sessions Tab: Session List */}
       {workspaceTab === "sessions" && (
-        sessionId ? (
-          <AssignedSessionDetail
-            userId={userId}
-            courseId={course.id}
-            sessionId={sessionId}
-            course={course}
-            onBack={handleBackFromSession}
-          />
-        ) : (
-          <CourseSessions
-            userId={userId}
-            courseId={course.id}
-          />
-        )
+        <CourseSessions
+          userId={userId}
+          courseId={course.id}
+        />
       )}
 
       {showCustomizeModal && (

@@ -3,7 +3,9 @@
 import {
   WarningCircle,
   ArrowLeft,
-  ArrowsClockwise
+  ArrowsClockwise,
+  PencilSimple,
+  Trash
 } from "@phosphor-icons/react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import Link from "next/link";
@@ -30,7 +32,6 @@ type AssignedAssignmentDetailProps = {
   userId: string;
   courseId: string;
   assignmentId: string;
-  /** When provided, the back button uses this callback instead of a Link href (in-dashboard context). */
   onBack?: () => void;
 };
 
@@ -172,16 +173,33 @@ function RequestErrorPanel({
   );
 }
 
-function AssignmentSummary({ assignment }: { assignment: Assignment }) {
+function AssignmentSummary({
+  assignment,
+  courseCode,
+  courseName
+}: {
+  assignment: Assignment;
+  courseCode?: string;
+  courseName?: string;
+}) {
   const allowedFileTypes = getAllowedFileTypes(
     assignment.allowed_file_types
   );
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs sm:p-6">
+    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs sm:p-7">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex items-center gap-2 text-xs">
+            {courseCode && (
+              <>
+                <span className="font-bold uppercase tracking-wider text-[11px] text-slate-400">
+                  {courseCode}{courseName ? ` · ${courseName}` : ""}
+                </span>
+                <span className="text-slate-300" aria-hidden="true">·</span>
+              </>
+            )}
+
             <span
               className={`font-semibold ${
                 assignment.is_published ? "text-slate-900" : "text-amber-700"
@@ -292,6 +310,7 @@ export function AssignedAssignmentDetail({
 }: AssignedAssignmentDetailProps) {
   const router = useRouter();
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const deleteMutation = useDeleteCourseAssignment({ userId, courseId });
   const courseQuery = useAssignedCourses(userId);
   const course = (courseQuery.data ?? []).find((item) => item.id === courseId);
@@ -424,46 +443,58 @@ export function AssignedAssignmentDetail({
   }
 
   return (
-    <div>
-      <div className="flex flex-wrap items-center justify-between gap-4">
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         {onBack ? (
           <button
             type="button"
             onClick={onBack}
-            className="inline-flex min-h-11 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-full shadow-xs apple-press transition-colors cursor-pointer"
           >
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            Back to Assignments
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to Assignments</span>
           </button>
         ) : (
           <Link
             href={getCourseDetailRoute(courseId, "assignments")}
-            className="inline-flex min-h-11 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-full shadow-xs apple-press transition-colors"
           >
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            Back to Assignments
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to Assignments</span>
           </Link>
         )}
 
-        {!isConfirmingDelete ? (
+        <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => {
-              deleteMutation.reset();
-              setIsConfirmingDelete(true);
-            }}
-            disabled={deleteMutation.isPending}
-            className="inline-flex min-h-11 items-center rounded-full border border-slate-300 bg-white px-4 text-sm font-semibold text-red-700 transition hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:opacity-60"
+            onClick={() => setIsEditing((prev) => !prev)}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-3.5 py-2 rounded-full shadow-xs apple-press transition-colors cursor-pointer"
           >
-            Delete assignment
+            <PencilSimple className="w-3.5 h-3.5 text-slate-500" />
+            <span>{isEditing ? "Close settings" : "Edit assignment"}</span>
           </button>
-        ) : null}
+
+          {!isConfirmingDelete ? (
+            <button
+              type="button"
+              onClick={() => {
+                deleteMutation.reset();
+                setIsConfirmingDelete(true);
+              }}
+              disabled={deleteMutation.isPending}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-700 hover:text-rose-800 bg-white border border-rose-200 hover:bg-rose-50 px-3.5 py-2 rounded-full shadow-xs apple-press transition-colors cursor-pointer disabled:opacity-60"
+            >
+              <Trash className="w-3.5 h-3.5 text-rose-500" />
+              <span>Delete</span>
+            </button>
+          ) : null}
+        </div>
       </div>
 
       {isConfirmingDelete ? (
-        <div role="alert" className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4">
+        <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-4">
           <p className="text-sm font-semibold text-red-950">Delete assignment?</p>
-          <p className="mt-1 text-sm text-red-800">
+          <p className="mt-1 text-xs text-red-800">
             All student submissions and grading records for this assignment will be permanently deleted. This action cannot be undone.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -471,7 +502,7 @@ export function AssignedAssignmentDetail({
               type="button"
               onClick={() => setIsConfirmingDelete(false)}
               disabled={deleteMutation.isPending}
-              className="rounded-full border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+              className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
             >
               Cancel
             </button>
@@ -479,13 +510,13 @@ export function AssignedAssignmentDetail({
               type="button"
               onClick={handleDeleteAssignment}
               disabled={deleteMutation.isPending}
-              className="rounded-full bg-red-700 px-3 py-2 text-sm font-semibold text-white hover:bg-red-800 disabled:opacity-60"
+              className="rounded-full bg-red-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-800 disabled:opacity-60"
             >
               {deleteMutation.isPending ? "Deleting..." : "Delete"}
             </button>
           </div>
           {deleteMutation.isError ? (
-            <p className="mt-3 text-sm text-red-800">
+            <p className="mt-3 text-xs text-red-800">
               {deleteMutation.error instanceof ApiError
                 ? deleteMutation.error.message
                 : "Unable to delete assignment. Please try again."}
@@ -494,24 +525,28 @@ export function AssignedAssignmentDetail({
         </div>
       ) : null}
 
-      <p className="mt-5 text-sm font-semibold text-slate-700">
-        {course.code} · {course.name}
-      </p>
-
       {assignmentQuery.isFetching ? (
-        <p role="status" className="mt-2 text-sm text-slate-500">
+        <p role="status" className="text-xs text-slate-500">
           Refreshing assignment...
         </p>
       ) : null}
 
-      <div className="mt-4 space-y-6">
-        <AssignmentSummary assignment={assignment} />
-
-        <AssignmentEditor
-          userId={userId}
-          courseId={courseId}
+      <div className="space-y-6">
+        <AssignmentSummary
           assignment={assignment}
+          courseCode={course.code}
+          courseName={course.name}
         />
+
+        {isEditing && (
+          <AssignmentEditor
+            userId={userId}
+            courseId={courseId}
+            assignment={assignment}
+            isEditing={isEditing}
+            onClose={() => setIsEditing(false)}
+          />
+        )}
 
         <AssignmentSubmissions
           userId={userId}
