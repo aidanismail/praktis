@@ -260,7 +260,7 @@ function AssignedCourseDetail({
         <div className="relative z-10 flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-white/90 drop-shadow-xs">
+              <span className="text-xs font-bold uppercase tracking-wider text-white/90">
                 {course.code}
               </span>
               <span className="text-white/40" aria-hidden="true">·</span>
@@ -271,7 +271,7 @@ function AssignedCourseDetail({
 
             <h1
               className="mt-2 text-2xl font-bold
-              tracking-tight text-white sm:text-3xl drop-shadow-xs"
+              tracking-tight text-white sm:text-3xl"
             >
               {course.name}
             </h1>

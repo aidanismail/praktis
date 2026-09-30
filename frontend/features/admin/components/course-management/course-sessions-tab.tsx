@@ -293,7 +293,7 @@ export function CourseSessionsTab({
         >
           <form
             onSubmit={handleCreateSubmit}
-            className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4 animate-apple-modal"
+            className="bg-white rounded-2xl border border-slate-200 p-6 w-full max-w-md shadow-xl space-y-4 animate-apple-modal"
           >
             <h4 id="create-session-modal-title" className="font-bold text-sm text-slate-900">
               Schedule a Session

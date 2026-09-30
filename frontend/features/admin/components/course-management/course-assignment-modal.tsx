@@ -106,7 +106,7 @@ function AssignmentFormInner({
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4 animate-apple-modal"
+      className="bg-white rounded-3xl border border-slate-200 p-6 w-full max-w-md shadow-xl space-y-4 animate-apple-modal"
     >
       <div>
         <h4 id="assignment-modal-title" className="font-bold text-sm text-slate-900">

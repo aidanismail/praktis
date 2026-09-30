@@ -524,7 +524,7 @@ export function UserManagement() {
           aria-labelledby="create-user-modal-title"
           className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 transition-opacity animate-in fade-in duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
         >
-          <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4 animate-apple-modal">
+          <div className="bg-white rounded-3xl border border-slate-200 p-6 w-full max-w-md shadow-xl space-y-4 animate-apple-modal">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
                 <h4
@@ -562,7 +562,7 @@ export function UserManagement() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. 140810220001 or johndoe"
+                  placeholder="e.g. 140810220001 or username"
                   value={newUsername}
                   onChange={(e) => setNewUsername(e.target.value)}
                   className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-shadow duration-150"
@@ -663,7 +663,7 @@ export function UserManagement() {
           aria-labelledby="bulk-assign-modal-title"
           className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 transition-opacity animate-in fade-in duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
         >
-          <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4 animate-apple-modal">
+          <div className="bg-white rounded-3xl border border-slate-200 p-6 w-full max-w-md shadow-xl space-y-4 animate-apple-modal">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h4 id="bulk-assign-modal-title" className="font-bold text-sm text-slate-900">
                 Assign {selectedUserIds.size} {selectedUserIds.size === 1 ? "User" : "Users"} to Course

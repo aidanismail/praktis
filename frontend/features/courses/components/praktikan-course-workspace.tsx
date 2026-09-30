@@ -20,7 +20,6 @@ import { CourseAssignments } from "@/features/assignments/components/course-assi
 import { PraktikanAssignmentDetailPage } from "@/features/assignments/components/praktikan-assignment-detail-page";
 import { PraktikanCourseMembership } from "./praktikan-course-membership";
 import { PraktikanCourseAttendance } from "@/features/attendance/components/praktikan-course-attendance";
-import { PraktikanCourseGrades } from "@/features/grades/components/praktikan-course-grades";
 import {
   getThemeConfig,
   getPatternConfig,
@@ -175,11 +174,11 @@ export function PraktikanCourseWorkspace({
               </span>
             </div>
 
-            <h1 className="mt-3 text-2xl sm:text-3xl font-bold tracking-tight text-white drop-shadow-xs">
+            <h1 className="mt-3 text-2xl sm:text-3xl font-bold tracking-tight text-white">
               {course.name}
             </h1>
 
-            <p className="mt-2 text-xs text-slate-200 flex items-center gap-2 drop-shadow-xs">
+            <p className="mt-2 text-xs text-slate-200 flex items-center gap-2">
               <CalendarBlank className="w-4 h-4 text-white/70" weight="bold" />
               <span>
                 Academic Year {course.academic_year} • Semester {course.semester}
@@ -275,12 +274,9 @@ export function PraktikanCourseWorkspace({
         <PraktikanCourseMembership user={user} />
       )}
 
-      {/* Sessions Tab: Attendance Records & Published Grades */}
+      {/* Sessions Tab: Attendance Records */}
       {workspaceTab === "sessions" && (
-        <div className="space-y-8">
-          <PraktikanCourseAttendance userId={user.id} courseId={course.id} />
-          <PraktikanCourseGrades userId={user.id} courseId={course.id} />
-        </div>
+        <PraktikanCourseAttendance userId={user.id} courseId={course.id} />
       )}
     </div>
   );

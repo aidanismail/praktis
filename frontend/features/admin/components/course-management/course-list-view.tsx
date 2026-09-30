@@ -161,7 +161,7 @@ export function CourseListView({
                       <span className="text-xs font-semibold uppercase tracking-wider text-white/90">
                         {course.code}
                       </span>
-                      <h3 className="text-base font-bold mt-1 text-white group-hover:underline line-clamp-1 drop-shadow-xs">
+                      <h3 className="text-base font-bold mt-1 text-white group-hover:underline line-clamp-1">
                         {course.name}
                       </h3>
                     </div>

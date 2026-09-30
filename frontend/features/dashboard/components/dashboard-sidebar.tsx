@@ -137,7 +137,7 @@ export function DashboardSidebar({
           />
 
           {/* Drawer Panel */}
-          <aside className="fixed top-0 bottom-0 left-0 w-72 max-w-[85vw] bg-white z-50 shadow-2xl flex flex-col animate-in slide-in-from-left duration-250 ease-[cubic-bezier(0.16,1,0.3,1)]">
+          <aside className="fixed top-0 bottom-0 left-0 w-72 max-w-[85vw] bg-white z-50 border-r border-slate-200 shadow-xl flex flex-col animate-in slide-in-from-left duration-250 ease-[cubic-bezier(0.16,1,0.3,1)]">
             {/* Drawer Header */}
             <div className="h-16 flex items-center justify-between px-5 border-b border-slate-100">
               <div className="flex items-center gap-2.5 font-bold text-slate-900">

@@ -402,7 +402,7 @@ export function CoursePeopleTab({
         >
           <form
             onSubmit={handleEnrollSubmit}
-            className="bg-white rounded-3xl p-6 w-full max-w-lg shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150"
+            className="bg-white rounded-3xl border border-slate-200 p-6 w-full max-w-lg shadow-xl space-y-4 animate-in fade-in zoom-in-95 duration-150"
           >
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>

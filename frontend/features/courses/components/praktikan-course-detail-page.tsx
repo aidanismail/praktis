@@ -190,7 +190,7 @@ export function PraktikanCourseDetailPage({ courseId, initialTab }: Props) {
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-white/90 drop-shadow-xs">
+                <span className="text-xs font-bold uppercase tracking-wider text-white/90">
                   {course.code}
                 </span>
                 <span className="text-white/40" aria-hidden="true">·</span>
@@ -198,10 +198,10 @@ export function PraktikanCourseDetailPage({ courseId, initialTab }: Props) {
                   {course.is_active ? "Active Offering" : "Historical Offering"}
                 </span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold mt-2 text-white tracking-tight drop-shadow-xs">
+              <h1 className="text-2xl sm:text-3xl font-bold mt-2 text-white tracking-tight">
                 {course.name}
               </h1>
-              <p className="text-xs text-slate-200 mt-1.5 flex items-center gap-2 drop-shadow-xs">
+              <p className="text-xs text-slate-200 mt-1.5 flex items-center gap-2">
                 <CalendarBlank className="w-4 h-4 text-white/70" />
                 <span>
                   Academic Year {course.academic_year} • Semester {course.semester}

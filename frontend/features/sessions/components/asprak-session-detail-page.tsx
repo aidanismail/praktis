@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { getCourseDetailRoute, ROUTES } from "@/constants/routes";
 import { SessionAttendanceRegister } from "@/features/attendance/components/session-attendance-register";
-import { SessionGradebook } from "@/features/grades/components/session-gradebook";
 import { SessionExportPanel } from "@/features/exports/components/session-export-panel";
 import { useAssignedCourses } from "@/features/courses/hooks/use-assigned-courses";
 import type { Course } from "@/features/courses/types/course.type";
@@ -26,7 +25,6 @@ import {
   ArrowsClockwise,
   Trash,
   CalendarCheck,
-  GraduationCap,
   DownloadSimple
 } from "@phosphor-icons/react";
 
@@ -46,9 +44,7 @@ type AsprakSessionDetailPageProps = {
 
 type AssignedSessionDetailProps = AsprakSessionDetailPageProps & {
   userId: string;
-  /** When provided, uses course theme for the session header banner. */
   course?: Course;
-  /** When provided, uses in-shell navigation instead of Link href for back button. */
   onBack?: () => void;
 };
 
@@ -125,7 +121,7 @@ function ErrorPanel({
   );
 }
 
-type SessionSubTab = "attendance" | "grades" | "exports";
+type SessionSubTab = "attendance" | "exports";
 
 function SessionSummary({
   session,
@@ -164,29 +160,16 @@ function SessionSummary({
 
         <div className="flex flex-wrap items-center gap-2">
           {status === "OPEN" ? (
-            <span className="inline-flex items-center gap-1.5 font-semibold text-xs text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-3 py-1 rounded-full">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 shrink-0" aria-hidden="true" />
+            <span className="inline-flex items-center font-semibold text-xs text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-3 py-1 rounded-full">
               Attendance Open
             </span>
           ) : status === "CLOSED" ? (
-            <span className="inline-flex items-center gap-1.5 font-medium text-xs text-slate-600 bg-slate-100 border border-slate-200 px-3 py-1 rounded-full">
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" aria-hidden="true" />
+            <span className="inline-flex items-center font-medium text-xs text-slate-600 bg-slate-100 border border-slate-200 px-3 py-1 rounded-full">
               Attendance Closed
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1.5 font-medium text-xs text-blue-700 bg-blue-50 border border-blue-200 px-3 py-1 rounded-full">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" aria-hidden="true" />
+            <span className="inline-flex items-center font-medium text-xs text-blue-700 bg-blue-50 border border-blue-200 px-3 py-1 rounded-full">
               Attendance Scheduled
-            </span>
-          )}
-
-          {session.grades_published ? (
-            <span className="inline-flex items-center font-medium text-xs text-slate-700 bg-slate-100 border border-slate-200 px-3 py-1 rounded-full">
-              Grades Published
-            </span>
-          ) : (
-            <span className="inline-flex items-center font-medium text-xs text-amber-800 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">
-              Grades Draft
             </span>
           )}
         </div>
@@ -206,7 +189,6 @@ export function AssignedSessionDetail({
   const [activeSubTab, setActiveSubTab] = useState<SessionSubTab>("attendance");
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [attendanceDirty, setAttendanceDirty] = useState(false);
-  const [gradeDirty, setGradeDirty] = useState(false);
   const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
   const deleteMutation = useDeleteCourseSession({ userId, courseId });
   const coursesQuery = useAssignedCourses(userId);
@@ -227,7 +209,7 @@ export function AssignedSessionDetail({
   }
 
   function handleBackAttempt() {
-    if (attendanceDirty || gradeDirty) {
+    if (attendanceDirty) {
       setShowUnsavedWarning(true);
     } else {
       navigateBack();
@@ -344,12 +326,11 @@ export function AssignedSessionDetail({
         ) : null}
       </div>
 
-      {/* Inline Unsaved-Changes Warning */}
       {showUnsavedWarning ? (
         <div role="alert" className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
           <p className="text-sm font-semibold text-amber-950">You have unsaved changes</p>
           <p className="mt-1 text-xs text-amber-800">
-            Attendance or grade entries have not been saved yet. Leaving now will discard them.
+            Attendance entries have not been saved yet. Leaving now will discard them.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <button
@@ -370,7 +351,6 @@ export function AssignedSessionDetail({
         </div>
       ) : null}
 
-      {/* Delete Confirmation Alert */}
       {isConfirmingDelete ? (
         <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-4">
           <p className="text-sm font-semibold text-red-950">Delete session?</p>
@@ -397,22 +377,18 @@ export function AssignedSessionDetail({
           </div>
           {deleteMutation.isError ? (
             <p className="mt-3 text-xs text-red-800">
-              {deleteMutation.error instanceof ApiError && deleteMutation.error.status === 400
-                ? deleteMutation.error.message || "Cannot delete session with published grades. Unpublish grades first."
-                : deleteMutation.error.message || "Unable to delete session. Please try again."}
+              {deleteMutation.error.message || "Unable to delete session. Please try again."}
             </p>
           ) : null}
         </div>
       ) : null}
 
-      {/* Session Summary Card */}
       <SessionSummary
         session={session}
         courseCode={course.code}
         courseName={course.name}
       />
 
-      {/* Segmented Controls for Sub-Workspaces */}
       <div className="flex items-center gap-1.5 p-1 bg-slate-200/70 rounded-2xl w-fit">
         <button
           type="button"
@@ -432,22 +408,6 @@ export function AssignedSessionDetail({
 
         <button
           type="button"
-          onClick={() => setActiveSubTab("grades")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all apple-press ${
-            activeSubTab === "grades"
-              ? "bg-white text-slate-900 shadow-xs"
-              : "text-slate-600 hover:text-slate-900"
-          }`}
-        >
-          <GraduationCap className="w-4 h-4 text-slate-500" />
-          <span>Gradebook</span>
-          {gradeDirty && (
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" title="Unsaved changes" />
-          )}
-        </button>
-
-        <button
-          type="button"
           onClick={() => setActiveSubTab("exports")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all apple-press ${
             activeSubTab === "exports"
@@ -460,22 +420,12 @@ export function AssignedSessionDetail({
         </button>
       </div>
 
-      {/* Workspaces - Kept mounted to preserve unsaved form edits and filter states */}
       <div className={activeSubTab === "attendance" ? "block" : "hidden"}>
         <SessionAttendanceRegister
           userId={userId}
           courseId={courseId}
           session={session}
           onDirtyChange={setAttendanceDirty}
-        />
-      </div>
-
-      <div className={activeSubTab === "grades" ? "block" : "hidden"}>
-        <SessionGradebook
-          userId={userId}
-          courseId={courseId}
-          session={session}
-          onDirtyChange={setGradeDirty}
         />
       </div>
 

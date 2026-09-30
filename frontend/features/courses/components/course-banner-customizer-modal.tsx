@@ -140,7 +140,7 @@ export function CourseBannerCustomizerModal({
       aria-labelledby="banner-customizer-title"
       className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 transition-opacity animate-in fade-in duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
     >
-      <div className="bg-white rounded-3xl p-5 sm:p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl space-y-5 animate-apple-modal">
+      <div className="bg-white rounded-3xl border border-slate-200 p-5 sm:p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-xl space-y-5 animate-apple-modal">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <div>
@@ -194,7 +194,7 @@ export function CourseBannerCustomizerModal({
 
             <div className="relative z-10 flex items-start justify-between gap-2">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-white/90 drop-shadow-xs">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-white/90">
                   {course.code}
                 </span>
                 <span className="text-white/40" aria-hidden="true">·</span>
@@ -223,7 +223,7 @@ export function CourseBannerCustomizerModal({
             </div>
 
             <div className="relative z-10 mt-3">
-              <h3 className="font-bold text-base text-white tracking-tight truncate drop-shadow-xs">
+              <h3 className="font-bold text-base text-white tracking-tight truncate">
                 {course.name}
               </h3>
             </div>

@@ -622,7 +622,7 @@ export function CourseManagement() {
           aria-modal="true"
           className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
         >
-          <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4">
+          <div className="bg-white rounded-3xl border border-slate-200 p-6 w-full max-w-sm shadow-xl space-y-4">
             <div className="flex items-center gap-3 text-rose-600">
               <div className="p-2.5 rounded-full bg-rose-50">
                 <Trash className="w-5 h-5" />
