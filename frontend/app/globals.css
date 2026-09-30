@@ -8,8 +8,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-brand: #080E21;
+  --font-dm-sans: var(--font-dm-sans);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,5 +22,185 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-dm-sans), Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+textarea {
+  resize: none;
+}
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+:root {
+  --ease-apple: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-apple-spring: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-apple-snappy: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+@keyframes appleModalIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.97) translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes appleFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes appleSheetUp {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes appleDrawerLeft {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.animate-apple-modal {
+  animation: appleModalIn 240ms var(--ease-apple) forwards;
+}
+
+.animate-apple-fade {
+  animation: appleFadeIn 200ms var(--ease-apple) forwards;
+}
+
+.animate-apple-sheet {
+  animation: appleSheetUp 280ms var(--ease-apple) forwards;
+}
+
+.apple-press {
+  transition: transform 140ms var(--ease-apple), opacity 140ms ease;
+}
+.apple-press:active {
+  transform: scale(0.97);
+}
+
+.apple-card-hover {
+  transition: transform 220ms var(--ease-apple), box-shadow 220ms var(--ease-apple), border-color 220ms ease;
+}
+.apple-card-hover:hover {
+  transform: translateY(-2px);
+}
+
+@keyframes asteriskSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-asterisk-spin {
+  animation: asteriskSpin 1.4s linear infinite;
+  transform-origin: center;
+}
+
+@keyframes asteriskDislodge1 {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  50% { transform: translate(-50%, -50%) rotate(-14deg) scale(1.08); }
+  100% { transform: translate(-50%, -50%) rotate(-8deg); }
+}
+
+@keyframes asteriskDislodge2 {
+  0% { transform: translate(-50%, -50%) rotate(-8deg); }
+  50% { transform: translate(-50%, -50%) rotate(22deg) scale(1.12); }
+  100% { transform: translate(-50%, -50%) rotate(15deg); }
+}
+
+@keyframes asteriskDislodge3 {
+  0% { transform: translate(-50%, -50%) rotate(15deg); }
+  40% { transform: translate(-50%, -46%) rotate(-32deg) scale(1.18); }
+  80% { transform: translate(-50%, -48%) rotate(-20deg); }
+  100% { transform: translate(-50%, -46%) rotate(-25deg); }
+}
+
+@keyframes asteriskDislodge4 {
+  0% { transform: translate(-50%, -46%) rotate(-25deg); }
+  25% { transform: translate(-50%, -40%) rotate(45deg) scale(1.22); }
+  50% { transform: translate(-50%, -38%) rotate(28deg); }
+  75% { transform: translate(-50%, -42%) rotate(42deg); }
+  100% { transform: translate(-50%, -40%) rotate(38deg); }
+}
+
+.animate-asterisk-dislodge-1 {
+  animation: asteriskDislodge1 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: center;
+}
+
+.animate-asterisk-dislodge-2 {
+  animation: asteriskDislodge2 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: center;
+}
+
+.animate-asterisk-dislodge-3 {
+  animation: asteriskDislodge3 240ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: center;
+}
+
+.animate-asterisk-dislodge-4 {
+  animation: asteriskDislodge4 260ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: center;
+}
+
+.fallen-asterisk-glyph {
+  filter: drop-shadow(0 0 1.5px rgba(15, 23, 42, 0.95)) drop-shadow(0 4px 12px rgba(15, 23, 42, 0.35));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-apple-modal,
+  .animate-apple-fade,
+  .animate-apple-sheet,
+  .animate-asterisk-spin,
+  .animate-asterisk-wobble-1,
+  .animate-asterisk-wobble-2,
+  .animate-asterisk-wobble-3,
+  .animate-asterisk-wobble-4,
+  .animate-asterisk-fall,
+  .animate-asterisk-recover,
+  .apple-press:active,
+  .apple-card-hover:hover {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+

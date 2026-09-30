@@ -1,0 +1,133 @@
+"use client";
+
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
+import { ApiError } from "@/lib/api/client";
+import type { CourseSession } from "@/features/sessions/types/session.type";
+import { useSetSessionGradePublication } from "../hooks/use-session-grades";
+import { NotificationBanner } from "@/components/ui/notification-banner";
+import {
+  Eye,
+  EyeSlash
+} from "@phosphor-icons/react";
+
+type GradePublicationControlsProps = {
+  userId: string;
+  courseId: string;
+  session: CourseSession;
+  savedGradeCount: number;
+  rosterCount: number;
+  hasUnsavedChanges: boolean;
+};
+
+function getPublicationError(error: Error | null) {
+  if (!error) return null;
+
+  if (error instanceof ApiError) {
+    if (error.status === 400)
+      return "Grades are already in that state. Try refreshing the page.";
+    if (error.status === 401)
+      return "Your session expired. Please sign in again before changing publication.";
+    if (error.status === 403)
+      return "You don't have permission to publish grades for this course.";
+    if (error.status === 404)
+      return "This session doesn't seem to exist anymore.";
+    if (error.status === 409)
+      return "Publication state changed elsewhere. Refresh before trying again.";
+  }
+
+  return "Couldn't update publication state. Please check your connection and try again.";
+}
+
+export function GradePublicationControls({
+  userId,
+  courseId,
+  session,
+  savedGradeCount,
+  rosterCount,
+  hasUnsavedChanges
+}: GradePublicationControlsProps) {
+  const publicationMutation = useSetSessionGradePublication({
+    userId,
+    courseId,
+    sessionId: session.id
+  });
+  const errorMessage = getPublicationError(publicationMutation.error);
+  const incomplete = savedGradeCount < rosterCount;
+
+  function changePublication(publish: boolean) {
+    publicationMutation.reset();
+
+    const confirmation = publish
+      ? incomplete
+        ? `Publish ${savedGradeCount} saved grades for ${rosterCount} enrolled students? Students without a saved grade won't see a score yet.`
+        : `Publish all ${savedGradeCount} saved session grades to students?`
+      : "Unpublish these session grades? Students will no longer see their scores until you publish again.";
+
+    if (!window.confirm(confirmation)) {
+      return;
+    }
+
+    publicationMutation.mutate(publish);
+  }
+
+  return (
+    <section aria-labelledby="grade-publication-heading" className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h3 id="grade-publication-heading" className="font-semibold text-slate-950">
+            Grade visibility
+          </h3>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            {session.grades_published
+              ? "Published grades are visible to each student who has a saved score."
+              : "Draft grades are private to instructors and hidden from students."}
+          </p>
+          <p className="mt-2 text-sm font-medium text-slate-700">
+            {savedGradeCount} saved of {rosterCount} enrolled
+          </p>
+          {hasUnsavedChanges ? (
+            <div className="mt-2">
+              <NotificationBanner
+                variant="warning"
+                message="Save or discard local grade changes before changing publication."
+              />
+            </div>
+          ) : null}
+        </div>
+
+        {session.grades_published ? (
+          <button
+            type="button"
+            onClick={() => changePublication(false)}
+            disabled={publicationMutation.isPending || hasUnsavedChanges}
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white shadow-xs transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {publicationMutation.isPending ? <AsteriskLoader className="h-4 w-4" /> : <EyeSlash className="h-4 w-4" aria-hidden="true" />}
+            {publicationMutation.isPending ? "Unpublishing..." : "Unpublish grades"}
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => changePublication(true)}
+            disabled={publicationMutation.isPending || savedGradeCount === 0 || hasUnsavedChanges}
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white shadow-xs transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {publicationMutation.isPending ? <AsteriskLoader className="h-4 w-4" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
+            {publicationMutation.isPending ? "Publishing..." : "Publish grades"}
+          </button>
+        )}
+      </div>
+
+      {errorMessage ? (
+        <div className="mt-3">
+          <NotificationBanner variant="error" message={errorMessage} />
+        </div>
+      ) : null}
+      {publicationMutation.isSuccess ? (
+        <div className="mt-3">
+          <NotificationBanner variant="success" message={publicationMutation.data.message} />
+        </div>
+      ) : null}
+    </section>
+  );
+}

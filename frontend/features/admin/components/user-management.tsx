@@ -1,0 +1,735 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
+import {
+  fetchAdminUsers,
+  fetchAdminCourses,
+  createAdminUser,
+  assignCourseStaff,
+  enrollCourseStudents,
+  resetUserPassword,
+  deactivateUser,
+  reactivateUser,
+} from "../api/admin.api";
+import type { User } from "@/types/user.type";
+import type { Course } from "@/features/courses/types/course.type";
+import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
+import { useAuthStore } from "@/stores/auth-store";
+import { NotificationBanner } from "@/components/ui/notification-banner";
+import {
+  X,
+  WarningCircle,
+  Plus,
+  UserPlus,
+  Eye,
+  EyeSlash
+} from "@phosphor-icons/react";
+
+export function UserManagement() {
+  const currentUser = useAuthStore((state) => state.user);
+  const [users, setUsers] = useState<User[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [filterRole, setFilterRole] = useState<string>("all");
+  const [search, setSearch] = useState<string>("");
+  const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+
+  // Edit / Assign Modal State
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [targetCourseId, setTargetCourseId] = useState("");
+  const [assignRole, setAssignRole] = useState<"praktikan" | "asprak">("praktikan");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Create User Modal State
+  const [showCreateUserModal, setShowCreateUserModal] = useState(false);
+  const [newUsername, setNewUsername] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [newRole, setNewRole] = useState<"praktikan" | "asprak" | "superadmin">("praktikan");
+  const [newPassword, setNewPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [isCreatingUser, setIsCreatingUser] = useState(false);
+  const [createUserError, setCreateUserError] = useState<string | null>(null);
+
+  // Auto-dismiss notification banners
+  useEffect(() => {
+    if (actionSuccess) {
+      const timer = setTimeout(() => setActionSuccess(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [actionSuccess]);
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(null), 6000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
+  const createUserModalRef = useModalFocusTrap<HTMLDivElement>({
+    isOpen: showCreateUserModal,
+    onClose: () => setShowCreateUserModal(false),
+  });
+
+  const bulkAssignModalRef = useModalFocusTrap<HTMLDivElement>({
+    isOpen: showEditModal,
+    onClose: () => setShowEditModal(false),
+  });
+
+
+  const loadData = async () => {
+    try {
+      const [uData, cData] = await Promise.all([
+        fetchAdminUsers().catch(() => []),
+        fetchAdminCourses().catch(() => []),
+      ]);
+      setUsers(uData);
+      setCourses(cData);
+      if (cData.length > 0) {
+        setTargetCourseId(cData[0].id);
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Couldn't load users. Please refresh.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchData() {
+      try {
+        const [uData, cData] = await Promise.all([
+          fetchAdminUsers().catch(() => []),
+          fetchAdminCourses().catch(() => []),
+        ]);
+        if (isMounted) {
+          setUsers(uData);
+          setCourses(cData);
+          if (cData.length > 0) {
+            setTargetCourseId(cData[0].id);
+          }
+        }
+      } catch (err: unknown) {
+        if (isMounted) {
+          setError(err instanceof Error ? err.message : "Couldn't load users. Please refresh.");
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+    fetchData();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreateUserError(null);
+
+    const trimmedUsername = newUsername.trim();
+    const trimmedEmail = newEmail.trim().toLowerCase();
+
+    if (!trimmedUsername) {
+      setCreateUserError("Enter a username or student NPM.");
+      return;
+    }
+    if (!trimmedEmail || !trimmedEmail.includes("@")) {
+      setCreateUserError("Enter a valid email address.");
+      return;
+    }
+    if (newPassword.length < 8) {
+      setCreateUserError("Password must be at least 8 characters.");
+      return;
+    }
+
+    setIsCreatingUser(true);
+    try {
+      await createAdminUser({
+        username: trimmedUsername,
+        email: trimmedEmail,
+        role: newRole,
+        password: newPassword,
+      });
+
+      setShowCreateUserModal(false);
+      setNewUsername("");
+      setNewEmail("");
+      setNewRole("praktikan");
+      setNewPassword("");
+      setActionSuccess(`Created ${newRole} account for ${trimmedUsername}.`);
+      await loadData();
+    } catch (err: unknown) {
+      setCreateUserError(err instanceof Error ? err.message : "Couldn't create user account. Please try again.");
+    } finally {
+      setIsCreatingUser(false);
+    }
+  };
+
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setSelectedUserIds(new Set(filteredUsers.map((u) => u.id)));
+    } else {
+      setSelectedUserIds(new Set());
+    }
+  };
+
+  const handleSelectUser = (id: string) => {
+    const next = new Set(selectedUserIds);
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    setSelectedUserIds(next);
+  };
+
+  const handleResetPassword = async (user: User) => {
+    if (!confirm(`Reset password for ${user.username} to default?`)) return;
+
+    setError(null);
+    setActionSuccess(null);
+
+    try {
+      const res = await resetUserPassword(user.id);
+      setActionSuccess(res.message || `Password reset for ${user.username}.`);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Couldn't reset password. Please try again.");
+    }
+  };
+
+  const handleDeactivateUser = async (user: User) => {
+    if (user.id === currentUser?.id) {
+      setError("You cannot deactivate your own account.");
+      return;
+    }
+
+    if (
+      !confirm(
+        `Are you sure you want to deactivate ${user.username}? They will immediately be signed out and unable to log in.`
+      )
+    ) {
+      return;
+    }
+
+    setError(null);
+    setActionSuccess(null);
+
+    try {
+      const res = await deactivateUser(user.id);
+      setActionSuccess(res.message || `Deactivated user ${user.username}.`);
+      await loadData();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Couldn't deactivate user. Please try again.");
+    }
+  };
+
+  const handleReactivateUser = async (user: User) => {
+    if (!confirm(`Reactivate account for ${user.username}? They will be able to log in again.`)) {
+      return;
+    }
+
+    setError(null);
+    setActionSuccess(null);
+
+    try {
+      const res = await reactivateUser(user.id);
+      setActionSuccess(res.message || `Reactivated user ${user.username}.`);
+      await loadData();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Couldn't reactivate user. Please try again.");
+    }
+  };
+
+  const handleApplyCourseAssign = async () => {
+    if (!targetCourseId || selectedUserIds.size === 0) return;
+
+    setIsSubmitting(true);
+    setError(null);
+    setActionSuccess(null);
+
+    const selectedUsers = users.filter((u) => selectedUserIds.has(u.id));
+    const usernames = selectedUsers.map((u) => u.username);
+
+    try {
+      if (assignRole === "asprak") {
+        const res = await assignCourseStaff(targetCourseId, usernames);
+        setActionSuccess(res.message || "Assigned teaching assistants.");
+      } else {
+        const res = await enrollCourseStudents(targetCourseId, usernames);
+        setActionSuccess(res.message || "Enrolled students.");
+      }
+      setShowEditModal(false);
+      setSelectedUserIds(new Set());
+      await loadData();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Couldn't assign users to course. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Role summary counts
+  const roleCounts = {
+    all: users.length,
+    superadmin: users.filter((u) => u.role === "superadmin").length,
+    asprak: users.filter((u) => u.role === "asprak").length,
+    praktikan: users.filter((u) => u.role === "praktikan").length,
+    inactive: users.filter((u) => !u.is_active).length,
+  };
+
+  // Filter users based on role and search query
+  const filteredUsers = users.filter((u) => {
+    const matchesRole =
+      filterRole === "all"
+        ? true
+        : filterRole === "inactive"
+          ? !u.is_active
+          : u.role === filterRole;
+    const matchesSearch =
+      u.username.toLowerCase().includes(search.toLowerCase()) ||
+      u.email.toLowerCase().includes(search.toLowerCase());
+    return matchesRole && matchesSearch;
+  });
+
+  return (
+    <div className="space-y-4">
+      {/* Alert Messages */}
+      {(actionSuccess || error) && (
+        <div className="space-y-2">
+          {actionSuccess && (
+            <NotificationBanner
+              variant="success"
+              message={actionSuccess}
+              onClose={() => setActionSuccess(null)}
+            />
+          )}
+          {error && (
+            <NotificationBanner
+              variant="error"
+              message={error}
+              onClose={() => setError(null)}
+            />
+          )}
+        </div>
+      )}
+
+      {/* Google Admin Style Filter Chips & Search / Add User Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        {/* Role Filter Chips */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {(["all", "superadmin", "asprak", "praktikan", "inactive"] as const).map((r) => {
+            const isSelected = filterRole === r;
+            return (
+              <button
+                key={r}
+                type="button"
+                onClick={() => setFilterRole(r)}
+                className={`rounded-full px-3.5 py-1.5 text-xs font-semibold capitalize transition-all ${
+                  isSelected
+                    ? "bg-slate-900 text-white shadow-xs"
+                    : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                }`}
+              >
+                {r} <span className="opacity-75 font-normal">({roleCounts[r]})</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Right Action: Search Input & Add User Button */}
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search users..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full sm:w-60 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 shadow-xs"
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              setNewUsername("");
+              setNewEmail("");
+              setNewRole("praktikan");
+              setNewPassword("");
+              setCreateUserError(null);
+              setShowCreateUserModal(true);
+            }}
+            className="rounded-full bg-slate-900 hover:bg-slate-800 text-white px-4 py-1.5 text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors shrink-0 active:scale-[0.98]"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add User</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Main Table Container */}
+      <div className="rounded-2xl border border-slate-200 bg-white shadow-xs overflow-hidden">
+        {/* Bulk Action Bar */}
+        {selectedUserIds.size > 0 ? (
+          <div className="flex items-center justify-between bg-slate-100 border-b border-slate-200 px-6 py-3">
+            <span className="text-xs font-semibold text-slate-900">
+              {selectedUserIds.size} {selectedUserIds.size === 1 ? "user" : "users"} selected
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setSelectedUserIds(new Set())}
+                className="rounded-full px-3 py-1 text-xs font-medium text-slate-600 hover:bg-white transition-colors"
+              >
+                Clear selection
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowEditModal(true)}
+                className="rounded-full bg-slate-900 px-4 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 transition-colors"
+              >
+                Assign to Course
+              </button>
+            </div>
+          </div>
+        ) : null}
+
+        {isLoading ? (
+          <div className="p-12 text-center text-xs text-slate-400">Loading users...</div>
+        ) : filteredUsers.length === 0 ? (
+          <div className="p-12 text-center text-xs text-slate-400">No users match your search.</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="border-b border-slate-100 bg-slate-50 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                  <th className="w-10 px-4 py-3 text-center">
+                    <input
+                      type="checkbox"
+                      aria-label="Select all users"
+                      onChange={handleSelectAll}
+                      checked={
+                        filteredUsers.length > 0 &&
+                        filteredUsers.every((u) => selectedUserIds.has(u.id))
+                      }
+                      className="rounded border-slate-300 text-slate-900 focus:ring-slate-900"
+                    />
+                  </th>
+                  <th className="px-4 py-3">User</th>
+                  <th className="px-4 py-3">Role</th>
+                  <th className="px-4 py-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filteredUsers.map((user) => {
+                  const isSelected = selectedUserIds.has(user.id);
+                  const initial = user.username.charAt(0).toUpperCase();
+
+                  return (
+                    <tr
+                      key={user.id}
+                      className={`hover:bg-slate-50/80 transition-colors ${
+                        isSelected ? "bg-slate-50" : ""
+                      }`}
+                    >
+                      <td className="px-4 py-3 text-center">
+                        <input
+                          type="checkbox"
+                          aria-label={`Select user ${user.username}`}
+                          checked={isSelected}
+                          onChange={() => handleSelectUser(user.id)}
+                          className="rounded border-slate-300 text-slate-900 focus:ring-slate-900"
+                        />
+                      </td>
+
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-700 shrink-0">
+                            {initial}
+                          </div>
+                          <div>
+                            <span className="font-semibold text-slate-900 block">{user.username}</span>
+                            <span className="text-[11px] text-slate-500">{user.email}</span>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1.5 flex-wrap text-xs">
+                          <span className="font-semibold text-slate-900 capitalize">
+                            {user.role}
+                          </span>
+                          {!user.is_active && (
+                            <>
+                              <span className="text-slate-300" aria-hidden="true">·</span>
+                              <span className="font-semibold text-rose-700">
+                                Inactive
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </td>
+
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleResetPassword(user)}
+                            className="apple-press rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-xs hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                          >
+                            Reset password
+                          </button>
+                          {user.id !== currentUser?.id && (
+                            user.is_active ? (
+                              <button
+                                type="button"
+                                onClick={() => handleDeactivateUser(user)}
+                                className="apple-press rounded-full border border-rose-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-rose-700 shadow-xs hover:bg-rose-50 hover:border-rose-300 transition-colors"
+                              >
+                                Deactivate
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handleReactivateUser(user)}
+                                className="apple-press rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-xs hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                              >
+                                Reactivate
+                              </button>
+                            )
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Create New User Modal */}
+      {showCreateUserModal && (
+        <div
+          ref={createUserModalRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="create-user-modal-title"
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 transition-opacity animate-in fade-in duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        >
+          <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4 animate-apple-modal">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h4
+                  id="create-user-modal-title"
+                  className="font-bold text-sm text-slate-900 flex items-center gap-2"
+                >
+                  <UserPlus className="w-4 h-4 text-slate-800" />
+                  <span>New User</span>
+                </h4>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  Add a student, assistant, or admin account.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCreateUserModal(false)}
+                className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center text-xs apple-press transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {createUserError && (
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-800 flex items-center gap-2 animate-apple-fade">
+                <WarningCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                <span>{createUserError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleCreateUser} className="space-y-3.5 text-xs">
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Username / NPM <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. 140810220001 or johndoe"
+                  value={newUsername}
+                  onChange={(e) => setNewUsername(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-shadow duration-150"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Email Address <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  required
+                  placeholder="e.g. user@unpad.ac.id"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-shadow duration-150"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  System Role <span className="text-rose-500">*</span>
+                </label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {(["praktikan", "asprak", "superadmin"] as const).map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => setNewRole(r)}
+                      className={`py-2 px-2 rounded-xl text-xs font-semibold capitalize border apple-press transition-all duration-150 text-center ${
+                        newRole === r
+                          ? "bg-slate-900 border-slate-900 text-white shadow-xs"
+                          : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                      }`}
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Initial Password <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    required
+                    minLength={8}
+                    placeholder="At least 8 characters"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 bg-white p-2.5 pr-9 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-shadow duration-150"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword((prev) => !prev)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors"
+                  >
+                    {showNewPassword ? <EyeSlash className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                <span className="text-[10px] text-slate-400 mt-1 block">
+                  Students will be prompted to change their password on first login.
+                </span>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateUserModal(false)}
+                  className="rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 apple-press transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isCreatingUser}
+                  className="rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 disabled:opacity-50 apple-press transition-all flex items-center gap-1.5"
+                >
+                  {isCreatingUser && <AsteriskLoader className="w-3.5 h-3.5" />}
+                  <span>{isCreatingUser ? "Creating..." : "Create User"}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Assign Modal */}
+      {showEditModal && (
+        <div
+          ref={bulkAssignModalRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="bulk-assign-modal-title"
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 transition-opacity animate-in fade-in duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        >
+          <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4 animate-apple-modal">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h4 id="bulk-assign-modal-title" className="font-bold text-sm text-slate-900">
+                Assign {selectedUserIds.size} {selectedUserIds.size === 1 ? "User" : "Users"} to Course
+              </h4>
+              <button
+                type="button"
+                onClick={() => setShowEditModal(false)}
+                className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center text-xs apple-press transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3 pt-2">
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">
+                  Target Course
+                </label>
+                <select
+                  value={targetCourseId}
+                  onChange={(e) => setTargetCourseId(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-shadow duration-150"
+                >
+                  {courses.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.code} - {c.name} ({c.academic_year} {c.semester})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">
+                  Assignment Role
+                </label>
+                <select
+                  value={assignRole}
+                  onChange={(e) => setAssignRole(e.target.value as "praktikan" | "asprak")}
+                  className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-shadow duration-150"
+                >
+                  <option value="praktikan">Enroll as Student</option>
+                  <option value="asprak">Assign as Teaching Assistant</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setShowEditModal(false)}
+                className="rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 apple-press transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleApplyCourseAssign}
+                disabled={isSubmitting || !targetCourseId}
+                className="rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 disabled:opacity-50 apple-press transition-all"
+              >
+                {isSubmitting ? "Saving..." : "Assign Users"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

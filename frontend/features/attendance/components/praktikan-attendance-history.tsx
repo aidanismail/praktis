@@ -1,0 +1,294 @@
+"use client";
+
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
+import { useMemo, useState } from "react";
+import { NotificationBanner } from "@/components/ui/notification-banner";
+import { ApiError } from "@/lib/api/client";
+import { usePersonalAttendance } from "../hooks/use-personal-attendance";
+import type { AttendanceStatus, PersonalAttendanceHistoryItem } from "../types/attendance.type";
+import {
+  CheckCircle,
+  ClipboardText,
+  ArrowsClockwise
+} from "@phosphor-icons/react";
+
+type Props = { userId: string };
+type StatusFilter = "all" | AttendanceStatus;
+const INITIAL_LIMIT = 60;
+
+const labels: Record<AttendanceStatus, string> = {
+  hadir: "Hadir",
+  sakit: "Sakit",
+  izin: "Izin",
+  alfa: "Alfa",
+};
+
+const statusTextColors: Record<AttendanceStatus, string> = {
+  hadir: "text-emerald-700 font-semibold",
+  sakit: "text-sky-700 font-semibold",
+  izin: "text-amber-700 font-semibold",
+  alfa: "text-rose-700 font-semibold",
+};
+
+const dateFormatter = new Intl.DateTimeFormat("en", { dateStyle: "medium" });
+
+function formatDate(value: string | null) {
+  if (!value) return "Date unavailable";
+  const date = new Date(`${value}T00:00:00`);
+  return Number.isNaN(date.getTime()) ? "Date unavailable" : dateFormatter.format(date);
+}
+
+function sortRows(rows: PersonalAttendanceHistoryItem[]) {
+  return [...rows].sort(
+    (a, b) =>
+      (b.session_date ?? "").localeCompare(a.session_date ?? "") ||
+      a.session_title.localeCompare(b.session_title)
+  );
+}
+
+export function PraktikanAttendanceHistory({ userId }: Props) {
+  const query = usePersonalAttendance(userId);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [courseFilter, setCourseFilter] = useState("all");
+  const [limit, setLimit] = useState(INITIAL_LIMIT);
+
+  const rows = useMemo(() => query.data ?? [], [query.data]);
+  const courses = useMemo(
+    () =>
+      Array.from(
+        new Map(
+          rows.map((row) => [
+            row.course_id,
+            { id: row.course_id, label: `${row.course_code} · ${row.course_name}` },
+          ])
+        ).values()
+      ).sort((a, b) => a.label.localeCompare(b.label)),
+    [rows]
+  );
+
+  const filtered = sortRows(
+    rows.filter(
+      (row) =>
+        (statusFilter === "all" || row.status === statusFilter) &&
+        (courseFilter === "all" || row.course_id === courseFilter)
+    )
+  );
+
+  const visible = filtered.slice(0, limit);
+  const groups = Array.from(
+    visible
+      .reduce((groupMap, row) => {
+        const key = `${row.academic_year}|${row.semester}|${row.course_id}`;
+        const current = groupMap.get(key);
+        if (current) current.rows.push(row);
+        else {
+          groupMap.set(key, {
+            key,
+            title: `${row.course_code} · ${row.course_name}`,
+            period: `${row.academic_year} · Semester ${row.semester}`,
+            rows: [row],
+          });
+        }
+        return groupMap;
+      }, new Map<string, { key: string; title: string; period: string; rows: PersonalAttendanceHistoryItem[] }>())
+      .values()
+  );
+
+  if (query.isPending) {
+    return (
+      <div
+        role="status"
+        className="flex min-h-72 items-center justify-center rounded-3xl border border-slate-200 bg-white"
+      >
+        <AsteriskLoader className="h-5 w-5 text-slate-400" aria-hidden="true" />
+        <span className="ml-3 text-xs font-medium text-slate-600">Loading your attendance...</span>
+      </div>
+    );
+  }
+
+  if (query.isError) {
+    const status = query.error instanceof ApiError ? query.error.status : null;
+    return (
+      <NotificationBanner variant="error">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
+          <div>
+            <h3 className="font-semibold text-white">Couldn&apos;t load attendance</h3>
+            <p className="mt-0.5 text-xs text-slate-300">
+              {status === 401
+                ? "You've been signed out. Sign in again to continue."
+                : "Couldn't reach the server. Let's try that again."}
+            </p>
+          </div>
+          {status !== 401 ? (
+            <button
+              type="button"
+              onClick={() => void query.refetch()}
+              disabled={query.isFetching}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700 transition disabled:opacity-60 shrink-0"
+            >
+              <ArrowsClockwise className={`h-3.5 w-3.5 ${query.isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
+              Try again
+            </button>
+          ) : null}
+        </div>
+      </NotificationBanner>
+    );
+  }
+
+  return (
+    <section aria-labelledby="attendance-history-heading" aria-busy={query.isFetching} className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <button
+          type="button"
+          aria-label="Refresh attendance"
+          onClick={() => void query.refetch()}
+          disabled={query.isFetching}
+          className="p-2 self-start sm:self-auto rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-xs transition-colors cursor-pointer disabled:opacity-60"
+          title="Refresh attendance"
+        >
+          <ArrowsClockwise className={`w-3.5 h-3.5 ${query.isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
+        </button>
+      </div>
+
+      <div className="space-y-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="w-full sm:w-auto flex-1 max-w-sm">
+            <select
+              id="attendance-course-filter"
+              aria-label="Filter by course"
+              value={courseFilter}
+              onChange={(event) => {
+                setCourseFilter(event.target.value);
+                setLimit(INITIAL_LIMIT);
+              }}
+              className="w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-xs focus:outline-none focus:ring-2 focus:ring-slate-900 cursor-pointer"
+            >
+              <option value="all">All practicum classes ({courses.length})</option>
+              {courses.map((course) => (
+                <option key={course.id} value={course.id}>
+                  {course.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <span className="text-xs font-medium text-slate-400">
+            {filtered.length} {filtered.length === 1 ? "record" : "records"} found
+          </span>
+        </div>
+
+        {/* Status Filter Pills */}
+        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none -mx-1 px-1 py-0.5">
+          <button
+            type="button"
+            onClick={() => {
+              setStatusFilter("all");
+              setLimit(INITIAL_LIMIT);
+            }}
+            className={`whitespace-nowrap px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all apple-press ${
+              statusFilter === "all"
+                ? "bg-slate-900 text-white shadow-xs"
+                : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+            }`}
+          >
+            All ({rows.length})
+          </button>
+
+          {(["hadir", "sakit", "izin", "alfa"] as AttendanceStatus[]).map((status) => {
+            const count = rows.filter((r) => r.status === status).length;
+            const isActive = statusFilter === status;
+            return (
+              <button
+                key={status}
+                type="button"
+                onClick={() => {
+                  setStatusFilter(status);
+                  setLimit(INITIAL_LIMIT);
+                }}
+                className={`whitespace-nowrap flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all apple-press ${
+                  isActive
+                    ? "bg-slate-900 text-white shadow-xs"
+                    : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+                }`}
+              >
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    status === "hadir"
+                      ? "bg-emerald-500"
+                      : status === "sakit"
+                      ? "bg-sky-500"
+                      : status === "izin"
+                      ? "bg-amber-500"
+                      : "bg-rose-500"
+                  }`}
+                />
+                <span>{labels[status]}</span>
+                <span className="text-[11px] opacity-70">({count})</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* List / Groups */}
+      {visible.length === 0 ? (
+        <div
+          role="status"
+          className="rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center shadow-xs"
+        >
+          <ClipboardText className="mx-auto h-9 w-9 text-slate-400" aria-hidden="true" />
+          <h2 className="mt-3 text-sm font-bold text-slate-950">No attendance records yet</h2>
+          <p className="mt-1 text-xs text-slate-500">
+            Attendance marked during your lab sessions will show up here.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {groups.map((group, index) => (
+            <section key={group.key} aria-labelledby={`attendance-group-${index}`} className="space-y-3">
+              <div>
+                <h2 id={`attendance-group-${index}`} className="text-sm font-bold text-slate-950">
+                  {group.title}
+                </h2>
+                <p className="text-xs text-slate-400">{group.period}</p>
+              </div>
+
+              <div className="space-y-2.5">
+                {group.rows.map((row) => (
+                    <article
+                      key={row.id}
+                      className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs apple-card-hover transition-all"
+                    >
+                      <div className="flex min-w-0 items-center gap-3">
+                        <CheckCircle className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-slate-950">{row.session_title}</p>
+                          <p className="text-[11px] text-slate-500 mt-0.5">{formatDate(row.session_date)}</p>
+                        </div>
+                      </div>
+
+                      <span
+                        className={`text-xs ${statusTextColors[row.status]}`}
+                      >
+                        {labels[row.status]}
+                      </span>
+                    </article>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      )}
+
+      {visible.length < filtered.length ? (
+        <button
+          type="button"
+          onClick={() => setLimit((value) => value + INITIAL_LIMIT)}
+          className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 transition-colors"
+        >
+          Show more ({filtered.length - visible.length} remaining)
+        </button>
+      ) : null}
+    </section>
+  );
+}

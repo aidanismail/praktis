@@ -1,0 +1,558 @@
+"use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
+import { useId, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { ApiError } from "@/lib/api/client";
+import { NotificationBanner } from "@/components/ui/notification-banner";
+import {
+  useConfirmCourseModuleUpload,
+  useRequestCourseModuleUpload,
+  useUploadCourseModuleFile
+} from "../hooks/use-course-modules";
+import {
+  getModuleFileExtension,
+  moduleUploadSchema,
+  type ModuleUploadFormValues
+} from "../schemas/module.schema";
+import {
+  ArrowCounterClockwise,
+  X
+} from "@phosphor-icons/react";
+
+type ModuleUploadFormProps = {
+  userId: string;
+  courseId: string;
+};
+
+type UploadStage =
+  | "idle"
+  | "requesting"
+  | "uploading"
+  | "confirming"
+  | "failed"
+  | "complete";
+
+type FailedStage = "presign" | "upload" | "confirm" | null;
+
+type UploadAttempt = {
+  title: string;
+  description: string;
+  file: File;
+  uploadUrl: string;
+  fileKey: string;
+  requestedAt: number;
+};
+
+const uploadDefaultValues = {
+  title: "",
+  description: ""
+};
+
+const SAFE_RETRY_WINDOW_MS = 55 * 60 * 1000;
+
+function getCurrentTimestamp() {
+  return Date.now();
+}
+
+function getUploadErrorMessage(
+  failedStage: Exclude<FailedStage, null>,
+  error: unknown
+) {
+  if (failedStage === "upload") {
+    if (error instanceof ApiError && error.status === 413) {
+      return "That file is too large to upload (maximum 25 MiB).";
+    }
+
+    if (error instanceof ApiError && error.status === 403) {
+      return "The upload link expired. Discard this attempt to get a fresh link.";
+    }
+
+    return "The file didn't finish uploading. You can retry while the link is active.";
+  }
+
+  if (!(error instanceof ApiError)) {
+    return failedStage === "confirm"
+      ? "Confirmation took too long. Refresh the page to verify if your module was saved."
+      : "Couldn't start the upload. Let's try that again.";
+  }
+
+  if (error.status === 401) {
+    return "You've been signed out. Please sign in again.";
+  }
+
+  if (error.status === 403) {
+    return "You don't have permission to upload modules for this course.";
+  }
+
+  if (error.status === 404) {
+    return "This course couldn't be found or is no longer assigned to you.";
+  }
+
+  if (error.status === 400) {
+    return failedStage === "confirm"
+      ? "Storage couldn't process this file. Please ensure it's a valid PDF or DOCX file."
+      : "That file format isn't supported. Please upload a PDF or DOCX.";
+  }
+
+  if (error.status === 422) {
+    return "Please check the module title and details.";
+  }
+
+  return failedStage === "confirm"
+    ? "Confirmation took too long. Refresh the page to verify if your module was saved."
+    : "Couldn't reach the server. Let's try that again.";
+}
+export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
+  const generatedId = useId();
+  const statusId = `module-upload-status-${generatedId}`;
+
+  const [stage, setStage] = useState<UploadStage>("idle");
+  const [failedStage, setFailedStage] = useState<FailedStage>(null);
+  const [attempt, setAttempt] = useState<UploadAttempt | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [attemptExpired, setAttemptExpired] = useState(false);
+  const [fileInputKey, setFileInputKey] = useState(0);
+
+  const scope = { userId, courseId };
+
+  const presignMutation = useRequestCourseModuleUpload(scope);
+  const storageMutation = useUploadCourseModuleFile();
+  const confirmMutation = useConfirmCourseModuleUpload(scope);
+
+  const form = useForm<ModuleUploadFormValues>({
+    resolver: zodResolver(moduleUploadSchema),
+    defaultValues: uploadDefaultValues
+  });
+
+  const isBusy =
+    presignMutation.isPending ||
+    storageMutation.isPending ||
+    confirmMutation.isPending;
+
+  const hasLockedAttempt = stage === "failed" && attempt !== null;
+
+  const fieldsDisabled = isBusy || hasLockedAttempt;
+
+  const busyMessage =
+    stage === "requesting"
+      ? "Preparing upload link..."
+      : stage === "uploading"
+        ? "Uploading file..."
+        : stage === "confirming"
+          ? "Saving module..."
+          : null;
+
+  function focusStatus() {
+    requestAnimationFrame(() => {
+      document.getElementById(statusId)?.focus();
+    });
+  }
+
+  function resetMutations() {
+    presignMutation.reset();
+    storageMutation.reset();
+    confirmMutation.reset();
+  }
+  function failAttempt(failedAt: Exclude<FailedStage, null>, error: unknown) {
+    setFailedStage(failedAt);
+    setErrorMessage(getUploadErrorMessage(failedAt, error));
+    setStage("failed");
+    focusStatus();
+  }
+
+  async function confirmAttempt(currentAttempt: UploadAttempt) {
+    setStage("confirming");
+    confirmMutation.reset();
+
+    try {
+      await confirmMutation.mutateAsync({
+        title: currentAttempt.title,
+        description: currentAttempt.description,
+        file_key: currentAttempt.fileKey
+      });
+
+      setAttempt(null);
+      setAttemptExpired(false);
+      setFailedStage(null);
+      setErrorMessage(null);
+      setStage("complete");
+      form.reset(uploadDefaultValues);
+      setFileInputKey((current) => current + 1);
+      focusStatus();
+    } catch (error) {
+      failAttempt("confirm", error);
+    }
+  }
+
+  async function uploadAndConfirm(currentAttempt: UploadAttempt) {
+    setStage("uploading");
+    storageMutation.reset();
+
+    try {
+      await storageMutation.mutateAsync({
+        uploadUrl: currentAttempt.uploadUrl,
+        file: currentAttempt.file
+      });
+    } catch (error) {
+      failAttempt("upload", error);
+      return;
+    }
+
+    await confirmAttempt(currentAttempt);
+  }
+
+  async function startUpload(values: ModuleUploadFormValues) {
+    const fileExtension = getModuleFileExtension(values.file.name);
+
+    if (!fileExtension) {
+      form.setError("file", {
+        message: "Only PDF and DOCX files are allowed"
+      });
+      return;
+    }
+
+    resetMutations();
+    setAttempt(null);
+    setAttemptExpired(false);
+    setFailedStage(null);
+    setErrorMessage(null);
+    setStage("requesting");
+
+    try {
+      const uploadIntent = await presignMutation.mutateAsync({
+        title: values.title,
+        description: values.description,
+        file_extension: fileExtension
+      });
+
+      const nextAttempt: UploadAttempt = {
+        title: values.title,
+        description: values.description,
+        file: values.file,
+        uploadUrl: uploadIntent.upload_url,
+        fileKey: uploadIntent.file_key,
+        requestedAt: getCurrentTimestamp()
+      };
+
+      setAttempt(nextAttempt);
+      await uploadAndConfirm(nextAttempt);
+    } catch (error) {
+      failAttempt("presign", error);
+    }
+  }
+
+  function retryFailedStage() {
+    if (failedStage === "presign") {
+      void form.handleSubmit(startUpload)();
+      return;
+    }
+
+    if (!attempt || !failedStage) {
+      return;
+    }
+
+    const isExpired =
+      getCurrentTimestamp() - attempt.requestedAt >= SAFE_RETRY_WINDOW_MS;
+
+    if (isExpired) {
+      setAttemptExpired(true);
+      setErrorMessage(
+        "This upload attempt is too old to retry safely. Discard it and request a new link."
+      );
+      focusStatus();
+      return;
+    }
+
+    setAttemptExpired(false);
+    setErrorMessage(null);
+
+    if (failedStage === "upload") {
+      void uploadAndConfirm(attempt);
+      return;
+    }
+
+    void confirmAttempt(attempt);
+  }
+
+  function discardAttempt() {
+    resetMutations();
+    setAttempt(null);
+    setAttemptExpired(false);
+    setFailedStage(null);
+    setErrorMessage(null);
+    setStage("idle");
+
+    requestAnimationFrame(() => {
+      document.getElementById(`module-upload-title-${generatedId}`)?.focus();
+    });
+  }
+
+  return (
+    <section
+      aria-labelledby={`module-upload-heading-${generatedId}`}
+      className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xs"
+    >
+      <div>
+        <h3
+          id={`module-upload-heading-${generatedId}`}
+          className="text-sm font-bold tracking-tight text-slate-950"
+        >
+          Upload module
+        </h3>
+
+        <p className="mt-0.5 text-xs text-slate-500">
+          Upload PDF or DOCX (up to 25 MiB). Saved as draft until published.
+        </p>
+      </div>
+
+      <form
+        noValidate
+        onSubmit={form.handleSubmit(startUpload)}
+        aria-busy={isBusy}
+        className="mt-4 space-y-3.5"
+      >
+        {busyMessage ? (
+          <p
+            role="status"
+            aria-live="polite"
+            className="flex items-center gap-2 rounded-xl
+                bg-slate-100 px-4 py-3 text-sm text-slate-700"
+          >
+            <AsteriskLoader className="h-4 w-4" />
+            {busyMessage}
+          </p>
+        ) : null}
+
+        {stage === "failed" && errorMessage ? (
+          <NotificationBanner
+            id={statusId}
+            tabIndex={-1}
+            variant="error"
+          >
+            <div>
+              <div>{errorMessage}</div>
+              {failedStage === "confirm" ? (
+                <div className="mt-1 text-xs text-slate-300">
+                  Confirmation may have completed even if its response was
+                  interrupted. Refresh the module list before starting a separate
+                  upload.
+                </div>
+              ) : null}
+            </div>
+          </NotificationBanner>
+        ) : null}
+
+        {stage === "complete" ? (
+          <NotificationBanner
+            id={statusId}
+            tabIndex={-1}
+            variant="success"
+            message="Module uploaded! Saved as draft."
+          />
+        ) : null}
+
+        <fieldset
+          disabled={fieldsDisabled}
+          className="space-y-3.5 disabled:opacity-70"
+        >
+          <div className="space-y-1.5">
+            <label
+              htmlFor={`module-upload-title-${generatedId}`}
+              className="text-xs font-semibold text-slate-700"
+            >
+              Title
+            </label>
+
+            <input
+              id={`module-upload-title-${generatedId}`}
+              type="text"
+              maxLength={255}
+              placeholder="Example: Module 1 — Introduction"
+              aria-invalid={Boolean(form.formState.errors.title)}
+              aria-describedby={
+                form.formState.errors.title
+                  ? `module-upload-title-error-${generatedId}`
+                  : undefined
+              }
+              className="h-9 w-full rounded-lg border
+                  border-slate-200 bg-white px-3 text-xs
+                  text-slate-900 outline-none transition
+                  placeholder:text-slate-400
+                  focus:border-slate-400
+                  focus:ring-2 focus:ring-slate-100
+                  disabled:cursor-not-allowed
+                  disabled:bg-slate-50"
+              {...form.register("title")}
+            />
+
+            {form.formState.errors.title ? (
+              <p
+                id={`module-upload-title-error-${generatedId}`}
+                className="text-xs text-red-600"
+              >
+                {form.formState.errors.title.message}
+              </p>
+            ) : null}
+          </div>
+
+          <div className="space-y-1.5">
+            <label
+              htmlFor={`module-upload-description-${generatedId}`}
+              className="text-xs font-semibold text-slate-700"
+            >
+              Description
+              <span className="ml-1 font-normal text-slate-400">
+                (optional)
+              </span>
+            </label>
+
+            <textarea
+              id={`module-upload-description-${generatedId}`}
+              rows={3}
+              maxLength={500}
+              placeholder="Summarize what students should learn."
+              aria-invalid={Boolean(form.formState.errors.description)}
+              aria-describedby={
+                form.formState.errors.description
+                  ? `module-upload-description-error-${generatedId}`
+                  : undefined
+              }
+              className="w-full resize-y rounded-lg border
+                  border-slate-200 bg-white px-3 py-2 text-xs
+                  leading-5 text-slate-900 outline-none transition
+                  placeholder:text-slate-400
+                  focus:border-slate-400
+                  focus:ring-2 focus:ring-slate-100
+                  disabled:cursor-not-allowed
+                  disabled:bg-slate-50"
+              {...form.register("description")}
+            />
+
+            {form.formState.errors.description ? (
+              <p
+                id={`module-upload-description-error-${generatedId}`}
+                className="text-xs text-red-600"
+              >
+                {form.formState.errors.description.message}
+              </p>
+            ) : null}
+          </div>
+
+          <div className="space-y-1.5">
+            <label
+              htmlFor={`module-upload-file-${generatedId}`}
+              className="text-xs font-semibold text-slate-700"
+            >
+              Module file
+            </label>
+            <Controller
+              name="file"
+              control={form.control}
+              render={({ field }) => (
+                <input
+                  key={fileInputKey}
+                  id={`module-upload-file-${generatedId}`}
+                  name={field.name}
+                  ref={field.ref}
+                  type="file"
+                  accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  onBlur={field.onBlur}
+                  onChange={(event) => field.onChange(event.target.files?.[0])}
+                  aria-invalid={Boolean(form.formState.errors.file)}
+                  aria-describedby={
+                    form.formState.errors.file
+                      ? `module-upload-file-error-${generatedId}`
+                      : `module-upload-file-help-${generatedId}`
+                  }
+                  className="block w-full text-xs text-slate-700
+                      file:mr-3 file:rounded-md file:border-0
+                      file:bg-slate-100 file:px-2.5 file:py-1
+                      file:text-xs file:font-semibold
+                      file:text-slate-700 hover:file:bg-slate-200
+                      focus-visible:outline-none
+                      disabled:cursor-not-allowed
+                      disabled:bg-slate-50
+                      border border-slate-200 rounded-lg p-1 bg-slate-50/50"
+                />
+              )}
+            />
+
+            <p
+              id={`module-upload-file-help-${generatedId}`}
+              className="text-[11px] leading-4 text-slate-400"
+            >
+              PDF or DOCX, up to 25 MiB.
+            </p>
+
+            {form.formState.errors.file ? (
+              <p
+                id={`module-upload-file-error-${generatedId}`}
+                className="text-xs text-red-600"
+              >
+                {form.formState.errors.file.message}
+              </p>
+            ) : null}
+          </div>
+        </fieldset>
+        <div className="flex flex-wrap justify-end gap-3">
+          {stage === "failed" ? (
+            <>
+              <button
+                type="button"
+                onClick={discardAttempt}
+                disabled={isBusy}
+                className="inline-flex min-h-11 items-center
+                    gap-2 rounded-xl border border-slate-300
+                    bg-white px-4 text-sm font-semibold
+                    text-slate-800 transition hover:bg-slate-50
+                    focus-visible:outline-2
+                    focus-visible:outline-offset-2
+                    focus-visible:outline-slate-700
+                    disabled:cursor-not-allowed
+                    disabled:opacity-60"
+              >
+                <X className="h-4 w-4" aria-hidden="true" />
+                Discard
+              </button>
+
+              <button
+                type="button"
+                onClick={retryFailedStage}
+                disabled={isBusy || attemptExpired}
+                className="inline-flex min-h-11 items-center
+                    gap-2 rounded-xl bg-amber-700 px-4
+                    text-sm font-semibold text-white transition
+                    hover:bg-amber-800 focus-visible:outline-2
+                    focus-visible:outline-offset-2
+                    focus-visible:outline-amber-700
+                    disabled:cursor-not-allowed
+                    disabled:opacity-60"
+              >
+                <ArrowCounterClockwise className="h-4 w-4" aria-hidden="true" />
+                Retry upload
+              </button>
+            </>
+          ) : null}
+          <button
+            type="submit"
+            disabled={isBusy || stage === "failed"}
+            className="apple-press inline-flex items-center justify-center rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60 shadow-xs"
+          >
+            {isBusy ? (
+              <>
+                <AsteriskLoader
+                  className="mr-1.5 h-3.5 w-3.5"
+                />
+                Uploading...
+              </>
+            ) : (
+              "Upload draft"
+            )}
+          </button>
+        </div>
+      </form>
+    </section>
+  );
+}

@@ -1,0 +1,746 @@
+"use client";
+
+import Link from "next/link";
+import {
+  BookOpen,
+  Users,
+  CloudArrowUp,
+  CaretRight,
+  FileText,
+  ArrowsClockwise,
+} from "@phosphor-icons/react";
+import { ROUTES } from "@/constants/routes";
+import type { Course } from "@/features/courses/types/course.type";
+import { ApiError } from "@/lib/api/client";
+import { NotificationBanner } from "@/components/ui/notification-banner";
+import { useAdminOverview } from "../hooks/use-admin-overview";
+
+type AdminSectionId = "courses" | "users" | "bulk-import" | "modules";
+
+type AdminOverviewProps = {
+  userId: string;
+  onNavigateToCourse: (courseId: string) => void;
+  onNavigateToNavItem: (itemId: AdminSectionId) => void;
+};
+
+type SummaryMetricProps = {
+  label: string;
+  value: number;
+  helper: string;
+  isPending: boolean;
+  isUnavailable: boolean;
+  onRetry?: () => void;
+};
+
+type InlineDataErrorProps = {
+  title: string;
+  message: string;
+  onRetry?: () => void;
+};
+
+type StatusTone = "positive" | "warning" | "negative" | "neutral";
+
+type StatusRowProps = {
+  label: string;
+  value: string;
+  tone: StatusTone;
+};
+
+const SEMESTER_ORDER: Record<Course["semester"], number> = {
+  Ganjil: 0,
+  Genap: 1
+};
+
+const ADMIN_AREAS = [
+  {
+    id: "courses",
+    label: "Course management",
+    description: "Offerings, rosters, and teaching staff",
+    icon: BookOpen
+  },
+  {
+    id: "users",
+    label: "User accounts",
+    description: "Roles, access, and password resets",
+    icon: Users
+  },
+  {
+    id: "bulk-import",
+    label: "Bulk import accounts",
+    description: "Import student accounts in batch via CSV or Excel",
+    icon: CloudArrowUp
+  },
+  {
+    id: "modules",
+    label: "Module management",
+    description: "Learning files and publication state",
+    icon: FileText
+  }
+] as const;
+
+function sortActiveCourses(courses: Course[]) {
+  return [...courses]
+    .filter((course) => course.is_active)
+    .sort((first, second) => {
+      const yearComparison = second.academic_year.localeCompare(
+        first.academic_year
+      );
+
+      if (yearComparison !== 0) {
+        return yearComparison;
+      }
+
+      const semesterComparison =
+        SEMESTER_ORDER[first.semester] - SEMESTER_ORDER[second.semester];
+
+      if (semesterComparison !== 0) {
+        return semesterComparison;
+      }
+
+      return first.code.localeCompare(second.code);
+    });
+}
+
+function isAccessError(error: unknown): error is ApiError {
+  return (
+    error instanceof ApiError && (error.status === 401 || error.status === 403)
+  );
+}
+
+function canRetryError(error: unknown) {
+  return !isAccessError(error);
+}
+
+
+function formatCheckedTime(timestamp: number) {
+  return new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(timestamp);
+}
+
+function SummaryMetric({
+  label,
+  value,
+  helper,
+  isPending,
+  isUnavailable,
+  onRetry
+}: SummaryMetricProps) {
+  return (
+    <div className="min-w-0 p-5 sm:p-6">
+      <dt className="text-sm font-medium text-slate-600">{label}</dt>
+
+      {isPending ? (
+        <dd className="mt-3" aria-hidden="true">
+          <span className="block h-9 w-20 animate-pulse rounded bg-slate-200" />
+          <span
+            className="mt-2 block h-4 w-32 animate-pulse rounded bg-slate-
+            100"
+          />
+        </dd>
+      ) : isUnavailable ? (
+        <dd className="mt-3">
+          <p className="text-lg font-semibold text-slate-700">Unavailable</p>
+          <p className="mt-1 text-sm text-slate-500">
+            Couldn&apos;t load this metric.
+          </p>
+
+          {onRetry ? (
+            <button
+              type="button"
+              onClick={onRetry}
+              className="mt-3 text-sm font-semibold text-slate-700 underline-offset-4 hover:text-slate-950 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+            >
+              Retry
+            </button>
+          ) : null}
+        </dd>
+      ) : (
+        <dd className="mt-3">
+          <p className="text-3xl font-semibold tracking-tight text-slate-950">
+            {value}
+          </p>
+          <p className="mt-1 text-sm text-slate-500">{helper}</p>
+        </dd>
+      )}
+    </div>
+  );
+}
+
+function InlineDataError({ title, message, onRetry }: InlineDataErrorProps) {
+  return (
+    <div className="p-4">
+      <NotificationBanner variant="error">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
+          <div>
+            <h4 className="font-semibold text-white">{title}</h4>
+            <p className="mt-0.5 text-xs text-slate-300">{message}</p>
+          </div>
+          {onRetry ? (
+            <button
+              type="button"
+              onClick={onRetry}
+              className="inline-flex items-center gap-1.5 rounded-full bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-700 shrink-0 apple-press"
+            >
+              <ArrowsClockwise className="h-3.5 w-3.5" aria-hidden="true" />
+              Try again
+            </button>
+          ) : null}
+        </div>
+      </NotificationBanner>
+    </div>
+  );
+}
+
+function StatusRow({ label, value, tone }: StatusRowProps) {
+  return (
+    <div className="flex items-center justify-between gap-4 py-3">
+      <dt className="text-sm text-slate-500">{label}</dt>
+      <dd
+        className={`text-sm font-semibold ${
+          tone === "positive"
+            ? "text-slate-900"
+            : tone === "warning"
+            ? "text-amber-700"
+            : tone === "negative"
+            ? "text-rose-700"
+            : "text-slate-600"
+        }`}
+      >
+        {value}
+      </dd>
+    </div>
+  );
+}
+
+export function AdminOverview({
+  userId,
+  onNavigateToCourse,
+  onNavigateToNavItem
+}: AdminOverviewProps) {
+  const { coursesQuery, usersQuery, healthQuery, refreshAll, isRefreshing } =
+    useAdminOverview(userId);
+
+  const courses = coursesQuery.data ?? [];
+  const users = usersQuery.data ?? [];
+
+  const activeCourses = sortActiveCourses(courses);
+  const visibleCourses = activeCourses.slice(0, 6);
+  const remainingCourseCount = Math.max(
+    activeCourses.length - visibleCourses.length,
+    0
+  );
+
+  const praktikanUsers = users.filter((user) => user.role === "praktikan");
+  const activePraktikanCount = praktikanUsers.filter(
+    (user) => user.is_active
+  ).length;
+
+  const asprakUsers = users.filter((user) => user.role === "asprak");
+  const activeAsprakCount = asprakUsers.filter((user) => user.is_active).length;
+
+  const coursesUnavailable =
+    coursesQuery.isError && coursesQuery.data === undefined;
+  const usersUnavailable = usersQuery.isError && usersQuery.data === undefined;
+
+  const accessError = [coursesQuery.error, usersQuery.error].find(
+    isAccessError
+  );
+
+  const hasRefreshError =
+    coursesQuery.isRefetchError || usersQuery.isRefetchError;
+
+  const isInitialLoading =
+    coursesQuery.isPending || usersQuery.isPending || healthQuery.isPending;
+
+  const health = healthQuery.data;
+
+  const platformLabel =
+    health?.status === "ok"
+      ? "Operational"
+      : health?.status === "degraded"
+        ? "Needs attention"
+        : "Unreachable";
+
+  const platformTone: StatusTone =
+    health?.status === "ok"
+      ? "positive"
+      : health?.status === "degraded"
+        ? "warning"
+        : "negative";
+
+  const courseRetry = canRetryError(coursesQuery.error)
+    ? () => {
+        void coursesQuery.refetch();
+      }
+    : undefined;
+
+  const userRetry = canRetryError(usersQuery.error)
+    ? () => {
+        void usersQuery.refetch();
+      }
+    : undefined;
+
+  return (
+    <div className="space-y-8">
+      {isInitialLoading ? (
+        <p role="status" className="sr-only">
+          Loading overview...
+        </p>
+      ) : null}
+
+      {accessError ? (
+        <NotificationBanner variant="error">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full">
+            <div>
+              <h3 className="font-semibold text-white">
+                {accessError.status === 401
+                  ? "Your session expired"
+                  : "Access restricted"}
+              </h3>
+
+              <p className="mt-0.5 text-xs text-slate-300">
+                {accessError.status === 401
+                  ? "Please sign in again to access administrative data."
+                  : "This section requires a Superadmin account."}
+              </p>
+            </div>
+
+            {accessError.status === 401 ? (
+              <Link
+                href={ROUTES.login}
+                className="inline-flex rounded-full bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-700 shrink-0 apple-press"
+              >
+                Sign in
+              </Link>
+            ) : null}
+          </div>
+        </NotificationBanner>
+      ) : null}
+
+      {hasRefreshError && !accessError ? (
+        <NotificationBanner variant="warning">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between w-full">
+            <span>Couldn&apos;t refresh some data. Showing the latest saved information.</span>
+
+            <button
+              type="button"
+              onClick={() => void refreshAll()}
+              disabled={isRefreshing}
+              className="inline-flex items-center rounded-full bg-slate-800 border border-slate-700 px-3 py-1 text-xs font-semibold text-white hover:bg-slate-700 transition disabled:opacity-60 shrink-0 apple-press"
+            >
+              Retry refresh
+            </button>
+          </div>
+        </NotificationBanner>
+      ) : null}
+
+      <section aria-labelledby="operational-summary-heading">
+        <div
+          className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
+        >
+          <button
+            type="button"
+            onClick={() => void refreshAll()}
+            disabled={isRefreshing}
+            className="apple-press inline-flex min-h-10 items-center justify-center gap-2
+              self-start rounded-full border border-slate-200 bg-white px-4 py-2
+              text-sm font-semibold text-slate-700 transition hover:bg-slate-50
+              focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed
+              disabled:opacity-60 sm:self-auto"
+          >
+            <ArrowsClockwise
+              className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+              aria-hidden="true"
+            />
+            {isInitialLoading
+              ? "Loading data"
+              : isRefreshing
+                ? "Refreshing"
+                : "Refresh data"}
+          </button>
+        </div>
+
+        <dl
+          className="mt-4 grid overflow-hidden rounded-2xl border border-slate-
+            200 bg-white divide-y divide-slate-200 sm:grid-cols-3 sm:divide-x
+            sm:divide-y-0"
+          aria-busy={isInitialLoading}
+        >
+          <SummaryMetric
+            label="Active offerings"
+            value={activeCourses.length}
+            helper={`${courses.length} total course offerings`}
+            isPending={coursesQuery.isPending}
+            isUnavailable={coursesUnavailable}
+            onRetry={courseRetry}
+          />
+
+          <SummaryMetric
+            label="Active Praktikan"
+            value={activePraktikanCount}
+            helper={`${praktikanUsers.length} total Praktikan accounts`}
+            isPending={usersQuery.isPending}
+            isUnavailable={usersUnavailable}
+            onRetry={userRetry}
+          />
+
+          <SummaryMetric
+            label="Active Asprak"
+            value={activeAsprakCount}
+            helper={`${asprakUsers.length} total Asprak accounts`}
+            isPending={usersQuery.isPending}
+            isUnavailable={usersUnavailable}
+            onRetry={userRetry}
+          />
+        </dl>
+      </section>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        <section
+          aria-labelledby="active-offerings-heading"
+          className="overflow-hidden rounded-2xl border border-slate-200 bg-white lg:col-span-2"
+        >
+          <div className="flex items-start justify-between gap-4 p-5 sm:p-6">
+            <div>
+              <h3
+                id="active-offerings-heading"
+                className="text-lg font-semibold text-slate-950"
+              >
+                Active course offerings
+              </h3>
+              <p className="mt-1 text-sm leading-6 text-slate-500">
+                Jump straight into an active course or manage all courses.
+              </p>
+            </div>
+
+            {!coursesUnavailable && courses.length > 0 ? (
+              <button
+                type="button"
+                onClick={() => onNavigateToNavItem("courses")}
+                className="hidden shrink-0 items-center gap-1 text-sm font-semibold text-slate-700 underline-offset-4 hover:text-slate-950 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 sm:inline-flex"
+              >
+                View all
+                <CaretRight className="h-4 w-4" aria-hidden="true" />
+              </button>
+            ) : null}
+          </div>
+
+          <div className="border-t border-slate-200">
+            {coursesQuery.isPending ? (
+              <div
+                role="status"
+                className="space-y-3 p-5 sm:p-6"
+                aria-label="Loading active course offerings"
+              >
+                {[0, 1, 2].map((item) => (
+                  <div
+                    key={item}
+                    className="h-16 animate-pulse rounded-lg bg-slate-100"
+                    aria-hidden="true"
+                  />
+                ))}
+              </div>
+            ) : coursesUnavailable ? (
+              <InlineDataError
+                title="Course data unavailable"
+                message={
+                  accessError
+                    ? "Couldn&apos;t verify administrative course access."
+                    : "Couldn&apos;t load courses due to a connection error."
+                }
+                onRetry={courseRetry}
+              />
+            ) : courses.length === 0 ? (
+              <div role="status" className="p-6 sm:p-8">
+                <BookOpen
+                  className="h-7 w-7 text-slate-400"
+                  aria-hidden="true"
+                />
+                <h4 className="mt-4 font-semibold text-slate-950">
+                  No courses yet
+                </h4>
+                <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
+                  Get started by creating the first practicum course in Course Management.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => onNavigateToNavItem("courses")}
+                  className="apple-press mt-4 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+                >
+                  Open Course Management
+                </button>
+              </div>
+            ) : visibleCourses.length === 0 ? (
+              <div role="status" className="p-6 sm:p-8">
+                <BookOpen
+                  className="h-7 w-7 text-slate-400"
+                  aria-hidden="true"
+                />
+                <h4 className="mt-4 font-semibold text-slate-950">
+                  No active offerings
+                </h4>
+                <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
+                  No active courses right now. {courses.length} historical {courses.length === 1 ? "course is" : "courses are"} available in Course Management.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => onNavigateToNavItem("courses")}
+                  className="apple-press mt-4 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+                >
+                  View historical courses
+                </button>
+              </div>
+            ) : (
+              <>
+                <ul className="divide-y divide-slate-100">
+                  {visibleCourses.map((course) => (
+                    <li key={course.id}>
+                      <button
+                        type="button"
+                        onClick={() => onNavigateToCourse(course.id)}
+                        aria-label={`Open ${course.code}, ${course.name},
+                          academic year ${course.academic_year}, semester
+                          ${course.semester}`}
+                        className="group flex min-h-20 w-full items-center
+                          justify-between gap-4 px-5 py-4 text-left transition
+                          hover:bg-slate-50 focus-visible:z-10 focus-
+                          visible:outline-2 focus-visible:outline-t-[-2px]
+                          focus-visible:outline-slate-900 sm:px-6"
+                      >
+                        <span
+                          className="flex min-w-0 items-center gap-3 sm:gap-
+                          5"
+                        >
+                          <span
+                            className="w-16 shrink-0 font-mono text-sm font-
+                            semibold text-slate-700"
+                          >
+                            {course.code}
+                          </span>
+
+                          <span className="min-w-0">
+                            <span
+                              className="block truncate text-sm font-
+                              semibold text-slate-950"
+                            >
+                              {course.name}
+                            </span>
+                            <span className="mt-1 block text-sm text-slate-500">
+                              {course.academic_year} · {course.semester}
+                            </span>
+                          </span>
+                        </span>
+
+                        <CaretRight
+                          className="h-4 w-4 shrink-0 text-slate-400 transition
+                            group-hover:translate-x-0.5 group-hover:text-slate-
+                            700"
+                          aria-hidden="true"
+                        />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+
+                <div
+                  className="flex flex-col gap-3 border-t border-slate-200
+                  bg-slate-50 px-5 py-4 text-sm text-slate-600 sm:flex-row
+                  sm:items-center sm:justify-between sm:px-6"
+                >
+                  <span>
+                    Showing {visibleCourses.length} of {activeCourses.length}
+                    {""}
+                    active offerings
+                    {remainingCourseCount > 0
+                      ? ` · ${remainingCourseCount} more available`
+                      : ""}
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={() => onNavigateToNavItem("courses")}
+                    className="self-start font-semibold text-slate-800
+                      underline-offset-4 hover:text-slate-950 hover:underline
+                      focus-visible:outline-2 focus-visible:outline-offset-2
+                      focus-visible:outline-slate-900 sm:self-auto"
+                  >
+                    View all course offerings
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </section>
+
+        <section
+          aria-labelledby="platform-status-heading"
+          className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6"
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h3
+                id="platform-status-heading"
+                className="text-lg font-semibold text-slate-950"
+              >
+                Platform status
+              </h3>
+            </div>
+          </div>
+
+          {healthQuery.isPending ? (
+            <div
+              role="status"
+              aria-label="Checking platform status"
+              className="mt-6 space-y-4"
+            >
+              <div
+                className="h-8 w-32 rounded bg-slate-200"
+                aria-hidden="true"
+              />
+              <div
+                className="h-28 rounded-lg bg-slate-100"
+                aria-hidden="true"
+              />
+            </div>
+          ) : health ? (
+            <>
+              <div className="mt-6 flex items-center gap-3">
+                <span className="text-xl font-semibold text-slate-950">
+                  {platformLabel}
+                </span>
+              </div>
+
+              <dl
+                className="mt-5 divide-y divide-slate-100 border-y border-slate-200"
+              >
+                <StatusRow
+                  label="API"
+                  value={platformLabel}
+                  tone={platformTone}
+                />
+                <StatusRow
+                  label="Database"
+                  value={
+                    health.status === "down"
+                      ? "Unavailable"
+                      : health.db_connected
+                        ? "Connected"
+                        : "Disconnected"
+                  }
+                  tone={
+                    health.status === "down"
+                      ? "neutral"
+                      : health.db_connected
+                        ? "positive"
+                        : "negative"
+                  }
+                />
+                <StatusRow
+                  label="Schema"
+                  value={
+                    health.status === "down" || !health.db_connected
+                      ? "Unavailable"
+                      : health.migrations_current
+                        ? "Current"
+                        : "Update required"
+                  }
+                  tone={
+                    health.status === "down" || !health.db_connected
+                      ? "neutral"
+                      : health.migrations_current
+                        ? "positive"
+                        : "warning"
+                  }
+                />
+              </dl>
+
+              <div
+                className="mt-4 flex items-center justify-between gap-4 text-xs text-slate-500"
+              >
+                <span>
+                  {healthQuery.dataUpdatedAt > 0
+                    ? `Checked ${formatCheckedTime(healthQuery.dataUpdatedAt)}`
+                    : "Check completed"}
+                </span>
+                <span className="font-mono">{health.latency_ms}ms</span>
+              </div>
+            </>
+          ) : (
+            <InlineDataError
+              title="Platform status unavailable"
+              message="Couldn&apos;t check service health right now."
+              onRetry={() => void healthQuery.refetch()}
+            />
+          )}
+        </section>
+      </div>
+
+      <section aria-labelledby="administrative-areas-heading">
+        <h3
+          id="administrative-areas-heading"
+          className="text-lg font-semibold text-slate-950"
+        >
+          Administrative areas
+        </h3>
+        <p className="mt-1 text-sm leading-6 text-slate-500">
+          Quick shortcuts to manage different parts of the system.
+        </p>
+
+        <nav
+          aria-label="Administrative areas"
+          className="mt-4 overflow-hidden rounded-2xl border border-slate-200
+            bg-white"
+        >
+          {ADMIN_AREAS.map((area) => {
+            const Icon = area.icon;
+
+            return (
+              <button
+                key={area.id}
+                type="button"
+                onClick={() => onNavigateToNavItem(area.id)}
+                className="group flex min-h-20 w-full items-center justify-
+                  between gap-4 border-b border-slate-100 px-5 py-4 text-left
+                  transition last:border-b-0 hover:bg-slate-50 focus-visible:z-10
+                  focus-visible:outline-2 focus-visible:-outline-offset-2
+                  focus-visible:outline-slate-900 sm:px-6"
+              >
+                <span className="flex min-w-0 items-center gap-4">
+                  <span
+                    className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-slate-
+  100 text-slate-700 leading-none"
+                  >
+                    <Icon
+                      className="block h-5 w-5 shrink-0"
+                      aria-hidden="true"
+                    />
+                  </span>
+
+                  <span className="min-w-0">
+                    <span
+                      className="block text-sm font-semibold text-slate-
+                      950"
+                    >
+                      {area.label}
+                    </span>
+                    <span className="mt-1 block text-sm text-slate-500">
+                      {area.description}
+                    </span>
+                  </span>
+                </span>
+
+                <CaretRight
+                  className="h-4 w-4 shrink-0 text-slate-400 transition group-
+                    hover:translate-x-0.5 group-hover:text-slate-700"
+                  aria-hidden="true"
+                />
+              </button>
+            );
+          })}
+        </nav>
+      </section>
+    </div>
+  );
+}

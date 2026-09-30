@@ -1,0 +1,151 @@
+"use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { PushPin } from "@phosphor-icons/react";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
+import { useForm } from "react-hook-form";
+import { useCreateCourseAnnouncement } from "../hooks/use-course-announcements";
+import {
+  announcementSchema,
+  type AnnouncementFormValues
+} from "../schemas/announcement.schema";
+import { NotificationBanner } from "@/components/ui/notification-banner";
+
+type AnnouncementComposerProps = {
+  userId: string;
+  courseId: string;
+};
+
+export function AnnouncementComposer({
+  userId,
+  courseId
+}: AnnouncementComposerProps) {
+  const mutation = useCreateCourseAnnouncement({ userId, courseId });
+  const form = useForm<AnnouncementFormValues>({
+    resolver: zodResolver(announcementSchema),
+    defaultValues: {
+      title: "",
+      content: "",
+      is_pinned: false
+    }
+  });
+
+  function onSubmit(values: AnnouncementFormValues) {
+    mutation.reset();
+    mutation.mutate(values, {
+      onSuccess: () => form.reset()
+    });
+  }
+
+  return (
+    <section
+      aria-labelledby="announcement-composer-heading"
+      className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs"
+    >
+      <div className="flex items-start gap-3">
+        <div>
+          <h2
+            id="announcement-composer-heading"
+            className="font-semibold text-slate-950"
+          >
+            Post an announcement
+          </h2>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            Broadcast updates, reminders, or schedule changes to the entire class.
+          </p>
+        </div>
+      </div>
+
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="mt-5 space-y-4"
+        aria-busy={mutation.isPending}
+      >
+        {mutation.isError ? (
+          <NotificationBanner
+            variant="error"
+            message={mutation.error.message}
+          />
+        ) : null}
+
+        {mutation.isSuccess ? (
+          <NotificationBanner
+            variant="success"
+            message="Announcement posted!"
+          />
+        ) : null}
+
+        <div className="space-y-2">
+          <label htmlFor="announcement-title" className="text-sm font-medium text-slate-800">
+            Title
+          </label>
+          <input
+            id="announcement-title"
+            type="text"
+            maxLength={255}
+            disabled={mutation.isPending}
+            aria-invalid={Boolean(form.formState.errors.title)}
+            aria-describedby={form.formState.errors.title ? "announcement-title-error" : undefined}
+            className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-50"
+            placeholder="Title (e.g. Lab 3 guidelines updated)"
+            {...form.register("title")}
+          />
+          {form.formState.errors.title ? (
+            <p id="announcement-title-error" className="text-sm text-red-600">
+              {form.formState.errors.title.message}
+            </p>
+          ) : null}
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="announcement-content" className="text-sm font-medium text-slate-800">
+            Message
+          </label>
+          <textarea
+            id="announcement-content"
+            rows={4}
+            disabled={mutation.isPending}
+            aria-invalid={Boolean(form.formState.errors.content)}
+            aria-describedby={form.formState.errors.content ? "announcement-content-error" : undefined}
+            className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-50"
+            placeholder="Share details, links, or instructions..."
+            {...form.register("content")}
+          />
+          {form.formState.errors.content ? (
+            <p id="announcement-content-error" className="text-sm text-red-600">
+              {form.formState.errors.content.message}
+            </p>
+          ) : null}
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-700">
+            <input
+              type="checkbox"
+              disabled={mutation.isPending}
+              className="h-4 w-4 rounded border-slate-300 accent-slate-900"
+              {...form.register("is_pinned")}
+            />
+            <PushPin className="h-4 w-4" aria-hidden="true" />
+            Pin to top of stream
+          </label>
+
+          <button
+            type="submit"
+            disabled={mutation.isPending}
+            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60 shadow-xs"
+          >
+            {mutation.isPending ? (
+              <>
+                <AsteriskLoader className="mr-2 h-4 w-4" />
+                Publishing...
+              </>
+            ) : (
+              "Publish update"
+            )}
+          </button>
+        </div>
+      </form>
+    </section>
+  );
+}

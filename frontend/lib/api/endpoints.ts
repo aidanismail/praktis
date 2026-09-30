@@ -1,0 +1,140 @@
+export const API_ENDPOINTS = {
+  auth: {
+    login: "/api/auth/login",
+    logout: "/api/auth/logout",
+    me: "/api/auth/me",
+    changePassword: "/api/auth/change-password",
+    importCsv: "/api/auth/import-csv",
+    listUsers: "/api/auth/users",
+    createUser: "/api/auth/users",
+    resetPassword: (userId: string) =>
+      `/api/auth/users/${encodeURIComponent(userId)}/reset-password`,
+    deleteUser: (userId: string) =>
+      `/api/auth/users/${encodeURIComponent(userId)}`,
+    reactivateUser: (userId: string) =>
+      `/api/auth/users/${encodeURIComponent(userId)}/reactivate`
+  },
+
+  courses: {
+    list: "/api/courses/",
+    create: "/api/courses/",
+    detail: (courseId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}`,
+    students: (courseId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}/students`,
+    sessions: (courseId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}/sessions`,
+    staff: (courseId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}/staff`,
+    enroll: (courseId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}/enroll`,
+    unenroll: (courseId: string, studentId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}/students/${encodeURIComponent(studentId)}`,
+    removeStaff: (courseId: string, userId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}/staff/${encodeURIComponent(userId)}`,
+    update: (courseId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}`,
+    delete: (courseId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}`,
+    banner: (courseId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}/banner`,
+    bannerImage: (courseId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}/banner-image`
+  },
+
+  announcements: {
+    list: (courseId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}/announcements`,
+    create: (courseId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}/announcements`,
+    update: (courseId: string, announcementId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}/announcements/${encodeURIComponent(announcementId)}`,
+    delete: (courseId: string, announcementId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}/announcements/${encodeURIComponent(announcementId)}`,
+    addComment: (courseId: string, announcementId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}/announcements/${encodeURIComponent(announcementId)}/comments`,
+    deleteComment: (courseId: string, announcementId: string, commentId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}/announcements/${encodeURIComponent(announcementId)}/comments/${encodeURIComponent(commentId)}`,
+  },
+
+  assignments: {
+    list: (courseId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}/assignments`,
+    create: (courseId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}/assignments`,
+    detail: (courseId: string, assignmentId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}/assignments/${encodeURIComponent(assignmentId)}`,
+    submit: (courseId: string, assignmentId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}/assignments/${encodeURIComponent(assignmentId)}/submit`,
+    update: (courseId: string, assignmentId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}/assignments/${encodeURIComponent(assignmentId)}`,
+    delete: (courseId: string, assignmentId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}/assignments/${encodeURIComponent(assignmentId)}`,
+    submissions: (courseId: string, assignmentId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}/assignments/${encodeURIComponent(assignmentId)}/submissions`,
+    grade: (courseId: string, assignmentId: string, submissionId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}/assignments/${encodeURIComponent(assignmentId)}/submissions/${encodeURIComponent(submissionId)}/grade`,
+  },
+
+  modules: {
+    list: "/api/modules/",
+    presignedUrl: "/api/modules/presigned-url",
+    confirm: "/api/modules/confirm",
+    presignedReplacementUrl: (moduleId: string) =>
+      `/api/modules/${encodeURIComponent(moduleId)}/presigned-replacement-url`,
+    confirmReplacement: (moduleId: string) =>
+      `/api/modules/${encodeURIComponent(moduleId)}/confirm-replacement`,
+    update: (moduleId: string) =>
+      `/api/modules/${encodeURIComponent(moduleId)}`,
+    publish: (moduleId: string) =>
+      `/api/modules/${encodeURIComponent(moduleId)}/publish`,
+    unpublish: (moduleId: string) =>
+      `/api/modules/${encodeURIComponent(moduleId)}/unpublish`,
+    delete: (moduleId: string) =>
+      `/api/modules/${encodeURIComponent(moduleId)}`
+  },
+
+  classSessions: {
+    create: (courseId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}/sessions`,
+    update: (sessionId: string) =>
+      `/api/class-sessions/${encodeURIComponent(sessionId)}`,
+    delete: (sessionId: string) =>
+      `/api/class-sessions/${encodeURIComponent(sessionId)}`,
+    openAttendance: (sessionId: string) =>
+      `/api/class-sessions/${encodeURIComponent(sessionId)}/open-attendance`,
+    closeAttendance: (sessionId: string) =>
+      `/api/class-sessions/${encodeURIComponent(sessionId)}/close-attendance`
+  },
+
+  attendance: {
+    me: "/api/attendance/me",
+    listBySession: (sessionId: string) =>
+      `/api/attendance/sessions/${encodeURIComponent(sessionId)}`,
+    record: (sessionId: string) =>
+      `/api/attendance/sessions/${encodeURIComponent(sessionId)}`,
+    bulkUpdate: (sessionId: string) =>
+      `/api/attendance/sessions/${encodeURIComponent(sessionId)}/bulk`,
+  },
+
+  grades: {
+    me: "/api/grades/me",
+    listBySession: (sessionId: string) =>
+      `/api/grades/sessions/${encodeURIComponent(sessionId)}`,
+    bulkUpdate: (sessionId: string) =>
+      `/api/grades/sessions/${encodeURIComponent(sessionId)}/bulk`,
+    publish: (sessionId: string) =>
+      `/api/grades/sessions/${encodeURIComponent(sessionId)}/publish`,
+    unpublish: (sessionId: string) =>
+      `/api/grades/sessions/${encodeURIComponent(sessionId)}/unpublish`,
+  },
+
+  export: {
+    attendance: (sessionId: string, format: "csv" | "xlsx" = "csv") =>
+      `/api/export/attendance/${encodeURIComponent(sessionId)}?format=${encodeURIComponent(format)}`,
+    grades: (sessionId: string, format: "csv" | "xlsx" = "csv") =>
+      `/api/export/grades/${encodeURIComponent(sessionId)}?format=${encodeURIComponent(format)}`
+  },
+
+  health: "/api/health"
+} as const;

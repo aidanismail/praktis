@@ -1,34 +1,150 @@
-version: "3.8"
+name: praktis
 
 services:
-  # 1. Database PostgreSQL
   db:
     image: postgres:16-alpine
-    container_name: praktis-db
-    restart: always
+    container_name: praktis_db
+    restart: unless-stopped
+    env_file:
+      - .env
     environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: supersecretpassword
-      POSTGRES_DB: praktis_db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5432:5432"
+      - "5438:5432"
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - praktis_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  # 2. MinIO (File Storage)
   storage:
-    image: minio/minio
-    container_name: praktis-storage
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    environment:
-      MINIO_ROOT_USER: admin
-      MINIO_ROOT_PASSWORD: supersecretpassword
+    image: quay.io/minio/aistor/minio
+    container_name: praktis_storage
+    restart: unless-stopped
     command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_LICENSE: /minio.license
     volumes:
-      - minio_data:/data
+      - ./minio_data:/data
+      - ./minio.license:/minio.license
+    ports:
+      - "9002:9000" # API
+      - "9003:9001" # Console
+    networks:
+      - praktis_network
+
+  cache:
+    image: redis:7-alpine
+    container_name: praktis_cache
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    networks:
+      - praktis_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  migrate:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: praktis_migrate
+    restart: "no"
+    command: ["alembic", "upgrade", "head"]
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      MINIO_ENDPOINT: storage:9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_USE_SSL: "false"
+      REDIS_URL: redis://cache:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - praktis_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: praktis_backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      MINIO_ENDPOINT: storage:9000
+      MINIO_PUBLIC_ENDPOINT: ${MINIO_PUBLIC_ENDPOINT:-http://localhost:8085}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_USE_SSL: "false"
+      MINIO_BUCKET_NAME: praktis-modules
+      REDIS_URL: redis://cache:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      storage:
+        condition: service_started
+      cache:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    networks:
+      - praktis_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: praktis_frontend
+    restart: unless-stopped
+    environment:
+      - HOSTNAME=0.0.0.0
+      - PORT=3000
+      - NEXT_PUBLIC_API_URL=https://localhost-0.tail8b8e30.ts.net:10000/api
+      - INTERNAL_API_URL=http://backend:8000
+    command: >
+      sh -c "
+      pnpm build &&
+      cp -r public .next/standalone/ 2>/dev/null || true &&
+      cp -r .next/static .next/standalone/.next/ 2>/dev/null || true &&
+      node .next/standalone/server.js
+      "
+    networks:
+      - praktis_network
+      
+  nginx:
+    image: nginx:alpine
+    container_name: praktis_proxy
+    restart: unless-stopped
+    ports:
+      - "8085:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - praktis_network
+
+networks:
+  praktis_network:
+    driver: bridge
 
 volumes:
-  db_data:
+  postgres_data:
   minio_data:

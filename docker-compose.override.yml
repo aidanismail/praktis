@@ -1,0 +1,47 @@
+services:
+  migrate:
+    build:
+      target: dev
+    volumes:
+      - ./backend:/app
+
+  backend:
+    build:
+      target: dev
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: dev
+    volumes:
+      - type: bind
+        source: ./frontend
+        target: /app
+      - type: volume
+        source: frontend_node_modules
+        target: /app/node_modules
+        volume:
+          nocopy: true
+      - type: volume
+        source: frontend_next
+        target: /app/.next
+        volume:
+          nocopy: true
+      - type: volume
+        source: frontend_pnpm_store
+        target: /pnpm/store
+        volume:
+          nocopy: true
+    environment:
+      NEXT_TELEMETRY_DISABLED: "1"
+      WATCHPACK_POLLING: "1000"
+      CHOKIDAR_USEPOLLING: "true"
+      CHOKIDAR_INTERVAL: "1000"
+
+volumes:
+  frontend_node_modules:
+  frontend_next:
+  frontend_pnpm_store:
