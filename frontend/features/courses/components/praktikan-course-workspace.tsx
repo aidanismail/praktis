@@ -5,11 +5,6 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import {
   CalendarBlank,
   ArrowLeft,
-  ChatCircle,
-  BookOpen,
-  ClipboardText,
-  Users,
-  GraduationCap,
 } from "@phosphor-icons/react";
 import type { Course } from "@/features/courses/types/course.type";
 import type { User } from "@/types/user.type";
@@ -32,18 +27,6 @@ export type PraktikanWorkspaceTab =
   | "assignments"
   | "people"
   | "sessions";
-
-const WORKSPACE_TABS: {
-  id: PraktikanWorkspaceTab;
-  label: string;
-  icon: React.ElementType;
-}[] = [
-  { id: "stream", label: "Stream", icon: ChatCircle },
-  { id: "modules", label: "Modules", icon: BookOpen },
-  { id: "assignments", label: "Assignments", icon: ClipboardText },
-  { id: "people", label: "People", icon: Users },
-  { id: "sessions", label: "Attendance & Grades", icon: GraduationCap },
-];
 
 type PraktikanCourseWorkspaceProps = {
   user: User;
@@ -197,34 +180,6 @@ export function PraktikanCourseWorkspace({
           </div>
         </div>
       </header>
-
-      {/* In-workspace Tab Navigation — visible on mobile (<md), scrollable pills */}
-      {!assignmentId && (
-        <nav
-          className="flex items-center gap-1 overflow-x-auto scrollbar-none -mx-1 px-1 md:hidden"
-          aria-label="Course workspace tabs"
-        >
-          {WORKSPACE_TABS.map((tab) => {
-            const isActive = workspaceTab === tab.id;
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => handleSelectTab(tab.id)}
-                className={`whitespace-nowrap flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-full transition-all duration-200 shrink-0 apple-press ${
-                  isActive
-                    ? "bg-slate-900 text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900 bg-white border border-slate-200/80 hover:bg-slate-50"
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </nav>
-      )}
 
       {/* Stream Tab: Upcoming Deadlines & Next Session + Announcements */}
       {workspaceTab === "stream" && (
