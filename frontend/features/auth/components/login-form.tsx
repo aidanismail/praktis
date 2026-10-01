@@ -1,7 +1,8 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { ProductLogo } from "@/components/branding/product-logo";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
@@ -18,15 +19,33 @@ import {
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const searchParams = useSearchParams();
   const loginMutation = useLogin();
+  const autoSubmittedRef = useRef(false);
+
+  const queryUsername = searchParams.get("username") || "";
+  const queryPassword = searchParams.get("password") || "";
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: "",
-      password: ""
+      username: queryUsername,
+      password: queryPassword
     }
   });
+
+  useEffect(() => {
+    if (queryUsername) {
+      form.setValue("username", queryUsername);
+    }
+    if (queryPassword) {
+      form.setValue("password", queryPassword);
+    }
+    if (queryUsername && queryPassword && !autoSubmittedRef.current) {
+      autoSubmittedRef.current = true;
+      loginMutation.mutate({ username: queryUsername, password: queryPassword });
+    }
+  }, [queryUsername, queryPassword, form, loginMutation]);
 
   function onSubmit(values: LoginFormValues) {
     loginMutation.mutate(values);

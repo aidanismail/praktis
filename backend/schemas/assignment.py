@@ -30,6 +30,7 @@ class SubmissionResponse(BaseModel):
     student_id: str = Field(..., description="Student User ID.")
     student_username: str = Field(..., description="Student username.")
     student_email: str | None = Field(None, description="Student email.")
+    student_name: str | None = Field(None, description="Student's full name.")
     file_name: str = Field(..., description="Uploaded file name.")
     file_size: int = Field(..., description="File size in bytes.")
     download_url: str = Field(..., description="Presigned download URL.")

@@ -7,6 +7,7 @@ from models.user import RoleEnum
 class UserBase(BaseModel):
     email: EmailStr = Field(..., description="User's email address.", examples=["student1@unpad.ac.id"])
     username: str = Field(..., description="Login username. For students this is their NPM.", examples=["140810220001"])
+    name: str | None = Field(default=None, max_length=100, description="User's full name.")
     role: RoleEnum = Field(..., description="Role determining what the user can access.")
 
 class UserCreate(UserBase):
@@ -42,6 +43,9 @@ class ChangePasswordRequest(BaseModel):
 
 class AdminResetPasswordRequest(BaseModel):
     new_password: str | None = Field(default=None, description="Optional custom new password. Defaults to Praktis{username}.")
+
+class UpdateProfileRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100, description="User's new full name.", examples=["Aidan Bagas"])
 
 class LoginRequest(BaseModel):
     username: str = Field(..., description="Login username (NPM for students).", examples=["140810220001"])

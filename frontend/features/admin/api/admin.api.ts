@@ -27,12 +27,14 @@ export type StudentItem = {
   id: string;
   username: string;
   email: string;
+  name?: string | null;
 };
 
 export type StaffItem = {
   id: string;
   username: string;
   email: string;
+  name?: string | null;
 };
 
 export type AnnouncementCommentItem = {
@@ -66,6 +68,7 @@ export type SubmissionItem = {
   student_id: string;
   student_username: string;
   student_email: string | null;
+  student_name?: string | null;
   file_name: string;
   file_size: number;
   download_url: string;
@@ -111,6 +114,7 @@ export async function fetchAdminUsers(): Promise<User[]> {
 export type CreateAdminUserInput = {
   username: string;
   email: string;
+  name?: string;
   role: "superadmin" | "asprak" | "praktikan";
   password: string;
 };

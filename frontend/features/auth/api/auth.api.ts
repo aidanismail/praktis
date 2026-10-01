@@ -34,3 +34,10 @@ export function changePassword(payload: ChangePasswordRequest) {
     body: JSON.stringify(payload)
   });
 }
+
+export function updateProfile(payload: { name: string }) {
+  return apiClient<AuthMeResponse>(API_ENDPOINTS.auth.updateProfile, {
+    method: "PATCH",
+    body: JSON.stringify(payload)
+  });
+}

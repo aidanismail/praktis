@@ -74,6 +74,7 @@ class EnrolledStudentResponse(BaseModel):
     id: uuid.UUID = Field(..., description="Unique student (user) identifier.")
     username: str = Field(..., description="Student's username (NPM).")
     email: str = Field(..., description="Student's email address.")
+    name: str | None = Field(default=None, description="Student's full name.")
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -108,6 +109,7 @@ class StaffMemberResponse(BaseModel):
     id: uuid.UUID = Field(..., description="Unique user identifier.")
     username: str = Field(..., description="Staff member's username.")
     email: str = Field(..., description="Staff member's email address.")
+    name: str | None = Field(default=None, description="Staff member's full name.")
     role: RoleEnum = Field(..., description="Staff member's role.")
 
     model_config = ConfigDict(from_attributes=True)
