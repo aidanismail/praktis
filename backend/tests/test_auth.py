@@ -67,11 +67,11 @@ async def test_update_profile_name_success(client, db):
     set_auth(client, user)
     resp = await client.patch(
         "/auth/me",
-        json={"name": "Aidan Bagas"},
+        json={"name": "Plastic Trees"},
     )
     assert resp.status_code == 200
     data = resp.json()
-    assert data["name"] == "Aidan Bagas"
+    assert data["name"] == "Plastic Trees"
     assert data["username"] == user.username
 
 

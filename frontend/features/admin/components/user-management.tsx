@@ -583,7 +583,7 @@ export function UserManagement() {
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Aidan Bagas"
+                  placeholder="e.g. Plastic Trees"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-shadow duration-150"
