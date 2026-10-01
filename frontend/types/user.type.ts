@@ -4,6 +4,7 @@ export type User = {
   id: string;
   email: string;
   username: string;
+  name?: string | null;
   role: UserRole;
   is_active: boolean;
   force_password_change: boolean;

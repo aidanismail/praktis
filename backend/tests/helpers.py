@@ -17,12 +17,14 @@ async def create_user(
     role: RoleEnum,
     username: str | None = None,
     *,
+    name: str | None = None,
     is_active: bool = True,
     force_password_change: bool = False,
 ) -> User:
     username = username or f"u{uuid.uuid4().hex[:12]}"
     user = User(
         username=username,
+        name=name,
         email=f"{username}@example.com",
         role=role,
         hashed_password=_PASSWORD_HASH,

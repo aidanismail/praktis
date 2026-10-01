@@ -8,6 +8,7 @@ from pydantic import BaseModel, EmailStr, Field, ValidationError
 class ImportRow(BaseModel):
     npm: str = Field(..., pattern=r"^\d{6,20}$")
     email: EmailStr
+    name: str | None = Field(default=None, max_length=100)
 
 
 class ParsedImport(BaseModel):
@@ -36,8 +37,10 @@ def parse_import_file(filename: str, content: bytes) -> ParsedImport:
     for idx, raw in enumerate(raw_rows, start=1):
         npm = str(raw.get("npm") or "").strip()
         email = str(raw.get("email") or "").strip()
+        raw_name = raw.get("name") or raw.get("nama")
+        name = str(raw_name).strip() if raw_name is not None and str(raw_name).strip() else None
         try:
-            row = ImportRow(npm=npm, email=email)
+            row = ImportRow(npm=npm, email=email, name=name)
         except ValidationError as exc:
             reasons = "; ".join(f"{e['loc'][0]}: {e['msg']}" for e in exc.errors())
             invalid_rows.append({"row": idx, "reason": reasons})

@@ -77,7 +77,8 @@ export function CourseSubmissionsView({
     return submissions.filter((sub) => {
       const matchesSearch =
         sub.student_username.toLowerCase().includes(submissionSearch.toLowerCase()) ||
-        sub.file_name.toLowerCase().includes(submissionSearch.toLowerCase());
+        sub.file_name.toLowerCase().includes(submissionSearch.toLowerCase()) ||
+        Boolean(sub.student_name && sub.student_name.toLowerCase().includes(submissionSearch.toLowerCase()));
       if (!matchesSearch) return false;
 
       if (submissionFilter === "pending") return sub.score === null;
@@ -316,11 +317,13 @@ export function CourseSubmissionsView({
               >
                 <div className="flex items-start gap-3.5">
                   <div className="w-10 h-10 rounded-full bg-slate-900 text-white font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
-                    {sub.student_username.slice(0, 2).toUpperCase()}
+                    {(sub.student_name || sub.student_username).slice(0, 2).toUpperCase()}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h4 className="font-bold text-xs text-slate-900">{sub.student_username}</h4>
+                      <h4 className="font-bold text-xs text-slate-900">
+                        {sub.student_name ? `${sub.student_name} (${sub.student_username})` : sub.student_username}
+                      </h4>
                       <span className="text-slate-300" aria-hidden="true">·</span>
                       {sub.is_late ? (
                         <span className="text-xs font-semibold text-rose-700">

@@ -65,7 +65,10 @@ export function CoursePeopleTab({
     const q = peopleSearch.toLowerCase().trim();
     if (!q) return staff;
     return staff.filter(
-      (s) => s.username.toLowerCase().includes(q) || s.email.toLowerCase().includes(q)
+      (s) =>
+        s.username.toLowerCase().includes(q) ||
+        s.email.toLowerCase().includes(q) ||
+        Boolean(s.name && s.name.toLowerCase().includes(q))
     );
   }, [staff, peopleSearch]);
 
@@ -73,7 +76,10 @@ export function CoursePeopleTab({
     const q = peopleSearch.toLowerCase().trim();
     if (!q) return students;
     return students.filter(
-      (s) => s.username.toLowerCase().includes(q) || s.email.toLowerCase().includes(q)
+      (s) =>
+        s.username.toLowerCase().includes(q) ||
+        s.email.toLowerCase().includes(q) ||
+        Boolean(s.name && s.name.toLowerCase().includes(q))
     );
   }, [students, peopleSearch]);
 
@@ -92,10 +98,11 @@ export function CoursePeopleTab({
         if (u.role !== targetRole) return false;
         const uName = u.username.toLowerCase();
         const uEmail = u.email.toLowerCase();
+        const uFullName = u.name ? u.name.toLowerCase() : "";
         if (existingTagsSet.has(uName)) return false;
         if (enrollType === "student" && enrolledStudentSet.has(uName)) return false;
         if (enrollType === "staff" && enrolledStaffSet.has(uName)) return false;
-        return uName.includes(query) || uEmail.includes(query);
+        return uName.includes(query) || uEmail.includes(query) || uFullName.includes(query);
       })
       .slice(0, 6);
   }, [tagInput, enrollType, tags, students, staff, systemUsers]);
@@ -316,11 +323,11 @@ export function CoursePeopleTab({
               >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-slate-900 text-white font-bold text-xs flex items-center justify-center">
-                    {s.username.slice(0, 2).toUpperCase()}
+                    {(s.name || s.username).slice(0, 2).toUpperCase()}
                   </div>
                   <div>
-                    <span className="font-semibold text-slate-900 block">{s.username}</span>
-                    <span className="text-[11px] text-slate-400">{s.email}</span>
+                    <span className="font-semibold text-slate-900 block">{s.name || s.username}</span>
+                    <span className="text-[11px] text-slate-400">{s.name ? `${s.username} · ${s.email}` : s.email}</span>
                   </div>
                 </div>
 
@@ -364,11 +371,11 @@ export function CoursePeopleTab({
               >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center">
-                    {st.username.slice(0, 2).toUpperCase()}
+                    {(st.name || st.username).slice(0, 2).toUpperCase()}
                   </div>
                   <div>
-                    <span className="font-bold text-slate-900 block">{st.username}</span>
-                    <span className="text-slate-400 text-[11px]">{st.email}</span>
+                    <span className="font-bold text-slate-900 block">{st.name || st.username}</span>
+                    <span className="text-slate-400 text-[11px]">{st.name ? `${st.username} · ${st.email}` : st.email}</span>
                   </div>
                 </div>
 
@@ -517,14 +524,14 @@ export function CoursePeopleTab({
                       >
                         <div className="flex items-center gap-2.5 overflow-hidden">
                           <div className="w-7 h-7 rounded-full bg-slate-800 text-white font-bold text-[10px] flex items-center justify-center shrink-0">
-                            {userItem.username.slice(0, 2).toUpperCase()}
+                            {(userItem.name || userItem.username).slice(0, 2).toUpperCase()}
                           </div>
                           <div className="overflow-hidden">
                             <span className="font-bold text-slate-900 block truncate">
-                              {userItem.username}
+                              {userItem.name || userItem.username}
                             </span>
                             <span className="text-[11px] text-slate-500 block truncate">
-                              {userItem.email}
+                              {userItem.name ? `${userItem.username} · ${userItem.email}` : userItem.email}
                             </span>
                           </div>
                         </div>

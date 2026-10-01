@@ -47,6 +47,7 @@ export function UserManagement() {
   // Create User Modal State
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
   const [newUsername, setNewUsername] = useState("");
+  const [newName, setNewName] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newRole, setNewRole] = useState<"praktikan" | "asprak" | "superadmin">("praktikan");
   const [newPassword, setNewPassword] = useState("");
@@ -154,12 +155,14 @@ export function UserManagement() {
       await createAdminUser({
         username: trimmedUsername,
         email: trimmedEmail,
+        name: newName.trim() || undefined,
         role: newRole,
         password: newPassword,
       });
 
       setShowCreateUserModal(false);
       setNewUsername("");
+      setNewName("");
       setNewEmail("");
       setNewRole("praktikan");
       setNewPassword("");
@@ -294,7 +297,8 @@ export function UserManagement() {
           : u.role === filterRole;
     const matchesSearch =
       u.username.toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase());
+      u.email.toLowerCase().includes(search.toLowerCase()) ||
+      Boolean(u.name && u.name.toLowerCase().includes(search.toLowerCase()));
     return matchesRole && matchesSearch;
   });
 
@@ -359,6 +363,7 @@ export function UserManagement() {
             type="button"
             onClick={() => {
               setNewUsername("");
+              setNewName("");
               setNewEmail("");
               setNewRole("praktikan");
               setNewPassword("");
@@ -429,7 +434,8 @@ export function UserManagement() {
               <tbody className="divide-y divide-slate-100">
                 {filteredUsers.map((user) => {
                   const isSelected = selectedUserIds.has(user.id);
-                  const initial = user.username.charAt(0).toUpperCase();
+                  const displayName = user.name || user.username;
+                  const initial = displayName.charAt(0).toUpperCase();
 
                   return (
                     <tr
@@ -454,8 +460,10 @@ export function UserManagement() {
                             {initial}
                           </div>
                           <div>
-                            <span className="font-semibold text-slate-900 block">{user.username}</span>
-                            <span className="text-[11px] text-slate-500">{user.email}</span>
+                            <span className="font-semibold text-slate-900 block">{displayName}</span>
+                            <span className="text-[11px] text-slate-500">
+                              {user.name ? `${user.username} · ${user.email}` : user.email}
+                            </span>
                           </div>
                         </div>
                       </td>
@@ -565,6 +573,19 @@ export function UserManagement() {
                   placeholder="e.g. 140810220001 or username"
                   value={newUsername}
                   onChange={(e) => setNewUsername(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-shadow duration-150"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Full Name <span className="text-slate-400 font-normal">(Optional)</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Aidan Bagas"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
                   className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-shadow duration-150"
                 />
               </div>

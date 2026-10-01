@@ -60,3 +60,34 @@ async def test_change_password_success(client, db):
         "/auth/login", json={"username": user.username, "password": "new-password-123"}
     )
     assert login.status_code == 200
+
+
+async def test_update_profile_name_success(client, db):
+    user = await create_user(db, RoleEnum.PRAKTIKAN)
+    set_auth(client, user)
+    resp = await client.patch(
+        "/auth/me",
+        json={"name": "Aidan Bagas"},
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["name"] == "Aidan Bagas"
+    assert data["username"] == user.username
+
+
+async def test_update_profile_name_blank_rejected(client, db):
+    user = await create_user(db, RoleEnum.PRAKTIKAN)
+    set_auth(client, user)
+    resp = await client.patch(
+        "/auth/me",
+        json={"name": "   "},
+    )
+    assert resp.status_code == 400
+
+
+async def test_update_profile_unauthenticated(client, db):
+    resp = await client.patch(
+        "/auth/me",
+        json={"name": "New Name"},
+    )
+    assert resp.status_code == 401

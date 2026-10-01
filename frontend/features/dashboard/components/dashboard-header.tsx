@@ -6,9 +6,12 @@ import type { User } from "@/types/user.type";
 import type { Course } from "@/features/courses/types/course.type";
 import { ProductLogo } from "@/components/branding/product-logo";
 import { ROUTES } from "@/constants/routes";
+import { EditProfileModal } from "./edit-profile-modal";
 import {
   List,
-  CaretRight
+  CaretRight,
+  UserCircle,
+  Key
 } from "@phosphor-icons/react";
 
 export type CourseTabItem = {
@@ -66,9 +69,11 @@ export function DashboardHeader({
   onLogout,
 }: DashboardHeaderProps) {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  const initial = user.username.charAt(0).toUpperCase();
+  const displayName = user.name || user.username;
+  const initial = displayName.charAt(0).toUpperCase();
 
   const effectiveTabs =
     courseTabs ||
@@ -192,8 +197,8 @@ export function DashboardHeader({
             <div className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-900 text-[10px] font-bold text-white shrink-0">
               {initial}
             </div>
-            <span className="font-semibold text-slate-900 hidden sm:inline">
-              {user.username}
+            <span className="font-semibold text-slate-900 hidden sm:inline max-w-[140px] truncate">
+              {displayName}
             </span>
             <span className="text-slate-300 hidden sm:inline" aria-hidden="true">·</span>
             <span className="text-[11px] font-medium text-slate-500 capitalize">
@@ -208,18 +213,33 @@ export function DashboardHeader({
                   Signed in as
                 </p>
                 <p className="text-sm font-bold text-slate-900 mt-0.5 truncate">
-                  {user.username}
+                  {displayName}
                 </p>
-                <p className="text-xs text-slate-500 truncate">{user.email}</p>
+                {user.name && (
+                  <p className="text-xs text-slate-500 truncate">@{user.username}</p>
+                )}
+                <p className="text-xs text-slate-400 truncate">{user.email}</p>
               </div>
 
               <div className="py-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsUserMenuOpen(false);
+                    setIsEditProfileOpen(true);
+                  }}
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors text-left"
+                >
+                  <UserCircle className="w-4 h-4 text-slate-500" />
+                  <span>Edit display name</span>
+                </button>
                 <Link
                   href={ROUTES.changePassword}
                   onClick={() => setIsUserMenuOpen(false)}
-                  className="flex w-full items-center rounded-xl px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors"
                 >
-                  Change password
+                  <Key className="w-4 h-4 text-slate-500" />
+                  <span>Change password</span>
                 </Link>
               </div>
 
@@ -263,6 +283,12 @@ export function DashboardHeader({
           })}
         </nav>
       )}
+
+      <EditProfileModal
+        user={user}
+        isOpen={isEditProfileOpen}
+        onClose={() => setIsEditProfileOpen(false)}
+      />
     </header>
   );
 }
