@@ -9,6 +9,7 @@ export type AnnouncementComment = {
   announcement_id: string;
   author_id: string;
   author_username: string;
+  author_name?: string | null;
   author_role: AnnouncementAuthorRole;
   content: string;
   created_at: string;
@@ -19,6 +20,7 @@ export type Announcement = {
   course_id: string;
   author_id: string;
   author_username: string;
+  author_name?: string | null;
   author_role: AnnouncementAuthorRole;
   title: string;
   content: string;

@@ -99,7 +99,16 @@ export function AnnouncementCard({
               </>
             ) : null}
             <span className="text-xs sm:text-sm font-semibold text-slate-950">
-              {announcement.author_username}
+              {announcement.author_name ? (
+                <>
+                  {announcement.author_name}
+                  <span className="ml-1.5 text-xs font-normal text-slate-500">
+                    @{announcement.author_username}
+                  </span>
+                </>
+              ) : (
+                announcement.author_username
+              )}
             </span>
             <span className="text-[11px] font-medium uppercase tracking-wider text-slate-400">
               {announcement.author_role}
