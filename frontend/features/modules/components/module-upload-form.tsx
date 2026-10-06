@@ -17,8 +17,8 @@ import {
   type ModuleUploadFormValues
 } from "../schemas/module.schema";
 import {
-  ArrowCounterClockwise,
-  X
+  ArrowCounterClockwiseIcon,
+  XIcon
 } from "@phosphor-icons/react";
 
 type ModuleUploadFormProps = {
@@ -513,7 +513,7 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
                     disabled:cursor-not-allowed
                     disabled:opacity-60"
               >
-                <X className="h-4 w-4" aria-hidden="true" />
+                <XIcon className="h-4 w-4" aria-hidden="true" />
                 Discard
               </button>
 
@@ -530,7 +530,7 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
                     disabled:cursor-not-allowed
                     disabled:opacity-60"
               >
-                <ArrowCounterClockwise className="h-4 w-4" aria-hidden="true" />
+                <ArrowCounterClockwiseIcon className="h-4 w-4" aria-hidden="true" />
                 Retry upload
               </button>
             </>

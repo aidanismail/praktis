@@ -9,8 +9,8 @@ import { ApiError } from "@/lib/api/client";
 import { downloadSessionExport } from "../api/session-exports.api";
 import type { SessionExportFormat } from "../types/export.type";
 import {
-  WarningCircle,
-  DownloadSimple
+  WarningCircleIcon,
+  DownloadSimpleIcon
 } from "@phosphor-icons/react";
 
 type SessionExportPanelProps = {
@@ -114,7 +114,7 @@ export function SessionExportPanel({
               disabled={attendanceQuery.data === undefined || attendanceCount === 0 || activeFormat !== null}
               className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-semibold uppercase text-slate-700 transition hover:bg-slate-50 apple-press focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {activeFormat === format ? <AsteriskLoader className="h-3.5 w-3.5" aria-hidden="true" /> : <DownloadSimple className="h-3.5 w-3.5" aria-hidden="true" />}
+              {activeFormat === format ? <AsteriskLoader className="h-3.5 w-3.5" aria-hidden="true" /> : <DownloadSimpleIcon className="h-3.5 w-3.5" aria-hidden="true" />}
               {activeFormat === format ? `Preparing ${format}` : format}
             </button>
           ))}
@@ -123,14 +123,14 @@ export function SessionExportPanel({
 
       {(rosterQuery.isError || attendanceQuery.isError) ? (
         <p role="alert" className="mt-4 inline-flex items-start gap-2 text-sm text-amber-800">
-          <WarningCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          <WarningCircleIcon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
           Row counts could not be loaded. Export controls remain disabled until data is available.
         </p>
       ) : null}
 
       {errorMessage ? (
         <p role="alert" className="mt-4 inline-flex items-start gap-2 text-sm text-red-700">
-          <WarningCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          <WarningCircleIcon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
           {errorMessage}
         </p>
       ) : null}

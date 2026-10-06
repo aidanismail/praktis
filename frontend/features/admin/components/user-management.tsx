@@ -18,12 +18,12 @@ import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
 import { useAuthStore } from "@/stores/auth-store";
 import { NotificationBanner } from "@/components/ui/notification-banner";
 import {
-  X,
-  WarningCircle,
-  Plus,
-  UserPlus,
-  Eye,
-  EyeSlash
+  XIcon,
+  WarningCircleIcon,
+  PlusIcon,
+  UserPlusIcon,
+  EyeIcon,
+  EyeSlashIcon
 } from "@phosphor-icons/react";
 
 export function UserManagement() {
@@ -372,7 +372,7 @@ export function UserManagement() {
             }}
             className="rounded-full bg-slate-900 hover:bg-slate-800 text-white px-4 py-1.5 text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors shrink-0 active:scale-[0.98]"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <PlusIcon className="w-3.5 h-3.5" />
             <span>Add User</span>
           </button>
         </div>
@@ -539,7 +539,7 @@ export function UserManagement() {
                   id="create-user-modal-title"
                   className="font-bold text-sm text-slate-900 flex items-center gap-2"
                 >
-                  <UserPlus className="w-4 h-4 text-slate-800" />
+                  <UserPlusIcon className="w-4 h-4 text-slate-800" />
                   <span>New User</span>
                 </h4>
                 <p className="text-[11px] text-slate-400 mt-0.5">
@@ -551,13 +551,13 @@ export function UserManagement() {
                 onClick={() => setShowCreateUserModal(false)}
                 className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center text-xs apple-press transition-colors"
               >
-                <X className="w-4 h-4" />
+                <XIcon className="w-4 h-4" />
               </button>
             </div>
 
             {createUserError && (
               <div className="p-3 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-800 flex items-center gap-2 animate-apple-fade">
-                <WarningCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                <WarningCircleIcon className="w-4 h-4 text-rose-600 shrink-0" />
                 <span>{createUserError}</span>
               </div>
             )}
@@ -645,7 +645,7 @@ export function UserManagement() {
                     onClick={() => setShowNewPassword((prev) => !prev)}
                     className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors"
                   >
-                    {showNewPassword ? <EyeSlash className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showNewPassword ? <EyeSlashIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
                   </button>
                 </div>
                 <span className="text-[10px] text-slate-400 mt-1 block">
@@ -694,7 +694,7 @@ export function UserManagement() {
                 onClick={() => setShowEditModal(false)}
                 className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center text-xs apple-press transition-colors"
               >
-                <X className="w-4 h-4" />
+                <XIcon className="w-4 h-4" />
               </button>
             </div>
 

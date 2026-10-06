@@ -8,10 +8,10 @@ import { ProductLogo } from "@/components/branding/product-logo";
 import { ROUTES } from "@/constants/routes";
 import { EditProfileModal } from "./edit-profile-modal";
 import {
-  List,
-  CaretRight,
-  UserCircle,
-  Key
+  ListIcon,
+  CaretRightIcon,
+  UserCircleIcon,
+  KeyIcon
 } from "@phosphor-icons/react";
 
 export type CourseTabItem = {
@@ -120,7 +120,7 @@ export function DashboardHeader({
             title="Toggle Navigation Menu"
             aria-label="Toggle Navigation Menu"
           >
-            <List className="w-5 h-5" />
+            <ListIcon className="w-5 h-5" />
           </button>
 
           <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-slate-800 min-w-0">
@@ -135,7 +135,7 @@ export function DashboardHeader({
 
             {activeCourse && (
               <>
-                <CaretRight className="w-4 h-4 text-slate-400 shrink-0" />
+                <CaretRightIcon className="w-4 h-4 text-slate-400 shrink-0" />
                 {activeAssignmentTitle ? (
                   <>
                     <button
@@ -146,7 +146,7 @@ export function DashboardHeader({
                     >
                       {activeCourse.code}
                     </button>
-                    <CaretRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <CaretRightIcon className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                     <span className="font-bold text-slate-900 truncate max-w-[100px] sm:max-w-[180px] md:max-w-[240px]">
                       {activeAssignmentTitle}
                     </span>
@@ -230,7 +230,7 @@ export function DashboardHeader({
                   }}
                   className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors text-left"
                 >
-                  <UserCircle className="w-4 h-4 text-slate-500" />
+                  <UserCircleIcon className="w-4 h-4 text-slate-500" />
                   <span>Edit display name</span>
                 </button>
                 <Link
@@ -238,7 +238,7 @@ export function DashboardHeader({
                   onClick={() => setIsUserMenuOpen(false)}
                   className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors"
                 >
-                  <Key className="w-4 h-4 text-slate-500" />
+                  <KeyIcon className="w-4 h-4 text-slate-500" />
                   <span>Change password</span>
                 </Link>
               </div>

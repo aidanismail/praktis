@@ -20,12 +20,12 @@ import {
   type CourseSession
 } from "../types/session.type";
 import {
-  WarningCircle,
-  ArrowLeft,
-  ArrowsClockwise,
-  Trash,
-  CalendarCheck,
-  DownloadSimple
+  WarningCircleIcon,
+  ArrowLeftIcon,
+  ArrowsClockwiseIcon,
+  TrashIcon,
+  CalendarCheckIcon,
+  DownloadSimpleIcon
 } from "@phosphor-icons/react";
 
 const dateFormatter = new Intl.DateTimeFormat("en", {
@@ -92,7 +92,7 @@ function ErrorPanel({
   return (
     <div role="alert" className="rounded-3xl border border-red-200 bg-red-50 p-6">
       <div className="flex items-start gap-3">
-        <WarningCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" aria-hidden="true" />
+        <WarningCircleIcon className="mt-0.5 h-5 w-5 shrink-0 text-red-600" aria-hidden="true" />
         <div>
           <h1 className="text-lg font-semibold text-red-950">{title}</h1>
           <p className="mt-2 text-sm leading-6 text-red-800">{description}</p>
@@ -102,12 +102,12 @@ function ErrorPanel({
             </Link>
           ) : retryable ? (
             <button type="button" onClick={onRetry} disabled={isRetrying} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-red-700 px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60">
-              <ArrowsClockwise className={isRetrying ? "h-4 w-4 animate-spin" : "h-4 w-4"} aria-hidden="true" />
+              <ArrowsClockwiseIcon className={isRetrying ? "h-4 w-4 animate-spin" : "h-4 w-4"} aria-hidden="true" />
               Try again
             </button>
           ) : onBack ? (
             <button type="button" onClick={onBack} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
               Back to sessions
             </button>
           ) : (
@@ -277,12 +277,12 @@ export function AssignedSessionDetail({
         <p className="mt-2 text-sm text-amber-800">This session does not belong to the selected assigned course.</p>
         {onBack ? (
           <button type="button" onClick={onBack} className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-amber-900 underline underline-offset-4">
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
             Back to sessions
           </button>
         ) : (
           <Link href={getCourseDetailRoute(courseId, "sessions")} className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-amber-900 underline underline-offset-4">
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
             Back to sessions
           </Link>
         )}
@@ -306,7 +306,7 @@ export function AssignedSessionDetail({
           onClick={handleBackAttempt}
           className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-full shadow-xs apple-press transition-colors cursor-pointer"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeftIcon className="w-4 h-4" />
           <span>Back to Sessions</span>
         </button>
 
@@ -320,7 +320,7 @@ export function AssignedSessionDetail({
             disabled={deleteMutation.isPending}
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-700 hover:text-rose-800 bg-white border border-rose-200 hover:bg-rose-50 px-3.5 py-2 rounded-full shadow-xs apple-press transition-colors cursor-pointer disabled:opacity-60"
           >
-            <Trash className="w-3.5 h-3.5 text-rose-500" />
+            <TrashIcon className="w-3.5 h-3.5 text-rose-500" />
             <span>Delete session</span>
           </button>
         ) : null}
@@ -399,7 +399,7 @@ export function AssignedSessionDetail({
               : "text-slate-600 hover:text-slate-900"
           }`}
         >
-          <CalendarCheck className="w-4 h-4 text-slate-500" />
+          <CalendarCheckIcon className="w-4 h-4 text-slate-500" />
           <span>Attendance Register</span>
           {attendanceDirty && (
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500" title="Unsaved changes" />
@@ -415,7 +415,7 @@ export function AssignedSessionDetail({
               : "text-slate-600 hover:text-slate-900"
           }`}
         >
-          <DownloadSimple className="w-4 h-4 text-slate-500" />
+          <DownloadSimpleIcon className="w-4 h-4 text-slate-500" />
           <span>Export Records</span>
         </button>
       </div>

@@ -16,11 +16,11 @@ import {
 } from "../constants/banner-themes";
 import { CourseBannerCustomizerModal } from "./course-banner-customizer-modal";
 import {
-  WarningCircle,
-  ArrowLeft,
-  CalendarDots,
-  ArrowsClockwise,
-  Palette
+  WarningCircleIcon,
+  ArrowLeftIcon,
+  CalendarDotsIcon,
+  ArrowsClockwiseIcon,
+  PaletteIcon
 } from "@phosphor-icons/react";
 
 type AsprakCourseDetailPageProps = {
@@ -112,7 +112,7 @@ function AssignedCourseDetail({
           className="rounded-2xl border border-red-200 bg-red-50 p-6"
         >
           <div className="flex items-start gap-3">
-            <WarningCircle
+            <WarningCircleIcon
               className="mt-0.5 h-5 w-5 shrink-0 text-red-600"
               aria-hidden="true"
             />
@@ -165,7 +165,7 @@ function AssignedCourseDetail({
                     hover:bg-red-100 disabled:cursor-not-allowed
                     disabled:opacity-60"
                 >
-                  <ArrowsClockwise
+                  <ArrowsClockwiseIcon
                     className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`}
                     aria-hidden="true"
                   />
@@ -198,7 +198,7 @@ function AssignedCourseDetail({
               text-sm font-medium text-amber-900 underline
               underline-offset-4"
           >
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
             Return to dashboard
           </Link>
         </div>
@@ -220,7 +220,7 @@ function AssignedCourseDetail({
           href={ROUTES.dashboard}
           className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 bg-white border border-slate-200 hover:bg-slate-50 px-3.5 py-1.5 rounded-xl shadow-xs transition-colors"
         >
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
           Back to dashboard
         </Link>
 
@@ -229,7 +229,7 @@ function AssignedCourseDetail({
           onClick={() => setShowCustomizeModal(true)}
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-3.5 py-1.5 rounded-xl shadow-xs transition-colors"
         >
-          <Palette className="h-3.5 w-3.5" aria-hidden="true" />
+          <PaletteIcon className="h-3.5 w-3.5" aria-hidden="true" />
           <span>Customize Banner</span>
         </button>
       </div>
@@ -283,7 +283,7 @@ function AssignedCourseDetail({
           border-t border-white/15 pt-5 text-sm text-slate-200 relative z-10"
         >
           <span className="inline-flex items-center gap-2">
-            <CalendarDots
+            <CalendarDotsIcon
               className="h-4 w-4 text-white/70"
               aria-hidden="true"
             />

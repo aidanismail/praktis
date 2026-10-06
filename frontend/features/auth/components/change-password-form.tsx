@@ -16,8 +16,8 @@ import {
 import { useChangePassword } from "../hooks/use-change-password";
 import { NotificationBanner } from "@/components/ui/notification-banner";
 import {
-  Eye,
-  EyeSlash
+  EyeIcon,
+  EyeSlashIcon
 } from "@phosphor-icons/react";
 
 type ChangePasswordFormProps = { isForced: boolean };
@@ -122,9 +122,9 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
               }
             >
               {showCurrentPassword ? (
-                <EyeSlash className="h-4 w-4" />
+                <EyeSlashIcon className="h-4 w-4" />
               ) : (
-                <Eye className="h-4 w-4" />
+                <EyeIcon className="h-4 w-4" />
               )}
             </button>
           </div>
@@ -171,9 +171,9 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
               }
             >
               {showNewPassword ? (
-                <EyeSlash className="h-4 w-4" />
+                <EyeSlashIcon className="h-4 w-4" />
               ) : (
-                <Eye className="h-4 w-4" />
+                <EyeIcon className="h-4 w-4" />
               )}
             </button>
           </div>
@@ -222,9 +222,9 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
               }
             >
               {showConfirmPassword ? (
-                <EyeSlash className="h-4 w-4" />
+                <EyeSlashIcon className="h-4 w-4" />
               ) : (
-                <Eye className="h-4 w-4" />
+                <EyeIcon className="h-4 w-4" />
               )}
             </button>
           </div>

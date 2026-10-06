@@ -1,7 +1,7 @@
 import type { User } from "@/types/user.type";
 import {
-  LockKey,
-  User as UserIcon
+  LockKeyIcon,
+  UserIcon
 } from "@phosphor-icons/react";
 
 type PraktikanCourseMembershipProps = { user: User };
@@ -25,7 +25,7 @@ export function PraktikanCourseMembership({ user }: PraktikanCourseMembershipPro
         </div>
       </div>
       <div className="mt-6 flex items-start gap-3 rounded-2xl border border-slate-200/60 bg-slate-50 p-4">
-        <LockKey className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
+        <LockKeyIcon className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
         <div>
           <h3 className="text-xs font-bold text-slate-900">Class membership is private</h3>
           <p className="mt-1 text-xs leading-5 text-slate-500">

@@ -188,7 +188,7 @@ export function CourseSessionsTab({
                       {s.attendance_status === "OPEN" ? (
                         <>
                           <LockIcon className="w-3.5 h-3.5" />
-                          <span>Close Window</span>
+                          <span>Close</span>
                         </>
                       ) : (
                         <>

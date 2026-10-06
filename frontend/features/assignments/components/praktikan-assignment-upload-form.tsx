@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FileArrowUp, ArrowCounterClockwise, LockKey } from "@phosphor-icons/react";
+import { FileArrowUpIcon, ArrowCounterClockwiseIcon, LockKeyIcon } from "@phosphor-icons/react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -96,7 +96,7 @@ export function PraktikanAssignmentUploadForm({
       >
         <div className="flex items-start gap-4">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-50 text-amber-700">
-            <LockKey className="h-5 w-5" aria-hidden="true" />
+            <LockKeyIcon className="h-5 w-5" aria-hidden="true" />
           </span>
           <div>
             <h2 id="assignment-upload-locked-heading" className="text-lg font-bold text-slate-950">
@@ -159,9 +159,9 @@ export function PraktikanAssignmentUploadForm({
       <div className="flex items-start gap-4">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">
           {hasSubmission ? (
-            <ArrowCounterClockwise className="h-5 w-5" aria-hidden="true" />
+            <ArrowCounterClockwiseIcon className="h-5 w-5" aria-hidden="true" />
           ) : (
-            <FileArrowUp className="h-5 w-5" aria-hidden="true" />
+            <FileArrowUpIcon className="h-5 w-5" aria-hidden="true" />
           )}
         </span>
         <div>
@@ -243,9 +243,9 @@ export function PraktikanAssignmentUploadForm({
           {submissionMutation.isPending ? (
             <AsteriskLoader className="h-3.5 w-3.5" />
           ) : hasSubmission ? (
-            <ArrowCounterClockwise className="h-3.5 w-3.5" aria-hidden="true" />
+            <ArrowCounterClockwiseIcon className="h-3.5 w-3.5" aria-hidden="true" />
           ) : (
-            <FileArrowUp className="h-3.5 w-3.5" aria-hidden="true" />
+            <FileArrowUpIcon className="h-3.5 w-3.5" aria-hidden="true" />
           )}
           {submissionMutation.isPending
             ? "Turning in..."

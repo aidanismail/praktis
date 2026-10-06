@@ -15,7 +15,7 @@ import {
   UserCheckIcon,
   UserMinusIcon,
   UserPlusIcon,
-  X
+  XIcon
 } from "@phosphor-icons/react";
 
 interface CoursePeopleTabProps {
@@ -431,7 +431,7 @@ export function CoursePeopleTab({
                 className="apple-press w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center text-xs"
                 aria-label="Close modal"
               >
-                <X className="w-4 h-4" />
+                <XIcon className="w-4 h-4" />
               </button>
             </div>
 
@@ -449,7 +449,7 @@ export function CoursePeopleTab({
                   className="apple-press text-rose-600 hover:text-rose-800 p-1 rounded-full transition-colors"
                   aria-label="Dismiss error"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <XIcon className="w-3.5 h-3.5" />
                 </button>
               </div>
             )}
@@ -476,7 +476,7 @@ export function CoursePeopleTab({
                       title="Remove"
                       aria-label={`Remove ${tag}`}
                     >
-                      <X className="w-3.5 h-3.5" />
+                      <XIcon className="w-3.5 h-3.5" />
                     </button>
                   </span>
                 ))}

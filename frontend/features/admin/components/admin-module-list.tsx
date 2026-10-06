@@ -2,17 +2,17 @@
 
 import { useEffect, useState } from "react";
 import {
-  DownloadSimple,
-  FileText,
-  X,
-  MagnifyingGlass,
-  Trash,
-  GlobeSimple,
-  Lock,
-  Plus,
-  CloudArrowUp,
-  FileArrowDown,
-  Eye
+  DownloadSimpleIcon,
+  FileTextIcon,
+  XIcon,
+  MagnifyingGlassIcon,
+  TrashIcon,
+  GlobeSimpleIcon,
+  LockIcon,
+  PlusIcon,
+  CloudArrowUpIcon,
+  FileArrowDownIcon,
+  EyeIcon
 } from "@phosphor-icons/react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import {
@@ -344,7 +344,7 @@ export function AdminModuleList() {
     }
   };
 
-  // Group modules by Course
+  // group modules by Course
   const courseMap = new Map<string, Course>();
   courses.forEach((c) => courseMap.set(c.id, c));
 
@@ -382,7 +382,7 @@ export function AdminModuleList() {
     return matchesSearch;
   });
 
-  // Group filtered modules by course (sorted active courses first)
+  // group filtered modules by course (sorted active courses first)
   const groupedModules = new Map<string, AdminModuleItem[]>();
   const sortedCourses = [...courses].sort((a, b) => {
     if (a.is_active !== b.is_active) return a.is_active ? -1 : 1;
@@ -434,7 +434,7 @@ export function AdminModuleList() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 shadow-xs"
             />
-            <MagnifyingGlass className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+            <MagnifyingGlassIcon className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
           </div>
 
           <select
@@ -464,7 +464,7 @@ export function AdminModuleList() {
           }}
           className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-full shadow-xs transition-all flex items-center gap-1.5 self-end sm:self-auto active:scale-[0.98]"
         >
-          <Plus className="w-3.5 h-3.5" />
+          <PlusIcon className="w-3.5 h-3.5" />
           <span>Upload Modules</span>
         </button>
       </div>
@@ -552,7 +552,7 @@ export function AdminModuleList() {
                           >
                             <div className="flex items-start gap-3.5">
                               <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 shrink-0 mt-0.5">
-                                <FileText className="w-5 h-5" />
+                                <FileTextIcon className="w-5 h-5" />
                               </div>
                               <div>
                                 <div className="flex items-center gap-2">
@@ -569,12 +569,12 @@ export function AdminModuleList() {
                                   >
                                     {mod.is_published ? (
                                       <>
-                                        <GlobeSimple className="w-3 h-3" />
+                                        <GlobeSimpleIcon className="w-3 h-3" />
                                         <span>Published</span>
                                       </>
                                     ) : (
                                       <>
-                                        <Lock className="w-3 h-3" />
+                                        <LockIcon className="w-3 h-3" />
                                         <span>Draft</span>
                                       </>
                                     )}
@@ -612,7 +612,7 @@ export function AdminModuleList() {
                                     }
                                     className="apple-press px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full text-xs flex items-center gap-1.5 transition-colors shadow-xs"
                                   >
-                                    <Eye className="w-3.5 h-3.5" />
+                                    <EyeIcon className="w-3.5 h-3.5" />
                                     <span>Preview</span>
                                   </button>
 
@@ -621,7 +621,7 @@ export function AdminModuleList() {
                                     download
                                     className="apple-press px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-colors"
                                   >
-                                    <DownloadSimple className="w-3.5 h-3.5" />
+                                    <DownloadSimpleIcon className="w-3.5 h-3.5" />
                                     <span className="hidden sm:inline">
                                       Download
                                     </span>
@@ -650,7 +650,7 @@ export function AdminModuleList() {
                                 title="Delete Module"
                                 aria-label="Delete module"
                               >
-                                <Trash className="w-3.5 h-3.5" />
+                                <TrashIcon className="w-3.5 h-3.5" />
                               </button>
                             </div>
                           </div>
@@ -697,7 +697,7 @@ export function AdminModuleList() {
                 className="apple-press w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center text-xs"
                 aria-label="Close modal"
               >
-                <X className="w-4 h-4" />
+                <XIcon className="w-4 h-4" />
               </button>
             </div>
 
@@ -753,7 +753,7 @@ export function AdminModuleList() {
                   }`}
                 >
                   <label className="cursor-pointer flex flex-col items-center justify-center gap-1.5 py-2">
-                    <CloudArrowUp className="w-8 h-8 text-slate-400" />
+                    <CloudArrowUpIcon className="w-8 h-8 text-slate-400" />
                     <span className="text-xs font-semibold text-slate-800">
                       Click to browse or drag and drop files here
                     </span>
@@ -784,7 +784,7 @@ export function AdminModuleList() {
                       Files to Upload ({uploadQueue.length})
                     </span>
                     <label className="text-[11px] font-semibold text-slate-900 hover:underline cursor-pointer flex items-center gap-1">
-                      <Plus className="w-3 h-3" />
+                      <PlusIcon className="w-3 h-3" />
                       <span>Add more</span>
                       <input
                         type="file"
@@ -809,7 +809,7 @@ export function AdminModuleList() {
                       >
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2 overflow-hidden">
-                            <FileArrowDown className="w-4 h-4 text-slate-800 shrink-0" />
+                            <FileArrowDownIcon className="w-4 h-4 text-slate-800 shrink-0" />
                             <span className="font-semibold text-slate-900 truncate block text-[11px]">
                               {item.file.name}
                             </span>
@@ -826,7 +826,7 @@ export function AdminModuleList() {
                               title="Remove file"
                               aria-label={`Remove file ${item.file.name}`}
                             >
-                              <Trash className="w-3.5 h-3.5" />
+                              <TrashIcon className="w-3.5 h-3.5" />
                             </button>
                           )}
                         </div>
@@ -928,7 +928,7 @@ export function AdminModuleList() {
                   </>
                 ) : (
                   <>
-                    <CloudArrowUp className="w-3.5 h-3.5" />
+                    <CloudArrowUpIcon className="w-3.5 h-3.5" />
                     <span>
                       Upload {uploadQueue.length > 0 ? uploadQueue.length : ""}{" "}
                       Module{uploadQueue.length !== 1 ? "s" : ""}
@@ -955,7 +955,7 @@ export function AdminModuleList() {
             <div className="p-5 bg-linear-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-white">
-                  <FileText className="w-4 h-4" />
+                  <FileTextIcon className="w-4 h-4" />
                 </div>
                 <div>
                   <h3 id="admin-module-detail-title" className="font-bold text-sm text-white">
@@ -972,7 +972,7 @@ export function AdminModuleList() {
                 className="apple-press w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-bold flex items-center justify-center transition-colors"
                 aria-label="Close modal"
               >
-                <X className="w-4 h-4" />
+                <XIcon className="w-4 h-4" />
               </button>
             </div>
 
@@ -1069,7 +1069,7 @@ export function AdminModuleList() {
                         }}
                         className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-full font-semibold flex items-center gap-1.5 transition-colors shadow-xs"
                       >
-                        <Eye className="w-3.5 h-3.5" />
+                        <EyeIcon className="w-3.5 h-3.5" />
                         <span>Preview</span>
                       </button>
 
@@ -1078,7 +1078,7 @@ export function AdminModuleList() {
                         download
                         className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-full font-semibold flex items-center gap-1.5 transition-colors"
                       >
-                        <DownloadSimple className="w-3.5 h-3.5" />
+                        <DownloadSimpleIcon className="w-3.5 h-3.5" />
                         <span>Download</span>
                       </a>
                     </>
@@ -1102,7 +1102,7 @@ export function AdminModuleList() {
                   onClick={() => handleDelete(selectedModuleForDetail)}
                   className="px-3 py-2 text-rose-600 hover:bg-rose-50 rounded-full font-semibold transition-colors flex items-center gap-1"
                 >
-                  <Trash className="w-3.5 h-3.5" />
+                  <TrashIcon className="w-3.5 h-3.5" />
                   <span>Delete</span>
                 </button>
               </div>

@@ -28,7 +28,6 @@ export function DashboardShell({ user }: DashboardShellProps) {
   const logoutMutation = useLogout();
   const navigationItems = DASHBOARD_NAVIGATION[user.role];
 
-  // Active dashboard sidebar tab from URL
   const tabParam = searchParams.get("tab");
   const activeItemId =
     tabParam && navigationItems.some((item) => item.id === tabParam)
@@ -38,24 +37,19 @@ export function DashboardShell({ user }: DashboardShellProps) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
-  // Declarative URL parameters for course workspace
   const isSuperadmin = user.role === "superadmin";
   const courseIdParam = searchParams.get("courseId");
   const workspaceTabParam = searchParams.get("workspaceTab");
   const assignmentIdParam = searchParams.get("assignmentId");
   const sessionIdParam = searchParams.get("sessionId");
 
-  // Fetch admin courses for breadcrumb & active course resolution
   const { courses: adminCourses } = useAdminCourses({ enabled: isSuperadmin });
   const { assignments } = useCourseWorkspace(isSuperadmin ? courseIdParam : null);
 
-  // Fetch assigned courses for asprak
   const assignedCoursesQuery = useAssignedCourses(user.id);
 
-  // Fetch enrolled courses for praktikan
   const enrolledCoursesQuery = useEnrolledCourses(user.role === "praktikan" ? user.id : "");
 
-  // Fetch assignment detail for active assignment title in breadcrumbs
   const assignmentDetailQuery = useAssignmentDetail({
     userId: user.id,
     courseId: courseIdParam ?? "",
@@ -63,7 +57,6 @@ export function DashboardShell({ user }: DashboardShellProps) {
     enabled: !isSuperadmin && Boolean(courseIdParam && assignmentIdParam),
   });
 
-  // Fetch sessions for active session title in breadcrumbs
   const sessionsQuery = useCourseSessions({
     userId: user.id,
     courseId: courseIdParam ?? "",
@@ -188,7 +181,6 @@ export function DashboardShell({ user }: DashboardShellProps) {
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] text-slate-900 flex flex-col">
-      {/* 1. Global Full-Width Google Classroom Top App Bar */}
       <DashboardHeader
         user={user}
         isSidebarCollapsed={isSidebarCollapsed}
@@ -202,7 +194,6 @@ export function DashboardShell({ user }: DashboardShellProps) {
         onLogout={handleLogout}
       />
 
-      {/* 2. Main Body with Sidebar & Content */}
       <div className="flex flex-1 min-h-[calc(100vh-4rem)]">
         <DashboardSidebar
           items={navigationItems}

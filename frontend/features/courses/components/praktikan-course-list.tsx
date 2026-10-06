@@ -11,11 +11,11 @@ import type { Course } from "../types/course.type";
 import { PraktikanCourseCard } from "./praktikan-course-card";
 import { PraktikanCourseTable } from "./praktikan-course-table";
 import {
-  BookOpen,
-  SquaresFour,
-  ListBullets,
-  ArrowsClockwise,
-  MagnifyingGlass
+  BookOpenIcon,
+  SquaresFourIcon,
+  ListBulletsIcon,
+  ArrowsClockwiseIcon,
+  MagnifyingGlassIcon
 } from "@phosphor-icons/react";
 
 type PraktikanCourseListProps = {
@@ -94,7 +94,7 @@ export function PraktikanCourseList({
               disabled={query.isFetching}
               className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700 transition disabled:opacity-60 shrink-0"
             >
-              <ArrowsClockwise className={query.isFetching ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"} aria-hidden="true" />
+              <ArrowsClockwiseIcon className={query.isFetching ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"} aria-hidden="true" />
               Try again
             </button>
           )}
@@ -116,7 +116,7 @@ export function PraktikanCourseList({
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 shadow-xs"
             />
-            <MagnifyingGlass className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+            <MagnifyingGlassIcon className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
           </div>
         </div>
 
@@ -133,7 +133,7 @@ export function PraktikanCourseList({
               title="Grid View"
               aria-pressed={viewMode === "grid"}
             >
-              <SquaresFour className="w-3.5 h-3.5" />
+              <SquaresFourIcon className="w-3.5 h-3.5" />
             </button>
             <button
               type="button"
@@ -146,7 +146,7 @@ export function PraktikanCourseList({
               title="Table View"
               aria-pressed={viewMode === "table"}
             >
-              <ListBullets className="w-3.5 h-3.5" />
+              <ListBulletsIcon className="w-3.5 h-3.5" />
             </button>
           </div>
 
@@ -158,7 +158,7 @@ export function PraktikanCourseList({
             className="p-2 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-xs transition-colors cursor-pointer disabled:opacity-60"
             title="Refresh classes"
           >
-            <ArrowsClockwise className={`w-3.5 h-3.5 ${query.isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
+            <ArrowsClockwiseIcon className={`w-3.5 h-3.5 ${query.isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -168,7 +168,7 @@ export function PraktikanCourseList({
           role="status"
           className="rounded-3xl border border-dashed border-slate-300 bg-white p-12 text-center shadow-xs"
         >
-          <BookOpen className="mx-auto h-10 w-10 text-slate-400" aria-hidden="true" />
+          <BookOpenIcon className="mx-auto h-10 w-10 text-slate-400" aria-hidden="true" />
           <h2 className="mt-3 text-sm font-bold text-slate-950">No enrolled classes yet</h2>
           <p className="mt-1 text-xs text-slate-500">
             Once you&apos;re enrolled in a practicum class, it will show up right here.

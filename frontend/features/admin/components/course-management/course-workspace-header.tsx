@@ -7,10 +7,10 @@ import {
   type SavedCourseTheme,
 } from "@/features/courses/constants/banner-themes";
 import {
-  CalendarBlank,
-  Palette,
-  PencilSimple,
-  ArrowLeft
+  CalendarBlankIcon,
+  PaletteIcon,
+  PencilSimpleIcon,
+  ArrowLeftIcon
 } from "@phosphor-icons/react";
 
 type CourseWorkspaceHeaderProps = {
@@ -44,7 +44,7 @@ export function CourseWorkspaceHeader({
           onClick={onBack}
           className="flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-3.5 py-1.5 rounded-xl shadow-xs transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeftIcon className="w-4 h-4" />
           <span>Back to Courses</span>
         </button>
 
@@ -86,7 +86,7 @@ export function CourseWorkspaceHeader({
               {course.name}
             </h1>
             <p className="text-xs text-slate-200 mt-1.5 flex items-center gap-2">
-              <CalendarBlank className="w-4 h-4 text-white/70" />
+              <CalendarBlankIcon className="w-4 h-4 text-white/70" />
               <span>
                 Academic Year {course.academic_year} • Semester {course.semester}
               </span>
@@ -111,7 +111,7 @@ export function CourseWorkspaceHeader({
                 className="rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 px-3 py-1.5 text-xs font-semibold text-white transition-colors flex items-center gap-1.5 shadow-xs"
                 title="Customize course banner"
               >
-                <Palette className="w-3.5 h-3.5" />
+                <PaletteIcon className="w-3.5 h-3.5" />
                 <span>Customize</span>
               </button>
 
@@ -120,7 +120,7 @@ export function CourseWorkspaceHeader({
               onClick={onEditCourse}
               className="rounded-full border border-white/20 bg-white/10 hover:bg-white/20 px-3.5 py-1.5 text-xs font-semibold text-white transition-colors flex items-center gap-1 backdrop-blur-xs shadow-xs"
             >
-              <PencilSimple className="w-3 h-3" />
+              <PencilSimpleIcon className="w-3 h-3" />
               <span>Edit</span>
             </button>
           </div>

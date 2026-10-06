@@ -16,6 +16,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       target: dev
+    command: sh -c "pnpm install --prefer-offline --store-dir /pnpm/store && exec pnpm dev --hostname 0.0.0.0 --webpack"
     volumes:
       - type: bind
         source: ./frontend
@@ -37,9 +38,7 @@ services:
           nocopy: true
     environment:
       NEXT_TELEMETRY_DISABLED: "1"
-      WATCHPACK_POLLING: "1000"
-      CHOKIDAR_USEPOLLING: "true"
-      CHOKIDAR_INTERVAL: "1000"
+      WATCHPACK_POLLING: "2000"
 
 volumes:
   frontend_node_modules:

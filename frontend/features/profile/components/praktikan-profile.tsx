@@ -2,10 +2,10 @@ import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
 import type { User } from "@/types/user.type";
 import {
-  At,
-  Key,
-  ShieldCheck,
-  User as UserIcon
+  AtIcon,
+  KeyIcon,
+  ShieldCheckIcon,
+  UserIcon
 } from "@phosphor-icons/react";
 
 type Props = { user: User };
@@ -36,14 +36,14 @@ export function PraktikanProfile({ user }: Props) {
         <dl className="mt-6 space-y-3">
           <div className="rounded-2xl bg-slate-50 p-4">
             <dt className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-              <At className="h-4 w-4" aria-hidden="true" />
+              <AtIcon className="h-4 w-4" aria-hidden="true" />
               Email
             </dt>
             <dd className="mt-2 wrap-break-word text-sm font-medium text-slate-950">{user.email}</dd>
           </div>
           <div className="rounded-2xl bg-slate-50 p-4">
             <dt className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-              <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+              <ShieldCheckIcon className="h-4 w-4" aria-hidden="true" />
               Account status
             </dt>
             <dd className="mt-2 text-sm font-semibold text-slate-950">
@@ -57,7 +57,7 @@ export function PraktikanProfile({ user }: Props) {
       </article>
       <aside className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
         <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">
-          <Key className="h-5 w-5" aria-hidden="true" />
+          <KeyIcon className="h-5 w-5" aria-hidden="true" />
         </span>
         <h2 className="mt-4 font-semibold text-slate-950">Password &amp; security</h2>
         <p className="mt-2 text-sm leading-6 text-slate-600">Need to refresh your password? Keep your account safe with a strong, unique passphrase.</p>

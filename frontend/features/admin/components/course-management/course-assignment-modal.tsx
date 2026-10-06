@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import type { Assignment } from "@/features/admin/types";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
 import {
-  WarningCircle
+  WarningCircleIcon
 } from "@phosphor-icons/react";
 
 interface CourseAssignmentModalProps {
@@ -125,7 +125,7 @@ function AssignmentFormInner({
           aria-live="polite"
           className="flex items-center gap-2 p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs font-medium"
         >
-          <WarningCircle className="w-4 h-4 text-rose-600 shrink-0" />
+          <WarningCircleIcon className="w-4 h-4 text-rose-600 shrink-0" />
           <span className="flex-1">{formError}</span>
         </div>
       )}

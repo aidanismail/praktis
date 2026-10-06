@@ -1,6 +1,6 @@
 "use client";
 
-import { CaretRight } from "@phosphor-icons/react";
+import { CaretRightIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useState } from "react";
 import { getAssignmentDetailRoute } from "@/constants/routes";
@@ -163,7 +163,7 @@ export function AssignmentCard({
             className="apple-press inline-flex items-center gap-1 text-xs font-semibold text-slate-800 hover:text-slate-950 transition-colors"
           >
             <span>Open assignment</span>
-            <CaretRight className="w-3.5 h-3.5 text-slate-400" />
+            <CaretRightIcon className="w-3.5 h-3.5 text-slate-400" />
           </button>
         ) : (
           <Link
@@ -174,7 +174,7 @@ export function AssignmentCard({
             className="apple-press inline-flex items-center gap-1 text-xs font-semibold text-slate-800 hover:text-slate-950 transition-colors"
           >
             <span>Open assignment</span>
-            <CaretRight className="w-3.5 h-3.5 text-slate-400" />
+            <CaretRightIcon className="w-3.5 h-3.5 text-slate-400" />
           </Link>
         )}
 

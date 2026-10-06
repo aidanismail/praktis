@@ -4,10 +4,10 @@ import { useState } from "react";
 import { AsteriskLoader } from "./asterisk-loader";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
 import {
-  FileText,
-  DownloadSimple,
-  ArrowSquareOut,
-  X
+  FileTextIcon,
+  DownloadSimpleIcon,
+  ArrowSquareOutIcon,
+  XIcon
 } from "@phosphor-icons/react";
 
 type DocumentPreviewModalProps = {
@@ -55,7 +55,7 @@ export function DocumentPreviewModal({
         <div className="flex items-center justify-between border-b border-slate-200 bg-white px-5 py-3.5 shrink-0">
           <div className="flex items-center gap-3 overflow-hidden">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-800">
-              <FileText className="h-5 w-5" />
+              <FileTextIcon className="h-5 w-5" />
             </div>
             <div className="overflow-hidden">
               <div className="flex items-center gap-2">
@@ -86,7 +86,7 @@ export function DocumentPreviewModal({
               className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900 shadow-xs"
               title="Open in new browser tab"
             >
-              <ArrowSquareOut className="h-3.5 w-3.5" />
+              <ArrowSquareOutIcon className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">New Tab</span>
             </a>
 
@@ -96,7 +96,7 @@ export function DocumentPreviewModal({
               className="flex items-center gap-1.5 rounded-full bg-slate-900 px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-slate-800"
               title="Download original file"
             >
-              <DownloadSimple className="h-3.5 w-3.5" />
+              <DownloadSimpleIcon className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Download</span>
             </a>
 
@@ -107,7 +107,7 @@ export function DocumentPreviewModal({
               title="Close preview (Esc)"
               aria-label="Close preview"
             >
-              <X className="h-4 w-4" />
+              <XIcon className="h-4 w-4" />
             </button>
           </div>
         </div>
@@ -133,7 +133,7 @@ export function DocumentPreviewModal({
             /* Non-PDF fallback reader */
             <div className="flex h-full w-full flex-col items-center justify-center p-8 text-center bg-white">
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 mb-4 shadow-xs">
-                <FileText className="h-8 w-8" />
+                <FileTextIcon className="h-8 w-8" />
               </div>
               <h4 className="text-base font-bold text-slate-900 mb-1">{title}</h4>
               <p className="max-w-md text-xs text-slate-500 mb-6">
@@ -146,7 +146,7 @@ export function DocumentPreviewModal({
                   rel="noopener noreferrer"
                   className="rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold text-white hover:bg-slate-800 shadow-xs flex items-center gap-1.5"
                 >
-                  <ArrowSquareOut className="h-3.5 w-3.5" />
+                  <ArrowSquareOutIcon className="h-3.5 w-3.5" />
                   <span>Open via Document Viewer</span>
                 </a>
                 <a
@@ -154,7 +154,7 @@ export function DocumentPreviewModal({
                   download
                   className="rounded-full border border-slate-200 bg-white px-5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-xs flex items-center gap-1.5"
                 >
-                  <DownloadSimple className="h-3.5 w-3.5" />
+                  <DownloadSimpleIcon className="h-3.5 w-3.5" />
                   <span>Download File</span>
                 </a>
               </div>

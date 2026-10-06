@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CaretDown, CaretUp, ChatCircle, PaperPlaneTilt, Trash } from "@phosphor-icons/react";
+import { CaretDownIcon, CaretUpIcon, ChatCircleIcon, PaperPlaneTiltIcon, TrashIcon } from "@phosphor-icons/react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -85,7 +85,7 @@ export function AnnouncementComments({
         className="flex w-full items-center justify-between rounded-xl px-2 py-1.5 -mx-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-800 transition-colors"
       >
         <span className="flex items-center gap-2">
-          <ChatCircle className="h-4 w-4 text-slate-500" aria-hidden="true" />
+          <ChatCircleIcon className="h-4 w-4 text-slate-500" aria-hidden="true" />
           <span>Comments ({comments.length})</span>
         </span>
         <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
@@ -96,7 +96,7 @@ export function AnnouncementComments({
               ? "Leave a comment"
               : "Show comments"}
           </span>
-          <CaretDown
+          <CaretDownIcon
             className={`h-3.5 w-3.5 text-slate-400 transition-transform duration-200 ${
               isExpanded ? "rotate-180" : ""
             }`}
@@ -173,7 +173,7 @@ export function AnnouncementComments({
                               }}
                               className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
                             >
-                              <Trash className="h-3.5 w-3.5" aria-hidden="true" />
+                              <TrashIcon className="h-3.5 w-3.5" aria-hidden="true" />
                               Delete
                             </button>
                           )
@@ -194,7 +194,7 @@ export function AnnouncementComments({
                     onClick={() => setIsExpanded(false)}
                     className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-800 transition-colors"
                   >
-                    <CaretUp className="h-3.5 w-3.5" aria-hidden="true" />
+                    <CaretUpIcon className="h-3.5 w-3.5" aria-hidden="true" />
                     Collapse comments
                   </button>
                 </div>
@@ -241,7 +241,7 @@ export function AnnouncementComments({
                 {addMutation.isPending ? (
                   <AsteriskLoader className="h-4 w-4" />
                 ) : (
-                  <PaperPlaneTilt className="h-4 w-4" aria-hidden="true" />
+                  <PaperPlaneTiltIcon className="h-4 w-4" aria-hidden="true" />
                 )}
                 {addMutation.isPending ? "Posting..." : "Post"}
               </button>

@@ -10,14 +10,14 @@ import {
   type SavedCourseTheme,
 } from "@/features/courses/constants/banner-themes";
 import {
-  CaretRight,
-  SquaresFour,
-  ListBullets,
-  Palette,
-  PencilSimple,
-  Plus,
-  MagnifyingGlass,
-  Trash
+  CaretRightIcon,
+  SquaresFourIcon,
+  ListBulletsIcon,
+  PaletteIcon,
+  PencilSimpleIcon,
+  PlusIcon,
+  MagnifyingGlassIcon,
+  TrashIcon
 } from "@phosphor-icons/react";
 
 interface CourseListViewProps {
@@ -68,7 +68,7 @@ export function CourseListView({
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 shadow-xs"
             />
-            <MagnifyingGlass className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+            <MagnifyingGlassIcon className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
           </div>
         </div>
 
@@ -84,7 +84,7 @@ export function CourseListView({
               }`}
               title="Grid View"
             >
-              <SquaresFour className="w-3.5 h-3.5" />
+              <SquaresFourIcon className="w-3.5 h-3.5" />
             </button>
             <button
               type="button"
@@ -96,7 +96,7 @@ export function CourseListView({
               }`}
               title="Table View"
             >
-              <ListBullets className="w-3.5 h-3.5" />
+              <ListBulletsIcon className="w-3.5 h-3.5" />
             </button>
           </div>
 
@@ -105,7 +105,7 @@ export function CourseListView({
             onClick={onCreateCourse}
             className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-full shadow-xs transition-all flex items-center gap-1.5 active:scale-[0.98] cursor-pointer"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <PlusIcon className="w-3.5 h-3.5" />
             <span>Create course</span>
           </button>
         </div>
@@ -195,7 +195,7 @@ export function CourseListView({
                   <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
                     <span className="text-slate-900 font-semibold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
                       <span>Open course</span>
-                      <CaretRight className="w-3.5 h-3.5" />
+                      <CaretRightIcon className="w-3.5 h-3.5" />
                     </span>
                     <div
                       className="flex items-center gap-1"
@@ -210,7 +210,7 @@ export function CourseListView({
                         className="p-1.5 hover:bg-slate-100 text-slate-500 rounded-lg text-xs transition-colors cursor-pointer"
                         title="Customize banner"
                       >
-                        <Palette className="w-3.5 h-3.5" />
+                        <PaletteIcon className="w-3.5 h-3.5" />
                       </button>
                       <button
                         type="button"
@@ -221,7 +221,7 @@ export function CourseListView({
                         className="p-1.5 hover:bg-slate-100 text-slate-500 rounded-lg text-xs transition-colors cursor-pointer"
                         title="Edit"
                       >
-                        <PencilSimple className="w-3.5 h-3.5" />
+                        <PencilSimpleIcon className="w-3.5 h-3.5" />
                       </button>
                       <button
                         type="button"
@@ -232,7 +232,7 @@ export function CourseListView({
                         className="p-1.5 hover:bg-rose-50 text-rose-500 rounded-lg text-xs transition-colors cursor-pointer"
                         title="Delete"
                       >
-                        <Trash className="w-3.5 h-3.5" />
+                        <TrashIcon className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>

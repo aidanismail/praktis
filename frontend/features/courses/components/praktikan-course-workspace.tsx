@@ -3,8 +3,8 @@
 import { useCallback } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import {
-  CalendarBlank,
-  ArrowLeft,
+  CalendarBlankIcon,
+  ArrowLeftIcon,
 } from "@phosphor-icons/react";
 import type { Course } from "@/features/courses/types/course.type";
 import type { User } from "@/types/user.type";
@@ -108,7 +108,7 @@ export function PraktikanCourseWorkspace({
           onClick={handleBackToCourses}
           className="flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-full shadow-xs transition-colors apple-press"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeftIcon className="w-4 h-4" />
           <span>Back to Classes</span>
         </button>
 
@@ -162,7 +162,7 @@ export function PraktikanCourseWorkspace({
             </h1>
 
             <p className="mt-2 text-xs text-slate-200 flex items-center gap-2">
-              <CalendarBlank className="w-4 h-4 text-white/70" weight="bold" />
+              <CalendarBlankIcon className="w-4 h-4 text-white/70" weight="bold" />
               <span>
                 Academic Year {course.academic_year} • Semester {course.semester}
               </span>
