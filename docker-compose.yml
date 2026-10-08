@@ -117,13 +117,6 @@ services:
       - PORT=3000
       - NEXT_PUBLIC_API_URL=https://localhost-0.tail8b8e30.ts.net:10000/api
       - INTERNAL_API_URL=http://backend:8000
-    command: >
-      sh -c "
-      pnpm build &&
-      cp -r public .next/standalone/ 2>/dev/null || true &&
-      cp -r .next/static .next/standalone/.next/ 2>/dev/null || true &&
-      node .next/standalone/server.js
-      "
     networks:
       - praktis_network
       
