@@ -1,0 +1,463 @@
+"use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
+import { NotificationBanner } from "@/components/ui/notification-banner";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
+import { useCourseRoster } from "@/features/courses/hooks/use-course-roster";
+import type { EnrolledStudent } from "@/features/courses/types/enrolled-student.type";
+import type { CourseSession } from "@/features/sessions/types/session.type";
+import { ApiError } from "@/lib/api/client";
+import {
+  gradebookSchema,
+  parseGradeScore,
+  type GradebookValues
+} from "../schemas/grade.schema";
+import {
+  useSaveSessionGrades,
+  useSessionGrades
+} from "../hooks/use-session-grades";
+import type { SessionGrade } from "../types/grade.type";
+import { GradePublicationControls } from "./grade-publication-controls";
+import {
+  ArrowsClockwiseIcon,
+  MagnifyingGlassIcon
+} from "@phosphor-icons/react";
+
+type SessionGradebookProps = {
+  userId: string;
+  courseId: string;
+  session: CourseSession;
+  onDirtyChange?: (dirty: boolean) => void;
+};
+
+function buildGradebookValues(
+  students: EnrolledStudent[],
+  grades: SessionGrade[]
+): GradebookValues {
+  const scoreByStudent = new Map(
+    grades.map((grade) => [grade.student_id, String(grade.score)])
+  );
+
+  return {
+    records: [...students]
+      .sort((left, right) => {
+        const byUsername = left.username.localeCompare(right.username);
+        return byUsername !== 0 ? byUsername : left.id.localeCompare(right.id);
+      })
+      .map((student) => ({
+        student_id: student.id,
+        score: scoreByStudent.get(student.id) ?? ""
+      }))
+  };
+}
+
+function getRequestError(error: Error | null, kind: "roster" | "grades") {
+  if (!error) return null;
+
+  if (error instanceof ApiError) {
+    if (error.status === 401) return "Your session expired. Please sign in again.";
+    if (error.status === 403)
+      return `You don't have permission to view this session's ${kind}.`;
+    if (error.status === 404)
+      return "Couldn't find this course or session.";
+    if (error.status === 422) return "The selected session link is invalid.";
+  }
+
+  return `Couldn't load ${kind}. Please check your connection and try again.`;
+}
+
+function getSaveError(error: Error | null) {
+  if (!error) return null;
+
+  if (error instanceof ApiError) {
+    if (error.status === 401)
+      return "Your session expired. Sign in again before saving.";
+    if (error.status === 403)
+      return "You don't have permission to save grades for this course.";
+    if (error.status === 404)
+      return "This session doesn't seem to exist anymore. Try refreshing the page.";
+    if (error.status === 409)
+      return "Grades were published elsewhere while you were editing. Your entries are kept—unpublish before retrying.";
+    if (error.status === 422)
+      return "A score or student record was rejected. Your edits were kept—check the refreshed roster before saving again.";
+  }
+
+  return "Couldn't save grades due to a network or server hiccup. Your entries are still safe.";
+}
+
+function GradeRequestError({
+  message,
+  onRetry,
+  isRetrying
+}: {
+  message: string;
+  onRetry: () => void;
+  isRetrying: boolean;
+}) {
+  return (
+    <NotificationBanner variant="error">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <span>{message}</span>
+        <button
+          type="button"
+          onClick={onRetry}
+          disabled={isRetrying}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1 text-xs font-semibold text-white hover:bg-slate-700 transition disabled:opacity-60"
+        >
+          <ArrowsClockwiseIcon className={isRetrying ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"} aria-hidden="true" />
+          Try again
+        </button>
+      </div>
+    </NotificationBanner>
+  );
+}
+
+function GradebookForm({
+  userId,
+  courseId,
+  session,
+  students,
+  grades,
+  onRosterRefresh,
+  onGradesRefresh,
+  onDirtyChange
+}: SessionGradebookProps & {
+  students: EnrolledStudent[];
+  grades: SessionGrade[];
+  onRosterRefresh: () => Promise<unknown>;
+  onGradesRefresh: () => Promise<unknown>;
+}) {
+  const [search, setSearch] = useState("");
+  const serverValues = useMemo(
+    () => buildGradebookValues(students, grades),
+    [students, grades]
+  );
+  const serverSignature = useMemo(
+    () => JSON.stringify(serverValues.records),
+    [serverValues]
+  );
+  const appliedServerSignature = useRef(serverSignature);
+  const saveMutation = useSaveSessionGrades({
+    userId,
+    courseId,
+    sessionId: session.id
+  });
+  const form = useForm<GradebookValues>({
+    resolver: zodResolver(gradebookSchema),
+    defaultValues: serverValues
+  });
+
+  const { fields } = useFieldArray({ control: form.control, name: "records" });
+  const watchedRecords = useWatch({ control: form.control, name: "records" });
+  const studentById = useMemo(
+    () => new Map(students.map((student) => [student.id, student])),
+    [students]
+  );
+  const savedStudentIds = useMemo(
+    () => new Set(grades.map((grade) => grade.student_id)),
+    [grades]
+  );
+  const normalizedSearch = search.trim().toLocaleLowerCase();
+  const visibleIndexes = fields
+    .map((field, index) => ({ field, index, student: studentById.get(field.student_id) }))
+    .filter(({ student }) => {
+      if (!student || normalizedSearch.length === 0) return Boolean(student);
+      return (
+        student.username.toLocaleLowerCase().includes(normalizedSearch) ||
+        student.email.toLocaleLowerCase().includes(normalizedSearch)
+      );
+    });
+  const enteredCount = (watchedRecords ?? []).filter(
+    (record) => record?.score?.trim() !== ""
+  ).length;
+  const hasClearedSavedGrade = (watchedRecords ?? []).some(
+    (record) =>
+      record && savedStudentIds.has(record.student_id) && record.score.trim() === ""
+  );
+  const unmatchedGrades = grades.filter(
+    (grade) => !studentById.has(grade.student_id)
+  );
+  const saveError = getSaveError(saveMutation.error);
+  const isReadOnly = session.grades_published;
+
+  useEffect(() => {
+    if (
+      !form.formState.isDirty &&
+      appliedServerSignature.current !== serverSignature
+    ) {
+      appliedServerSignature.current = serverSignature;
+      form.reset(serverValues);
+    }
+  }, [form, form.formState.isDirty, serverSignature, serverValues]);
+
+  useEffect(() => {
+    function warnBeforeUnload(event: BeforeUnloadEvent) {
+      if (!form.formState.isDirty) return;
+      event.preventDefault();
+    }
+
+    window.addEventListener("beforeunload", warnBeforeUnload);
+    return () => window.removeEventListener("beforeunload", warnBeforeUnload);
+  }, [form.formState.isDirty]);
+
+  async function submitGrades(values: GradebookValues) {
+    saveMutation.reset();
+    const payload = values.records.flatMap((record) => {
+      const score = parseGradeScore(record.score);
+      return score === null ? [] : [{ student_id: record.student_id, score }];
+    });
+
+    try {
+      await saveMutation.mutateAsync({ records: payload });
+      form.reset(values);
+      onDirtyChange?.(false);
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 422) {
+        const dirtyScores = new Map(
+          form
+            .getValues()
+            .records.filter((_, index) =>
+              form.getFieldState(`records.${index}.score`).isDirty
+            )
+            .map((record) => [record.student_id, record.score])
+        );
+        const [rosterResult, gradesResult] = await Promise.all([
+          onRosterRefresh(),
+          onGradesRefresh()
+        ]);
+        const refreshedStudents = (rosterResult as { data?: EnrolledStudent[] })?.data ?? students;
+        const refreshedGrades = (gradesResult as { data?: SessionGrade[] })?.data ?? grades;
+        const refreshedValues = buildGradebookValues(refreshedStudents, refreshedGrades);
+
+        form.reset(refreshedValues);
+        refreshedValues.records.forEach((record, index) => {
+          const dirtyScore = dirtyScores.get(record.student_id);
+
+          if (dirtyScore !== undefined && dirtyScore !== record.score) {
+            form.setValue(`records.${index}.score`, dirtyScore, {
+              shouldDirty: true,
+              shouldValidate: true
+            });
+          }
+        });
+        onDirtyChange?.(dirtyScores.size > 0);
+      }
+    }
+  }
+
+  function resetChanges() {
+    if (form.formState.isDirty && !window.confirm("Discard all unsaved grade changes?")) {
+      return;
+    }
+
+    form.reset(serverValues);
+    appliedServerSignature.current = serverSignature;
+    saveMutation.reset();
+    onDirtyChange?.(false);
+  }
+
+  return (
+    <form onSubmit={form.handleSubmit(submitGrades)} noValidate>
+      <dl className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+        <div>
+          <dt className="inline text-slate-500">Saved grades: </dt>
+          <dd className="inline font-semibold text-slate-950">{grades.length}</dd>
+        </div>
+        <div>
+          <dt className="inline text-slate-500">Ungraded: </dt>
+          <dd className="inline font-semibold text-slate-950">
+            {students.length - grades.filter((grade) => studentById.has(grade.student_id)).length}
+          </dd>
+        </div>
+      </dl>
+
+      {isReadOnly ? (
+        <div className="mt-4">
+          <NotificationBanner variant="info" message="Published grades are read-only. Unpublish them first if you need to make changes." />
+        </div>
+      ) : (
+        <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+          Blank rows stay ungraded and won&apos;t overwrite existing scores. To update a previously saved score, enter a new number or reset the row.
+        </div>
+      )}
+
+      {hasClearedSavedGrade ? (
+        <div className="mt-3">
+          <NotificationBanner variant="warning" message="Enter a score or reset any cleared fields before saving. Existing grades cannot be left blank." />
+        </div>
+      ) : null}
+
+      {unmatchedGrades.length > 0 ? (
+        <div className="mt-3">
+          <NotificationBanner variant="warning" message={`${unmatchedGrades.length} saved grade ${unmatchedGrades.length === 1 ? "score doesn't" : "scores don't"} match the current roster. No grades were reassigned.`} />
+        </div>
+      ) : null}
+
+      <label className="mt-5 block sm:max-w-sm">
+        <span className="text-sm font-semibold text-slate-800">Search by NPM or email</span>
+        <span className="relative mt-1.5 block">
+          <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-slate-400" aria-hidden="true" />
+          <input
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            className="min-h-11 w-full rounded-xl border border-slate-300 bg-white pl-9 pr-3 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-slate-100"
+            placeholder="Search by NPM or email..."
+          />
+        </span>
+      </label>
+
+      {visibleIndexes.length === 0 ? (
+        <div role="status" className="mt-5 rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-600">
+          No students match this search.
+        </div>
+      ) : (
+        <ul className="mt-5 divide-y divide-slate-200 overflow-hidden rounded-2xl border border-slate-200">
+          {visibleIndexes.map(({ field, index, student }) => {
+            if (!student) return null;
+            const registration = form.register(`records.${index}.score`);
+            const rowError = form.formState.errors.records?.[index]?.score;
+
+            return (
+              <li key={field.id} className="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_10rem] sm:items-center">
+                <div className="min-w-0">
+                  <p className="wrap-break-word font-mono text-sm font-semibold text-slate-950">{student.username}</p>
+                  <p className="mt-1 break-all text-sm text-slate-600">{student.email}</p>
+                </div>
+                <div>
+                  <label htmlFor={`grade-${field.id}`} className="sr-only">Score for {student.username}</label>
+                  <input
+                    id={`grade-${field.id}`}
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="Ungraded"
+                    disabled={isReadOnly || saveMutation.isPending}
+                    aria-invalid={Boolean(rowError)}
+                    {...registration}
+                    onChange={(event) => {
+                      registration.onChange(event);
+                      saveMutation.reset();
+                      onDirtyChange?.(true);
+                    }}
+                    className="min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-brand focus:ring-2 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100"
+                  />
+                  {rowError ? <p role="alert" className="mt-1 text-xs text-red-700">{rowError.message}</p> : null}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      <p className="mt-3 text-sm text-slate-600">{enteredCount} of {students.length} students have a score entered.</p>
+      {saveError ? (
+        <div className="mt-3">
+          <NotificationBanner variant="error" message={saveError} />
+        </div>
+      ) : null}
+      {saveMutation.isSuccess ? (
+        <div className="mt-3">
+          <NotificationBanner variant="success" message={saveMutation.data.message} />
+        </div>
+      ) : null}
+
+      {!isReadOnly ? (
+        <div className="mt-5 flex flex-wrap gap-2">
+          <button
+            type="submit"
+            disabled={saveMutation.isPending || !form.formState.isDirty || enteredCount === 0 || hasClearedSavedGrade}
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white shadow-xs transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {saveMutation.isPending ? <AsteriskLoader className="h-4 w-4" /> : null}
+            {saveMutation.isPending ? "Saving..." : "Save draft grades"}
+          </button>
+          <button
+            type="button"
+            onClick={resetChanges}
+            disabled={saveMutation.isPending || !form.formState.isDirty}
+            className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Reset changes
+          </button>
+        </div>
+      ) : null}
+    </form>
+  );
+}
+
+export function SessionGradebook({
+  userId,
+  courseId,
+  session,
+  onDirtyChange
+}: SessionGradebookProps) {
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const rosterQuery = useCourseRoster({ userId, courseId, enabled: true });
+  const gradesQuery = useSessionGrades({ userId, courseId, sessionId: session.id, enabled: true });
+  const rosterError = getRequestError(rosterQuery.error, "roster");
+  const gradesError = getRequestError(gradesQuery.error, "grades");
+
+  function reportDirty(dirty: boolean) {
+    setHasUnsavedChanges(dirty);
+    onDirtyChange?.(dirty);
+  }
+
+  return (
+    <section aria-labelledby="session-gradebook-heading" className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+      <div>
+        <h2 id="session-gradebook-heading" className="text-xl font-semibold text-slate-950">Session gradebook</h2>
+        <p className="mt-1 text-sm leading-6 text-slate-600">Save private draft scores, then publish them whenever you&apos;re ready.</p>
+      </div>
+
+      {rosterQuery.isPending || gradesQuery.isPending ? (
+        <div role="status" aria-live="polite" className="mt-5 flex min-h-40 items-center justify-center rounded-2xl bg-slate-50">
+          <AsteriskLoader className="h-5 w-5" />
+          <span className="ml-3 text-sm text-slate-600">Loading roster and saved grades...</span>
+        </div>
+      ) : null}
+
+      {!rosterQuery.isPending && rosterError ? (
+        <div className="mt-5">
+          <GradeRequestError message={rosterError} onRetry={() => void rosterQuery.refetch()} isRetrying={rosterQuery.isFetching} />
+        </div>
+      ) : null}
+      {!gradesQuery.isPending && gradesError ? (
+        <div className="mt-5">
+          <GradeRequestError message={gradesError} onRetry={() => void gradesQuery.refetch()} isRetrying={gradesQuery.isFetching} />
+        </div>
+      ) : null}
+
+      {!rosterQuery.isPending && !gradesQuery.isPending && !rosterError && !gradesError ? (
+        rosterQuery.data && rosterQuery.data.length > 0 ? (
+          <div className="mt-5">
+            <GradebookForm
+              userId={userId}
+              courseId={courseId}
+              session={session}
+              students={rosterQuery.data}
+              grades={gradesQuery.data ?? []}
+              onRosterRefresh={() => rosterQuery.refetch()}
+              onGradesRefresh={() => gradesQuery.refetch()}
+              onDirtyChange={reportDirty}
+            />
+            <GradePublicationControls
+              userId={userId}
+              courseId={courseId}
+              session={session}
+              savedGradeCount={(gradesQuery.data ?? []).length}
+              rosterCount={rosterQuery.data.length}
+              hasUnsavedChanges={hasUnsavedChanges}
+            />
+          </div>
+        ) : (
+          <div role="status" className="mt-5 rounded-2xl border border-dashed border-slate-300 p-8 text-center">
+            <h3 className="text-base font-semibold text-slate-950">No students enrolled yet</h3>
+            <p className="mt-1 text-sm text-slate-600">Session grades can be recorded once students join this course.</p>
+          </div>
+        )
+      ) : null}
+    </section>
+  );
+}

@@ -11,6 +11,7 @@ from models.grade import Grade
 from models.class_session import ClassSession
 from models.course import Course
 from models.enrollment import Enrollment
+from models.assignment import Assignment, Submission
 from schemas.grade import BulkGradeRequest, GradeResponse, PersonalGradeHistoryItem
 from schemas.common import MessageResponse
 from api.dependencies import get_current_active_user
@@ -172,29 +173,89 @@ async def my_grades(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
-    result = await db.execute(
+    session_res = await db.execute(
         select(Grade, ClassSession, Course)
         .join(ClassSession, Grade.session_id == ClassSession.id)
         .join(Course, ClassSession.course_id == Course.id)
         .where(Grade.student_id == current_user.id, ClassSession.grades_published.is_(True))
-        .order_by(Course.academic_year.desc(), Course.semester.desc(), ClassSession.date.asc())
     )
-    rows = result.all()
-    return [
-        PersonalGradeHistoryItem(
-            id=grade.id,
-            session_id=grade.session_id,
-            session_title=session.title,
-            session_date=session.date,
-            course_id=course.id,
-            course_code=course.code,
-            course_name=course.name,
-            academic_year=course.academic_year,
-            semester=course.semester,
-            score=grade.score,
-            created_at=grade.created_at,
-            updated_at=grade.updated_at,
-            recorded_by=grade.recorded_by,
+    session_rows = session_res.all()
+
+    assignment_res = await db.execute(
+        select(Submission, Assignment, Course)
+        .join(Assignment, Submission.assignment_id == Assignment.id)
+        .join(Course, Assignment.course_id == Course.id)
+        .where(
+            Submission.student_id == current_user.id,
+            Assignment.is_published.is_(True),
+            Submission.status == "graded",
+            Submission.score.isnot(None),
         )
-        for grade, session, course in rows
-    ]
+    )
+    assignment_rows = assignment_res.all()
+
+    items: list[PersonalGradeHistoryItem] = []
+    for grade, session, course in session_rows:
+        items.append(
+            PersonalGradeHistoryItem(
+                id=grade.id,
+                session_id=grade.session_id,
+                assignment_id=None,
+                item_type="session",
+                session_title=session.title,
+                session_date=session.date,
+                course_id=course.id,
+                course_code=course.code,
+                course_name=course.name,
+                academic_year=course.academic_year,
+                semester=course.semester,
+                score=grade.score,
+                max_points=100.0,
+                feedback=None,
+                created_at=grade.created_at,
+                updated_at=grade.updated_at,
+                recorded_by=grade.recorded_by,
+            )
+        )
+
+    for sub, assignment, course in assignment_rows:
+        item_date = None
+        if assignment.due_date:
+            item_date = assignment.due_date.date()
+        elif sub.graded_at:
+            item_date = sub.graded_at.date()
+        elif sub.submitted_at:
+            item_date = sub.submitted_at.date()
+
+        items.append(
+            PersonalGradeHistoryItem(
+                id=sub.id,
+                session_id=assignment.session_id,
+                assignment_id=assignment.id,
+                item_type="assignment",
+                session_title=assignment.title,
+                session_date=item_date,
+                course_id=course.id,
+                course_code=course.code,
+                course_name=course.name,
+                academic_year=course.academic_year,
+                semester=course.semester,
+                score=sub.score,
+                max_points=float(assignment.max_points),
+                feedback=sub.feedback,
+                created_at=sub.submitted_at,
+                updated_at=sub.graded_at or sub.submitted_at,
+                recorded_by=sub.graded_by,
+            )
+        )
+
+    items.sort(
+        key=lambda x: (
+            x.academic_year,
+            x.semester,
+            x.session_date.isoformat() if x.session_date else "",
+            x.session_title,
+        ),
+        reverse=True,
+    )
+    return items

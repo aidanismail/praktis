@@ -199,8 +199,26 @@ export function PraktikanGradeHistory({ userId }: Props) {
                     className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs apple-card-hover transition-all"
                   >
                     <div className="min-w-0">
-                      <p className="text-xs font-bold text-slate-950">{row.session_title}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs font-bold text-slate-950">{row.session_title}</p>
+                        {row.item_type ? (
+                          <span
+                            className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full ${
+                              row.item_type === "assignment"
+                                ? "bg-blue-50 text-blue-700 border border-blue-200/60"
+                                : "bg-slate-100 text-slate-600 border border-slate-200"
+                            }`}
+                          >
+                            {row.item_type === "assignment" ? "Assignment" : "Session"}
+                          </span>
+                        ) : null}
+                      </div>
                       <p className="text-[11px] text-slate-500 mt-0.5">{formatDate(row.session_date)}</p>
+                      {row.feedback ? (
+                        <p className="text-[11px] text-slate-600 mt-1 italic">
+                          Feedback: &ldquo;{row.feedback}&rdquo;
+                        </p>
+                      ) : null}
                     </div>
 
                     <div className="flex items-baseline gap-1.5">
@@ -208,6 +226,9 @@ export function PraktikanGradeHistory({ userId }: Props) {
                       <span className="text-base font-bold text-slate-950 font-mono">
                         {formatScore(row.score)}
                       </span>
+                      {row.max_points && row.max_points !== 100 ? (
+                        <span className="text-[11px] text-slate-400 font-mono">/ {row.max_points}</span>
+                      ) : null}
                     </div>
                   </article>
                 ))}
