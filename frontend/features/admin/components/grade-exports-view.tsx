@@ -3,23 +3,33 @@
 import { useEffect, useState } from "react";
 import {
   fetchAdminCourses,
+  fetchAssignments,
   fetchCourseSessions,
-  getGradeExportUrl,
+  getAssignmentGradeExportUrl,
   getAttendanceExportUrl,
+  type AssignmentItem,
 } from "../api/admin.api";
 import type { Course } from "@/features/courses/types/course.type";
 import type { ClassSessionItem } from "../types/admin.type";
 
+type ExportType = "grades" | "attendance";
+
+const SELECT_CLASS =
+  "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900";
+const LABEL_CLASS = "block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5";
+
 export function GradeExportsView() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [sessions, setSessions] = useState<ClassSessionItem[]>([]);
+  const [assignments, setAssignments] = useState<AssignmentItem[]>([]);
   const [selectedCourseId, setSelectedCourseId] = useState<string>("");
   const [selectedSessionId, setSelectedSessionId] = useState<string>("");
-  const [exportType, setExportType] = useState<"grades" | "attendance">("grades");
+  const [selectedAssignmentId, setSelectedAssignmentId] = useState<string>("");
+  const [exportType, setExportType] = useState<ExportType>("grades");
   const [fileFormat, setFileFormat] = useState<"csv" | "xlsx">("csv");
 
   const [isLoadingCourses, setIsLoadingCourses] = useState(true);
-  const [isLoadingSessions, setIsLoadingSessions] = useState(false);
+  const [isLoadingTargets, setIsLoadingTargets] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -52,45 +62,47 @@ export function GradeExportsView() {
     if (!selectedCourseId) return;
     let isMounted = true;
 
-    async function loadSessions() {
-      setIsLoadingSessions(true);
+    async function loadTargets() {
+      setIsLoadingTargets(true);
       try {
-        const sList = await fetchCourseSessions(selectedCourseId).catch(() => []);
+        const [sList, aList] = await Promise.all([
+          fetchCourseSessions(selectedCourseId).catch(() => []),
+          fetchAssignments(selectedCourseId).catch(() => []),
+        ]);
         if (isMounted) {
           setSessions(sList);
-          if (sList.length > 0) {
-            setSelectedSessionId(sList[0].id);
-          } else {
-            setSelectedSessionId("");
-          }
+          setAssignments(aList);
+          setSelectedSessionId(sList[0]?.id ?? "");
+          setSelectedAssignmentId(aList[0]?.id ?? "");
         }
       } finally {
         if (isMounted) {
-          setIsLoadingSessions(false);
+          setIsLoadingTargets(false);
         }
       }
     }
-    loadSessions();
+    loadTargets();
     return () => {
       isMounted = false;
     };
   }, [selectedCourseId]);
 
+  const targetId = exportType === "grades" ? selectedAssignmentId : selectedSessionId;
+
   const handleDownload = () => {
-    if (!selectedSessionId) return;
-
-    let url = "";
-    if (exportType === "grades") {
-      url = getGradeExportUrl(selectedSessionId, fileFormat);
-    } else {
-      url = getAttendanceExportUrl(selectedSessionId, fileFormat);
-    }
-
+    if (!targetId) return;
+    const url =
+      exportType === "grades"
+        ? getAssignmentGradeExportUrl(targetId, fileFormat)
+        : getAttendanceExportUrl(targetId, fileFormat);
     window.open(url, "_blank");
   };
 
   const selectedCourse = courses.find((c) => c.id === selectedCourseId);
-  const selectedSession = sessions.find((s) => s.id === selectedSessionId);
+  const targetTitle =
+    exportType === "grades"
+      ? assignments.find((a) => a.id === selectedAssignmentId)?.title
+      : sessions.find((s) => s.id === selectedSessionId)?.title;
 
   return (
     <div className="max-w-2xl space-y-4">
@@ -101,15 +113,15 @@ export function GradeExportsView() {
           <p className="text-xs text-slate-400 py-4">No courses available to export.</p>
         ) : (
           <div className="space-y-4">
-            {/* Step 1: Course */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+              <label htmlFor="export-course" className={LABEL_CLASS}>
                 Course
               </label>
               <select
+                id="export-course"
                 value={selectedCourseId}
                 onChange={(e) => setSelectedCourseId(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                className={SELECT_CLASS}
               >
                 {courses.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -119,113 +131,120 @@ export function GradeExportsView() {
               </select>
             </div>
 
-            {/* Step 2: Session */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
-                Session
-              </label>
-              {isLoadingSessions ? (
-                <p className="text-xs text-slate-400 py-2">Loading sessions...</p>
-              ) : sessions.length === 0 ? (
-                <p className="text-xs text-slate-400 py-2">No sessions recorded for this course.</p>
-              ) : (
-                <select
-                  value={selectedSessionId}
-                  onChange={(e) => setSelectedSessionId(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                >
-                  {sessions.map((s, idx) => (
-                    <option key={s.id} value={s.id}>
-                      Session #{idx + 1}: {s.title} ({s.attendance_status})
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
-
-            {/* Step 3: Export Type */}
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
-                Data to Export
-              </label>
+              <span className={LABEL_CLASS}>Data to Export</span>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
                   onClick={() => setExportType("grades")}
+                  aria-pressed={exportType === "grades"}
                   className={`rounded-xl border p-3 text-left text-xs transition-all ${
                     exportType === "grades"
                       ? "border-slate-900 bg-slate-50 shadow-xs"
                       : "border-slate-200 bg-white hover:bg-slate-50"
                   }`}
                 >
-                  <span className="font-bold text-slate-900 block">Grades</span>
+                  <span className="font-bold text-slate-900 block">Assignment grades</span>
                   <span className="text-[11px] text-slate-500 mt-0.5 block">
-                    Student scores, feedback notes, and grader info.
+                    Scores, late flags, and feedback for one assignment.
                   </span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setExportType("attendance")}
+                  aria-pressed={exportType === "attendance"}
                   className={`rounded-xl border p-3 text-left text-xs transition-all ${
                     exportType === "attendance"
                       ? "border-slate-900 bg-slate-50 shadow-xs"
                       : "border-slate-200 bg-white hover:bg-slate-50"
                   }`}
                 >
-                  <span className="font-bold text-slate-900 block">Attendance</span>
+                  <span className="font-bold text-slate-900 block">Session attendance</span>
                   <span className="text-[11px] text-slate-500 mt-0.5 block">
-                    Check-in timestamps and presence records.
+                    Hadir, sakit, izin, and alfa for one session.
                   </span>
                 </button>
               </div>
             </div>
 
-            {/* Step 4: File Format */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
-                File Format
+              <label htmlFor="export-target" className={LABEL_CLASS}>
+                {exportType === "grades" ? "Assignment" : "Session"}
               </label>
+              {isLoadingTargets ? (
+                <p className="text-xs text-slate-400 py-2">Loading...</p>
+              ) : exportType === "grades" ? (
+                assignments.length === 0 ? (
+                  <p className="text-xs text-slate-400 py-2">No assignments in this course yet.</p>
+                ) : (
+                  <select
+                    id="export-target"
+                    value={selectedAssignmentId}
+                    onChange={(e) => setSelectedAssignmentId(e.target.value)}
+                    className={SELECT_CLASS}
+                  >
+                    {assignments.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {a.title} ({a.max_points} pts)
+                      </option>
+                    ))}
+                  </select>
+                )
+              ) : sessions.length === 0 ? (
+                <p className="text-xs text-slate-400 py-2">No sessions recorded for this course.</p>
+              ) : (
+                <select
+                  id="export-target"
+                  value={selectedSessionId}
+                  onChange={(e) => setSelectedSessionId(e.target.value)}
+                  className={SELECT_CLASS}
+                >
+                  {sessions.map((s, idx) => (
+                    <option key={s.id} value={s.id}>
+                      Session #{idx + 1}: {s.title}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+
+            <div>
+              <span className={LABEL_CLASS}>File Format</span>
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setFileFormat("csv")}
-                  className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all ${
-                    fileFormat === "csv"
-                      ? "bg-slate-900 text-white shadow-xs"
-                      : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
-                  }`}
-                >
-                  CSV (.csv)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFileFormat("xlsx")}
-                  className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all ${
-                    fileFormat === "xlsx"
-                      ? "bg-slate-900 text-white shadow-xs"
-                      : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
-                  }`}
-                >
-                  Excel (.xlsx)
-                </button>
+                {(["csv", "xlsx"] as const).map((format) => (
+                  <button
+                    key={format}
+                    type="button"
+                    onClick={() => setFileFormat(format)}
+                    aria-pressed={fileFormat === format}
+                    className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all ${
+                      fileFormat === format
+                        ? "bg-slate-900 text-white shadow-xs"
+                        : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    {format === "csv" ? "CSV (.csv)" : "Excel (.xlsx)"}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Action Download */}
             <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
               <div className="text-[11px] text-slate-500">
-                {selectedCourse && selectedSession ? (
-                  <span>Target: {selectedCourse.code} • {selectedSession.title}</span>
+                {selectedCourse && targetTitle ? (
+                  <span>Target: {selectedCourse.code} • {targetTitle}</span>
                 ) : (
-                  <span>Select a course and session to export.</span>
+                  <span>
+                    Select a course and {exportType === "grades" ? "assignment" : "session"} to export.
+                  </span>
                 )}
               </div>
 
               <button
                 type="button"
                 onClick={handleDownload}
-                disabled={!selectedSessionId}
+                disabled={!targetId}
                 className="rounded-full bg-slate-900 px-5 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 disabled:opacity-50 transition-all active:scale-[0.98]"
               >
                 Download ({fileFormat.toUpperCase()})

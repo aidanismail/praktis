@@ -78,6 +78,7 @@ export function CourseManagement() {
     unenrollStudent,
     removeStaff,
     createSession,
+    renameSession,
     deleteModule,
     createAnnouncement,
     updateAnnouncement,
@@ -594,6 +595,7 @@ export function CourseManagement() {
                   sessions={sessions}
                   students={students}
                   onCreateSession={handleCreateSession}
+                  onRenameSession={(sessionId, title) => renameSession({ sessionId, title })}
                   onSuccess={setActionSuccess}
                   onError={setError}
                 />

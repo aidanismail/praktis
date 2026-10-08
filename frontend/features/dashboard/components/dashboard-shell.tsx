@@ -38,6 +38,9 @@ export function DashboardShell({ user }: DashboardShellProps) {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   const isSuperadmin = user.role === "superadmin";
+  const isAsprak = user.role === "asprak";
+  const isPraktikan = user.role === "praktikan";
+
   const courseIdParam = searchParams.get("courseId");
   const workspaceTabParam = searchParams.get("workspaceTab");
   const assignmentIdParam = searchParams.get("assignmentId");
@@ -165,7 +168,7 @@ export function DashboardShell({ user }: DashboardShellProps) {
   const handleNavigateToCourse = useCallback(
     (courseId: string) => {
       const params = new URLSearchParams(searchParams.toString());
-      params.set("tab", user.role === "superadmin" ? "courses" : "classes");
+      params.set("tab", isSuperadmin ? "courses" : "classes");
       params.set("courseId", courseId);
       params.set("workspaceTab", "stream");
       params.delete("assignmentId");

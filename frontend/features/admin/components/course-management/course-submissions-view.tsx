@@ -87,7 +87,7 @@ export function CourseSubmissionsView({
     });
   }, [submissions, submissionSearch, submissionFilter]);
 
-  const handleGradeSubmit = async (e: React.FormEvent) => {
+  const handleGradeSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     if (!selectedSubForGrade) return;
 

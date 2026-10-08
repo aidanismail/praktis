@@ -9,9 +9,10 @@ from sqlalchemy.future import select
 from core.database import get_db
 from models.user import User, RoleEnum
 from models.attendance import Attendance
-from models.grade import Grade
+from models.assignment import Assignment, Submission
+from models.enrollment import Enrollment
 from api.dependencies import get_current_active_user
-from api.permissions import require_session_access
+from api.permissions import require_course_access, require_session_access
 from services.export_service import build_csv, build_xlsx
 
 router = APIRouter(prefix="/export", tags=["Export"])
@@ -80,34 +81,60 @@ async def export_attendance(
 
 
 @router.get(
-    "/grades/{session_id}",
-    summary="Export a session's grades as CSV or XLSX",
-    description="Superadmin, or an asprak assigned to the session's course. Downloads username/email/score for every student graded in the session.",
-    responses=EXPORT_RESPONSES,  # type: ignore
+    "/assignments/{assignment_id}",
+    summary="Export an assignment's grades as CSV or XLSX",
+    description=(
+        "Superadmin, or an asprak assigned to the assignment's course. One row per enrolled "
+        "student; students without a submission are listed with status 'missing'."
+    ),
+    responses={
+        **EXPORT_RESPONSES,  # type: ignore
+        404: {"description": "Assignment not found, or the course has no enrolled students."},
+    },
 )
-async def export_grades(
-    session_id: uuid.UUID,
+async def export_assignment_grades(
+    assignment_id: uuid.UUID,
     format: str = Query("csv", pattern="^(csv|xlsx)$", description="Output file format: 'csv' or 'xlsx'."),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
-    await require_session_access(db, current_user, session_id, write=False)
-    if current_user.role == RoleEnum.PRAKTIKAN:
-        raise HTTPException(status_code=403, detail="Students cannot export session records")
+    assignment = (
+        await db.execute(select(Assignment).where(Assignment.id == assignment_id))
+    ).scalars().first()
+    if assignment is None:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+
+    # write=True rejects praktikan and unassigned asprak.
+    await require_course_access(db, current_user, assignment.course_id, write=True)
 
     result = await db.execute(
-        select(Grade, User.username, User.email)
-        .join(User, User.id == Grade.student_id)
-        .where(Grade.session_id == session_id)
+        select(User, Submission)
+        .join(Enrollment, Enrollment.student_id == User.id)
+        .outerjoin(
+            Submission,
+            (Submission.student_id == User.id) & (Submission.assignment_id == assignment_id),
+        )
+        .where(Enrollment.course_id == assignment.course_id)
+        .order_by(User.username)
     )
     rows = [
-        {"username": username, "email": email, "score": grade.score}
-        for grade, username, email in result.all()
+        {
+            "username": student.username,
+            "name": student.name or "",
+            "email": student.email,
+            "status": submission.status if submission else "missing",
+            "submitted_at": submission.submitted_at.isoformat() if submission and submission.submitted_at else "",
+            "is_late": submission.is_late if submission else "",
+            "score": submission.score if submission and submission.score is not None else "",
+            "max_points": assignment.max_points,
+            "feedback": (submission.feedback or "") if submission else "",
+        }
+        for student, submission in result.all()
     ]
     if not rows:
-        raise HTTPException(status_code=404, detail="No grade records found for this session")
+        raise HTTPException(status_code=404, detail="No students are enrolled in this course")
 
-    headers = ["username", "email", "score"]
+    headers = ["username", "name", "email", "status", "submitted_at", "is_late", "score", "max_points", "feedback"]
     builder_fn = build_xlsx if format == "xlsx" else build_csv
     content = await asyncio.to_thread(builder_fn, rows, headers)
-    return _stream(content, MEDIA_TYPES[format], f"grades_{session_id}.{format}")
+    return _stream(content, MEDIA_TYPES[format], f"grades_{assignment_id}.{format}")

@@ -110,7 +110,7 @@ export function CourseClassworkTab({
     }
   };
 
-  const handleUploadModules = async (e: React.FormEvent) => {
+  const handleUploadModules = async (e: React.SubmitEvent) => {
     e.preventDefault();
     if (modUploadQueue.length === 0) return;
 

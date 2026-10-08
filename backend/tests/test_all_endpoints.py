@@ -261,10 +261,10 @@ def run_suite():
         print(f"19. GET /export/attendance/{{id}} (CSV)       -> Status {status} [Bytes: {len(raw_csv)}]")
         assert status == 200
 
-    # 20. GET /export/grades/{session_id}?format=xlsx
-    if session_id:
-        status, _, raw_xlsx, _ = request("GET", f"/export/grades/{session_id}?format=xlsx")
-        print(f"20. GET /export/grades/{{id}} (XLSX)          -> Status {status} [Bytes: {len(raw_xlsx)}]")
+    # 20. GET /export/assignments/{assignment_id}?format=xlsx
+    if assign_id:
+        status, _, raw_xlsx, _ = request("GET", f"/export/assignments/{assign_id}?format=xlsx")
+        print(f"20. GET /export/assignments/{{id}} (XLSX)     -> Status {status} [Bytes: {len(raw_xlsx)}]")
         assert status == 200
 
     # 21. POST /auth/logout

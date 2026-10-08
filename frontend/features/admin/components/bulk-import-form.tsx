@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useState, type ChangeEvent, type SubmitEvent } from "react";
 import {
   CloudArrowUpIcon,
   TableIcon,
@@ -24,7 +24,7 @@ export function BulkImportForm() {
     }
   }
 
-  async function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: SubmitEvent) {
     e.preventDefault();
     if (!file) {
       setError("Pick a .csv or .xlsx spreadsheet file to upload.");

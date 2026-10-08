@@ -51,11 +51,11 @@ class EnrollRequest(BaseModel):
     )
 
 class ClassSessionCreate(BaseModel):
-    title: str = Field(..., description="Title of the session/meeting.", examples=["Pertemuan 1"])
+    title: str = Field(..., min_length=1, max_length=255, description="Title of the session/meeting.", examples=["Pertemuan 1"])
     date: date_type = Field(..., description="Date the session takes place.")
 
 class ClassSessionUpdate(BaseModel):
-    title: str | None = Field(None, description="New title of the session/meeting.")
+    title: str | None = Field(None, min_length=1, max_length=255, description="New title of the session/meeting.")
     date: date_type | None = Field(None, description="New date the session takes place.")
 
 class ClassSessionResponse(BaseModel):

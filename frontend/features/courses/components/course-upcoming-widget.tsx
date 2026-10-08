@@ -140,7 +140,8 @@ export function CourseUpcomingWidget({
           <div className="py-3 text-center">
             <CheckCircleIcon className="w-5 h-5 text-slate-400 mx-auto" />
             <p className="mt-1.5 text-xs font-medium text-slate-600">
-              No assignments due soon
+              No assignments due soon,
+              wow wow wow!!
             </p>
           </div>
         ) : (

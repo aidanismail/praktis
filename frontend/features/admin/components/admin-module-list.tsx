@@ -266,7 +266,7 @@ export function AdminModuleList() {
     setUploadQueue((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const handleUploadSubmit = async (e: React.FormEvent) => {
+  const handleUploadSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     if (!newModuleCourseId) {
       setError("Choose a target course for the modules.");

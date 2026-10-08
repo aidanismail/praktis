@@ -130,7 +130,7 @@ export function UserManagement() {
     };
   }, []);
 
-  const handleCreateUser = async (e: React.FormEvent) => {
+  const handleCreateUser = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setCreateUserError(null);
 

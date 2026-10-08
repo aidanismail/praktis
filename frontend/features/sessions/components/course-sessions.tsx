@@ -8,8 +8,10 @@ import {
   useCourseSessions,
   useCreateCourseSession,
   useDeleteCourseSession,
-  useTransitionSessionAttendance
+  useTransitionSessionAttendance,
+  useUpdateCourseSession
 } from "../hooks/use-course-sessions";
+import { SessionTitleEditor } from "./session-title-editor";
 import { useCourseRoster } from "@/features/courses/hooks/use-course-roster";
 import {
   useSessionAttendance,
@@ -196,6 +198,7 @@ export function CourseSessions({
     courseId
   });
   const deleteMutation = useDeleteCourseSession({ userId, courseId });
+  const updateMutation = useUpdateCourseSession({ userId, courseId });
 
   const sessions = useMemo(() => {
     return [...(sessionsQuery.data ?? [])].sort((a, b) => {
@@ -207,7 +210,7 @@ export function CourseSessions({
 
   const students = rosterQuery.data ?? [];
 
-  const handleCreateSubmit = async (e: React.FormEvent) => {
+  const handleCreateSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     if (!sessionTitle.trim() || !sessionDate) return;
 
@@ -321,9 +324,15 @@ export function CourseSessions({
                 <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-xs text-slate-900 block">
-                        {s.title}
-                      </span>
+                      <SessionTitleEditor
+                        title={s.title}
+                        onSave={async (title) => {
+                          await updateMutation.mutateAsync({
+                            sessionId: s.id,
+                            payload: { title }
+                          });
+                        }}
+                      />
                       {s.attendance_status === "OPEN" ? (
                         <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-full">
                           Open
@@ -391,7 +400,7 @@ export function CourseSessions({
                       title="Export attendance CSV"
                     >
                       <DownloadSimpleIcon className="w-3.5 h-3.5" />
-                      <span>CSV</span>
+                      <span>Attd CSV</span>
                     </a>
 
                     {deletingSessionId === s.id ? (

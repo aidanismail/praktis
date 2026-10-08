@@ -66,7 +66,7 @@ function AssignmentFormInner({
   );
   const [formError, setFormError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
     setFormError(null);

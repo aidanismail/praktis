@@ -37,7 +37,7 @@ function CourseFormInner({
   const [isActiveCourse, setIsActiveCourse] = useState(initialCourse?.is_active ?? true);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     if (!code.trim() || !name.trim()) return;
     setFormError(null);

@@ -51,7 +51,7 @@ export function AnnouncementComposer({
             Post an announcement
           </h2>
           <p className="mt-1 text-sm leading-6 text-slate-600">
-            Broadcast updates, reminders, or schedule changes to the entire class.
+            Broadcast updates, reminders, or schedule changes.
           </p>
         </div>
       </div>

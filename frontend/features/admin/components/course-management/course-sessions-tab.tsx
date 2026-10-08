@@ -9,6 +9,7 @@ import type {
 import { getAttendanceExportUrl } from "@/features/admin/api/admin.api";
 import { useSessionAttendance } from "@/features/admin/hooks/use-admin-course-workspace";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
+import { SessionTitleEditor } from "@/features/sessions/components/session-title-editor";
 import {
   CalendarBlankIcon,
   DownloadSimpleIcon,
@@ -24,6 +25,7 @@ interface CourseSessionsTabProps {
   students: CourseStudent[];
   initialInspectingSessionId?: string | null;
   onCreateSession: (data: { title: string; date: string }) => Promise<void>;
+  onRenameSession: (sessionId: string, title: string) => Promise<unknown>;
   onSuccess: (msg: string) => void;
   onError: (msg: string) => void;
 }
@@ -41,6 +43,7 @@ export function CourseSessionsTab({
   students,
   initialInspectingSessionId = null,
   onCreateSession,
+  onRenameSession,
   onSuccess,
   onError,
 }: CourseSessionsTabProps) {
@@ -71,7 +74,7 @@ export function CourseSessionsTab({
     return map;
   }, [attendanceList]);
 
-  const handleCreateSubmit = async (e: React.FormEvent) => {
+  const handleCreateSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     if (!sessionTitle.trim() || !sessionDate) return;
 
@@ -155,7 +158,13 @@ export function CourseSessionsTab({
               >
                 <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <span className="font-bold text-xs text-slate-900 block">{s.title}</span>
+                    <SessionTitleEditor
+                      title={s.title}
+                      onSave={async (title) => {
+                        await onRenameSession(s.id, title);
+                        onSuccess("Session renamed.");
+                      }}
+                    />
                     <span className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
                       <CalendarBlankIcon className="w-3 h-3" />
                       <span>Date: {s.date}</span>

@@ -47,6 +47,21 @@ export const DASHBOARD_NAVIGATION: Record<UserRole, DashboardNavItem[]> = {
       description: "Your practicum classes, lab sessions, and rosters."
     },
     {
+      id: "modules",
+      label: "Module Management",
+      description: "Organize lab guides, lecture slides, and references."
+    },
+    {
+      id: "attendance-reports",
+      label: "Attendance Reports",
+      description: "Track attendance across all active practicum classes."
+    },
+    {
+      id: "grade-exports",
+      label: "Grade Exports",
+      description: "Export final grades and spreadsheets anytime."
+    },
+    {
       id: "profile",
       label: "Profile & Security",
       description: "Your assistant identity and password security."

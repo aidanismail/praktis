@@ -192,7 +192,7 @@ export function CoursePeopleTab({
     setEnrollModalError(null);
   };
 
-  const handleEnrollSubmit = async (e: React.FormEvent) => {
+  const handleEnrollSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
 
     const currentTags = [...tags];
