@@ -14,6 +14,8 @@ import {
 import { CourseBannerCustomizerModal } from "@/features/courses/components/course-banner-customizer-modal";
 import { DocumentPreviewModal } from "@/components/ui/document-preview-modal";
 import { NotificationBanner } from "@/components/ui/notification-banner";
+import { AsteriskLoader } from "@/components/ui/asterisk-loader";
+import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
 
 import { useAdminCourses } from "../hooks/use-admin-courses";
 import { useCourseWorkspace } from "../hooks/use-admin-course-workspace";
@@ -37,7 +39,6 @@ export function CourseManagement() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // Declarative URL search parameters
   const courseId = searchParams.get("courseId");
   const workspaceTab =
     (searchParams.get("workspaceTab") as
@@ -47,24 +48,24 @@ export function CourseManagement() {
       | "sessions") || "stream";
   const assignmentId = searchParams.get("assignmentId");
 
-  // Courses query and mutations
   const {
     courses,
     isLoading: isLoadingCourses,
+    error: coursesError,
+    refetch: refetchCourses,
     createCourse,
     updateCourse,
     deleteCourse,
     isCreating,
     isUpdating,
+    isDeleting,
   } = useAdminCourses();
 
-  // Selected course derived from URL
   const selectedCourse = useMemo(
     () => (courseId ? courses.find((c) => c.id === courseId) ?? null : null),
     [courses, courseId]
   );
 
-  // Active course workspace query and mutations
   const {
     students,
     staff,
@@ -73,13 +74,18 @@ export function CourseManagement() {
     announcements,
     assignments,
     systemUsers,
+    isLoadingWorkspace,
     enrollStudents,
     assignStaff,
     unenrollStudent,
     removeStaff,
     createSession,
     renameSession,
+    changeSessionDate,
+    setSessionWindow,
+    deleteSession,
     deleteModule,
+    setModulePublished,
     createAnnouncement,
     updateAnnouncement,
     deleteAnnouncement,
@@ -87,11 +93,13 @@ export function CourseManagement() {
     deleteComment,
     createAssignment,
     updateAssignment,
+    isSavingAssignment,
     deleteAssignment,
     invalidateModules,
-  } = useCourseWorkspace(selectedCourse?.id ?? null);
+  } = useCourseWorkspace(selectedCourse?.id ?? null, {
+    loadSystemUsers: workspaceTab === "people" && !assignmentId,
+  });
 
-  // Selected assignment for submissions view
   const selectedAssignment = useMemo(
     () =>
       assignmentId
@@ -100,10 +108,21 @@ export function CourseManagement() {
     [assignments, assignmentId]
   );
 
-  // Modal & form states
   const [showCreateCourseModal, setShowCreateCourseModal] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [courseToDelete, setCourseToDelete] = useState<Course | null>(null);
+  const [deleteCourseError, setDeleteCourseError] = useState<string | null>(null);
+
+  const closeDeleteCourseDialog = () => {
+    if (isDeleting) return;
+    setCourseToDelete(null);
+    setDeleteCourseError(null);
+  };
+
+  const deleteCourseDialogRef = useModalFocusTrap<HTMLDivElement>({
+    isOpen: Boolean(courseToDelete),
+    onClose: closeDeleteCourseDialog,
+  });
 
   const [showCreateAssignmentModal, setShowCreateAssignmentModal] =
     useState(false);
@@ -114,7 +133,6 @@ export function CourseManagement() {
   const [showThemeModal, setShowThemeModal] = useState(false);
   const [themeModalCourse, setThemeModalCourse] = useState<Course | null>(null);
 
-  // Document preview modal state
   const [previewDoc, setPreviewDoc] = useState<{
     isOpen: boolean;
     title: string;
@@ -129,7 +147,6 @@ export function CourseManagement() {
     courseCode: "",
   });
 
-  // Action toasts
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -147,7 +164,6 @@ export function CourseManagement() {
     }
   }, [error]);
 
-  // Banner themes state
   const [themeOverrides, setThemeOverrides] = useState<
     Record<string, SavedCourseTheme>
   >({});
@@ -181,7 +197,6 @@ export function CourseManagement() {
       window.removeEventListener("course-theme-updated", handleThemeUpdate);
   }, [handleThemeUpdate]);
 
-  // Navigation handlers using Next.js App Router search params
   const handleOpenWorkspace = useCallback(
     (course: Course) => {
       const params = new URLSearchParams(searchParams.toString());
@@ -228,7 +243,6 @@ export function CourseManagement() {
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   }, [pathname, router, searchParams]);
 
-  // Document preview handlers
   const handlePreviewDoc = useCallback(
     (doc: {
       title: string;
@@ -251,7 +265,6 @@ export function CourseManagement() {
     setPreviewDoc((prev) => ({ ...prev, isOpen: false, fileUrl: null }));
   }, []);
 
-  // Course CRUD handlers
   const handleCourseSubmit = async (data: {
     code: string;
     name: string;
@@ -259,23 +272,20 @@ export function CourseManagement() {
     semester: "Ganjil" | "Genap";
     is_active?: boolean;
   }) => {
-    try {
-      if (editingCourse) {
-        await updateCourse({ id: editingCourse.id, payload: data });
-        setActionSuccess(`Course ${data.code} updated.`);
-      } else {
-        await createCourse(data);
-        setActionSuccess(`Course ${data.code} created.`);
-      }
-      setShowCreateCourseModal(false);
-      setEditingCourse(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't save course.");
+    if (editingCourse) {
+      await updateCourse({ id: editingCourse.id, payload: data });
+      setActionSuccess(`Course ${data.code} updated.`);
+    } else {
+      await createCourse(data);
+      setActionSuccess(`Course ${data.code} created.`);
     }
+    setShowCreateCourseModal(false);
+    setEditingCourse(null);
   };
 
   const handleDeleteCourseConfirmed = async () => {
     if (!courseToDelete) return;
+    setDeleteCourseError(null);
     try {
       await deleteCourse(courseToDelete.id);
       setActionSuccess(`Course ${courseToDelete.code} deleted.`);
@@ -284,11 +294,12 @@ export function CourseManagement() {
         handleBackToCourses();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't delete course.");
+      setDeleteCourseError(
+        err instanceof Error ? err.message : "Couldn't delete course. Please try again."
+      );
     }
   };
 
-  // Assignment CRUD handlers
   const handleAssignmentSubmit = async (data: {
     title: string;
     description: string;
@@ -296,33 +307,20 @@ export function CourseManagement() {
     allowed_file_types: string;
     due_date?: string | null;
     allow_late_submissions?: boolean;
+    is_published: boolean;
   }) => {
-    try {
-      if (editingAssignment) {
-        await updateAssignment({
-          assignmentId: editingAssignment.id,
-          data: {
-            ...data,
-            due_date: data.due_date || null,
-            is_published: true,
-          },
-        });
-        setActionSuccess(`Assignment "${data.title}" updated.`);
-      } else {
-        await createAssignment({
-          ...data,
-          due_date: data.due_date || null,
-          is_published: true,
-        });
-        setActionSuccess(`Assignment "${data.title}" created.`);
-      }
-      setShowCreateAssignmentModal(false);
-      setEditingAssignment(null);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Couldn't save assignment."
-      );
+    if (editingAssignment) {
+      await updateAssignment({
+        assignmentId: editingAssignment.id,
+        data: { ...data, due_date: data.due_date || null },
+      });
+      setActionSuccess(`Assignment "${data.title}" updated.`);
+    } else {
+      await createAssignment({ ...data, due_date: data.due_date || null });
+      setActionSuccess(`Assignment "${data.title}" created.`);
     }
+    setShowCreateAssignmentModal(false);
+    setEditingAssignment(null);
   };
 
   const handleDeleteAssignment = async (assignmentId: string) => {
@@ -336,7 +334,6 @@ export function CourseManagement() {
     }
   };
 
-  // Announcement stream handlers
   const handleCreateAnnouncement = async (data: {
     title: string;
     content: string;
@@ -400,25 +397,23 @@ export function CourseManagement() {
     }
   };
 
-  // Sessions & Attendance handlers
-  const handleCreateSession = async (data: { title: string; date: string }) => {
-    try {
-      await createSession(data);
-      setActionSuccess(`Session "${data.title}" created.`);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Couldn't create session."
-      );
-    }
-  };
-
-  // Modules handlers
   const handleDeleteModule = async (moduleId: string) => {
     try {
       await deleteModule(moduleId);
       setActionSuccess("Module removed.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't remove module.");
+    }
+  };
+
+  const handleSetModulePublished = async (moduleId: string, published: boolean) => {
+    try {
+      await setModulePublished({ moduleId, published });
+      setActionSuccess(published ? "Module published." : "Module moved to drafts.");
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Couldn't update module visibility."
+      );
     }
   };
 
@@ -468,6 +463,8 @@ export function CourseManagement() {
         <CourseListView
           courses={courses}
           isLoading={isLoadingCourses}
+          error={coursesError}
+          onRetry={() => void refetchCourses()}
           courseThemes={courseThemes}
           onOpenWorkspace={handleOpenWorkspace}
           onCreateCourse={() => setShowCreateCourseModal(true)}
@@ -510,6 +507,14 @@ export function CourseManagement() {
                 }
                 onPreviewDoc={handlePreviewDoc}
               />
+            ) : isLoadingWorkspace ? (
+              <div
+                role="status"
+                className="flex items-center justify-center gap-3 p-12 bg-white rounded-3xl border border-slate-200 shadow-xs text-xs text-slate-500"
+              >
+                <AsteriskLoader className="h-4 w-4" />
+                <span>Loading assignment...</span>
+              </div>
             ) : (
               <div className="p-8 sm:p-12 bg-white rounded-3xl border border-slate-200 shadow-xs text-center space-y-4 max-w-lg mx-auto">
                 <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto shadow-xs">
@@ -558,6 +563,7 @@ export function CourseManagement() {
                   course={selectedCourse}
                   assignments={assignments}
                   modules={courseModules}
+                  isLoading={isLoadingWorkspace}
                   onOpenSubmissions={handleOpenSubmissions}
                   onOpenCreateAssignment={() =>
                     setShowCreateAssignmentModal(true)
@@ -567,6 +573,7 @@ export function CourseManagement() {
                   }
                   onDeleteAssignment={handleDeleteAssignment}
                   onDeleteModule={handleDeleteModule}
+                  onSetModulePublished={handleSetModulePublished}
                   onUploadModulesSuccess={invalidateModules}
                   onPreviewDoc={handlePreviewDoc}
                   onError={setError}
@@ -591,11 +598,14 @@ export function CourseManagement() {
 
               {workspaceTab === "sessions" && (
                 <CourseSessionsTab
-                  course={selectedCourse}
+                  courseId={selectedCourse.id}
                   sessions={sessions}
-                  students={students}
-                  onCreateSession={handleCreateSession}
+                  isLoading={isLoadingWorkspace}
+                  onCreateSession={createSession}
                   onRenameSession={(sessionId, title) => renameSession({ sessionId, title })}
+                  onChangeSessionDate={(sessionId, date) => changeSessionDate({ sessionId, date })}
+                  onSetSessionWindow={(sessionId, open) => setSessionWindow({ sessionId, open })}
+                  onDeleteSession={deleteSession}
                   onSuccess={setActionSuccess}
                   onError={setError}
                 />
@@ -620,16 +630,18 @@ export function CourseManagement() {
       {/* Delete Course Confirmation Modal */}
       {courseToDelete && (
         <div
+          ref={deleteCourseDialogRef}
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
+          aria-labelledby="delete-course-title"
+          className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-start sm:items-center justify-center overflow-y-auto p-4 animate-in fade-in duration-150"
         >
-          <div className="bg-white rounded-3xl border border-slate-200 p-6 w-full max-w-sm shadow-xl space-y-4">
+          <div className="bg-white rounded-3xl border border-slate-200 p-6 w-full max-w-sm max-h-[90dvh] overflow-y-auto shadow-xl space-y-4">
             <div className="flex items-center gap-3 text-rose-600">
               <div className="p-2.5 rounded-full bg-rose-50">
-                <TrashIcon className="w-5 h-5" />
+                <TrashIcon className="w-5 h-5" aria-hidden="true" />
               </div>
-              <h4 className="font-bold text-sm text-slate-900">
+              <h4 id="delete-course-title" className="font-bold text-sm text-slate-900">
                 Delete course
               </h4>
             </div>
@@ -639,20 +651,25 @@ export function CourseManagement() {
               ({courseToDelete.name})? This will permanently remove its
               modules, sessions, announcements, and student enrollments.
             </p>
+            {deleteCourseError && (
+              <NotificationBanner variant="error" message={deleteCourseError} />
+            )}
             <div className="flex justify-end gap-2 pt-2">
               <button
                 type="button"
-                onClick={() => setCourseToDelete(null)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+                onClick={closeDeleteCourseDialog}
+                disabled={isDeleting}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors disabled:opacity-60"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleDeleteCourseConfirmed}
-                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-colors"
+                disabled={isDeleting}
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-colors disabled:opacity-60"
               >
-                Delete course
+                {isDeleting ? "Deleting..." : "Delete course"}
               </button>
             </div>
           </div>
@@ -669,6 +686,7 @@ export function CourseManagement() {
           setEditingAssignment(null);
         }}
         onSubmit={handleAssignmentSubmit}
+        isSubmitting={isSavingAssignment}
       />
 
       {/* Banner Customizer Modal */}

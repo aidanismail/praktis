@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import {
   fetchAdminUsers,
@@ -13,13 +14,12 @@ import {
   reactivateUser,
 } from "../api/admin.api";
 import type { User } from "@/types/user.type";
-import type { Course } from "@/features/courses/types/course.type";
+import { adminQueryKeys } from "../constants/admin-query-keys";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
 import { useAuthStore } from "@/stores/auth-store";
 import { NotificationBanner } from "@/components/ui/notification-banner";
 import {
   XIcon,
-  WarningCircleIcon,
   PlusIcon,
   UserPlusIcon,
   EyeIcon,
@@ -28,23 +28,40 @@ import {
 
 export function UserManagement() {
   const currentUser = useAuthStore((state) => state.user);
-  const [users, setUsers] = useState<User[]>([]);
-  const [courses, setCourses] = useState<Course[]>([]);
+  const queryClient = useQueryClient();
+
+  const usersQuery = useQuery({
+    queryKey: adminQueryKeys.users(),
+    queryFn: fetchAdminUsers,
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+  });
+  const coursesQuery = useQuery({
+    queryKey: adminQueryKeys.courses(),
+    queryFn: fetchAdminCourses,
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+  });
+  const users = usersQuery.data ?? [];
+  const courses = coursesQuery.data ?? [];
+  const isLoading = usersQuery.isLoading;
+
   const [filterRole, setFilterRole] = useState<string>("all");
   const [search, setSearch] = useState<string>("");
   const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
 
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
-  // Edit / Assign Modal State
   const [showEditModal, setShowEditModal] = useState(false);
-  const [targetCourseId, setTargetCourseId] = useState("");
+  const [pickedCourseId, setPickedCourseId] = useState("");
+  const targetCourseId = courses.some((c) => c.id === pickedCourseId)
+    ? pickedCourseId
+    : (courses[0]?.id ?? "");
+  const [assignError, setAssignError] = useState<string | null>(null);
   const [assignRole, setAssignRole] = useState<"praktikan" | "asprak">("praktikan");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Create User Modal State
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
   const [newUsername, setNewUsername] = useState("");
   const [newName, setNewName] = useState("");
@@ -55,7 +72,6 @@ export function UserManagement() {
   const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [createUserError, setCreateUserError] = useState<string | null>(null);
 
-  // Auto-dismiss notification banners
   useEffect(() => {
     if (actionSuccess) {
       const timer = setTimeout(() => setActionSuccess(null), 4000);
@@ -80,55 +96,8 @@ export function UserManagement() {
     onClose: () => setShowEditModal(false),
   });
 
-
-  const loadData = async () => {
-    try {
-      const [uData, cData] = await Promise.all([
-        fetchAdminUsers().catch(() => []),
-        fetchAdminCourses().catch(() => []),
-      ]);
-      setUsers(uData);
-      setCourses(cData);
-      if (cData.length > 0) {
-        setTargetCourseId(cData[0].id);
-      }
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Couldn't load users. Please refresh.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    let isMounted = true;
-    async function fetchData() {
-      try {
-        const [uData, cData] = await Promise.all([
-          fetchAdminUsers().catch(() => []),
-          fetchAdminCourses().catch(() => []),
-        ]);
-        if (isMounted) {
-          setUsers(uData);
-          setCourses(cData);
-          if (cData.length > 0) {
-            setTargetCourseId(cData[0].id);
-          }
-        }
-      } catch (err: unknown) {
-        if (isMounted) {
-          setError(err instanceof Error ? err.message : "Couldn't load users. Please refresh.");
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    }
-    fetchData();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const refreshUsers = () =>
+    queryClient.invalidateQueries({ queryKey: adminQueryKeys.all });
 
   const handleCreateUser = async (e: React.SubmitEvent) => {
     e.preventDefault();
@@ -167,7 +136,7 @@ export function UserManagement() {
       setNewRole("praktikan");
       setNewPassword("");
       setActionSuccess(`Created ${newRole} account for ${trimmedUsername}.`);
-      await loadData();
+      await refreshUsers();
     } catch (err: unknown) {
       setCreateUserError(err instanceof Error ? err.message : "Couldn't create user account. Please try again.");
     } finally {
@@ -227,7 +196,7 @@ export function UserManagement() {
     try {
       const res = await deactivateUser(user.id);
       setActionSuccess(res.message || `Deactivated user ${user.username}.`);
-      await loadData();
+      await refreshUsers();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Couldn't deactivate user. Please try again.");
     }
@@ -244,7 +213,7 @@ export function UserManagement() {
     try {
       const res = await reactivateUser(user.id);
       setActionSuccess(res.message || `Reactivated user ${user.username}.`);
-      await loadData();
+      await refreshUsers();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Couldn't reactivate user. Please try again.");
     }
@@ -254,7 +223,7 @@ export function UserManagement() {
     if (!targetCourseId || selectedUserIds.size === 0) return;
 
     setIsSubmitting(true);
-    setError(null);
+    setAssignError(null);
     setActionSuccess(null);
 
     const selectedUsers = users.filter((u) => selectedUserIds.has(u.id));
@@ -270,9 +239,14 @@ export function UserManagement() {
       }
       setShowEditModal(false);
       setSelectedUserIds(new Set());
-      await loadData();
+      queryClient.invalidateQueries({
+        queryKey:
+          assignRole === "asprak"
+            ? adminQueryKeys.courseStaff(targetCourseId)
+            : adminQueryKeys.courseStudents(targetCourseId),
+      });
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Couldn't assign users to course. Please try again.");
+      setAssignError(err instanceof Error ? err.message : "Couldn't assign users to course. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -352,6 +326,7 @@ export function UserManagement() {
           <div className="relative">
             <input
               type="text"
+              aria-label="Search users"
               placeholder="Search users..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -396,7 +371,10 @@ export function UserManagement() {
               </button>
               <button
                 type="button"
-                onClick={() => setShowEditModal(true)}
+                onClick={() => {
+                  setAssignError(null);
+                  setShowEditModal(true);
+                }}
                 className="rounded-full bg-slate-900 px-4 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 transition-colors"
               >
                 Assign to Course
@@ -407,6 +385,23 @@ export function UserManagement() {
 
         {isLoading ? (
           <div className="p-12 text-center text-xs text-slate-400">Loading users...</div>
+        ) : usersQuery.isError ? (
+          <div className="p-4">
+            <NotificationBanner variant="error">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <span>Couldn&apos;t load users.</span>
+                <button
+                  type="button"
+                  onClick={() => void usersQuery.refetch()}
+                  className="rounded-lg bg-slate-800 border border-slate-700 px-3 py-1 text-xs font-semibold text-white hover:bg-slate-700 transition"
+                >
+                  Retry
+                </button>
+              </div>
+            </NotificationBanner>
+          </div>
+        ) : users.length === 0 ? (
+          <div className="p-12 text-center text-xs text-slate-400">No users yet. Click &quot;Add User&quot; to create one.</div>
         ) : filteredUsers.length === 0 ? (
           <div className="p-12 text-center text-xs text-slate-400">No users match your search.</div>
         ) : (
@@ -530,9 +525,9 @@ export function UserManagement() {
           role="dialog"
           aria-modal="true"
           aria-labelledby="create-user-modal-title"
-          className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 transition-opacity animate-in fade-in duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-start sm:items-center justify-center overflow-y-auto p-3 sm:p-4 transition-opacity animate-in fade-in duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
         >
-          <div className="bg-white rounded-3xl border border-slate-200 p-6 w-full max-w-md shadow-xl space-y-4 animate-apple-modal">
+          <div className="bg-white rounded-3xl border border-slate-200 p-6 w-full max-w-md max-h-[90dvh] overflow-y-auto shadow-xl space-y-4 animate-apple-modal">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
                 <h4
@@ -549,6 +544,7 @@ export function UserManagement() {
               <button
                 type="button"
                 onClick={() => setShowCreateUserModal(false)}
+                aria-label="Close modal"
                 className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center text-xs apple-press transition-colors"
               >
                 <XIcon className="w-4 h-4" />
@@ -556,18 +552,16 @@ export function UserManagement() {
             </div>
 
             {createUserError && (
-              <div className="p-3 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-800 flex items-center gap-2 animate-apple-fade">
-                <WarningCircleIcon className="w-4 h-4 text-rose-600 shrink-0" />
-                <span>{createUserError}</span>
-              </div>
+              <NotificationBanner variant="error" message={createUserError} />
             )}
 
             <form onSubmit={handleCreateUser} className="space-y-3.5 text-xs">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
+                <label htmlFor="new-user-username" className="block font-semibold text-slate-700 mb-1">
                   Username / NPM <span className="text-rose-500">*</span>
                 </label>
                 <input
+                  id="new-user-username"
                   type="text"
                   required
                   placeholder="e.g. 140810220001 or username"
@@ -578,10 +572,11 @@ export function UserManagement() {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
+                <label htmlFor="new-user-name" className="block font-semibold text-slate-700 mb-1">
                   Full Name <span className="text-slate-400 font-normal">(Optional)</span>
                 </label>
                 <input
+                  id="new-user-name"
                   type="text"
                   placeholder="e.g. Plastic Trees"
                   value={newName}
@@ -591,10 +586,11 @@ export function UserManagement() {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
+                <label htmlFor="new-user-email" className="block font-semibold text-slate-700 mb-1">
                   Email Address <span className="text-rose-500">*</span>
                 </label>
                 <input
+                  id="new-user-email"
                   type="email"
                   required
                   placeholder="e.g. user@unpad.ac.id"
@@ -605,14 +601,15 @@ export function UserManagement() {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
+                <span id="new-user-role-label" className="block font-semibold text-slate-700 mb-1">
                   System Role <span className="text-rose-500">*</span>
-                </label>
-                <div className="grid grid-cols-3 gap-1.5">
+                </span>
+                <div role="group" aria-labelledby="new-user-role-label" className="grid grid-cols-3 gap-1.5">
                   {(["praktikan", "asprak", "superadmin"] as const).map((r) => (
                     <button
                       key={r}
                       type="button"
+                      aria-pressed={newRole === r}
                       onClick={() => setNewRole(r)}
                       className={`py-2 px-2 rounded-xl text-xs font-semibold capitalize border apple-press transition-all duration-150 text-center ${
                         newRole === r
@@ -627,11 +624,12 @@ export function UserManagement() {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
+                <label htmlFor="new-user-password" className="block font-semibold text-slate-700 mb-1">
                   Initial Password <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
                   <input
+                    id="new-user-password"
                     type={showNewPassword ? "text" : "password"}
                     required
                     minLength={8}
@@ -643,6 +641,7 @@ export function UserManagement() {
                   <button
                     type="button"
                     onClick={() => setShowNewPassword((prev) => !prev)}
+                    aria-label={showNewPassword ? "Hide password" : "Show password"}
                     className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors"
                   >
                     {showNewPassword ? <EyeSlashIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
@@ -682,9 +681,9 @@ export function UserManagement() {
           role="dialog"
           aria-modal="true"
           aria-labelledby="bulk-assign-modal-title"
-          className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 transition-opacity animate-in fade-in duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-start sm:items-center justify-center overflow-y-auto p-4 transition-opacity animate-in fade-in duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
         >
-          <div className="bg-white rounded-3xl border border-slate-200 p-6 w-full max-w-md shadow-xl space-y-4 animate-apple-modal">
+          <div className="bg-white rounded-3xl border border-slate-200 p-6 w-full max-w-md max-h-[90dvh] overflow-y-auto shadow-xl space-y-4 animate-apple-modal">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h4 id="bulk-assign-modal-title" className="font-bold text-sm text-slate-900">
                 Assign {selectedUserIds.size} {selectedUserIds.size === 1 ? "User" : "Users"} to Course
@@ -692,20 +691,26 @@ export function UserManagement() {
               <button
                 type="button"
                 onClick={() => setShowEditModal(false)}
+                aria-label="Close modal"
                 className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center text-xs apple-press transition-colors"
               >
                 <XIcon className="w-4 h-4" />
               </button>
             </div>
 
+            {assignError && (
+              <NotificationBanner variant="error" message={assignError} />
+            )}
+
             <div className="space-y-3 pt-2">
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">
+                <label htmlFor="assign-target-course" className="block text-xs font-semibold text-slate-600 mb-1">
                   Target Course
                 </label>
                 <select
+                  id="assign-target-course"
                   value={targetCourseId}
-                  onChange={(e) => setTargetCourseId(e.target.value)}
+                  onChange={(e) => setPickedCourseId(e.target.value)}
                   className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-shadow duration-150"
                 >
                   {courses.map((c) => (
@@ -717,10 +722,11 @@ export function UserManagement() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">
+                <label htmlFor="assign-role" className="block text-xs font-semibold text-slate-600 mb-1">
                   Assignment Role
                 </label>
                 <select
+                  id="assign-role"
                   value={assignRole}
                   onChange={(e) => setAssignRole(e.target.value as "praktikan" | "asprak")}
                   className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-shadow duration-150"

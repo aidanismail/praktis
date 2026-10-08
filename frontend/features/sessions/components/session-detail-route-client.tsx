@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
-import { getCourseDetailRoute } from "@/constants/routes";
+import { getSessionDetailRoute } from "@/constants/routes";
 import { useAuthStore } from "@/stores/auth-store";
 
 type SessionDetailRouteClientProps = {
@@ -21,17 +21,7 @@ export function SessionDetailRouteClient({
   useEffect(() => {
     if (!user) return;
 
-    if (user.role === "praktikan") {
-      router.replace(getCourseDetailRoute(courseId, "sessions"));
-    } else if (user.role === "superadmin") {
-      router.replace(
-        `/dashboard?tab=courses&courseId=${courseId}&workspaceTab=sessions`
-      );
-    } else if (user.role === "asprak") {
-      router.replace(
-        `/dashboard?tab=classes&courseId=${courseId}&workspaceTab=sessions&sessionId=${sessionId}`
-      );
-    }
+    router.replace(getSessionDetailRoute(courseId, sessionId, user.role));
   }, [user, courseId, sessionId, router]);
 
   return (

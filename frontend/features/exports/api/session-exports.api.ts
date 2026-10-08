@@ -8,7 +8,7 @@ import type {
 function getExportErrorMessage(status: number) {
   if (status === 401) return "Your session expired. Sign in again.";
   if (status === 403) return "You are not allowed to export this session.";
-  if (status === 404) return "No saved records are available for this export.";
+  if (status === 404) return "Nothing to export yet.";
   if (status === 422) return "The export format or session link is invalid.";
 
   return "The export could not be prepared.";

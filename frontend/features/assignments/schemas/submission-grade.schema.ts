@@ -15,7 +15,10 @@ export function createSubmissionGradeSchema(maxPoints: number) {
         (value) => Number(value) <= maxPoints,
         `Score cannot exceed ${maxPoints}`
       ),
-    feedback: z.string().trim()
+    feedback: z
+      .string()
+      .trim()
+      .max(5000, "Feedback must be 5000 characters or fewer")
   });
 }
 

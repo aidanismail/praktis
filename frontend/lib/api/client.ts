@@ -5,7 +5,7 @@ type ApiErrorDetail =
       detail?: string;
       msg?: string;
     }
-  | Array<{
+  |Array<{
       msg?: string;
       message?: string;
       loc?: Array<string | number>;
@@ -28,8 +28,11 @@ export class ApiError extends Error {
   }
 }
 
-function getErrorMessage(data: unknown): string {
+function getErrorMessage(data: unknown, status?: number): string {
   if (!data) {
+    if (status && status >= 500) {
+      return `Server error (${status}). Please try again.`;
+    }
     return "Request failed";
   }
 
@@ -109,7 +112,11 @@ export async function apiClient<T>(
   const data = isJson ? await response.json().catch(() => null) : null;
 
   if (!response.ok) {
-    throw new ApiError(getErrorMessage(data), response.status, data);
+    throw new ApiError(
+      getErrorMessage(data, response.status),
+      response.status,
+      data
+    );
   }
 
   return data as T;

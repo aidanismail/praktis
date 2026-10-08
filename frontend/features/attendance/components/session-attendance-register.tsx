@@ -7,6 +7,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useCourseRoster } from "@/features/courses/hooks/use-course-roster";
 import type { EnrolledStudent } from "@/features/courses/types/enrolled-student.type";
+import { compareStudents } from "@/features/courses/utils/student";
 import type { CourseSession } from "@/features/sessions/types/session.type";
 import { ApiError } from "@/lib/api/client";
 import {
@@ -51,10 +52,7 @@ function buildRegisterValues(
 
   return {
     records: [...students]
-      .sort((left, right) => {
-        const byUsername = left.username.localeCompare(right.username);
-        return byUsername !== 0 ? byUsername : left.id.localeCompare(right.id);
-      })
+      .sort(compareStudents)
       .map((student) => ({
         student_id: student.id,
         status: statusByStudent.get(student.id) ?? ""
@@ -143,6 +141,7 @@ function AttendanceRegisterForm({
   onAttendanceRefresh: () => Promise<{ data?: AttendanceRecord[] }>;
 }) {
   const [search, setSearch] = useState("");
+  const [onlyUnrecorded, setOnlyUnrecorded] = useState(false);
   const serverValues = useMemo(
     () => buildRegisterValues(students, records),
     [students, records]
@@ -177,11 +176,14 @@ function AttendanceRegisterForm({
   const normalizedSearch = search.trim().toLocaleLowerCase();
   const visibleIndexes = fields
     .map((field, index) => ({ field, index, student: studentById.get(field.student_id) }))
-    .filter(({ student }) => {
-      if (!student || normalizedSearch.length === 0) return Boolean(student);
+    .filter(({ student, index }) => {
+      if (!student) return false;
+      if (onlyUnrecorded && watchedRecords[index]?.status) return false;
+      if (normalizedSearch.length === 0) return true;
 
       return (
         student.username.toLocaleLowerCase().includes(normalizedSearch) ||
+        (student.name ?? "").toLocaleLowerCase().includes(normalizedSearch) ||
         student.email.toLocaleLowerCase().includes(normalizedSearch)
       );
     });
@@ -308,7 +310,12 @@ function AttendanceRegisterForm({
         </dl>
 
         {isEditable ? (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {counts.unrecorded > 0 ? (
+              <span role="status" className="text-xs font-medium text-amber-700">
+                {counts.unrecorded} {counts.unrecorded === 1 ? "student" : "students"} not recorded
+              </span>
+            ) : null}
             <button
               type="submit"
               disabled={saveMutation.isPending || !form.formState.isDirty || counts.unrecorded > 0 || students.length === 0}
@@ -332,13 +339,13 @@ function AttendanceRegisterForm({
 
       {unmatchedRecords.length > 0 ? (
         <div role="alert" className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-          {unmatchedRecords.length} saved attendance {unmatchedRecords.length === 1 ? "record doesn&apos;t" : "records don&apos;t"} match the current course roster. They haven&apos;t been assigned to another student.
+          {unmatchedRecords.length} saved attendance {unmatchedRecords.length === 1 ? "record doesn't" : "records don't"} match the current course roster. They haven&apos;t been assigned to another student.
         </div>
       ) : null}
 
       <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
         <label className="min-w-0 flex-1 sm:max-w-sm">
-          <span className="text-sm font-semibold text-slate-800">Search by NPM or email</span>
+          <span className="text-sm font-semibold text-slate-800">Search by name, NPM or email</span>
           <span className="relative mt-1.5 block">
             <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-slate-400" aria-hidden="true" />
             <input
@@ -346,10 +353,23 @@ function AttendanceRegisterForm({
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               className="min-h-11 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
-              placeholder="Search by NPM or email..."
+              placeholder="Search by name, NPM or email..."
             />
           </span>
         </label>
+
+        <button
+          type="button"
+          aria-pressed={onlyUnrecorded}
+          onClick={() => setOnlyUnrecorded((value) => !value)}
+          className={`inline-flex min-h-11 items-center rounded-xl border px-4 text-sm font-semibold shadow-xs transition ${
+            onlyUnrecorded
+              ? "border-slate-900 bg-slate-900 text-white"
+              : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+          }`}
+        >
+          Show unrecorded ({counts.unrecorded})
+        </button>
 
         {isEditable ? (
           <button type="button" onClick={setAllPresent} disabled={saveMutation.isPending || students.length === 0} className="inline-flex min-h-11 items-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60">
@@ -360,7 +380,9 @@ function AttendanceRegisterForm({
 
       {visibleIndexes.length === 0 ? (
         <div role="status" className="mt-4 rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-600">
-          No students match this search.
+          {onlyUnrecorded && normalizedSearch.length === 0
+            ? "Every student has a status."
+            : "No students match this search."}
         </div>
       ) : (
         <ul className="mt-4 max-h-96 divide-y divide-slate-200 overflow-y-auto overscroll-contain rounded-2xl border border-slate-200">
@@ -372,12 +394,17 @@ function AttendanceRegisterForm({
             return (
               <li key={field.id} className="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_12rem] sm:items-center">
                 <div className="min-w-0">
-                  <p className="wrap-break-word font-mono text-sm font-semibold text-slate-950">{student.username}</p>
+                  {student.name ? (
+                    <p className="wrap-break-word text-sm font-semibold text-slate-950">{student.name}</p>
+                  ) : null}
+                  <p className={`wrap-break-word font-mono text-sm ${student.name ? "text-slate-700" : "font-semibold text-slate-950"}`}>
+                    {student.username}
+                  </p>
                   <p className="mt-1 break-all text-sm text-slate-600">{student.email}</p>
                 </div>
                 <div>
                   <label htmlFor={`attendance-${field.id}`} className="sr-only">
-                    Attendance status for {student.username}
+                    Attendance status for {student.name || student.username}
                   </label>
                   <select
                     id={`attendance-${field.id}`}

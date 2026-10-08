@@ -14,7 +14,7 @@ import { useState } from "react";
 import { getCourseDetailRoute, ROUTES } from "@/constants/routes";
 import { useAssignedCourses } from "@/features/courses/hooks/use-assigned-courses";
 import { ApiError } from "@/lib/api/client";
-import { useAuthStore } from "@/stores/auth-store";
+import { formatDateTime } from "@/lib/format/date";
 import {
   useAssignmentDetail,
   useDeleteCourseAssignment
@@ -23,30 +23,12 @@ import type { Assignment } from "../types/assignment.type";
 import { AssignmentEditor } from "./assignment-editor";
 import { AssignmentSubmissions } from "./assignment-submissions";
 
-type AsprakAssignmentDetailPageProps = {
-  courseId: string;
-  assignmentId: string;
-};
-
 type AssignedAssignmentDetailProps = {
   userId: string;
   courseId: string;
   assignmentId: string;
   onBack?: () => void;
 };
-
-const dateFormatter = new Intl.DateTimeFormat("en", {
-  dateStyle: "medium",
-  timeStyle: "short"
-});
-
-function formatDate(value: string) {
-  const date = new Date(value);
-
-  return Number.isNaN(date.getTime())
-    ? "Date unavailable"
-    : dateFormatter.format(date);
-}
 
 function getAllowedFileTypes(value: string) {
   return value
@@ -190,7 +172,7 @@ function AssignmentSummary({
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs sm:p-7">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <div className="flex items-center gap-2 text-xs">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
             {courseCode && (
               <>
                 <span className="font-bold uppercase tracking-wider text-[11px] text-slate-400">
@@ -210,10 +192,20 @@ function AssignmentSummary({
 
             <span className="text-slate-300" aria-hidden="true">·</span>
 
+            <span
+              className={`font-semibold ${
+                assignment.grades_published ? "text-emerald-700" : "text-slate-500"
+              }`}
+            >
+              {assignment.grades_published ? "Grades published" : "Grades hidden"}
+            </span>
+
+            <span className="text-slate-300" aria-hidden="true">·</span>
+
             <span className="text-slate-500">
               Created{" "}
               <time dateTime={assignment.created_at}>
-                {formatDate(assignment.created_at)}
+                {formatDateTime(assignment.created_at)}
               </time>
             </span>
           </div>
@@ -249,7 +241,7 @@ function AssignmentSummary({
           <span className="font-semibold text-slate-800">
             {assignment.due_date ? (
               <time dateTime={assignment.due_date}>
-                {formatDate(assignment.due_date)}
+                {formatDateTime(assignment.due_date)}
               </time>
             ) : (
               "No deadline"
@@ -451,7 +443,7 @@ export function AssignedAssignmentDetail({
             onClick={onBack}
             className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-full shadow-xs apple-press transition-colors cursor-pointer"
           >
-            <ArrowLeftIcon className="w-4 h-4" />
+            <ArrowLeftIcon className="w-4 h-4" aria-hidden="true" />
             <span>Back to Assignments</span>
           </button>
         ) : (
@@ -459,7 +451,7 @@ export function AssignedAssignmentDetail({
             href={getCourseDetailRoute(courseId, "assignments")}
             className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-full shadow-xs apple-press transition-colors"
           >
-            <ArrowLeftIcon className="w-4 h-4" />
+            <ArrowLeftIcon className="w-4 h-4" aria-hidden="true" />
             <span>Back to Assignments</span>
           </Link>
         )}
@@ -470,7 +462,7 @@ export function AssignedAssignmentDetail({
             onClick={() => setIsEditing((prev) => !prev)}
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-3.5 py-2 rounded-full shadow-xs apple-press transition-colors cursor-pointer"
           >
-            <PencilSimpleIcon className="w-3.5 h-3.5 text-slate-500" />
+            <PencilSimpleIcon className="w-3.5 h-3.5 text-slate-500" aria-hidden="true" />
             <span>{isEditing ? "Close settings" : "Edit assignment"}</span>
           </button>
 
@@ -484,7 +476,7 @@ export function AssignedAssignmentDetail({
               disabled={deleteMutation.isPending}
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-700 hover:text-rose-800 bg-white border border-rose-200 hover:bg-rose-50 px-3.5 py-2 rounded-full shadow-xs apple-press transition-colors cursor-pointer disabled:opacity-60"
             >
-              <TrashIcon className="w-3.5 h-3.5 text-rose-500" />
+              <TrashIcon className="w-3.5 h-3.5 text-rose-500" aria-hidden="true" />
               <span>Delete</span>
             </button>
           ) : null}
@@ -551,60 +543,10 @@ export function AssignedAssignmentDetail({
         <AssignmentSubmissions
           userId={userId}
           courseId={courseId}
-          assignmentId={assignment.id}
-          maxPoints={assignment.max_points}
-          enabled={assignment.course_id === courseId}
+          courseCode={course.code}
+          assignment={assignment}
         />
       </div>
     </div>
-  );
-}
-
-export function AsprakAssignmentDetailPage({
-  courseId,
-  assignmentId
-}: AsprakAssignmentDetailPageProps) {
-  const user = useAuthStore((state) => state.user);
-
-  if (!user) {
-    return null;
-  }
-
-  if (user.role !== "asprak") {
-    return (
-      <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl">
-          <div
-            role="alert"
-            className="rounded-3xl border border-amber-200 bg-amber-50 p-6"
-          >
-            <h1 className="text-lg font-semibold text-amber-950">
-              Asprak access required
-            </h1>
-            <p className="mt-2 text-sm leading-6 text-amber-800">
-              Assignment management is available only to Asprak accounts.
-            </p>
-            <Link
-              href={ROUTES.dashboard}
-              className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-amber-900 underline underline-offset-4"
-            >
-              Return to dashboard
-            </Link>
-          </div>
-        </div>
-      </main>
-    );
-  }
-
-  return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl">
-        <AssignedAssignmentDetail
-          userId={user.id}
-          courseId={courseId}
-          assignmentId={assignmentId}
-        />
-      </div>
-    </main>
   );
 }

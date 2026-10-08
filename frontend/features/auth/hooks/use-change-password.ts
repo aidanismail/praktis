@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { ApiError } from "@/lib/api/client";
-import { getDefaultDashboardByRole, ROUTES } from "@/constants/routes";
+import { ROUTES } from "@/constants/routes";
 import { useAuthStore } from "@/stores/auth-store";
 import { changePassword, getMe } from "../api/auth.api";
 import { authQueryKeys } from "../constants/auth-query-keys";
@@ -24,7 +24,7 @@ export function useChangePassword() {
     onSuccess: (user) => {
       queryClient.setQueryData(authQueryKeys.currentUser(), user);
       setUser(user);
-      router.replace(getDefaultDashboardByRole(user.role));
+      router.replace(ROUTES.dashboard);
     },
 
     onError: async (error) => {

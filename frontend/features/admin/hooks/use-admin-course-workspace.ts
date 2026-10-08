@@ -9,7 +9,6 @@ import {
   fetchAnnouncements,
   fetchAssignments,
   fetchAssignmentSubmissions,
-  fetchSessionAttendance,
   fetchAdminUsers,
   enrollCourseStudents,
   assignCourseStaff,
@@ -17,6 +16,8 @@ import {
   removeCourseStaff,
   createCourseSession,
   deleteModule,
+  publishModule,
+  unpublishModule,
   createAnnouncement,
   updateAnnouncement,
   deleteAnnouncement,
@@ -25,15 +26,24 @@ import {
   createAssignment,
   updateAssignment,
   deleteAssignment,
-  gradeAssignmentSubmission,
+  setAssignmentGradesPublished,
   openSessionAttendance,
   closeSessionAttendance,
-  updateSessionAttendance,
 } from "../api/admin.api";
-import { updateCourseSession } from "@/features/sessions/api/sessions.api";
+import {
+  deleteCourseSession,
+  updateCourseSession,
+} from "@/features/sessions/api/sessions.api";
 import { adminQueryKeys } from "../constants/admin-query-keys";
 
-export function useCourseWorkspace(courseId: string | null) {
+type CourseWorkspaceOptions = {
+  loadSystemUsers?: boolean;
+};
+
+export function useCourseWorkspace(
+  courseId: string | null,
+  { loadSystemUsers = false }: CourseWorkspaceOptions = {}
+) {
   const queryClient = useQueryClient();
   const enabled = Boolean(courseId);
   const cid = courseId ?? "";
@@ -92,6 +102,7 @@ export function useCourseWorkspace(courseId: string | null) {
   const systemUsersQuery = useQuery({
     queryKey: adminQueryKeys.users(),
     queryFn: fetchAdminUsers,
+    enabled: loadSystemUsers,
     staleTime: 60_000,
     refetchOnWindowFocus: false,
   });
@@ -103,8 +114,10 @@ export function useCourseWorkspace(courseId: string | null) {
     queryClient.invalidateQueries({ queryKey: adminQueryKeys.courseStaff(cid) });
   const invalidateSessions = () =>
     queryClient.invalidateQueries({ queryKey: adminQueryKeys.courseSessions(cid) });
-  const invalidateModules = () =>
-    queryClient.invalidateQueries({ queryKey: adminQueryKeys.courseModules(cid) });
+  const invalidateModules = () => {
+    queryClient.invalidateQueries({ queryKey: adminQueryKeys.modules() });
+    return queryClient.invalidateQueries({ queryKey: adminQueryKeys.courseModules(cid) });
+  };
   const invalidateAnnouncements = () =>
     queryClient.invalidateQueries({ queryKey: adminQueryKeys.courseAnnouncements(cid) });
   const invalidateAssignments = () =>
@@ -143,8 +156,35 @@ export function useCourseWorkspace(courseId: string | null) {
     onSuccess: invalidateSessions,
   });
 
+  const changeSessionDateMutation = useMutation({
+    mutationFn: ({ sessionId, date }: { sessionId: string; date: string }) =>
+      updateCourseSession(sessionId, { date }),
+    onSuccess: invalidateSessions,
+  });
+
+  const setSessionWindowMutation = useMutation({
+    mutationFn: ({ sessionId, open }: { sessionId: string; open: boolean }) =>
+      open ? openSessionAttendance(sessionId) : closeSessionAttendance(sessionId),
+    onSuccess: invalidateSessions,
+  });
+
+  const deleteSessionMutation = useMutation({
+    mutationFn: (sessionId: string) => deleteCourseSession(sessionId),
+    onSuccess: () => {
+      invalidateSessions();
+      // Deleting a session unlinks its assignments.
+      invalidateAssignments();
+    },
+  });
+
   const deleteModuleMutation = useMutation({
     mutationFn: (moduleId: string) => deleteModule(moduleId),
+    onSuccess: invalidateModules,
+  });
+
+  const setModulePublishedMutation = useMutation({
+    mutationFn: ({ moduleId, published }: { moduleId: string; published: boolean }) =>
+      published ? publishModule(moduleId) : unpublishModule(moduleId),
     onSuccess: invalidateModules,
   });
 
@@ -229,18 +269,6 @@ export function useCourseWorkspace(courseId: string | null) {
     onSuccess: invalidateAssignments,
   });
 
-  const refetchAllWorkspace = async () => {
-    await Promise.all([
-      studentsQuery.refetch(),
-      staffQuery.refetch(),
-      sessionsQuery.refetch(),
-      modulesQuery.refetch(),
-      announcementsQuery.refetch(),
-      assignmentsQuery.refetch(),
-      systemUsersQuery.refetch(),
-    ]);
-  };
-
   const isLoadingWorkspace =
     studentsQuery.isLoading ||
     staffQuery.isLoading ||
@@ -258,7 +286,6 @@ export function useCourseWorkspace(courseId: string | null) {
     assignments: assignmentsQuery.data ?? [],
     systemUsers: systemUsersQuery.data ?? [],
     isLoadingWorkspace,
-    refetchAllWorkspace,
     // Mutations
     enrollStudents: enrollMutation.mutateAsync,
     assignStaff: assignStaffMutation.mutateAsync,
@@ -266,7 +293,11 @@ export function useCourseWorkspace(courseId: string | null) {
     removeStaff: removeStaffMutation.mutateAsync,
     createSession: createSessionMutation.mutateAsync,
     renameSession: renameSessionMutation.mutateAsync,
+    changeSessionDate: changeSessionDateMutation.mutateAsync,
+    setSessionWindow: setSessionWindowMutation.mutateAsync,
+    deleteSession: deleteSessionMutation.mutateAsync,
     deleteModule: deleteModuleMutation.mutateAsync,
+    setModulePublished: setModulePublishedMutation.mutateAsync,
     createAnnouncement: createAnnouncementMutation.mutateAsync,
     updateAnnouncement: updateAnnouncementMutation.mutateAsync,
     deleteAnnouncement: deleteAnnouncementMutation.mutateAsync,
@@ -274,7 +305,10 @@ export function useCourseWorkspace(courseId: string | null) {
     deleteComment: deleteCommentMutation.mutateAsync,
     createAssignment: createAssignmentMutation.mutateAsync,
     updateAssignment: updateAssignmentMutation.mutateAsync,
+    isSavingAssignment:
+      createAssignmentMutation.isPending || updateAssignmentMutation.isPending,
     deleteAssignment: deleteAssignmentMutation.mutateAsync,
+    isDeletingAssignment: deleteAssignmentMutation.isPending,
     invalidateModules,
     invalidateSessions,
   };
@@ -293,85 +327,24 @@ export function useAssignmentSubmissions(courseId: string, assignmentId: string 
     refetchOnWindowFocus: false,
   });
 
-  const gradeMutation = useMutation({
-    mutationFn: ({
-      submissionId,
-      score,
-      feedback,
-    }: {
-      submissionId: string;
-      score: number;
-      feedback?: string;
-    }) =>
-      gradeAssignmentSubmission(courseId, aid, submissionId, { score, feedback }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: adminQueryKeys.assignmentSubmissions(courseId, aid),
-      });
+  const publishMutation = useMutation({
+    mutationFn: (published: boolean) =>
+      setAssignmentGradesPublished(courseId, aid, published),
+    onSuccess: () =>
       queryClient.invalidateQueries({
         queryKey: adminQueryKeys.courseAssignments(courseId),
-      });
-    },
+      }),
   });
 
   return {
     submissions: submissionsQuery.data ?? [],
     isLoadingSubmissions: submissionsQuery.isLoading,
     refetchSubmissions: submissionsQuery.refetch,
-    gradeSubmission: gradeMutation.mutateAsync,
-    isGrading: gradeMutation.isPending,
-  };
-}
-
-export function useSessionAttendance(sessionId: string | null, courseId?: string) {
-  const queryClient = useQueryClient();
-  const enabled = Boolean(sessionId);
-  const sid = sessionId ?? "";
-
-  const attendanceQuery = useQuery({
-    queryKey: adminQueryKeys.sessionAttendance(sid),
-    queryFn: () => fetchSessionAttendance(sid),
-    enabled,
-    staleTime: 15_000,
-    refetchOnWindowFocus: false,
-  });
-
-  const toggleAttendanceMutation = useMutation({
-    mutationFn: async (shouldOpen: boolean) => {
-      if (shouldOpen) {
-        return await openSessionAttendance(sid);
-      }
-      return await closeSessionAttendance(sid);
+    setGradesPublished: (published: boolean) => {
+      publishMutation.reset();
+      return publishMutation.mutateAsync(published);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: adminQueryKeys.sessionAttendance(sid),
-      });
-      if (courseId) {
-        queryClient.invalidateQueries({
-          queryKey: adminQueryKeys.courseSessions(courseId),
-        });
-      }
-    },
-  });
-
-  const updateRecordMutation = useMutation({
-    mutationFn: (records: { student_id: string; status: "hadir" | "sakit" | "izin" | "alfa" }[]) =>
-      updateSessionAttendance(sid, records),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: adminQueryKeys.sessionAttendance(sid),
-      });
-    },
-  });
-
-  return {
-    attendanceList: attendanceQuery.data ?? [],
-    isLoadingAttendance: attendanceQuery.isLoading,
-    refetchAttendance: attendanceQuery.refetch,
-    toggleAttendance: toggleAttendanceMutation.mutateAsync,
-    isTogglingAttendance: toggleAttendanceMutation.isPending,
-    updateAttendance: updateRecordMutation.mutateAsync,
-    isUpdatingAttendance: updateRecordMutation.isPending,
+    isPublishing: publishMutation.isPending,
+    publishError: publishMutation.error,
   };
 }

@@ -16,7 +16,7 @@ export default function NotFound() {
         </div>
 
         <div className="space-y-1.5">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
             Error 404
           </span>
           <h1 className="text-lg font-bold text-slate-900">

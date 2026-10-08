@@ -1,17 +1,22 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ClockIcon,
   CalendarCheckIcon,
   CheckCircleIcon,
   CaretRightIcon,
+  GraduationCapIcon,
 } from "@phosphor-icons/react";
 import { useCourseAssignments } from "@/features/assignments/hooks/use-course-assignments";
 import { useCourseSessions } from "@/features/sessions/hooks/use-course-sessions";
+import { usePersonalGrades } from "@/features/grades/hooks/use-personal-grades";
 import type { Assignment } from "@/features/assignments/types/assignment.type";
 import type { CourseSession } from "@/features/sessions/types/session.type";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
+import { SessionStatusBadge } from "@/features/sessions/components/session-status-badge";
+import { formatCalendarDate, formatDate, localDateKey } from "@/lib/format/date";
+import { formatScore } from "@/lib/format/score";
 
 type CourseUpcomingWidgetProps = {
   userId: string;
@@ -20,24 +25,26 @@ type CourseUpcomingWidgetProps = {
   onNavigateToAssignments: () => void;
   onSelectAssignment: (assignmentId: string) => void;
   onNavigateToSessions: () => void;
+  onNavigateToGrades?: () => void;
 };
 
-const dateFormatter = new Intl.DateTimeFormat("en", {
-  weekday: "short",
-  month: "short",
-  day: "numeric",
-});
+const CLOCK_TICK_MS = 60_000;
+const MAX_UPCOMING = 4;
+const MAX_PAST = 2;
 
-function formatDueDate(isoString: string): string {
-  const date = new Date(isoString);
-  if (Number.isNaN(date.getTime())) return "Date unavailable";
-  return dateFormatter.format(date);
-}
-
-function formatSessionDate(dateString: string): string {
-  const date = new Date(`${dateString}T00:00:00`);
-  if (Number.isNaN(date.getTime())) return "Date unavailable";
-  return dateFormatter.format(date);
+function LoadError({ message, onRetry }: { message: string; onRetry: () => void }) {
+  return (
+    <div role="alert" className="py-3 text-center">
+      <p className="text-xs font-medium text-rose-700">{message}</p>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="mt-2 text-[11px] font-semibold text-slate-600 hover:text-slate-900 hover:underline cursor-pointer"
+      >
+        Retry
+      </button>
+    </div>
+  );
 }
 
 export function CourseUpcomingWidget({
@@ -47,6 +54,7 @@ export function CourseUpcomingWidget({
   onNavigateToAssignments,
   onSelectAssignment,
   onNavigateToSessions,
+  onNavigateToGrades,
 }: CourseUpcomingWidgetProps) {
   const assignmentsQuery = useCourseAssignments({
     userId,
@@ -60,52 +68,59 @@ export function CourseUpcomingWidget({
     enabled: true,
   });
 
-  const isLoading = assignmentsQuery.isPending || sessionsQuery.isPending;
-  const referenceTime = assignmentsQuery.dataUpdatedAt || sessionsQuery.dataUpdatedAt || 0;
+  const gradesQuery = usePersonalGrades(userId, viewerRole === "praktikan");
 
-  // Upcoming assignments: published, has due_date, sorted by due_date ascending
+  const recentGrades = useMemo(() => {
+    if (viewerRole !== "praktikan") return [];
+    return (gradesQuery.data ?? [])
+      .filter((g) => g.course_id === courseId && g.item_type === "assignment")
+      .slice(0, 3);
+  }, [gradesQuery.data, viewerRole, courseId]);
+
+  const isLoading = assignmentsQuery.isPending || sessionsQuery.isPending;
+
+  // Coarse clock so "past due" and "today" stay correct without re-rendering constantly.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), CLOCK_TICK_MS);
+    return () => clearInterval(id);
+  }, []);
+
+  // Published assignments with a deadline: upcoming first (soonest first), then a few
+  // recent past ones (students only see past ones they have not turned in).
   const upcomingAssignments = useMemo(() => {
-    const list = (assignmentsQuery.data ?? []).filter(
+    const withDeadline = (assignmentsQuery.data ?? []).filter(
       (a: Assignment) => a.is_published && a.due_date
     );
-    return list
-      .sort((a, b) => new Date(a.due_date!).getTime() - new Date(b.due_date!).getTime())
-      .slice(0, 4)
-      .map((a) => ({
-        ...a,
-        isPastDue: Boolean(
-          referenceTime > 0 &&
-            a.due_date &&
-            new Date(a.due_date).getTime() < referenceTime
-        ),
-      }));
-  }, [assignmentsQuery.data, referenceTime]);
+    const dueTime = (a: Assignment) => new Date(a.due_date!).getTime();
+    const future = withDeadline
+      .filter((a) => dueTime(a) >= now)
+      .sort((a, b) => dueTime(a) - dueTime(b))
+      .slice(0, MAX_UPCOMING);
+    const past = withDeadline
+      .filter((a) => dueTime(a) < now && (viewerRole === "asprak" || !a.my_submission))
+      .sort((a, b) => dueTime(b) - dueTime(a))
+      .slice(0, Math.min(MAX_PAST, MAX_UPCOMING - future.length));
+    return [...future, ...past].map((a) => ({ ...a, isPastDue: dueTime(a) < now }));
+  }, [assignmentsQuery.data, now, viewerRole]);
 
-  // Next upcoming session
-  const nextSession = useMemo(() => {
+  // Open session first, then the next one by local date, else the most recent one.
+  const { session: featuredSession, isLast: isLastSession } = useMemo(() => {
     const sessions = (sessionsQuery.data ?? []) as CourseSession[];
-    if (sessions.length === 0) return null;
+    if (sessions.length === 0) return { session: null, isLast: false };
 
-    const todayStr = referenceTime > 0
-      ? new Date(referenceTime).toISOString().split("T")[0]
-      : "";
+    const openSession = sessions.find((s) => s.attendance_status === "OPEN");
+    if (openSession) return { session: openSession, isLast: false };
 
-    // Check if any session is currently OPEN
-    const openSession = sessions.find(
-      (s) => s.attendance_status === "OPEN"
-    );
-    if (openSession) return openSession;
-
-    // Next future session
-    const futureSessions = sessions
-      .filter((s) => !todayStr || s.date >= todayStr)
+    const today = localDateKey(now);
+    const future = sessions
+      .filter((s) => s.date >= today)
       .sort((a, b) => a.date.localeCompare(b.date));
+    if (future.length > 0) return { session: future[0], isLast: false };
 
-    if (futureSessions.length > 0) return futureSessions[0];
-
-    // Fall back to most recent session
-    return [...sessions].sort((a, b) => b.date.localeCompare(a.date))[0];
-  }, [sessionsQuery.data, referenceTime]);
+    const latest = [...sessions].sort((a, b) => b.date.localeCompare(a.date))[0];
+    return { session: latest, isLast: true };
+  }, [sessionsQuery.data, now]);
 
   if (isLoading) {
     return (
@@ -136,12 +151,16 @@ export function CourseUpcomingWidget({
           </button>
         </div>
 
-        {upcomingAssignments.length === 0 ? (
+        {assignmentsQuery.isError ? (
+          <LoadError
+            message="Could not load assignments."
+            onRetry={() => void assignmentsQuery.refetch()}
+          />
+        ) : upcomingAssignments.length === 0 ? (
           <div className="py-3 text-center">
             <CheckCircleIcon className="w-5 h-5 text-slate-400 mx-auto" />
             <p className="mt-1.5 text-xs font-medium text-slate-600">
-              No assignments due soon,
-              wow wow wow!!
+              No assignments due soon.
             </p>
           </div>
         ) : (
@@ -173,7 +192,7 @@ export function CourseUpcomingWidget({
 
                   <div className="mt-1 flex items-center justify-between gap-2 text-[11px]">
                     <span className="text-slate-400 font-medium">
-                      Due {formatDueDate(assignment.due_date!)}
+                      Due {formatDate(assignment.due_date)}
                     </span>
 
                     {viewerRole === "praktikan" ? (
@@ -219,7 +238,7 @@ export function CourseUpcomingWidget({
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-bold text-slate-900 flex items-center gap-1.5 uppercase tracking-wider">
             <CalendarCheckIcon className="w-4 h-4 text-slate-700" weight="bold" />
-            <span>Next Session</span>
+            <span>{isLastSession ? "Last session" : "Next Session"}</span>
           </h3>
 
           <span className="text-[11px] font-semibold text-slate-500 group-hover:text-slate-900 group-hover:underline transition-colors">
@@ -227,14 +246,19 @@ export function CourseUpcomingWidget({
           </span>
         </div>
 
-        {nextSession ? (
+        {sessionsQuery.isError ? (
+          <LoadError
+            message="Could not load sessions."
+            onRetry={() => void sessionsQuery.refetch()}
+          />
+        ) : featuredSession ? (
           <div className="pt-1 space-y-2">
             <div>
               <h4 className="text-xs font-bold text-slate-900 group-hover:text-slate-950 transition-colors line-clamp-1">
-                {nextSession.title}
+                {featuredSession.title}
               </h4>
               <p className="mt-0.5 text-[11px] text-slate-500 font-medium">
-                {formatSessionDate(nextSession.date)}
+                {formatCalendarDate(featuredSession.date)}
               </p>
             </div>
 
@@ -243,19 +267,7 @@ export function CourseUpcomingWidget({
                 Attendance
               </span>
 
-              {nextSession.attendance_status === "OPEN" ? (
-                <span className="inline-flex items-center font-semibold text-[10px] uppercase tracking-wide text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2.5 py-0.5 rounded-full">
-                  Open
-                </span>
-              ) : nextSession.attendance_status === "CLOSED" ? (
-                <span className="inline-flex items-center font-medium text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
-                  Closed
-                </span>
-              ) : (
-                <span className="inline-flex items-center font-medium text-[10px] text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">
-                  Scheduled
-                </span>
-              )}
+              <SessionStatusBadge status={featuredSession.attendance_status} />
             </div>
           </div>
         ) : (
@@ -264,6 +276,52 @@ export function CourseUpcomingWidget({
           </div>
         )}
       </div>
+
+      {viewerRole === "praktikan" && recentGrades.length > 0 && (
+        <div
+          onClick={onNavigateToGrades ?? onNavigateToAssignments}
+          className="rounded-3xl border border-slate-200 bg-white p-5 shadow-xs space-y-3 cursor-pointer apple-card-hover transition-all group"
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              (onNavigateToGrades ?? onNavigateToAssignments)();
+            }
+          }}
+        >
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold text-slate-900 flex items-center gap-1.5 uppercase tracking-wider">
+              <GraduationCapIcon className="w-4 h-4 text-slate-700" weight="bold" />
+              <span>Released Grades</span>
+            </h3>
+
+            <span className="text-[11px] font-semibold text-slate-500 group-hover:text-slate-900 group-hover:underline transition-colors">
+              View All
+            </span>
+          </div>
+
+          <div className="space-y-2 pt-1">
+            {recentGrades.map((grade) => (
+              <div
+                key={grade.id}
+                className="flex items-center justify-between py-1.5 border-t border-slate-100 text-xs"
+              >
+                <div className="min-w-0 pr-2">
+                  <p className="font-semibold text-slate-900 truncate">
+                    {grade.session_title}
+                  </p>
+                  <p className="text-[10px] text-slate-400">Assignment</p>
+                </div>
+                <span className="font-mono font-bold text-slate-900 shrink-0">
+                  {formatScore(grade.score)}
+                  <span className="text-[10px] text-slate-400 font-normal"> / {grade.max_points}</span>
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

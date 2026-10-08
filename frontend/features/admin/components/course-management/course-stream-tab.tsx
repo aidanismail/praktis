@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type {
   AnnouncementItem,
   AssignmentItem,
   ClassSessionItem,
 } from "../../api/admin.api";
+import { formatCalendarDate, formatDateTime, localDateKey } from "@/lib/format/date";
 import type { Course } from "@/features/courses/types/course.type";
 import {
   CaretRightIcon,
@@ -24,7 +25,7 @@ type CourseStreamTabProps = {
   sessions: ClassSessionItem[];
   onOpenSubmissions: (assignment: AssignmentItem) => void;
   onNavigateToClasswork: () => void;
-  onNavigateToSessions: (session?: ClassSessionItem) => void;
+  onNavigateToSessions: () => void;
   onCreateAnnouncement: (data: {
     title: string;
     content: string;
@@ -55,6 +56,32 @@ export function CourseStreamTab({
   const [newPinned, setNewPinned] = useState(false);
   const [isPosting, setIsPosting] = useState(false);
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
+  const [confirmDeleteAnnouncementId, setConfirmDeleteAnnouncementId] = useState<string | null>(null);
+  const [confirmDeleteCommentId, setConfirmDeleteCommentId] = useState<string | null>(null);
+  const [now] = useState(() => Date.now());
+
+  // Published assignments that are not yet due, soonest first.
+  const upcomingAssignments = useMemo(
+    () =>
+      assignments
+        .filter(
+          (a) => a.is_published && a.due_date && new Date(a.due_date).getTime() >= now
+        )
+        .sort(
+          (a, b) => new Date(a.due_date!).getTime() - new Date(b.due_date!).getTime()
+        )
+        .slice(0, 3),
+    [assignments, now]
+  );
+
+  // Next session = earliest session today or later; otherwise fall back to the most recent one.
+  const { nextSession, isFallbackSession } = useMemo(() => {
+    const today = localDateKey(now);
+    const byDate = [...sessions].sort((a, b) => a.date.localeCompare(b.date));
+    const upcoming = byDate.find((s) => s.date.slice(0, 10) >= today);
+    if (upcoming) return { nextSession: upcoming, isFallbackSession: false };
+    return { nextSession: byDate[byDate.length - 1] ?? null, isFallbackSession: true };
+  }, [sessions, now]);
 
   const handlePost = async (e: React.SubmitEvent) => {
     e.preventDefault();
@@ -102,71 +129,64 @@ export function CourseStreamTab({
             )}
           </div>
 
-          {assignments.filter((a) => a.due_date).length === 0 ? (
-            <p className="text-xs text-slate-400">No assignments due soon. All caught up!</p>
+          {upcomingAssignments.length === 0 ? (
+            <p className="text-xs text-slate-400">No upcoming deadlines.</p>
           ) : (
             <div className="space-y-1">
-              {assignments
-                .filter((a) => a.due_date)
-                .slice(0, 3)
-                .map((a) => (
-                  <div
-                    key={a.id}
-                    onClick={() => onOpenSubmissions(a)}
-                    className="group p-2 -mx-2 rounded-2xl hover:bg-slate-50 transition-all cursor-pointer border border-transparent hover:border-slate-100"
-                    title={`Open ${a.title} submissions`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold text-xs text-slate-800 block truncate group-hover:text-slate-900 group-hover:underline">
-                        {a.title}
-                      </span>
-                      <CaretRightIcon className="w-3.5 h-3.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-1" />
-                    </div>
-                    <span className="text-[11px] text-slate-400 block mt-0.5 font-medium">
-                      Due: {new Date(a.due_date!).toLocaleDateString()}
+              {upcomingAssignments.map((a) => (
+                <button
+                  type="button"
+                  key={a.id}
+                  onClick={() => onOpenSubmissions(a)}
+                  className="group block w-full text-left p-2 -mx-2 rounded-2xl hover:bg-slate-50 transition-all cursor-pointer border border-transparent hover:border-slate-100"
+                  title={`Open ${a.title} submissions`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-xs text-slate-800 block truncate group-hover:text-slate-900 group-hover:underline">
+                      {a.title}
                     </span>
+                    <CaretRightIcon className="w-3.5 h-3.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-1" aria-hidden="true" />
                   </div>
-                ))}
+                  <span className="text-[11px] text-slate-400 block mt-0.5 font-medium">
+                    Due: {formatDateTime(a.due_date)}
+                  </span>
+                </button>
+              ))}
             </div>
           )}
         </div>
 
         {/* Next Session Card */}
-        <div
-          onClick={() => {
-            if (sessions.length > 0) {
-              onNavigateToSessions(sessions[0]);
-            } else {
-              onNavigateToSessions();
-            }
-          }}
-          className="bg-white rounded-3xl border border-slate-200 p-5 shadow-xs space-y-2 hover:border-slate-300 hover:shadow-xs cursor-pointer group"
+        <button
+          type="button"
+          onClick={onNavigateToSessions}
+          className="block w-full text-left bg-white rounded-3xl border border-slate-200 p-5 shadow-xs space-y-2 hover:border-slate-300 hover:shadow-xs cursor-pointer group"
           title="Go to session attendance management"
         >
           <div className="flex items-center justify-between">
             <h4 className="text-xs font-bold text-slate-900">
-              Next Session
+              {isFallbackSession && nextSession ? "Latest Session" : "Next Session"}
             </h4>
-            <CaretRightIcon className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+            <CaretRightIcon className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" aria-hidden="true" />
           </div>
 
-          {sessions.length === 0 ? (
-            <p className="text-xs text-slate-400">No upcoming sessions scheduled yet.</p>
+          {!nextSession ? (
+            <p className="text-xs text-slate-400">No sessions scheduled yet.</p>
           ) : (
             <div className="text-xs space-y-0.5">
               <span className="font-semibold text-slate-800 block group-hover:text-slate-900 group-hover:underline truncate">
-                {sessions[0].title}
+                {nextSession.title}
               </span>
               <span className="text-[11px] text-slate-400 block font-medium">
-                Date: {sessions[0].date}
+                Date: {formatCalendarDate(nextSession.date)}
               </span>
               <span className="text-[10px] font-semibold text-slate-600 inline-flex items-center gap-1 pt-1">
                 <span>Attendance register</span>
-                <CaretRightIcon className="w-3 h-3" />
+                <CaretRightIcon className="w-3 h-3" aria-hidden="true" />
               </span>
             </div>
           )}
-        </div>
+        </button>
       </div>
 
       {/* Right Side: Announcement Composer & Feed */}
@@ -178,12 +198,14 @@ export function CourseStreamTab({
         >
           <input
             type="text"
+            aria-label="Announcement title (optional)"
             placeholder="Title (optional)..."
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
             className="w-full text-xs font-semibold px-4 py-2 border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 placeholder:text-slate-400"
           />
           <textarea
+            aria-label="Announcement content"
             placeholder="Share an update with your class..."
             value={newContent}
             onChange={(e) => setNewContent(e.target.value)}
@@ -254,7 +276,7 @@ export function CourseStreamTab({
                       </div>
                       <p className="text-[11px] text-slate-400 mt-0.5">
                         {ann.author_username} ({ann.author_role}) •{" "}
-                        {new Date(ann.created_at).toLocaleString()}
+                        {formatDateTime(ann.created_at)}
                       </p>
                     </div>
                   </div>
@@ -280,15 +302,37 @@ export function CourseStreamTab({
                         {ann.is_pinned ? "Unpin" : "Pin"}
                       </span>
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => onDeleteAnnouncement(ann.id)}
-                      className="apple-press p-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg text-xs transition-colors"
-                      title="Delete notice"
-                      aria-label="Delete notice"
-                    >
-                      <TrashIcon className="w-3.5 h-3.5" />
-                    </button>
+                    {confirmDeleteAnnouncementId === ann.id ? (
+                      <div className="flex items-center gap-1 text-xs">
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            await onDeleteAnnouncement(ann.id);
+                            setConfirmDeleteAnnouncementId(null);
+                          }}
+                          className="px-2.5 py-1 bg-rose-600 text-white rounded-full font-semibold hover:bg-rose-700"
+                        >
+                          Delete
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmDeleteAnnouncementId(null)}
+                          className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full hover:bg-slate-200"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDeleteAnnouncementId(ann.id)}
+                        className="apple-press p-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg text-xs transition-colors"
+                        title="Delete notice"
+                        aria-label="Delete notice"
+                      >
+                        <TrashIcon className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -318,21 +362,40 @@ export function CourseStreamTab({
                             </span>
                             <span className="text-slate-600">{c.content}</span>
                             <span className="text-[10px] text-slate-400 ml-2">
-                              {new Date(c.created_at).toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
+                              {formatDateTime(c.created_at)}
                             </span>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => onDeleteComment(ann.id, c.id)}
-                            className="apple-press p-1 rounded-full opacity-0 group-hover:opacity-100 text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition-all"
-                            title="Delete comment"
-                            aria-label="Delete comment"
-                          >
-                            <XIcon className="w-3 h-3" />
-                          </button>
+                          {confirmDeleteCommentId === c.id ? (
+                            <div className="flex items-center gap-1 shrink-0">
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  await onDeleteComment(ann.id, c.id);
+                                  setConfirmDeleteCommentId(null);
+                                }}
+                                className="px-2 py-0.5 bg-rose-600 text-white rounded-full text-[10px] font-semibold hover:bg-rose-700"
+                              >
+                                Delete
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setConfirmDeleteCommentId(null)}
+                                className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full text-[10px] hover:bg-slate-200"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => setConfirmDeleteCommentId(c.id)}
+                              className="apple-press p-1 rounded-full shrink-0 sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100 text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition-all"
+                              title="Delete comment"
+                              aria-label="Delete comment"
+                            >
+                              <XIcon className="w-3 h-3" />
+                            </button>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -341,6 +404,7 @@ export function CourseStreamTab({
                   <div className="flex gap-2">
                     <input
                       type="text"
+                      aria-label="Add a comment"
                       placeholder="Add a comment..."
                       maxLength={1000}
                       value={commentInputs[ann.id] || ""}

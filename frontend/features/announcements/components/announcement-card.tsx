@@ -5,6 +5,7 @@ import { PencilSimpleIcon, PushPinIcon, TrashIcon, XIcon } from "@phosphor-icons
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { formatDateTime } from "@/lib/format/date";
 import { useAuthStore } from "@/stores/auth-store";
 import {
   useDeleteCourseAnnouncement,
@@ -24,18 +25,6 @@ type AnnouncementCardProps = {
   announcement: Announcement;
 };
 
-const announcementDateFormatter = new Intl.DateTimeFormat("en", {
-  dateStyle: "medium",
-  timeStyle: "short"
-});
-
-function formatAnnouncementDate(value: string) {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime())
-    ? "Date unavailable"
-    : announcementDateFormatter.format(date);
-}
-
 export function AnnouncementCard({
   userId,
   courseId,
@@ -47,9 +36,7 @@ export function AnnouncementCard({
   const updateMutation = useUpdateCourseAnnouncement({ userId, courseId });
   const deleteMutation = useDeleteCourseAnnouncement({ userId, courseId });
   const canManage =
-    announcement.author_id === userId ||
-    user?.role === "asprak" ||
-    user?.role === "superadmin";
+    announcement.author_id === userId || user?.role === "superadmin";
   const form = useForm<AnnouncementFormValues>({
     resolver: zodResolver(announcementSchema),
     defaultValues: {
@@ -115,7 +102,7 @@ export function AnnouncementCard({
             </span>
             <span className="text-slate-300" aria-hidden="true">·</span>
             <time dateTime={announcement.created_at} className="text-[11px] text-slate-400">
-              {formatAnnouncementDate(announcement.created_at)}
+              {formatDateTime(announcement.created_at)}
             </time>
           </div>
         </div>

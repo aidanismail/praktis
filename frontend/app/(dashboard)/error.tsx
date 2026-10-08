@@ -9,6 +9,8 @@ import {
   SquaresFourIcon
 } from "@phosphor-icons/react";
 
+const isDev = process.env.NODE_ENV !== "production";
+
 export default function DashboardError({
   error,
   reset,
@@ -36,11 +38,11 @@ export default function DashboardError({
             Couldn&apos;t load this section
           </h2>
           <p className="text-xs text-slate-500 leading-relaxed">
-            Something tripped up while loading this part of your dashboard. Your session is safe—try reloading or head to overview.
+            Something tripped up while loading this part of your dashboard. Your session is safe. Try again, or head back to your dashboard.
           </p>
-          {error.message && (
-            <p className="text-[11px] text-slate-400 font-mono bg-slate-50 p-2 rounded-xl border border-slate-100 mt-2 overflow-x-auto">
-              {error.message}
+          {(isDev ? error.message : error.digest) && (
+            <p className="text-[11px] text-slate-500 font-mono bg-slate-50 p-2 rounded-xl border border-slate-100 mt-2 overflow-x-auto">
+              {isDev ? error.message : `Error reference: ${error.digest}`}
             </p>
           )}
         </div>
@@ -59,7 +61,7 @@ export default function DashboardError({
             className="w-full sm:w-auto px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
           >
             <SquaresFourIcon className="w-3.5 h-3.5" />
-            <span>Overview</span>
+            <span>Back to dashboard</span>
           </Link>
         </div>
       </div>

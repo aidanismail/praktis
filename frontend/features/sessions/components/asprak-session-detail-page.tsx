@@ -6,15 +6,15 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { getCourseDetailRoute, ROUTES } from "@/constants/routes";
 import { SessionAttendanceRegister } from "@/features/attendance/components/session-attendance-register";
-import { SessionGradebook } from "@/features/grades/components/session-gradebook";
 import { SessionExportPanel } from "@/features/exports/components/session-export-panel";
 import { useAssignedCourses } from "@/features/courses/hooks/use-assigned-courses";
 import type { Course } from "@/features/courses/types/course.type";
 import { ApiError } from "@/lib/api/client";
-import { useAuthStore } from "@/stores/auth-store";
+import { formatCalendarDate } from "@/lib/format/date";
 import {
   useCourseSessions,
-  useDeleteCourseSession
+  useDeleteCourseSession,
+  useTransitionSessionAttendance
 } from "../hooks/use-course-sessions";
 import {
   getSessionAttendanceStatus,
@@ -26,18 +26,10 @@ import {
   ArrowsClockwiseIcon,
   TrashIcon,
   CalendarCheckIcon,
-  GraduationCapIcon,
+  LockIcon,
+  LockOpenIcon,
   DownloadSimpleIcon
 } from "@phosphor-icons/react";
-
-const dateFormatter = new Intl.DateTimeFormat("en", {
-  dateStyle: "medium"
-});
-
-function formatDate(value: string) {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : dateFormatter.format(date);
-}
 
 type AsprakSessionDetailPageProps = {
   courseId: string;
@@ -123,24 +115,39 @@ function ErrorPanel({
   );
 }
 
-type SessionSubTab = "attendance" | "grades" | "exports";
+type SessionSubTab = "attendance" | "exports";
 
 function SessionSummary({
   session,
   courseCode,
-  courseName
+  courseName,
+  isTransitioning,
+  lockDisabledReason,
+  otherOpenTitle,
+  onToggleWindow
 }: {
   session: CourseSession;
   courseCode?: string;
   courseName?: string;
+  isTransitioning: boolean;
+  lockDisabledReason: string | null;
+  otherOpenTitle: string | null;
+  onToggleWindow: () => void;
 }) {
   const status = getSessionAttendanceStatus(session.attendance_status);
+  const blockedByOtherOpen = status !== "OPEN" && Boolean(otherOpenTitle);
+  const toggleHint =
+    status === "OPEN" && lockDisabledReason
+      ? lockDisabledReason
+      : blockedByOtherOpen
+        ? `Lock '${otherOpenTitle}' first`
+        : undefined;
 
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs sm:p-7">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2 text-xs">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
             {courseCode && (
               <>
                 <span className="font-bold uppercase tracking-wider text-[11px] text-slate-400">
@@ -151,7 +158,7 @@ function SessionSummary({
             )}
 
             <span className="text-slate-500 font-medium">
-              <time dateTime={session.date}>{formatDate(session.date)}</time>
+              <time dateTime={session.date}>{formatCalendarDate(session.date)}</time>
             </span>
           </div>
 
@@ -167,7 +174,7 @@ function SessionSummary({
             </span>
           ) : status === "CLOSED" ? (
             <span className="inline-flex items-center font-medium text-xs text-slate-600 bg-slate-100 border border-slate-200 px-3 py-1 rounded-full">
-              Attendance Closed
+              Attendance Locked
             </span>
           ) : (
             <span className="inline-flex items-center font-medium text-xs text-blue-700 bg-blue-50 border border-blue-200 px-3 py-1 rounded-full">
@@ -175,15 +182,33 @@ function SessionSummary({
             </span>
           )}
 
-          {session.grades_published ? (
-            <span className="inline-flex items-center font-medium text-xs text-slate-700 bg-slate-100 border border-slate-200 px-3 py-1 rounded-full">
-              Grades Published
-            </span>
-          ) : (
-            <span className="inline-flex items-center font-medium text-xs text-amber-800 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">
-              Grades Draft
-            </span>
-          )}
+          <button
+            type="button"
+            onClick={onToggleWindow}
+            disabled={
+              isTransitioning ||
+              (status === "OPEN" && Boolean(lockDisabledReason)) ||
+              blockedByOtherOpen
+            }
+            title={toggleHint}
+            className={`apple-press inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
+              status === "OPEN"
+                ? "bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200/60"
+                : "bg-slate-900 text-white hover:bg-slate-800"
+            }`}
+          >
+            {status === "OPEN" ? (
+              <>
+                <LockIcon className="w-3.5 h-3.5" aria-hidden="true" />
+                {isTransitioning ? "Locking..." : "Lock"}
+              </>
+            ) : (
+              <>
+                <LockOpenIcon className="w-3.5 h-3.5" aria-hidden="true" />
+                {isTransitioning ? "Opening..." : "Open for editing"}
+              </>
+            )}
+          </button>
         </div>
       </div>
     </section>
@@ -201,9 +226,9 @@ export function AssignedSessionDetail({
   const [activeSubTab, setActiveSubTab] = useState<SessionSubTab>("attendance");
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [attendanceDirty, setAttendanceDirty] = useState(false);
-  const [gradeDirty, setGradeDirty] = useState(false);
   const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
   const deleteMutation = useDeleteCourseSession({ userId, courseId });
+  const transitionMutation = useTransitionSessionAttendance({ userId, courseId });
   const coursesQuery = useAssignedCourses(userId);
   const course = courseProp ?? coursesQuery.data?.find((item) => item.id === courseId);
   const courseVerified = courseProp ? true : (coursesQuery.isSuccess && Boolean(course));
@@ -222,7 +247,7 @@ export function AssignedSessionDetail({
   }
 
   function handleBackAttempt() {
-    if (attendanceDirty || gradeDirty) {
+    if (attendanceDirty) {
       setShowUnsavedWarning(true);
     } else {
       navigateBack();
@@ -282,6 +307,9 @@ export function AssignedSessionDetail({
   const session = sessionsQuery.data?.find(
     (item) => item.id === sessionId && item.course_id === courseId
   );
+  const otherOpenSession = sessionsQuery.data?.find(
+    (item) => item.attendance_status === "OPEN" && item.id !== sessionId
+  );
 
   if (!session) {
     return (
@@ -319,7 +347,7 @@ export function AssignedSessionDetail({
           onClick={handleBackAttempt}
           className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-full shadow-xs apple-press transition-colors cursor-pointer"
         >
-          <ArrowLeftIcon className="w-4 h-4" />
+          <ArrowLeftIcon className="w-4 h-4" aria-hidden="true" />
           <span>Back to Sessions</span>
         </button>
 
@@ -333,7 +361,7 @@ export function AssignedSessionDetail({
             disabled={deleteMutation.isPending}
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-700 hover:text-rose-800 bg-white border border-rose-200 hover:bg-rose-50 px-3.5 py-2 rounded-full shadow-xs apple-press transition-colors cursor-pointer disabled:opacity-60"
           >
-            <TrashIcon className="w-3.5 h-3.5 text-rose-500" />
+            <TrashIcon className="w-3.5 h-3.5 text-rose-500" aria-hidden="true" />
             <span>Delete session</span>
           </button>
         ) : null}
@@ -343,7 +371,7 @@ export function AssignedSessionDetail({
         <div role="alert" className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
           <p className="text-sm font-semibold text-amber-950">You have unsaved changes</p>
           <p className="mt-1 text-xs text-amber-800">
-            Attendance or grade entries have not been saved yet. Leaving now will discard them.
+            Attendance entries have not been saved yet. Leaving now will discard them.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <button
@@ -368,7 +396,7 @@ export function AssignedSessionDetail({
         <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-4">
           <p className="text-sm font-semibold text-red-950">Delete session?</p>
           <p className="mt-1 text-xs text-red-800">
-            Attendance records and assignments linked to this session will also be deleted. This action cannot be undone.
+            Attendance records for this session will be deleted. Linked assignments are kept. This action cannot be undone.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <button
@@ -390,9 +418,7 @@ export function AssignedSessionDetail({
           </div>
           {deleteMutation.isError ? (
             <p className="mt-3 text-xs text-red-800">
-              {deleteMutation.error instanceof ApiError && deleteMutation.error.status === 400
-                ? deleteMutation.error.message || "Cannot delete session with published grades. Unpublish grades first."
-                : deleteMutation.error.message || "Unable to delete session. Please try again."}
+              {deleteMutation.error.message || "Unable to delete session. Please try again."}
             </p>
           ) : null}
         </div>
@@ -402,11 +428,35 @@ export function AssignedSessionDetail({
         session={session}
         courseCode={course.code}
         courseName={course.name}
+        isTransitioning={transitionMutation.isPending}
+        otherOpenTitle={otherOpenSession?.title ?? null}
+        lockDisabledReason={attendanceDirty ? "Save or reset your attendance changes before locking." : null}
+        onToggleWindow={() => {
+          transitionMutation.reset();
+          transitionMutation.mutate({
+            sessionId: session.id,
+            action: session.attendance_status === "OPEN" ? "close" : "open"
+          });
+        }}
       />
 
-      <div className="flex items-center gap-1.5 p-1 bg-slate-200/70 rounded-2xl w-fit">
+      {transitionMutation.isError ? (
+        <div role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-medium text-rose-800">
+          {transitionMutation.error.message || "Couldn't update the attendance window. Please try again."}
+        </div>
+      ) : null}
+
+      <div
+        role="tablist"
+        aria-label="Session sections"
+        className="flex items-center gap-1.5 p-1 bg-slate-200/70 rounded-2xl w-fit"
+      >
         <button
           type="button"
+          role="tab"
+          id="session-tab-attendance"
+          aria-selected={activeSubTab === "attendance"}
+          aria-controls="session-panel-attendance"
           onClick={() => setActiveSubTab("attendance")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all apple-press ${
             activeSubTab === "attendance"
@@ -414,31 +464,22 @@ export function AssignedSessionDetail({
               : "text-slate-600 hover:text-slate-900"
           }`}
         >
-          <CalendarCheckIcon className="w-4 h-4 text-slate-500" />
+          <CalendarCheckIcon className="w-4 h-4 text-slate-500" aria-hidden="true" />
           <span>Attendance Register</span>
           {attendanceDirty && (
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" title="Unsaved changes" />
+            <>
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" aria-hidden="true" />
+              <span className="sr-only">(unsaved changes)</span>
+            </>
           )}
         </button>
 
         <button
           type="button"
-          onClick={() => setActiveSubTab("grades")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all apple-press ${
-            activeSubTab === "grades"
-              ? "bg-white text-slate-900 shadow-xs"
-              : "text-slate-600 hover:text-slate-900"
-          }`}
-        >
-          <GraduationCapIcon className="w-4 h-4 text-slate-500" />
-          <span>Gradebook</span>
-          {gradeDirty && (
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" title="Unsaved changes" />
-          )}
-        </button>
-
-        <button
-          type="button"
+          role="tab"
+          id="session-tab-exports"
+          aria-selected={activeSubTab === "exports"}
+          aria-controls="session-panel-exports"
           onClick={() => setActiveSubTab("exports")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all apple-press ${
             activeSubTab === "exports"
@@ -446,12 +487,17 @@ export function AssignedSessionDetail({
               : "text-slate-600 hover:text-slate-900"
           }`}
         >
-          <DownloadSimpleIcon className="w-4 h-4 text-slate-500" />
+          <DownloadSimpleIcon className="w-4 h-4 text-slate-500" aria-hidden="true" />
           <span>Export Records</span>
         </button>
       </div>
 
-      <div className={activeSubTab === "attendance" ? "block" : "hidden"}>
+      <div
+        role="tabpanel"
+        id="session-panel-attendance"
+        aria-labelledby="session-tab-attendance"
+        className={activeSubTab === "attendance" ? "block" : "hidden"}
+      >
         <SessionAttendanceRegister
           userId={userId}
           courseId={courseId}
@@ -460,16 +506,12 @@ export function AssignedSessionDetail({
         />
       </div>
 
-      <div className={activeSubTab === "grades" ? "block" : "hidden"}>
-        <SessionGradebook
-          userId={userId}
-          courseId={courseId}
-          session={session}
-          onDirtyChange={setGradeDirty}
-        />
-      </div>
-
-      <div className={activeSubTab === "exports" ? "block" : "hidden"}>
+      <div
+        role="tabpanel"
+        id="session-panel-exports"
+        aria-labelledby="session-tab-exports"
+        className={activeSubTab === "exports" ? "block" : "hidden"}
+      >
         <SessionExportPanel
           userId={userId}
           courseId={courseId}
@@ -477,44 +519,5 @@ export function AssignedSessionDetail({
         />
       </div>
     </div>
-  );
-}
-
-export function AsprakSessionDetailPage({
-  courseId,
-  sessionId
-}: AsprakSessionDetailPageProps) {
-  const user = useAuthStore((state) => state.user);
-
-  if (!user) {
-    return null;
-  }
-
-  if (user.role !== "asprak") {
-    return (
-      <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl">
-          <div role="alert" className="rounded-3xl border border-amber-200 bg-amber-50 p-6">
-            <h1 className="text-lg font-semibold text-amber-950">Asprak access required</h1>
-            <p className="mt-2 text-sm text-amber-800">Session management is available only to Asprak accounts.</p>
-            <Link href={ROUTES.dashboard} className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-amber-900 underline underline-offset-4">
-              Return to dashboard
-            </Link>
-          </div>
-        </div>
-      </main>
-    );
-  }
-
-  return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl">
-        <AssignedSessionDetail
-          userId={user.id}
-          courseId={courseId}
-          sessionId={sessionId}
-        />
-      </div>
-    </main>
   );
 }

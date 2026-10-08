@@ -19,4 +19,4 @@ export type AdminModuleItem = {
   download_url: string;
 };
 
-export type { ClassSessionItem, AttendanceItem, StudentItem, StaffItem } from "../api/admin.api";
+export type { ClassSessionItem, StudentItem, StaffItem } from "../api/admin.api";

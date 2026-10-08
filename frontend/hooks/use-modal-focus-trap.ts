@@ -1,76 +1,93 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 
 interface UseModalFocusTrapOptions {
   isOpen: boolean;
   onClose: () => void;
   autoFocus?: boolean;
+  /** Element to focus when the modal closes. Defaults to the element that was focused before opening. */
+  returnFocusRef?: RefObject<HTMLElement | null>;
 }
 
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
+const AUTOFOCUS_SELECTOR = "[data-autofocus], [autofocus]";
+
+const modalStack: symbol[] = [];
+
+
+let lastOutsideFocus: HTMLElement | null = null;
+let isTrackingFocus = false;
+
+function trackFocus() {
+  if (isTrackingFocus || typeof document === "undefined") return;
+  isTrackingFocus = true;
+  document.addEventListener(
+    "focusin",
+    (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      if (target.closest('[aria-modal="true"]')) return;
+      lastOutsideFocus = target;
+    },
+    true
+  );
+}
+
+trackFocus();
+
 export function useModalFocusTrap<T extends HTMLElement = HTMLDivElement>({
   isOpen,
   onClose,
   autoFocus = true,
+  returnFocusRef,
 }: UseModalFocusTrapOptions) {
   const containerRef = useRef<T>(null);
-  const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
+  const returnTargetRef = useRef<HTMLElement | null>(null);
+  const returnFocusRefRef = useRef(returnFocusRef);
   const onCloseRef = useRef(onClose);
   useEffect(() => {
     onCloseRef.current = onClose;
-  }, [onClose]);
+    returnFocusRefRef.current = returnFocusRef;
+  }, [onClose, returnFocusRef]);
 
-  // Track initial focused element and manage autoFocus only on transition to open
   useEffect(() => {
     if (!isOpen) return;
 
-    if (!previouslyFocusedElementRef.current) {
-      previouslyFocusedElementRef.current = document.activeElement as HTMLElement | null;
-    }
+    const token = Symbol("modal");
+    modalStack.push(token);
 
+    const active = document.activeElement as HTMLElement | null;
+    const container = containerRef.current;
+    returnTargetRef.current =
+      active &&
+      active !== document.body &&
+      !(container && container.contains(active))
+        ? active
+        : lastOutsideFocus;
+
+    let frame: number | null = null;
     if (autoFocus) {
-      const timer = requestAnimationFrame(() => {
-        if (!containerRef.current) return;
-        const focusable = containerRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
-        if (focusable.length > 0) {
-          focusable[0].focus();
+      frame = requestAnimationFrame(() => {
+        const el = containerRef.current;
+        if (!el) return;
+        if (el.contains(document.activeElement)) return;
+        const target =
+          el.querySelector<HTMLElement>(AUTOFOCUS_SELECTOR) ??
+          el.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
+        if (target) {
+          target.focus();
         } else {
-          containerRef.current.focus();
+          el.focus();
         }
       });
-      return () => cancelAnimationFrame(timer);
-    }
-  }, [isOpen, autoFocus]);
-
-  // Restore focus to previous element only when modal actually closes or unmounts
-  useEffect(() => {
-    return () => {
-      if (
-        previouslyFocusedElementRef.current &&
-        typeof previouslyFocusedElementRef.current.focus === "function"
-      ) {
-        previouslyFocusedElementRef.current.focus();
-        previouslyFocusedElementRef.current = null;
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!isOpen) {
-      if (
-        previouslyFocusedElementRef.current &&
-        typeof previouslyFocusedElementRef.current.focus === "function"
-      ) {
-        previouslyFocusedElementRef.current.focus();
-        previouslyFocusedElementRef.current = null;
-      }
-      return;
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (modalStack[modalStack.length - 1] !== token) return;
+
       if (e.key === "Escape") {
         e.stopPropagation();
         onCloseRef.current();
@@ -78,12 +95,12 @@ export function useModalFocusTrap<T extends HTMLElement = HTMLDivElement>({
       }
 
       if (e.key === "Tab") {
-        const container = containerRef.current;
-        if (!container) return;
+        const el = containerRef.current;
+        if (!el) return;
 
         const focusableElements = Array.from(
-          container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
-        ).filter((el) => el.offsetParent !== null);
+          el.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
+        ).filter((node) => node.offsetParent !== null);
 
         if (focusableElements.length === 0) {
           e.preventDefault();
@@ -94,25 +111,39 @@ export function useModalFocusTrap<T extends HTMLElement = HTMLDivElement>({
         const lastElement = focusableElements[focusableElements.length - 1];
 
         if (e.shiftKey) {
-          if (document.activeElement === firstElement || !container.contains(document.activeElement)) {
+          if (
+            document.activeElement === firstElement ||
+            !el.contains(document.activeElement)
+          ) {
             e.preventDefault();
             lastElement.focus();
           }
-        } else {
-          if (document.activeElement === lastElement || !container.contains(document.activeElement)) {
-            e.preventDefault();
-            firstElement.focus();
-          }
+        } else if (
+          document.activeElement === lastElement ||
+          !el.contains(document.activeElement)
+        ) {
+          e.preventDefault();
+          firstElement.focus();
         }
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keydown", handleKeyDown);
+      if (frame !== null) cancelAnimationFrame(frame);
+
+      const index = modalStack.indexOf(token);
+      if (index !== -1) modalStack.splice(index, 1);
+
+      const target = returnFocusRefRef.current?.current ?? returnTargetRef.current;
+      returnTargetRef.current = null;
+      if (target && target.isConnected && typeof target.focus === "function") {
+        target.focus();
+      }
     };
-  }, [isOpen]);
+  }, [isOpen, autoFocus]);
 
   return containerRef;
 }
-

@@ -13,7 +13,7 @@ export function DashboardPlaceholderCard({
       <p className="max-w-md mx-auto text-sm leading-relaxed text-slate-500">
         {description}
       </p>
-      <div className="pt-2 inline-flex items-center gap-2 text-xs font-medium text-slate-400">
+      <div className="pt-2 inline-flex items-center gap-2 text-xs font-medium text-slate-500">
         <span>Under active development</span>
         <span>•</span>
         <span>Coming up soon</span>

@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import type { Course } from "@/features/admin/types";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 import {
   getThemeConfig,
   getPatternConfig,
@@ -23,6 +24,8 @@ import {
 interface CourseListViewProps {
   courses: Course[];
   isLoading: boolean;
+  error?: string | null;
+  onRetry?: () => void;
   courseThemes: Record<string, SavedCourseTheme>;
   onOpenWorkspace: (course: Course) => void;
   onCreateCourse: () => void;
@@ -34,6 +37,8 @@ interface CourseListViewProps {
 export function CourseListView({
   courses,
   isLoading,
+  error = null,
+  onRetry,
   courseThemes,
   onOpenWorkspace,
   onCreateCourse,
@@ -63,12 +68,13 @@ export function CourseListView({
           <div className="relative w-full">
             <input
               type="text"
+              aria-label="Search courses"
               placeholder="Search courses by code, name, or year..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 shadow-xs"
             />
-            <MagnifyingGlassIcon className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+            <MagnifyingGlassIcon className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" aria-hidden="true" />
           </div>
         </div>
 
@@ -83,6 +89,8 @@ export function CourseListView({
                   : "text-slate-500 hover:text-slate-900"
               }`}
               title="Grid View"
+              aria-label="Grid view"
+              aria-pressed={viewMode === "grid"}
             >
               <SquaresFourIcon className="w-3.5 h-3.5" />
             </button>
@@ -95,6 +103,8 @@ export function CourseListView({
                   : "text-slate-500 hover:text-slate-900"
               }`}
               title="Table View"
+              aria-label="Table view"
+              aria-pressed={viewMode === "table"}
             >
               <ListBulletsIcon className="w-3.5 h-3.5" />
             </button>
@@ -116,6 +126,25 @@ export function CourseListView({
         <div className="p-16 text-center text-xs text-slate-400 bg-white rounded-3xl border border-slate-200 shadow-xs">
           Loading courses...
         </div>
+      ) : error ? (
+        <NotificationBanner variant="error">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <span>Couldn&apos;t load courses. {error}</span>
+            {onRetry && (
+              <button
+                type="button"
+                onClick={onRetry}
+                className="rounded-lg bg-slate-800 border border-slate-700 px-3 py-1 text-xs font-semibold text-white hover:bg-slate-700 transition"
+              >
+                Retry
+              </button>
+            )}
+          </div>
+        </NotificationBanner>
+      ) : courses.length === 0 ? (
+        <div className="p-16 text-center text-xs text-slate-400 bg-white rounded-3xl border border-slate-200 shadow-xs">
+          No courses yet. Click &quot;Create course&quot; to add the first one.
+        </div>
       ) : filteredCourses.length === 0 ? (
         <div className="p-16 text-center text-xs text-slate-400 bg-white rounded-3xl border border-slate-200 shadow-xs">
           No courses match your search.
@@ -133,14 +162,20 @@ export function CourseListView({
             return (
               <div
                 key={course.id}
-                onClick={() => onOpenWorkspace(course)}
-                className="group bg-white rounded-3xl border border-slate-200 shadow-xs apple-card-hover overflow-hidden cursor-pointer flex flex-col justify-between"
+                className="group relative bg-white rounded-3xl border border-slate-200 shadow-xs apple-card-hover overflow-hidden flex flex-col justify-between focus-within:ring-2 focus-within:ring-slate-900"
               >
+                {/* Stretched button makes the whole card open the course. */}
+                <button
+                  type="button"
+                  onClick={() => onOpenWorkspace(course)}
+                  aria-label={`Open course ${course.code} ${course.name}`}
+                  className="absolute inset-0 cursor-pointer focus:outline-none"
+                />
                 {/* Card Header Banner */}
                 <div
                   className={`${
                     !cTheme.imageUrl ? themeCfg.gradientClass : "bg-slate-900"
-                  } p-5 text-white relative overflow-hidden`}
+                  } p-5 text-white relative overflow-hidden pointer-events-none`}
                 >
                   {cTheme.imageUrl && (
                     <>
@@ -197,40 +232,31 @@ export function CourseListView({
                       <span>Open course</span>
                       <CaretRightIcon className="w-3.5 h-3.5" />
                     </span>
-                    <div
-                      className="flex items-center gap-1"
-                      onClick={(e) => e.stopPropagation()}
-                    >
+                    <div className="relative flex items-center gap-1">
                       <button
                         type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onCustomizeBanner(course);
-                        }}
+                        onClick={() => onCustomizeBanner(course)}
                         className="p-1.5 hover:bg-slate-100 text-slate-500 rounded-lg text-xs transition-colors cursor-pointer"
                         title="Customize banner"
+                        aria-label={`Customize banner for ${course.code}`}
                       >
                         <PaletteIcon className="w-3.5 h-3.5" />
                       </button>
                       <button
                         type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onEditCourse(course);
-                        }}
+                        onClick={() => onEditCourse(course)}
                         className="p-1.5 hover:bg-slate-100 text-slate-500 rounded-lg text-xs transition-colors cursor-pointer"
                         title="Edit"
+                        aria-label={`Edit ${course.code}`}
                       >
                         <PencilSimpleIcon className="w-3.5 h-3.5" />
                       </button>
                       <button
                         type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDeleteCourse(course);
-                        }}
+                        onClick={() => onDeleteCourse(course)}
                         className="p-1.5 hover:bg-rose-50 text-rose-500 rounded-lg text-xs transition-colors cursor-pointer"
                         title="Delete"
+                        aria-label={`Delete ${course.code}`}
                       >
                         <TrashIcon className="w-3.5 h-3.5" />
                       </button>
@@ -279,6 +305,7 @@ export function CourseListView({
                       <button
                         type="button"
                         onClick={() => onOpenWorkspace(c)}
+                        aria-label={`Open course ${c.code}`}
                         className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium rounded-lg text-xs cursor-pointer"
                       >
                         Open
@@ -289,6 +316,7 @@ export function CourseListView({
                           e.stopPropagation();
                           onDeleteCourse(c);
                         }}
+                        aria-label={`Delete course ${c.code}`}
                         className="px-3 py-1 hover:bg-rose-50 text-rose-600 font-medium rounded-lg text-xs cursor-pointer"
                       >
                         Delete

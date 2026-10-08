@@ -21,6 +21,13 @@ export interface NotificationBannerProps {
   id?: string;
 }
 
+const VARIANT_STYLES: Record<NotificationVariant, string> = {
+  success: "bg-emerald-950 border-emerald-800",
+  error: "bg-rose-950 border-rose-800",
+  warning: "bg-amber-950 border-amber-800",
+  info: "bg-sky-950 border-sky-800"
+};
+
 export const NotificationBanner = forwardRef<HTMLDivElement, NotificationBannerProps>(
   function NotificationBanner(
     {
@@ -43,12 +50,12 @@ export const NotificationBanner = forwardRef<HTMLDivElement, NotificationBannerP
         id={id}
         tabIndex={tabIndex}
         role={isAlert ? "alert" : "status"}
-        aria-live="polite"
-        className={`flex items-center justify-between gap-3 rounded-xl bg-slate-900 border border-slate-200 px-4 py-3 text-xs font-medium text-white shadow-xs animate-in fade-in duration-150 outline-none ${className}`}
+        aria-live={isAlert ? undefined : "polite"}
+        className={`flex items-center justify-between gap-3 rounded-xl border ${VARIANT_STYLES[variant]} px-4 py-3 text-xs font-medium text-white shadow-xs animate-in fade-in duration-150 outline-none ${className}`}
       >
         <div className="flex items-center gap-2.5 min-w-0">
           {variant === "success" && (
-            <CheckCircleIcon className="w-4 h-4 text-slate-300 shrink-0" aria-hidden="true" />
+            <CheckCircleIcon className="w-4 h-4 text-emerald-300 shrink-0" aria-hidden="true" />
           )}
           {variant === "error" && (
             <WarningCircleIcon className="w-4 h-4 text-rose-400 shrink-0" aria-hidden="true" />

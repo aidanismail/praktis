@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type RefObject } from "react";
 import type { User } from "@/types/user.type";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
-import { updateProfile } from "@/features/auth/api/auth.api";
-import { useAuthStore } from "@/stores/auth-store";
+import { useUpdateProfile } from "@/features/auth/hooks/use-update-profile";
+import { getApiErrorMessage } from "@/lib/api/error-message";
 import { XIcon, WarningCircleIcon, UserIcon } from "@phosphor-icons/react";
 
 type EditProfileModalProps = {
@@ -12,6 +12,7 @@ type EditProfileModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: (message: string) => void;
+  returnFocusRef?: RefObject<HTMLElement | null>;
 };
 
 export function EditProfileModal({
@@ -19,15 +20,17 @@ export function EditProfileModal({
   isOpen,
   onClose,
   onSuccess,
+  returnFocusRef,
 }: EditProfileModalProps) {
   const [name, setName] = useState(user.name ?? "");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const setUser = useAuthStore((state) => state.setUser);
+  const updateProfileMutation = useUpdateProfile();
+  const isSubmitting = updateProfileMutation.isPending;
 
   const modalRef = useModalFocusTrap<HTMLDivElement>({
     isOpen,
     onClose,
+    returnFocusRef,
   });
 
   if (!isOpen) return null;
@@ -42,16 +45,14 @@ export function EditProfileModal({
       return;
     }
 
-    setIsSubmitting(true);
     try {
-      const updatedUser = await updateProfile({ name: trimmed });
-      setUser(updatedUser);
+      await updateProfileMutation.mutateAsync({ name: trimmed });
       onSuccess?.("Your display name has been updated.");
       onClose();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Couldn't update your name. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+      setError(
+        getApiErrorMessage(err, "Couldn't update your name. Please try again.")
+      );
     }
   };
 
@@ -73,16 +74,17 @@ export function EditProfileModal({
               <UserIcon className="w-4 h-4 text-slate-800" />
               <span>Edit Display Name</span>
             </h4>
-            <p className="text-[11px] text-slate-400 mt-0.5">
+            <p className="text-[11px] text-slate-500 mt-0.5">
               Change the name displayed across courses, rosters, and assignments.
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
+            aria-label="Close"
             className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center text-xs apple-press transition-colors"
           >
-            <XIcon className="w-4 h-4" />
+            <XIcon className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
 
@@ -95,10 +97,14 @@ export function EditProfileModal({
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">
+            <label
+              htmlFor="edit-profile-name"
+              className="block font-semibold text-slate-700 mb-1"
+            >
               Full Name
             </label>
             <input
+              id="edit-profile-name"
               type="text"
               required
               autoFocus
@@ -112,15 +118,15 @@ export function EditProfileModal({
 
           <div className="bg-slate-50 rounded-2xl p-3 border border-slate-100 space-y-1.5 text-[11px] text-slate-500">
             <div className="flex justify-between">
-              <span className="font-medium text-slate-400">Username / NPM:</span>
+              <span className="font-medium text-slate-500">Username / NPM:</span>
               <span className="font-semibold text-slate-700">{user.username}</span>
             </div>
             <div className="flex justify-between">
-              <span className="font-medium text-slate-400">Email:</span>
+              <span className="font-medium text-slate-500">Email:</span>
               <span className="font-semibold text-slate-700 truncate max-w-[200px]">{user.email}</span>
             </div>
             <div className="flex justify-between">
-              <span className="font-medium text-slate-400">Role:</span>
+              <span className="font-medium text-slate-500">Role:</span>
               <span className="font-semibold text-slate-700 capitalize">{user.role}</span>
             </div>
           </div>

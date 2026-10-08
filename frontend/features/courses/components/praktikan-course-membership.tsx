@@ -34,10 +34,6 @@ export function PraktikanCourseMembership({ user }: PraktikanCourseMembershipPro
           </p>
         </div>
       </div>
-
-      <p className="mt-4 text-sm leading-6 text-slate-500">
-        Class membership is private. Only your own enrollment details are displayed here.
-      </p>
     </section>
   );
 }

@@ -405,11 +405,11 @@ export function CoursePeopleTab({
           role="dialog"
           aria-modal="true"
           aria-labelledby="enroll-modal-title"
-          className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-start sm:items-center justify-center overflow-y-auto p-4"
         >
           <form
             onSubmit={handleEnrollSubmit}
-            className="bg-white rounded-3xl border border-slate-200 p-6 w-full max-w-lg shadow-xl space-y-4 animate-in fade-in zoom-in-95 duration-150"
+            className="bg-white rounded-3xl border border-slate-200 p-6 w-full max-w-lg max-h-[90dvh] overflow-y-auto shadow-xl space-y-4 animate-in fade-in zoom-in-95 duration-150"
           >
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
@@ -455,7 +455,7 @@ export function CoursePeopleTab({
             )}
 
             <div className="space-y-2 relative">
-              <label className="block text-xs font-semibold text-slate-700">
+              <label htmlFor="enroll-tag-input" className="block text-xs font-semibold text-slate-700">
                 {enrollType === "student"
                   ? "Student NPM or username"
                   : "Assistant username or email"}
@@ -481,6 +481,7 @@ export function CoursePeopleTab({
                   </span>
                 ))}
                 <input
+                  id="enroll-tag-input"
                   type="text"
                   value={tagInput}
                   onChange={(e) => {

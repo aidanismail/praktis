@@ -118,13 +118,12 @@ async def close_attendance(
     summary="Delete a class session",
     description=(
         "Superadmin or assigned asprak. Deletes a class session, associated attendance records, "
-        "and unlinks assignments. Cannot delete if grades for the session are currently published."
+        "and unlinks assignments."
     ),
     responses={
         **UNAUTHENTICATED_401,
         **FORBIDDEN_403,
         **SESSION_NOT_FOUND_404,
-        400: {"description": "Cannot delete session with published grades."},
     },
 )
 async def delete_session(
@@ -133,12 +132,6 @@ async def delete_session(
     current_user: User = Depends(get_current_active_user),
 ):
     session = await require_session_access(db, current_user, session_id, write=True)
-
-    if session.grades_published:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Cannot delete session with published grades. Unpublish grades first.",
-        )
 
     await db.delete(session)
     await db.commit()

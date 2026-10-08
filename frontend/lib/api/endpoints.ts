@@ -19,8 +19,6 @@ export const API_ENDPOINTS = {
   courses: {
     list: "/api/courses/",
     create: "/api/courses/",
-    detail: (courseId: string) =>
-      `/api/courses/${encodeURIComponent(courseId)}`,
     students: (courseId: string) =>
       `/api/courses/${encodeURIComponent(courseId)}/students`,
     sessions: (courseId: string) =>
@@ -75,6 +73,10 @@ export const API_ENDPOINTS = {
       `/api/courses/${encodeURIComponent(courseId)}/assignments/${encodeURIComponent(assignmentId)}/submissions`,
     grade: (courseId: string, assignmentId: string, submissionId: string) =>
       `/api/courses/${encodeURIComponent(courseId)}/assignments/${encodeURIComponent(assignmentId)}/submissions/${encodeURIComponent(submissionId)}/grade`,
+    publishGrades: (courseId: string, assignmentId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}/assignments/${encodeURIComponent(assignmentId)}/grades/publish`,
+    unpublishGrades: (courseId: string, assignmentId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}/assignments/${encodeURIComponent(assignmentId)}/grades/unpublish`,
   },
 
   modules: {
@@ -112,22 +114,12 @@ export const API_ENDPOINTS = {
     me: "/api/attendance/me",
     listBySession: (sessionId: string) =>
       `/api/attendance/sessions/${encodeURIComponent(sessionId)}`,
-    record: (sessionId: string) =>
-      `/api/attendance/sessions/${encodeURIComponent(sessionId)}`,
     bulkUpdate: (sessionId: string) =>
       `/api/attendance/sessions/${encodeURIComponent(sessionId)}/bulk`,
   },
 
   grades: {
     me: "/api/grades/me",
-    listBySession: (sessionId: string) =>
-      `/api/grades/sessions/${encodeURIComponent(sessionId)}`,
-    bulkUpdate: (sessionId: string) =>
-      `/api/grades/sessions/${encodeURIComponent(sessionId)}/bulk`,
-    publish: (sessionId: string) =>
-      `/api/grades/sessions/${encodeURIComponent(sessionId)}/publish`,
-    unpublish: (sessionId: string) =>
-      `/api/grades/sessions/${encodeURIComponent(sessionId)}/unpublish`,
   },
 
   export: {

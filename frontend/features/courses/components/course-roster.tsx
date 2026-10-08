@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo } from "react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useCourseRoster } from "../hooks/use-course-roster";
+import { compareStudents } from "../utils/student";
 import {
   WarningCircleIcon,
   ArrowsClockwiseIcon
@@ -17,7 +19,7 @@ type CourseRosterProps = {
 
 export function CourseRoster({ userId, courseId }: CourseRosterProps) {
   const {
-    data: students = [],
+    data: rosterData,
     error,
     isError,
     isFetching,
@@ -28,6 +30,11 @@ export function CourseRoster({ userId, courseId }: CourseRosterProps) {
     courseId,
     enabled: true
   });
+
+  const students = useMemo(
+    () => [...(rosterData ?? [])].sort(compareStudents),
+    [rosterData]
+  );
 
   const isUnauthorized = error instanceof ApiError && error.status === 401;
   const isForbidden = error instanceof ApiError && error.status === 403;
@@ -180,7 +187,16 @@ export function CourseRoster({ userId, courseId }: CourseRosterProps) {
               className="flex flex-col gap-1 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
             >
               <div className="min-w-0">
-                <span className="font-mono text-sm font-medium text-slate-950">
+                {student.name ? (
+                  <span className="block text-sm font-semibold text-slate-950">
+                    {student.name}
+                  </span>
+                ) : null}
+                <span
+                  className={`block font-mono text-sm ${
+                    student.name ? "text-slate-600" : "font-medium text-slate-950"
+                  }`}
+                >
                   {student.username}
                 </span>
               </div>

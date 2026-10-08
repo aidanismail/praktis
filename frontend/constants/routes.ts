@@ -16,6 +16,16 @@ export const COURSE_WORKSPACE_TABS = [
 
 export type CourseWorkspaceTab = (typeof COURSE_WORKSPACE_TABS)[number];
 
+/** Workspace tabs available to superadmin (assignments live under "classwork"). */
+export const ADMIN_WORKSPACE_TABS = [
+  "stream",
+  "classwork",
+  "people",
+  "sessions"
+] as const;
+
+export type AdminWorkspaceTab = (typeof ADMIN_WORKSPACE_TABS)[number];
+
 export function parseCourseWorkspaceTab(
   value: string | undefined
 ): CourseWorkspaceTab {
@@ -36,31 +46,86 @@ export function parseCourseWorkspaceTab(
   return "stream";
 }
 
-export function getDefaultDashboardByRole(role?: UserRole): string {
-  void role;
-  return ROUTES.dashboard;
+/**
+ * Normalizes a workspaceTab URL value to one the given role can actually open.
+ * Unknown values fall back to "stream".
+ */
+export function resolveWorkspaceTabForRole(
+  role: UserRole | undefined,
+  value: string | null | undefined
+): string {
+  if (role === "superadmin") {
+    if (value === "modules" || value === "assignments") {
+      return "classwork";
+    }
+
+    return (ADMIN_WORKSPACE_TABS as readonly string[]).includes(value ?? "")
+      ? (value as AdminWorkspaceTab)
+      : "stream";
+  }
+
+  return parseCourseWorkspaceTab(value ?? undefined);
+}
+
+/** Dashboard navigation tab that hosts the course workspace for a role. */
+export function getCourseNavTabForRole(role?: UserRole): "courses" | "classes" {
+  return role === "superadmin" ? "courses" : "classes";
+}
+
+type DashboardCourseRouteOptions = {
+  role?: UserRole;
+  workspaceTab?: string;
+  assignmentId?: string;
+  sessionId?: string;
+};
+
+function buildDashboardCourseRoute(
+  courseId: string,
+  {
+    role,
+    workspaceTab = "stream",
+    assignmentId,
+    sessionId
+  }: DashboardCourseRouteOptions
+) {
+  const params = new URLSearchParams();
+  params.set("tab", getCourseNavTabForRole(role));
+  params.set("courseId", courseId);
+  params.set("workspaceTab", resolveWorkspaceTabForRole(role, workspaceTab));
+  if (assignmentId) params.set("assignmentId", assignmentId);
+  if (sessionId) params.set("sessionId", sessionId);
+
+  return `${ROUTES.dashboard}?${params.toString()}`;
 }
 
 export function getCourseDetailRoute(
   courseId: string,
-  tab?: CourseWorkspaceTab
+  tab?: string,
+  role?: UserRole
 ) {
-  const route = `/dashboard/courses/${encodeURIComponent(courseId)}`;
-
-  return tab ? `${route}?tab=${encodeURIComponent(tab)}` : route;
+  return buildDashboardCourseRoute(courseId, { role, workspaceTab: tab });
 }
 
 export function getAssignmentDetailRoute(
   courseId: string,
-  assignmentId: string
+  assignmentId: string,
+  role?: UserRole
 ) {
-  return `/dashboard/courses/${encodeURIComponent(
-    courseId
-  )}/assignments/${encodeURIComponent(assignmentId)}`;
+  return buildDashboardCourseRoute(courseId, {
+    role,
+    workspaceTab: "assignments",
+    assignmentId
+  });
 }
 
-export function getSessionDetailRoute(courseId: string, sessionId: string) {
-  return `/dashboard/courses/${encodeURIComponent(
-    courseId
-  )}/sessions/${encodeURIComponent(sessionId)}`;
+export function getSessionDetailRoute(
+  courseId: string,
+  sessionId: string,
+  role?: UserRole
+) {
+  return buildDashboardCourseRoute(courseId, {
+    role,
+    workspaceTab: "sessions",
+    sessionId
+  });
 }

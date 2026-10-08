@@ -3,36 +3,19 @@
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { NotificationBanner } from "@/components/ui/notification-banner";
 import { useCourseSessions } from "@/features/sessions/hooks/use-course-sessions";
-import { getSessionAttendanceStatus } from "@/features/sessions/types/session.type";
+import { SessionStatusBadge } from "@/features/sessions/components/session-status-badge";
+import { formatCalendarDate } from "@/lib/format/date";
 import { usePersonalAttendance } from "../hooks/use-personal-attendance";
-import type { AttendanceStatus } from "../types/attendance.type";
+import {
+  ATTENDANCE_STATUS_LABELS as labels,
+  ATTENDANCE_STATUS_TEXT_COLORS as statusTextColors,
+} from "../constants/praktikan-attendance";
 import {
   CalendarDotsIcon,
   ArrowsClockwiseIcon
 } from "@phosphor-icons/react";
 
 type Props = { userId: string; courseId: string };
-
-const labels: Record<AttendanceStatus, string> = {
-  hadir: "Hadir",
-  sakit: "Sakit",
-  izin: "Izin",
-  alfa: "Alfa",
-};
-
-const statusTextColors: Record<AttendanceStatus, string> = {
-  hadir: "text-emerald-700 font-semibold",
-  sakit: "text-sky-700 font-semibold",
-  izin: "text-amber-700 font-semibold",
-  alfa: "text-rose-700 font-semibold",
-};
-
-const dateFormatter = new Intl.DateTimeFormat("en", { dateStyle: "full" });
-
-function formatDate(value: string) {
-  const date = new Date(`${value}T00:00:00`);
-  return Number.isNaN(date.getTime()) ? "Date unavailable" : dateFormatter.format(date);
-}
 
 export function PraktikanCourseAttendance({ userId, courseId }: Props) {
   const sessionsQuery = useCourseSessions({ userId, courseId, enabled: true });
@@ -103,14 +86,13 @@ export function PraktikanCourseAttendance({ userId, courseId }: Props) {
           <CalendarDotsIcon className="mx-auto h-9 w-9 text-slate-400" aria-hidden="true" />
           <h3 className="mt-3 text-sm font-bold text-slate-950">No sessions scheduled yet</h3>
           <p className="mt-1 text-xs text-slate-500">
-            Upcoming lab sessions and attendance windows will show up here once created.
+            Upcoming lab sessions will show up here once they are created.
           </p>
         </div>
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
           {sessions.map((session) => {
             const record = attendance.get(session.id);
-            const windowState = getSessionAttendanceStatus(session.attendance_status);
 
             return (
               <article
@@ -121,11 +103,11 @@ export function PraktikanCourseAttendance({ userId, courseId }: Props) {
                   <div>
                     <h3 className="text-sm font-bold text-slate-950 tracking-tight">{session.title}</h3>
                     <p className="mt-0.5 text-xs text-slate-500">
-                      <time dateTime={session.date}>{formatDate(session.date)}</time>
+                      <time dateTime={session.date}>{formatCalendarDate(session.date)}</time>
                     </p>
                   </div>
-                  <span className="text-xs text-slate-500 font-medium">
-                    Window: <span className="font-semibold text-slate-800 capitalize">{windowState === "UNKNOWN" ? "Unavailable" : windowState.toLowerCase()}</span>
+                  <span className="inline-flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                    Attendance: <SessionStatusBadge status={session.attendance_status} />
                   </span>
                 </div>
 

@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { getAssignmentDetailRoute } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
+import { formatDateTime } from "@/lib/format/date";
+import { formatScore } from "@/lib/format/score";
 import { useAuthStore } from "@/stores/auth-store";
 import { useDeleteCourseAssignment } from "../hooks/use-course-assignments";
 import type { Assignment } from "../types/assignment.type";
@@ -16,17 +18,21 @@ type AssignmentCardProps = {
   onSelectAssignment?: (id: string) => void;
 };
 
-const assignmentDateFormatter = new Intl.DateTimeFormat("en", {
-  dateStyle: "medium",
-  timeStyle: "short",
-});
-
-function formatAssignmentDate(value: string) {
-  const date = new Date(value);
-
-  return Number.isNaN(date.getTime())
-    ? "Date unavailable"
-    : assignmentDateFormatter.format(date);
+function getSubmissionStatus(assignment: Assignment) {
+  const submission = assignment.my_submission;
+  if (!submission) return { label: "Not submitted", tone: "text-slate-400 font-medium" };
+  if (submission.score !== null) {
+    return {
+      label: `Graded · ${formatScore(submission.score)} / ${assignment.max_points}`,
+      tone: "text-emerald-700",
+    };
+  }
+  return {
+    label: assignment.grades_published
+      ? "Submitted · Awaiting grade"
+      : "Submitted · Grades not released yet",
+    tone: "text-amber-700",
+  };
 }
 
 function getAllowedFileTypes(value: string) {
@@ -45,30 +51,57 @@ export function AssignmentCard({
   const storeUserId = useAuthStore((state) => state.user?.id);
   const activeUserId = userId ?? storeUserId ?? "";
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [now] = useState(() => Date.now());
   const deleteMutation = useDeleteCourseAssignment({
     userId: activeUserId,
     courseId: assignment.course_id,
   });
 
   const allowedFileTypes = getAllowedFileTypes(assignment.allowed_file_types);
+  const submissionStatus = getSubmissionStatus(assignment);
+  const isPastDue = Boolean(
+    assignment.due_date && new Date(assignment.due_date).getTime() < now
+  );
 
   return (
     <article className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xs transition-all hover:border-slate-300 hover:shadow-sm">
       {/* Top Header: Typographic Status & Submissions */}
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-xs">
+        {viewerRole === "asprak" ? (
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
+            <span
+              className={`font-semibold ${
+                assignment.is_published ? "text-slate-900" : "text-amber-700"
+              }`}
+            >
+              {assignment.is_published ? "Published" : "Draft"}
+            </span>
+            <span className="text-slate-300" aria-hidden="true">·</span>
+            <span
+              className={`font-medium ${
+                assignment.grades_published ? "text-emerald-700" : "text-slate-500"
+              }`}
+            >
+              {assignment.grades_published ? "Grades published" : "Grades hidden"}
+            </span>
+            <span className="text-slate-300" aria-hidden="true">·</span>
+            <time dateTime={assignment.created_at} className="text-slate-400 text-[11px]">
+              {formatDateTime(assignment.created_at)}
+            </time>
+          </div>
+        ) : (
           <span
-            className={`font-semibold ${
-              assignment.is_published ? "text-slate-900" : "text-amber-700"
+            className={`text-xs font-semibold ${
+              !assignment.due_date
+                ? "text-slate-500"
+                : isPastDue
+                  ? "text-rose-700"
+                  : "text-slate-900"
             }`}
           >
-            {assignment.is_published ? "Published" : "Draft"}
+            {!assignment.due_date ? "No deadline" : isPastDue ? "Past due" : "Open"}
           </span>
-          <span className="text-slate-300" aria-hidden="true">·</span>
-          <time dateTime={assignment.created_at} className="text-slate-400 text-[11px]">
-            {formatAssignmentDate(assignment.created_at)}
-          </time>
-        </div>
+        )}
 
         {viewerRole === "asprak" ? (
           <span className="text-xs text-slate-500 font-medium">
@@ -78,20 +111,8 @@ export function AssignmentCard({
             {assignment.submissions_count === 1 ? "submission" : "submissions"}
           </span>
         ) : (
-          <span
-            className={`text-xs font-semibold ${
-              assignment.my_submission
-                ? assignment.my_submission.score === null
-                  ? "text-amber-700"
-                  : "text-emerald-700"
-                : "text-slate-400 font-medium"
-            }`}
-          >
-            {assignment.my_submission
-              ? assignment.my_submission.score === null
-                ? "Submitted · Awaiting grade"
-                : "Submitted · Graded"
-              : "Not submitted"}
+          <span className={`text-xs font-semibold text-right ${submissionStatus.tone}`}>
+            {submissionStatus.label}
           </span>
         )}
       </div>
@@ -117,7 +138,7 @@ export function AssignmentCard({
           <span className="font-medium text-slate-800">
             {assignment.due_date ? (
               <time dateTime={assignment.due_date}>
-                {formatAssignmentDate(assignment.due_date)}
+                {formatDateTime(assignment.due_date)}
               </time>
             ) : (
               "No deadline"

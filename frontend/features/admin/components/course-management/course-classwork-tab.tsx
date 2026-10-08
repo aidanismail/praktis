@@ -11,6 +11,7 @@ import type {
 } from "@/features/admin/types";
 import { createAndUploadMultipleModules } from "@/features/admin/api/admin.api";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
+import { formatDateTime } from "@/lib/format/date";
 import {
   DownloadSimpleIcon,
   EyeIcon,
@@ -27,11 +28,13 @@ interface CourseClassworkTabProps {
   course: Course;
   assignments: Assignment[];
   modules: CourseModule[];
+  isLoading: boolean;
   onOpenSubmissions: (assignment: Assignment) => void;
   onOpenCreateAssignment: () => void;
   onOpenEditAssignment: (assignment: Assignment) => void;
   onDeleteAssignment: (assignmentId: string) => Promise<void>;
   onDeleteModule: (moduleId: string) => Promise<void>;
+  onSetModulePublished: (moduleId: string, published: boolean) => Promise<void>;
   onUploadModulesSuccess: () => void;
   onPreviewDoc: (doc: {
     title: string;
@@ -47,11 +50,13 @@ export function CourseClassworkTab({
   course,
   assignments,
   modules,
+  isLoading,
   onOpenSubmissions,
   onOpenCreateAssignment,
   onOpenEditAssignment,
   onDeleteAssignment,
   onDeleteModule,
+  onSetModulePublished,
   onUploadModulesSuccess,
   onPreviewDoc,
   onError,
@@ -63,6 +68,19 @@ export function CourseClassworkTab({
   const [isDraggingMod, setIsDraggingMod] = useState(false);
   const [isUploadingMod, setIsUploadingMod] = useState(false);
   const [modUploadProgress, setModUploadProgress] = useState<ModUploadProgress | null>(null);
+
+  // Inline delete confirmation ("assignment:<id>" / "module:<id>")
+  const [confirmDeleteKey, setConfirmDeleteKey] = useState<string | null>(null);
+  const [busyKey, setBusyKey] = useState<string | null>(null);
+
+  const runBusy = async (key: string, action: () => Promise<void>) => {
+    setBusyKey(key);
+    try {
+      await action();
+    } finally {
+      setBusyKey(null);
+    }
+  };
 
   const uploadModalRef = useModalFocusTrap<HTMLDivElement>({
     isOpen: showUploadModal,
@@ -192,7 +210,12 @@ export function CourseClassworkTab({
           </h4>
         </div>
 
-        {assignments.length === 0 ? (
+        {isLoading ? (
+          <div role="status" className="flex items-center justify-center gap-3 p-8 bg-white border border-slate-200 rounded-2xl text-xs text-slate-500">
+            <AsteriskLoader className="h-4 w-4" />
+            <span>Loading assignments...</span>
+          </div>
+        ) : assignments.length === 0 ? (
           <div className="text-center p-8 bg-white border border-dashed border-slate-200 rounded-2xl text-xs text-slate-400">
             No assignments yet. Click &quot;Create Assignment&quot; to post coursework.
           </div>
@@ -205,11 +228,20 @@ export function CourseClassworkTab({
               >
                 <div className="flex items-center gap-3.5">
                   <div>
-                    <h3 className="font-bold text-xs text-slate-950">{a.title}</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bold text-xs text-slate-950">{a.title}</h3>
+                      <span
+                        className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
+                          a.is_published
+                            ? "text-emerald-700 bg-emerald-50 border-emerald-200/60"
+                            : "text-amber-700 bg-amber-50 border-amber-200"
+                        }`}
+                      >
+                        {a.is_published ? "Published" : "Draft"}
+                      </span>
+                    </div>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                      {a.due_date
-                        ? `Due: ${new Date(a.due_date).toLocaleString()}`
-                        : "No due date"}
+                      {a.due_date ? `Due: ${formatDateTime(a.due_date)}` : "No due date"}
                     </p>
                   </div>
                 </div>
@@ -232,15 +264,45 @@ export function CourseClassworkTab({
                   >
                     <PencilSimpleIcon className="w-3.5 h-3.5" />
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => onDeleteAssignment(a.id)}
-                    className="p-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg text-xs apple-press transition-colors"
-                    title="Delete assignment"
-                    aria-label="Delete assignment"
-                  >
-                    <TrashIcon className="w-3.5 h-3.5" />
-                  </button>
+                  {confirmDeleteKey === `assignment:${a.id}` ? (
+                    <div className="flex items-center gap-1 text-xs">
+                      <span className="text-[11px] text-rose-700 max-w-48">
+                        Delete and remove all {a.submissions_count}{" "}
+                        {a.submissions_count === 1 ? "submission" : "submissions"}?
+                      </span>
+                      <button
+                        type="button"
+                        disabled={busyKey === `assignment:${a.id}`}
+                        onClick={() =>
+                          runBusy(`assignment:${a.id}`, async () => {
+                            await onDeleteAssignment(a.id);
+                            setConfirmDeleteKey(null);
+                          })
+                        }
+                        className="px-2.5 py-1 bg-rose-600 text-white rounded-full font-semibold hover:bg-rose-700 disabled:opacity-50"
+                      >
+                        {busyKey === `assignment:${a.id}` ? "Deleting..." : "Delete"}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={busyKey === `assignment:${a.id}`}
+                        onClick={() => setConfirmDeleteKey(null)}
+                        className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full hover:bg-slate-200 disabled:opacity-50"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setConfirmDeleteKey(`assignment:${a.id}`)}
+                      className="p-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg text-xs apple-press transition-colors"
+                      title="Delete assignment"
+                      aria-label={`Delete assignment ${a.title}`}
+                    >
+                      <TrashIcon className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
@@ -256,7 +318,12 @@ export function CourseClassworkTab({
           </h4>
         </div>
 
-        {modules.length === 0 ? (
+        {isLoading ? (
+          <div role="status" className="flex items-center justify-center gap-3 p-8 bg-white border border-slate-200 rounded-2xl text-xs text-slate-500">
+            <AsteriskLoader className="h-4 w-4" />
+            <span>Loading modules...</span>
+          </div>
+        ) : modules.length === 0 ? (
           <div className="text-center p-8 bg-white border border-dashed border-slate-200 rounded-2xl text-xs text-slate-400">
             No learning modules uploaded yet. Click &quot;Upload Module&quot; to add guides and docs.
           </div>
@@ -315,13 +382,51 @@ export function CourseClassworkTab({
                   </span>
                   <button
                     type="button"
-                    onClick={() => onDeleteModule(m.id)}
-                    className="p-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg text-xs apple-press transition-colors"
-                    title="Delete module"
-                    aria-label="Delete module"
+                    disabled={busyKey === `publish:${m.id}`}
+                    onClick={() =>
+                      runBusy(`publish:${m.id}`, () =>
+                        onSetModulePublished(m.id, !m.is_published)
+                      )
+                    }
+                    className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs transition-colors disabled:opacity-50"
                   >
-                    <TrashIcon className="w-3.5 h-3.5" />
+                    {m.is_published ? "Unpublish" : "Publish"}
                   </button>
+                  {confirmDeleteKey === `module:${m.id}` ? (
+                    <div className="flex items-center gap-1 text-xs">
+                      <button
+                        type="button"
+                        disabled={busyKey === `module:${m.id}`}
+                        onClick={() =>
+                          runBusy(`module:${m.id}`, async () => {
+                            await onDeleteModule(m.id);
+                            setConfirmDeleteKey(null);
+                          })
+                        }
+                        className="px-2.5 py-1 bg-rose-600 text-white rounded-full font-semibold hover:bg-rose-700 disabled:opacity-50"
+                      >
+                        {busyKey === `module:${m.id}` ? "Deleting..." : "Delete"}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={busyKey === `module:${m.id}`}
+                        onClick={() => setConfirmDeleteKey(null)}
+                        className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full hover:bg-slate-200 disabled:opacity-50"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setConfirmDeleteKey(`module:${m.id}`)}
+                      className="p-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg text-xs apple-press transition-colors"
+                      title="Delete module"
+                      aria-label={`Delete module ${m.title}`}
+                    >
+                      <TrashIcon className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
@@ -336,11 +441,11 @@ export function CourseClassworkTab({
           role="dialog"
           aria-modal="true"
           aria-labelledby="upload-module-modal-title"
-          className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center overflow-y-auto p-4"
         >
           <form
             onSubmit={handleUploadModules}
-            className="bg-white rounded-3xl border border-slate-200 p-6 w-full max-w-lg shadow-xl space-y-4 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] flex flex-col"
+            className="bg-white rounded-3xl border border-slate-200 p-6 w-full max-w-lg shadow-xl space-y-4 animate-in fade-in zoom-in-95 duration-150 max-h-[90dvh] flex flex-col"
           >
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
@@ -476,6 +581,7 @@ export function CourseClassworkTab({
                                 prev.map((q, i) => (i === idx ? { ...q, title: val } : q))
                               );
                             }}
+                            aria-label={`Title for ${item.file.name}`}
                             placeholder="Module title *"
                             className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium focus:ring-1 focus:ring-slate-900"
                           />
@@ -491,6 +597,7 @@ export function CourseClassworkTab({
                                 )
                               );
                             }}
+                            aria-label={`Description for ${item.file.name}`}
                             placeholder="Brief description or notes (optional)"
                             className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-[11px] text-slate-600 focus:ring-1 focus:ring-slate-900"
                           />

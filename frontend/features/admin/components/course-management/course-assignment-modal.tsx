@@ -3,9 +3,7 @@
 import React, { useState } from "react";
 import type { Assignment } from "@/features/admin/types";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
-import {
-  WarningCircleIcon
-} from "@phosphor-icons/react";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 
 interface CourseAssignmentModalProps {
   isOpen: boolean;
@@ -19,6 +17,7 @@ interface CourseAssignmentModalProps {
     allowed_file_types: string;
     due_date?: string | null;
     allow_late_submissions?: boolean;
+    is_published: boolean;
   }) => Promise<void>;
   isSubmitting?: boolean;
 }
@@ -64,6 +63,9 @@ function AssignmentFormInner({
   const [allowLateSubmissions, setAllowLateSubmissions] = useState<boolean>(
     editingAssignment?.allow_late_submissions ?? true
   );
+  const [isPublished, setIsPublished] = useState<boolean>(
+    editingAssignment?.is_published ?? false
+  );
   const [formError, setFormError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.SubmitEvent) => {
@@ -79,6 +81,7 @@ function AssignmentFormInner({
         allowed_file_types: allowedTypes,
         due_date: dueDate ? new Date(dueDate).toISOString() : null,
         allow_late_submissions: allowLateSubmissions,
+        is_published: isPublished,
       });
     } catch (err: unknown) {
       setFormError(
@@ -106,7 +109,7 @@ function AssignmentFormInner({
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white rounded-3xl border border-slate-200 p-6 w-full max-w-md shadow-xl space-y-4 animate-apple-modal"
+      className="bg-white rounded-3xl border border-slate-200 p-6 w-full max-w-md max-h-[90dvh] overflow-y-auto shadow-xl space-y-4 animate-apple-modal"
     >
       <div>
         <h4 id="assignment-modal-title" className="font-bold text-sm text-slate-900">
@@ -120,20 +123,18 @@ function AssignmentFormInner({
       </div>
 
       {formError && (
-        <div
-          role="alert"
-          aria-live="polite"
-          className="flex items-center gap-2 p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs font-medium"
-        >
-          <WarningCircleIcon className="w-4 h-4 text-rose-600 shrink-0" />
-          <span className="flex-1">{formError}</span>
-        </div>
+        <NotificationBanner
+          variant="error"
+          message={formError}
+          onClose={() => setFormError(null)}
+        />
       )}
 
       <div className="space-y-3 text-xs">
         <div>
-          <label className="block font-semibold text-slate-600 mb-1">Title</label>
+          <label htmlFor="assignment-title" className="block font-semibold text-slate-600 mb-1">Title</label>
           <input
+            id="assignment-title"
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -144,8 +145,9 @@ function AssignmentFormInner({
         </div>
 
         <div>
-          <label className="block font-semibold text-slate-600 mb-1">Instructions / Description</label>
+          <label htmlFor="assignment-description" className="block font-semibold text-slate-600 mb-1">Instructions / Description</label>
           <textarea
+            id="assignment-description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
@@ -155,8 +157,9 @@ function AssignmentFormInner({
         </div>
 
         <div>
-          <label className="block font-semibold text-slate-600 mb-1">Max Points</label>
+          <label htmlFor="assignment-max-points" className="block font-semibold text-slate-600 mb-1">Max Points</label>
           <input
+            id="assignment-max-points"
             type="number"
             value={maxPoints}
             onChange={(e) => setMaxPoints(Number(e.target.value))}
@@ -168,10 +171,10 @@ function AssignmentFormInner({
         </div>
 
         <div>
-          <label className="block font-semibold text-slate-700 mb-1.5">
+          <span id="assignment-formats-label" className="block font-semibold text-slate-700 mb-1.5">
             Allowed Submission Formats *
-          </label>
-          <div className="flex flex-wrap gap-1.5 mb-2">
+          </span>
+          <div role="group" aria-labelledby="assignment-formats-label" className="flex flex-wrap gap-1.5 mb-2">
             {FORMAT_OPTIONS.map((fmt) => {
               const isSelected = activeTypesList.includes(fmt.id);
 
@@ -179,6 +182,7 @@ function AssignmentFormInner({
                 <button
                   key={fmt.id}
                   type="button"
+                  aria-pressed={isSelected}
                   onClick={() => toggleFormat(fmt.id)}
                   className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer select-none ${
                     isSelected
@@ -192,8 +196,9 @@ function AssignmentFormInner({
             })}
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[11px] text-slate-400 shrink-0">Selected / Custom:</span>
+            <label htmlFor="assignment-custom-types" className="text-[11px] text-slate-400 shrink-0">Selected / Custom:</label>
             <input
+              id="assignment-custom-types"
               type="text"
               value={allowedTypes}
               onChange={(e) => setAllowedTypes(e.target.value)}
@@ -204,8 +209,9 @@ function AssignmentFormInner({
         </div>
 
         <div>
-          <label className="block font-semibold text-slate-600 mb-1">Due Date & Time (Optional)</label>
+          <label htmlFor="assignment-due-date" className="block font-semibold text-slate-600 mb-1">Due Date &amp; Time (Optional)</label>
           <input
+            id="assignment-due-date"
             type="datetime-local"
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
@@ -228,6 +234,26 @@ function AssignmentFormInner({
             </span>
           </label>
         </div>
+
+        <div className="flex items-start gap-2.5 p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+          <input
+            type="checkbox"
+            id="assignment-published"
+            checked={isPublished}
+            onChange={(e) => setIsPublished(e.target.checked)}
+            className="mt-0.5 h-3.5 w-3.5 rounded border-slate-300 text-slate-900 accent-slate-900"
+          />
+          <label htmlFor="assignment-published" className="cursor-pointer">
+            <span className="block font-semibold text-slate-800">
+              {editingAssignment ? "Published" : "Publish immediately"}
+            </span>
+            <span className="block text-[11px] text-slate-500">
+              {editingAssignment
+                ? "Uncheck to move this assignment back to drafts, hidden from students."
+                : "Leave unchecked to save as a draft."}
+            </span>
+          </label>
+        </div>
       </div>
 
       <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
@@ -241,7 +267,7 @@ function AssignmentFormInner({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-5 py-2 bg-slate-900 text-white rounded-full text-xs font-semibold hover:bg-slate-800 shadow-xs apple-press transition-all"
+          className="px-5 py-2 bg-slate-900 text-white rounded-full text-xs font-semibold hover:bg-slate-800 shadow-xs apple-press transition-all disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {isSubmitting ? "Saving..." : editingAssignment ? "Save Changes" : "Create Assignment"}
         </button>
@@ -264,7 +290,7 @@ export function CourseAssignmentModal(props: CourseAssignmentModalProps) {
       role="dialog"
       aria-modal="true"
       aria-labelledby="assignment-modal-title"
-      className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 transition-opacity animate-in fade-in duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+      className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-start sm:items-center justify-center overflow-y-auto p-4 transition-opacity animate-in fade-in duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
     >
       <AssignmentFormInner
         key={props.editingAssignment?.id ?? "create"}

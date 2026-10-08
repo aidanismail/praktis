@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   DownloadSimpleIcon,
   FileTextIcon,
@@ -25,27 +26,43 @@ import {
 } from "../api/admin.api";
 import type { AdminModuleItem } from "../types/admin.type";
 import type { Course } from "@/features/courses/types/course.type";
+import { adminQueryKeys } from "../constants/admin-query-keys";
+import { formatDate } from "@/lib/format/date";
 import { DocumentPreviewModal } from "@/components/ui/document-preview-modal";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
 import { NotificationBanner } from "@/components/ui/notification-banner";
 
 export function AdminModuleList() {
-  const [modules, setModules] = useState<AdminModuleItem[]>([]);
-  const [courses, setCourses] = useState<Course[]>([]);
+  const queryClient = useQueryClient();
+  const modulesQuery = useQuery({
+    queryKey: adminQueryKeys.modules(),
+    queryFn: fetchAdminModules,
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+  });
+  const coursesQuery = useQuery({
+    queryKey: adminQueryKeys.courses(),
+    queryFn: fetchAdminCourses,
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+  });
+  const modules = modulesQuery.data ?? [];
+  const courses = coursesQuery.data ?? [];
+  const isLoading = modulesQuery.isLoading || coursesQuery.isLoading;
+  const loadError = modulesQuery.isError || coursesQuery.isError;
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCourseFilter, setSelectedCourseFilter] = useState("all");
   const [collapsedCourses, setCollapsedCourses] = useState<Set<string>>(
     new Set()
   );
 
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
-  const [selectedModuleForDetail, setSelectedModuleForDetail] =
-    useState<AdminModuleItem | null>(null);
+  const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
+  const selectedModuleForDetail =
+    modules.find((m) => m.id === selectedModuleId) ?? null;
 
-  // In-browser Document Preview state
   const [previewDoc, setPreviewDoc] = useState<{
     title: string;
     fileUrl: string;
@@ -53,7 +70,6 @@ export function AdminModuleList() {
     courseCode?: string;
   } | null>(null);
 
-  // Multi-Module Upload Queue state
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [newModuleCourseId, setNewModuleCourseId] = useState("");
   const [uploadQueue, setUploadQueue] = useState<
@@ -80,10 +96,9 @@ export function AdminModuleList() {
 
   const detailModalRef = useModalFocusTrap<HTMLDivElement>({
     isOpen: Boolean(selectedModuleForDetail),
-    onClose: () => setSelectedModuleForDetail(null),
+    onClose: () => setSelectedModuleId(null),
   });
 
-  // Auto-dismiss notification banners
   useEffect(() => {
     if (actionSuccess) {
       const timer = setTimeout(() => setActionSuccess(null), 4000);
@@ -98,60 +113,8 @@ export function AdminModuleList() {
     }
   }, [error]);
 
-  const loadData = async () => {
-    try {
-      const [mList, cList] = await Promise.all([
-        fetchAdminModules(),
-        fetchAdminCourses()
-      ]);
-      setModules(mList);
-      setCourses(cList);
-      if (selectedModuleForDetail) {
-        const updated = mList.find((m) => m.id === selectedModuleForDetail.id);
-        if (updated) setSelectedModuleForDetail(updated);
-      }
-    } catch (err: unknown) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Couldn't load modules. Please refresh."
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    let isMounted = true;
-    async function fetchData() {
-      try {
-        const [mList, cList] = await Promise.all([
-          fetchAdminModules(),
-          fetchAdminCourses()
-        ]);
-        if (isMounted) {
-          setModules(mList);
-          setCourses(cList);
-        }
-      } catch (err: unknown) {
-        if (isMounted) {
-          setError(
-            err instanceof Error
-              ? err.message
-              : "Couldn't load modules. Please refresh."
-          );
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    }
-    fetchData();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const refreshModules = () =>
+    queryClient.invalidateQueries({ queryKey: adminQueryKeys.all });
 
   const toggleCourseCollapse = (courseId: string) => {
     setCollapsedCourses((prev) => {
@@ -178,7 +141,7 @@ export function AdminModuleList() {
         const res = await publishModule(mod.id);
         setActionSuccess(res.message || "Module published.");
       }
-      await loadData();
+      await refreshModules();
     } catch (err: unknown) {
       setError(
         err instanceof Error ? err.message : "Couldn't update publish status. Please try again."
@@ -202,10 +165,10 @@ export function AdminModuleList() {
     try {
       const res = await deleteModule(mod.id);
       setActionSuccess(res.message || "Module deleted.");
-      if (selectedModuleForDetail?.id === mod.id) {
-        setSelectedModuleForDetail(null);
+      if (selectedModuleId === mod.id) {
+        setSelectedModuleId(null);
       }
-      await loadData();
+      await refreshModules();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Couldn't delete module. Please try again.");
     } finally {
@@ -230,7 +193,6 @@ export function AdminModuleList() {
         return;
       }
 
-      // Generate a clean prefilled title from filename
       const cleanTitle = file.name
         .replace(/\.[^/.]+$/, "")
         .replace(/[_-]+/g, " ")
@@ -333,7 +295,7 @@ export function AdminModuleList() {
         );
       }
 
-      await loadData();
+      await refreshModules();
     } catch (err: unknown) {
       setError(
         err instanceof Error ? err.message : "Couldn't complete the batch upload. Please try again."
@@ -344,7 +306,6 @@ export function AdminModuleList() {
     }
   };
 
-  // group modules by Course
   const courseMap = new Map<string, Course>();
   courses.forEach((c) => courseMap.set(c.id, c));
 
@@ -355,7 +316,6 @@ export function AdminModuleList() {
     const courseId = m.course_id || "";
     const course = courseMap.get(courseId);
 
-    // Active/Inactive filter
     if (selectedCourseFilter === "active" && (!course || !course.is_active)) {
       return false;
     }
@@ -474,6 +434,26 @@ export function AdminModuleList() {
         <div className="p-16 text-center text-xs text-slate-400 bg-white rounded-3xl border border-slate-200 shadow-xs">
           Loading modules...
         </div>
+      ) : loadError ? (
+        <NotificationBanner variant="error">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <span>Couldn&apos;t load modules.</span>
+            <button
+              type="button"
+              onClick={() => {
+                void modulesQuery.refetch();
+                void coursesQuery.refetch();
+              }}
+              className="rounded-lg bg-slate-800 border border-slate-700 px-3 py-1 text-xs font-semibold text-white hover:bg-slate-700 transition"
+            >
+              Retry
+            </button>
+          </div>
+        </NotificationBanner>
+      ) : modules.length === 0 ? (
+        <div className="p-16 text-center text-xs text-slate-400 bg-white rounded-3xl border border-slate-200 shadow-xs">
+          No learning modules uploaded yet. Click &quot;Upload Module&quot; to add guides and docs.
+        </div>
       ) : filteredModules.length === 0 ? (
         <div className="p-16 text-center text-xs text-slate-400 bg-white rounded-3xl border border-slate-200 shadow-xs">
           No learning modules found matching your search.
@@ -547,7 +527,16 @@ export function AdminModuleList() {
                         return (
                           <div
                             key={mod.id}
-                            onClick={() => setSelectedModuleForDetail(mod)}
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => setSelectedModuleId(mod.id)}
+                            onKeyDown={(e) => {
+                              if (e.target !== e.currentTarget) return;
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                setSelectedModuleId(mod.id);
+                              }
+                            }}
                             className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/80 cursor-pointer transition-colors"
                           >
                             <div className="flex items-start gap-3.5">
@@ -586,9 +575,7 @@ export function AdminModuleList() {
                                 </p>
                                 <span className="text-[10px] text-slate-400 font-mono mt-0.5 block">
                                   Uploaded:{" "}
-                                  {new Date(
-                                    mod.created_at
-                                  ).toLocaleDateString()}
+                                  {formatDate(mod.created_at)}
                                 </span>
                               </div>
                             </div>
@@ -672,11 +659,11 @@ export function AdminModuleList() {
           role="dialog"
           aria-modal="true"
           aria-labelledby="admin-upload-module-title"
-          className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center overflow-y-auto p-4"
         >
           <form
             onSubmit={handleUploadSubmit}
-            className="bg-white rounded-3xl border border-slate-200 p-6 w-full max-w-xl shadow-xl space-y-4 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] flex flex-col"
+            className="bg-white rounded-3xl border border-slate-200 p-6 w-full max-w-xl shadow-xl space-y-4 animate-in fade-in zoom-in-95 duration-150 max-h-[90dvh] flex flex-col"
           >
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 shrink-0">
               <div>
@@ -702,12 +689,20 @@ export function AdminModuleList() {
             </div>
 
             <div className="space-y-4 text-xs overflow-y-auto flex-1 pr-1">
+              {error && (
+                <NotificationBanner
+                  variant="error"
+                  message={error}
+                  onClose={() => setError(null)}
+                />
+              )}
               {/* Target Course Selector with Active/Inactive Groups */}
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
+                <label htmlFor="admin-module-course" className="block font-semibold text-slate-700 mb-1">
                   Target Course *
                 </label>
                 <select
+                  id="admin-module-course"
                   value={newModuleCourseId}
                   onChange={(e) => setNewModuleCourseId(e.target.value)}
                   required
@@ -843,6 +838,7 @@ export function AdminModuleList() {
                                 })
                               }
                               required
+                              aria-label={`Title for ${item.file.name}`}
                               placeholder="Module title *"
                               className="w-full p-2 text-xs border border-slate-200 rounded-xl bg-white focus:ring-1 focus:ring-slate-900 font-medium"
                             />
@@ -948,9 +944,9 @@ export function AdminModuleList() {
           role="dialog"
           aria-modal="true"
           aria-labelledby="admin-module-detail-title"
-          className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-start sm:items-center justify-center overflow-y-auto p-4"
         >
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-xl w-full max-w-lg max-h-[90dvh] overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
             {/* Modal Header Banner */}
             <div className="p-5 bg-linear-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -968,7 +964,7 @@ export function AdminModuleList() {
               </div>
               <button
                 type="button"
-                onClick={() => setSelectedModuleForDetail(null)}
+                onClick={() => setSelectedModuleId(null)}
                 className="apple-press w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-bold flex items-center justify-center transition-colors"
                 aria-label="Close modal"
               >

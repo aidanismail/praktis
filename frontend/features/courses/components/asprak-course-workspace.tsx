@@ -8,6 +8,7 @@ import { CourseUpcomingWidget } from "./course-upcoming-widget";
 import { CourseModules } from "@/features/modules/components/course-modules";
 import { CourseAssignments } from "@/features/assignments/components/course-assignments";
 import { AssignedAssignmentDetail } from "@/features/assignments/components/asprak-assignment-detail-page";
+import { AssignedSessionDetail } from "@/features/sessions/components/asprak-session-detail-page";
 import { CourseRoster } from "./course-roster";
 import { CourseSessions } from "@/features/sessions/components/course-sessions";
 import {
@@ -118,6 +119,17 @@ export function AsprakCourseWorkspace({
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   }, [pathname, router, searchParams]);
 
+  const handleSelectSession = useCallback(
+    (id: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("workspaceTab", "sessions");
+      params.set("sessionId", id);
+      params.delete("assignmentId");
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [pathname, router, searchParams]
+  );
+
   if (assignmentId) {
     return (
       <AssignedAssignmentDetail
@@ -125,6 +137,18 @@ export function AsprakCourseWorkspace({
         courseId={course.id}
         assignmentId={assignmentId}
         onBack={handleBackFromAssignment}
+      />
+    );
+  }
+
+  if (sessionId) {
+    return (
+      <AssignedSessionDetail
+        userId={userId}
+        courseId={course.id}
+        sessionId={sessionId}
+        course={course}
+        onBack={handleBackFromSession}
       />
     );
   }
@@ -138,7 +162,7 @@ export function AsprakCourseWorkspace({
           onClick={handleBackToCourses}
           className="flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-full shadow-xs transition-colors apple-press"
         >
-          <ArrowLeftIcon className="w-4 h-4" />
+          <ArrowLeftIcon className="w-4 h-4" aria-hidden="true" />
           <span>Back to Classes</span>
         </button>
 
@@ -190,7 +214,7 @@ export function AsprakCourseWorkspace({
             </h1>
 
             <p className="mt-2 text-xs text-slate-200 flex items-center gap-2">
-              <CalendarBlankIcon className="w-4 h-4 text-white/70" weight="bold" />
+              <CalendarBlankIcon className="w-4 h-4 text-white/70" weight="bold" aria-hidden="true" />
               <span>
                 Academic Year {course.academic_year} • Semester {course.semester}
               </span>
@@ -274,7 +298,7 @@ export function AsprakCourseWorkspace({
         <CourseSessions
           userId={userId}
           courseId={course.id}
-          initialInspectingSessionId={sessionId}
+          onSelectSession={handleSelectSession}
         />
       )}
 

@@ -3,6 +3,8 @@
 import { useState, useMemo, useCallback } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import type { User } from "@/types/user.type";
+import { resolveWorkspaceTabForRole } from "@/constants/routes";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useLogout } from "@/features/auth/hooks/use-logout";
 import { useAdminCourses } from "@/features/admin/hooks/use-admin-courses";
 import { useCourseWorkspace } from "@/features/admin/hooks/use-admin-course-workspace";
@@ -12,7 +14,12 @@ import { useAssignmentDetail } from "@/features/assignments/hooks/use-course-ass
 import { useCourseSessions } from "@/features/sessions/hooks/use-course-sessions";
 import { DASHBOARD_NAVIGATION } from "../constants/dashboard-navigation";
 import { DashboardHeader } from "./dashboard-header";
-import { DashboardSidebar } from "./dashboard-sidebar";
+import {
+  DashboardSidebar,
+  DESKTOP_SIDEBAR_ID,
+  MOBILE_SIDEBAR_ID
+} from "./dashboard-sidebar";
+import { CourseLookupState } from "./course-lookup-state";
 import { RoleDashboard } from "./role-dashboard";
 import { NotificationBanner } from "@/components/ui/notification-banner";
 
@@ -28,30 +35,41 @@ export function DashboardShell({ user }: DashboardShellProps) {
   const logoutMutation = useLogout();
   const navigationItems = DASHBOARD_NAVIGATION[user.role];
 
-  const tabParam = searchParams.get("tab");
+  const rawTabParam = searchParams.get("tab");
+  // "attendace" is a legacy misspelling that may still exist in old links.
+  const tabParam = rawTabParam === "attendace" ? "attendance" : rawTabParam;
   const activeItemId =
     tabParam && navigationItems.some((item) => item.id === tabParam)
       ? tabParam
       : navigationItems[0].id;
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isMobileSidebarRequested, setIsMobileSidebarOpen] = useState(false);
+  const isMobile = useIsMobile();
+  // The drawer only exists below md; never keep it (or its scroll lock) open on desktop.
+  const isMobileSidebarOpen = isMobile && isMobileSidebarRequested;
 
   const isSuperadmin = user.role === "superadmin";
   const isAsprak = user.role === "asprak";
   const isPraktikan = user.role === "praktikan";
+  const courseNavItemId = isSuperadmin ? "courses" : "classes";
 
   const courseIdParam = searchParams.get("courseId");
   const workspaceTabParam = searchParams.get("workspaceTab");
   const assignmentIdParam = searchParams.get("assignmentId");
   const sessionIdParam = searchParams.get("sessionId");
 
-  const { courses: adminCourses } = useAdminCourses({ enabled: isSuperadmin });
+  const {
+    courses: adminCourses,
+    isLoading: isAdminCoursesLoading,
+    error: adminCoursesError,
+    refetch: refetchAdminCourses
+  } = useAdminCourses({ enabled: isSuperadmin });
   const { assignments } = useCourseWorkspace(isSuperadmin ? courseIdParam : null);
 
-  const assignedCoursesQuery = useAssignedCourses(user.id);
-
-  const enrolledCoursesQuery = useEnrolledCourses(user.role === "praktikan" ? user.id : "");
+  // Each role only loads its own course list (an empty id disables the query).
+  const assignedCoursesQuery = useAssignedCourses(isAsprak ? user.id : "");
+  const enrolledCoursesQuery = useEnrolledCourses(isPraktikan ? user.id : "");
 
   const assignmentDetailQuery = useAssignmentDetail({
     userId: user.id,
@@ -66,33 +84,64 @@ export function DashboardShell({ user }: DashboardShellProps) {
     enabled: !isSuperadmin && Boolean(courseIdParam && sessionIdParam),
   });
 
+  const activeItem =
+    navigationItems.find((item) => item.id === activeItemId) ??
+    navigationItems[0];
+
+  // The course workspace only lives on the role's course tab.
+  const isCourseTab = activeItem.id === courseNavItemId;
+
   const activeCourse = useMemo(() => {
-    if (!courseIdParam) return null;
+    if (!courseIdParam || !isCourseTab) return null;
     if (isSuperadmin) {
       return adminCourses.find((c) => c.id === courseIdParam) ?? null;
     }
-    if (user.role === "asprak") {
+    if (isAsprak) {
       const assignedCourses = assignedCoursesQuery.data ?? [];
       return assignedCourses.find((c) => c.id === courseIdParam) ?? null;
     }
-    if (user.role === "praktikan") {
+    if (isPraktikan) {
       const enrolledCourses = enrolledCoursesQuery.data ?? [];
       return enrolledCourses.find((c) => c.id === courseIdParam) ?? null;
     }
     return null;
   }, [
     courseIdParam,
+    isCourseTab,
     isSuperadmin,
-    user.role,
+    isAsprak,
+    isPraktikan,
     adminCourses,
     assignedCoursesQuery.data,
     enrolledCoursesQuery.data
   ]);
 
   const activeTab = useMemo(
-    () => workspaceTabParam || "stream",
-    [workspaceTabParam]
+    () => resolveWorkspaceTabForRole(user.role, workspaceTabParam),
+    [user.role, workspaceTabParam]
   );
+
+  // Deep links: distinguish "still loading" from "not found / no access".
+  const courseLookupStatus: "loading" | "error" | "missing" | null = (() => {
+    if (!courseIdParam || !isCourseTab || activeCourse) return null;
+    if (isSuperadmin) {
+      if (isAdminCoursesLoading) return "loading";
+      return adminCoursesError ? "error" : "missing";
+    }
+    const query = isAsprak ? assignedCoursesQuery : enrolledCoursesQuery;
+    if (query.isPending) return "loading";
+    return query.isError ? "error" : "missing";
+  })();
+
+  function retryCourseLookup() {
+    if (isSuperadmin) {
+      void refetchAdminCourses();
+    } else if (isAsprak) {
+      void assignedCoursesQuery.refetch();
+    } else {
+      void enrolledCoursesQuery.refetch();
+    }
+  }
 
   const activeAssignmentTitle = useMemo(() => {
     if (assignmentIdParam) {
@@ -116,12 +165,8 @@ export function DashboardShell({ user }: DashboardShellProps) {
     sessionsQuery.data,
   ]);
 
-  const activeItem =
-    navigationItems.find((item) => item.id === activeItemId) ??
-    navigationItems[0];
-
   const toggleSidebar = () => {
-    if (typeof window !== "undefined" && window.innerWidth < 768) {
+    if (isMobile) {
       setIsMobileSidebarOpen((prev) => !prev);
     } else {
       setIsSidebarCollapsed((prev) => !prev);
@@ -168,14 +213,14 @@ export function DashboardShell({ user }: DashboardShellProps) {
   const handleNavigateToCourse = useCallback(
     (courseId: string) => {
       const params = new URLSearchParams(searchParams.toString());
-      params.set("tab", isSuperadmin ? "courses" : "classes");
+      params.set("tab", courseNavItemId);
       params.set("courseId", courseId);
       params.set("workspaceTab", "stream");
       params.delete("assignmentId");
       params.delete("sessionId");
       router.push(`${pathname}?${params.toString()}`, { scroll: false });
     },
-    [pathname, router, searchParams, user.role]
+    [courseNavItemId, pathname, router, searchParams]
   );
 
   function handleLogout() {
@@ -184,9 +229,16 @@ export function DashboardShell({ user }: DashboardShellProps) {
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] text-slate-900 flex flex-col">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[60] focus:rounded-full focus:bg-slate-900 focus:px-4 focus:py-2 focus:text-xs focus:font-semibold focus:text-white"
+      >
+        Skip to main content
+      </a>
       <DashboardHeader
         user={user}
-        isSidebarCollapsed={isSidebarCollapsed}
+        isSidebarExpanded={isMobile ? isMobileSidebarOpen : !isSidebarCollapsed}
+        sidebarControlsId={isMobile ? MOBILE_SIDEBAR_ID : DESKTOP_SIDEBAR_ID}
         onToggleSidebar={toggleSidebar}
         activeCourse={activeCourse}
         activeAssignmentTitle={activeAssignmentTitle}
@@ -210,7 +262,7 @@ export function DashboardShell({ user }: DashboardShellProps) {
           onCloseMobile={() => setIsMobileSidebarOpen(false)}
         />
 
-        <main className={`flex-1 min-w-0 p-3 sm:p-6 lg:p-8 mx-auto w-full ${activeCourse ? "max-w-6xl" : "max-w-5xl"}`}>
+        <main id="main-content" tabIndex={-1} className={`outline-none flex-1 min-w-0 p-3 sm:p-6 lg:p-8 mx-auto w-full ${activeCourse ? "max-w-6xl" : "max-w-5xl"}`}>
           {logoutMutation.isError ? (
             <div id="logout-error-message" className="mb-5">
               <NotificationBanner
@@ -245,16 +297,24 @@ export function DashboardShell({ user }: DashboardShellProps) {
               </p>
             </div>
           )}
-          <RoleDashboard
-            activeItem={activeItem}
-            user={user}
-            onNavigateToCourse={handleNavigateToCourse}
-            onNavigateToNavItem={handleSelectNavigationItem}
-            activeCourse={activeCourse}
-            workspaceTab={activeTab}
-            assignmentId={assignmentIdParam}
-            sessionId={sessionIdParam}
-          />
+          {courseLookupStatus ? (
+            <CourseLookupState
+              status={courseLookupStatus}
+              onBack={handleBackToCourses}
+              onRetry={retryCourseLookup}
+            />
+          ) : (
+            <RoleDashboard
+              activeItem={activeItem}
+              user={user}
+              onNavigateToCourse={handleNavigateToCourse}
+              onNavigateToNavItem={handleSelectNavigationItem}
+              activeCourse={activeCourse}
+              workspaceTab={activeTab}
+              assignmentId={assignmentIdParam}
+              sessionId={sessionIdParam}
+            />
+          )}
         </main>
       </div>
     </div>

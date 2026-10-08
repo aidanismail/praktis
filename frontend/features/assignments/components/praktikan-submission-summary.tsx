@@ -1,4 +1,6 @@
 import { NotificationBanner } from "@/components/ui/notification-banner";
+import { formatDateTime } from "@/lib/format/date";
+import { formatScore } from "@/lib/format/score";
 import type { AssignmentSubmission } from "../types/assignment.type";
 import {
   DownloadSimpleIcon,
@@ -9,19 +11,8 @@ import {
 type PraktikanSubmissionSummaryProps = {
   submission: AssignmentSubmission | null;
   maxPoints?: number;
+  gradesPublished?: boolean;
 };
-
-const dateFormatter = new Intl.DateTimeFormat("en", {
-  dateStyle: "medium",
-  timeStyle: "short",
-});
-
-function formatDate(value: string) {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime())
-    ? "Date unavailable"
-    : dateFormatter.format(date);
-}
 
 function formatFileSize(value: number) {
   if (!Number.isFinite(value) || value < 0) return "Size unavailable";
@@ -32,6 +23,8 @@ function formatFileSize(value: number) {
 
 export function PraktikanSubmissionSummary({
   submission,
+  maxPoints,
+  gradesPublished = false,
 }: PraktikanSubmissionSummaryProps) {
   if (!submission) {
     return (
@@ -49,7 +42,7 @@ export function PraktikanSubmissionSummary({
           <FileTextIcon className="mx-auto h-8 w-8 text-slate-400" aria-hidden="true" />
           <p className="mt-3 text-xs font-bold text-slate-900">Nothing turned in yet</p>
           <p className="mt-1 text-xs text-slate-500">
-            Ready? Drop your file or browse below to turn in your work.
+            Ready? Choose your file below to turn in your work.
           </p>
         </div>
       </section>
@@ -85,12 +78,15 @@ export function PraktikanSubmissionSummary({
         </div>
       </div>
 
-      {/* Clean Typographic Key-Value List (No Card Boxes, No Max Points) */}
+      {/* Clean Typographic Key-Value List */}
       <dl className="mt-4 divide-y divide-slate-100 text-xs">
         <div className="flex items-start justify-between py-2.5 gap-3">
           <dt className="text-slate-400 font-medium">File</dt>
-          <dd className="text-right min-w-0">
-            <span className="font-semibold text-slate-900 block truncate max-w-[200px]">
+          <dd className="text-right min-w-0 break-all">
+            <span
+              title={submission.file_name}
+              className="font-semibold text-slate-900 block break-all"
+            >
               {submission.file_name}
             </span>
             <span className="text-[11px] text-slate-400 block mt-0.5">
@@ -103,7 +99,7 @@ export function PraktikanSubmissionSummary({
           <dt className="text-slate-400 font-medium">Submitted</dt>
           <dd className="font-semibold text-slate-900">
             <time dateTime={submission.submitted_at}>
-              {formatDate(submission.submitted_at)}
+              {formatDateTime(submission.submitted_at)}
             </time>
           </dd>
         </div>
@@ -112,9 +108,16 @@ export function PraktikanSubmissionSummary({
           <dt className="text-slate-400 font-medium">Score</dt>
           <dd className="font-semibold text-slate-900">
             {submission.score === null ? (
-              <span className="text-slate-400 font-normal">Pending review</span>
+              <span className="text-slate-400 font-normal">
+                {gradesPublished ? "Awaiting grade" : "Grades not released yet"}
+              </span>
             ) : (
-              <span className="text-emerald-700 font-bold font-mono">{submission.score}</span>
+              <span className="text-emerald-700 font-bold font-mono">
+                {formatScore(submission.score)}
+                {maxPoints ? (
+                  <span className="text-xs font-normal text-slate-400"> / {maxPoints}</span>
+                ) : null}
+              </span>
             )}
           </dd>
         </div>
@@ -124,7 +127,7 @@ export function PraktikanSubmissionSummary({
             <dt className="text-slate-400 font-medium">Graded</dt>
             <dd className="text-slate-600 font-medium">
               <time dateTime={submission.graded_at}>
-                {formatDate(submission.graded_at)}
+                {formatDateTime(submission.graded_at)}
               </time>
             </dd>
           </div>

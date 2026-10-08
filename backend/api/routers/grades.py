@@ -188,6 +188,7 @@ async def my_grades(
         .where(
             Submission.student_id == current_user.id,
             Assignment.is_published.is_(True),
+            Assignment.grades_published.is_(True),
             Submission.status == "graded",
             Submission.score.isnot(None),
         )
@@ -219,13 +220,8 @@ async def my_grades(
         )
 
     for sub, assignment, course in assignment_rows:
-        item_date = None
-        if assignment.due_date:
-            item_date = assignment.due_date.date()
-        elif sub.graded_at:
-            item_date = sub.graded_at.date()
-        elif sub.submitted_at:
-            item_date = sub.submitted_at.date()
+        # Always the assignment deadline (or None), so clients can label it "Due".
+        item_date = assignment.due_date.date() if assignment.due_date else None
 
         items.append(
             PersonalGradeHistoryItem(

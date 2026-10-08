@@ -9,6 +9,8 @@ import {
   HouseIcon
 } from "@phosphor-icons/react";
 
+const isDev = process.env.NODE_ENV !== "production";
+
 export default function GlobalError({
   error,
   reset,
@@ -39,9 +41,9 @@ export default function GlobalError({
           <p className="text-xs text-slate-500 leading-relaxed">
             An unexpected hiccup occurred while loading this page. Give it another shot or head back to your dashboard.
           </p>
-          {error.message && (
+          {(isDev ? error.message : error.digest) && (
             <div className="mt-3 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-[11px] text-slate-600 font-mono text-left overflow-x-auto max-h-24">
-              {error.message}
+              {isDev ? error.message : `Error reference: ${error.digest}`}
             </div>
           )}
         </div>

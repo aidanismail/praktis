@@ -46,10 +46,6 @@ export function PraktikanCourseCard({ course }: PraktikanCourseCardProps) {
             <span className="text-[10px] font-bold uppercase tracking-wider text-white/90">
               {course.code}
             </span>
-            <span className="text-white/40" aria-hidden="true">·</span>
-            <span className="text-[11px] font-medium text-white/80">
-              {course.semester} {course.academic_year}
-            </span>
           </div>
           <h3 className="text-sm font-bold mt-2 text-white group-hover:underline line-clamp-1">
             {course.name}
@@ -65,7 +61,7 @@ export function PraktikanCourseCard({ course }: PraktikanCourseCardProps) {
               Academic Period
             </span>
             <span className="font-medium text-slate-800">
-              {course.academic_year}
+              {course.academic_year} · Semester {course.semester}
             </span>
           </div>
           <div className="bg-slate-50 p-2.5 rounded-2xl border border-slate-100">
@@ -82,9 +78,6 @@ export function PraktikanCourseCard({ course }: PraktikanCourseCardProps) {
           <span className="text-slate-900 font-semibold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
             <span>Open class</span>
             <CaretRightIcon className="w-3.5 h-3.5" />
-          </span>
-          <span className="text-[11px] text-slate-400 font-medium">
-            Semester {course.semester}
           </span>
         </div>
       </div>

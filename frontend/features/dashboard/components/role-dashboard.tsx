@@ -93,9 +93,7 @@ export function RoleDashboard({
               <AsprakCourseWorkspace
                 userId={user.id}
                 course={activeCourse}
-                workspaceTab={
-                  (workspaceTab as AsprakWorkspaceTab) || "stream"
-                }
+                workspaceTab={(workspaceTab ?? "stream") as AsprakWorkspaceTab}
                 assignmentId={assignmentId}
                 sessionId={sessionId}
               />
@@ -135,7 +133,7 @@ export function RoleDashboard({
                 user={user}
                 course={activeCourse}
                 workspaceTab={
-                  (workspaceTab as PraktikanWorkspaceTab) || "stream"
+                  (workspaceTab ?? "stream") as PraktikanWorkspaceTab
                 }
                 assignmentId={assignmentId}
                 sessionId={sessionId}
@@ -149,7 +147,7 @@ export function RoleDashboard({
             />
           );
         case "attendance":
-        case "attendace":
+        case "attendace": // legacy misspelling kept as an alias for old links
           return <PraktikanAttendanceHistory userId={user.id} />;
         case "grades":
           return <PraktikanGradeHistory userId={user.id} />;

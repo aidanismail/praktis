@@ -95,9 +95,12 @@ def _validate_zip_safety(content: bytes) -> None:
 
 
 
-def _build_submission_response(sub: Submission, student: User | None) -> SubmissionResponse:
+def _build_submission_response(
+    sub: Submission, student: User | None, hide_grade: bool = False
+) -> SubmissionResponse:
+    """Build a submission payload. `hide_grade` strips grading data for Praktikan until grades are published."""
     download_url = storage_service.generate_presigned_download_url(sub.file_key)
-    return SubmissionResponse(
+    response = SubmissionResponse(
         id=str(sub.id),
         assignment_id=str(sub.assignment_id),
         student_id=str(sub.student_id),
@@ -114,6 +117,41 @@ def _build_submission_response(sub: Submission, student: User | None) -> Submiss
         graded_by=str(sub.graded_by) if sub.graded_by else None,
         graded_at=sub.graded_at.isoformat() if sub.graded_at else None,
         status=sub.status,
+    )
+    if hide_grade:
+        response.score = None
+        response.feedback = None
+        response.graded_by = None
+        response.graded_at = None
+        if response.status == "graded":
+            response.status = "submitted"
+    return response
+
+
+_NON_NULLABLE_ASSIGNMENT_FIELDS = ("title", "max_points", "allowed_file_types", "is_published", "allow_late_submissions")
+
+
+def _build_assignment_response(
+    assignment: Assignment,
+    submissions_count: int = 0,
+    my_submission: SubmissionResponse | None = None,
+) -> AssignmentResponse:
+    return AssignmentResponse(
+        id=str(assignment.id),
+        course_id=str(assignment.course_id),
+        session_id=str(assignment.session_id) if assignment.session_id else None,
+        title=assignment.title,
+        description=assignment.description,
+        due_date=assignment.due_date.isoformat() if assignment.due_date else None,
+        max_points=assignment.max_points,
+        allowed_file_types=assignment.allowed_file_types,
+        is_published=assignment.is_published,
+        allow_late_submissions=assignment.allow_late_submissions,
+        grades_published=assignment.grades_published,
+        grades_published_at=assignment.grades_published_at.isoformat() if assignment.grades_published_at else None,
+        created_at=assignment.created_at.isoformat(),
+        submissions_count=submissions_count,
+        my_submission=my_submission,
     )
 
 
@@ -167,24 +205,12 @@ async def list_assignments(
     for a in assignments:
         my_sub_resp = None
         if current_user.role == RoleEnum.PRAKTIKAN and a.id in my_submissions_map:
-            my_sub_resp = _build_submission_response(my_submissions_map[a.id], current_user)
+            my_sub_resp = _build_submission_response(
+                my_submissions_map[a.id], current_user, hide_grade=not a.grades_published
+            )
 
         response_items.append(
-            AssignmentResponse(
-                id=str(a.id),
-                course_id=str(a.course_id),
-                session_id=str(a.session_id) if a.session_id else None,
-                title=a.title,
-                description=a.description,
-                due_date=a.due_date.isoformat() if a.due_date else None,
-                max_points=a.max_points,
-                allowed_file_types=a.allowed_file_types,
-                is_published=a.is_published,
-                allow_late_submissions=a.allow_late_submissions,
-                created_at=a.created_at.isoformat(),
-                submissions_count=sub_counts.get(a.id, 0),
-                my_submission=my_sub_resp,
-            )
+            _build_assignment_response(a, submissions_count=sub_counts.get(a.id, 0), my_submission=my_sub_resp)
         )
 
     return response_items
@@ -235,21 +261,7 @@ async def create_assignment(
     await db.commit()
     await db.refresh(new_assignment)
 
-    return AssignmentResponse(
-        id=str(new_assignment.id),
-        course_id=str(new_assignment.course_id),
-        session_id=str(new_assignment.session_id) if new_assignment.session_id else None,
-        title=new_assignment.title,
-        description=new_assignment.description,
-        due_date=new_assignment.due_date.isoformat() if new_assignment.due_date else None,
-        max_points=new_assignment.max_points,
-        allowed_file_types=new_assignment.allowed_file_types,
-        is_published=new_assignment.is_published,
-        allow_late_submissions=new_assignment.allow_late_submissions,
-        created_at=new_assignment.created_at.isoformat(),
-        submissions_count=0,
-        my_submission=None,
-    )
+    return _build_assignment_response(new_assignment, submissions_count=0)
 
 
 @router.get(
@@ -292,23 +304,11 @@ async def get_assignment(
         )
         my_sub = sub_res.scalars().first()
         if my_sub:
-            my_sub_resp = _build_submission_response(my_sub, current_user)
+            my_sub_resp = _build_submission_response(
+                my_sub, current_user, hide_grade=not assignment.grades_published
+            )
 
-    return AssignmentResponse(
-        id=str(assignment.id),
-        course_id=str(assignment.course_id),
-        session_id=str(assignment.session_id) if assignment.session_id else None,
-        title=assignment.title,
-        description=assignment.description,
-        due_date=assignment.due_date.isoformat() if assignment.due_date else None,
-        max_points=assignment.max_points,
-        allowed_file_types=assignment.allowed_file_types,
-        is_published=assignment.is_published,
-        allow_late_submissions=assignment.allow_late_submissions,
-        created_at=assignment.created_at.isoformat(),
-        submissions_count=submissions_count,
-        my_submission=my_sub_resp,
-    )
+    return _build_assignment_response(assignment, submissions_count=submissions_count, my_submission=my_sub_resp)
 
 
 @router.patch(
@@ -335,6 +335,26 @@ async def update_assignment(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Assignment not found")
 
     update_data = payload.model_dump(exclude_unset=True)
+    for field in _NON_NULLABLE_ASSIGNMENT_FIELDS:
+        if field in update_data and update_data[field] is None:
+            raise HTTPException(
+                status_code=422,
+                detail=f"{field} cannot be null",
+            )
+
+    new_max = update_data.get("max_points")
+    if new_max is not None and new_max < assignment.max_points:
+        top_score = (
+            await db.execute(
+                select(func.max(Submission.score)).where(Submission.assignment_id == assignment.id)
+            )
+        ).scalar_one()
+        if top_score is not None and top_score > new_max:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"max_points cannot be lower than an existing score ({top_score:g})",
+            )
+
     for field, value in update_data.items():
         setattr(assignment, field, value)
 
@@ -346,21 +366,7 @@ async def update_assignment(
     )
     submissions_count = count_res.scalar_one()
 
-    return AssignmentResponse(
-        id=str(assignment.id),
-        course_id=str(assignment.course_id),
-        session_id=str(assignment.session_id) if assignment.session_id else None,
-        title=assignment.title,
-        description=assignment.description,
-        due_date=assignment.due_date.isoformat() if assignment.due_date else None,
-        max_points=assignment.max_points,
-        allowed_file_types=assignment.allowed_file_types,
-        is_published=assignment.is_published,
-        allow_late_submissions=assignment.allow_late_submissions,
-        created_at=assignment.created_at.isoformat(),
-        submissions_count=submissions_count,
-        my_submission=None,
-    )
+    return _build_assignment_response(assignment, submissions_count=submissions_count)
 
 
 @router.delete(
@@ -693,3 +699,64 @@ async def grade_submission(
     student = st_res.scalars().first()
 
     return _build_submission_response(submission, student)
+
+
+async def _set_grades_published(
+    db: AsyncSession, course_id: uuid.UUID, assignment_id: uuid.UUID, published: bool
+) -> AssignmentResponse:
+    result = await db.execute(
+        select(Assignment)
+        .where(Assignment.id == assignment_id, Assignment.course_id == course_id)
+        .with_for_update()
+    )
+    assignment = result.scalars().first()
+    if not assignment:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Assignment not found")
+
+    if assignment.grades_published == published:
+        state = "already published" if published else "not published"
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Grades are {state} for this assignment")
+
+    assignment.grades_published = published
+    assignment.grades_published_at = datetime.datetime.now(datetime.timezone.utc) if published else None
+    await db.commit()
+    await db.refresh(assignment)
+
+    count_res = await db.execute(
+        select(func.count(Submission.id)).where(Submission.assignment_id == assignment.id)
+    )
+    return _build_assignment_response(assignment, submissions_count=count_res.scalar_one())
+
+
+@router.post(
+    "/{assignment_id}/grades/publish",
+    response_model=AssignmentResponse,
+    summary="Publish assignment grades",
+    description="Makes scores and feedback for this assignment visible to Praktikan. Requires Asprak or Superadmin.",
+    responses={**UNAUTHENTICATED_401, **FORBIDDEN_403, **NOT_FOUND_404, 400: {"description": "Grades are already published."}},
+)
+async def publish_assignment_grades(
+    course_id: uuid.UUID,
+    assignment_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    await require_course_access(db, current_user, course_id, write=True)
+    return await _set_grades_published(db, course_id, assignment_id, published=True)
+
+
+@router.post(
+    "/{assignment_id}/grades/unpublish",
+    response_model=AssignmentResponse,
+    summary="Unpublish assignment grades",
+    description="Hides scores and feedback for this assignment from Praktikan. Requires Asprak or Superadmin.",
+    responses={**UNAUTHENTICATED_401, **FORBIDDEN_403, **NOT_FOUND_404, 400: {"description": "Grades are not published."}},
+)
+async def unpublish_assignment_grades(
+    course_id: uuid.UUID,
+    assignment_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    await require_course_access(db, current_user, course_id, write=True)
+    return await _set_grades_published(db, course_id, assignment_id, published=False)

@@ -7,6 +7,7 @@ import {
   useCallback,
   useSyncExternalStore,
   type CSSProperties,
+  type KeyboardEvent,
   type MouseEvent,
 } from "react";
 import { createPortal } from "react-dom";
@@ -351,16 +352,23 @@ export function ProductLogo({
     <>
       <span
         ref={logoRef}
-        role="button"
-        tabIndex={0}
-        onClick={handleClick}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            handleClick(e as unknown as MouseEvent);
-          }
-        }}
-        className={`relative inline-flex items-center justify-center shrink-0 select-none cursor-pointer ${className ?? ""}`}
+        {...(interactive
+          ? {
+              role: "button",
+              tabIndex: 0,
+              "aria-label": alt || "Praktis logo",
+              onClick: handleClick,
+              onKeyDown: (e: KeyboardEvent<HTMLSpanElement>) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleClick(e as unknown as MouseEvent);
+                }
+              }
+            }
+          : {})}
+        className={`relative inline-flex items-center justify-center shrink-0 select-none ${
+          interactive ? "cursor-pointer" : ""
+        } ${className ?? ""}`}
         style={{ width: size, height: size }}
         title={
           clickCount > 0 && clickCount < 5
@@ -371,7 +379,6 @@ export function ProductLogo({
               ? "Click to put the star back!"
               : alt || "Praktis"
         }
-        aria-label={alt || "Praktis logo"}
       >
         {stage === "idle" ? (
           <Image
