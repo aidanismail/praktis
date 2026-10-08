@@ -148,6 +148,7 @@ export function RoleDashboard({
               onNavigateToCourse={onNavigateToCourse}
             />
           );
+        case "attendance":
         case "attendace":
           return <PraktikanAttendanceHistory userId={user.id} />;
         case "grades":
