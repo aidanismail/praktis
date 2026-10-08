@@ -8,6 +8,18 @@ from core.config import settings
 
 logger = logging.getLogger(__name__)
 
+CONTENT_TYPES = {
+    "pdf": "application/pdf",
+    "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "zip": "application/zip",
+}
+
+
+def content_type_for(object_name: str) -> str | None:
+    """Return the MIME type for a stored object based on its file extension."""
+    extension = object_name.rsplit(".", 1)[-1].lower() if "." in object_name else ""
+    return CONTENT_TYPES.get(extension)
+
 
 class StorageService:
     """MinIO/S3 access with two clients:
@@ -98,9 +110,13 @@ class StorageService:
         )
 
     def generate_presigned_download_url(self, object_name: str, expiration: int = 3600) -> str:
+        params = {"Bucket": self.bucket_name, "Key": object_name}
+        content_type = content_type_for(object_name)
+        if content_type:
+            params["ResponseContentType"] = content_type
         return self.public.generate_presigned_url(
             "get_object",
-            Params={"Bucket": self.bucket_name, "Key": object_name},
+            Params=params,
             ExpiresIn=expiration
         )
 

@@ -130,20 +130,22 @@ export function DashboardHeader({
           </button>
 
           <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-slate-800 min-w-0">
-            <button
-              type="button"
-              onClick={onBackToCourses}
-              className="flex items-center gap-2 font-bold text-slate-900 hover:text-slate-700 apple-press transition-colors shrink-0"
-              aria-label="Praktis - back to course list"
-              title="Back to course list"
-            >
+            <div className="flex items-center gap-2 shrink-0">
               <ProductLogo
                 size={28}
-                interactive={false}
+                alt="Praktis - back to course list"
+                onActivate={onBackToCourses}
                 className="rounded-full shadow-xs"
               />
-              <span className="text-base tracking-tight hidden sm:inline">Praktis</span>
-            </button>
+              <button
+                type="button"
+                onClick={onBackToCourses}
+                className="hidden sm:inline text-base font-bold tracking-tight text-slate-900 hover:text-slate-700 apple-press transition-colors"
+                title="Back to course list"
+              >
+                Praktis
+              </button>
+            </div>
 
             {activeCourse && (
               <>

@@ -114,7 +114,7 @@ def _submit_url(course_id, assignment_id) -> str:
     return f"/courses/{course_id}/assignments/{assignment_id}/submit"
 
 @pytest.mark.asyncio
-async def test_submit_valid_pdf(client, db, _setup):
+async def test_submit_valid_pdf(client, db, _setup, _mock_storage):
     s = _setup
     set_auth(client, s["student"])
 
@@ -132,6 +132,9 @@ async def test_submit_valid_pdf(client, db, _setup):
     assert body["file_size"] == len(content)
     assert body["file_name"].endswith(".pdf")
     assert "tugas1" in body["file_name"]
+
+    put_kwargs = _mock_storage.internal.put_object.call_args.kwargs
+    assert put_kwargs["ContentType"] == "application/pdf"
 
 
 @pytest.mark.asyncio
@@ -447,3 +450,19 @@ async def test_submit_rate_limiter_triggers_429(client, db, _setup):
     assert blocked_resp.status_code == 429
     assert "Too many requests" in blocked_resp.json()["detail"]
 
+
+
+
+def test_download_urls_carry_the_real_content_type():
+    from services.storage_service import StorageService, content_type_for
+
+    assert content_type_for("assignments/a/b/c.pdf") == "application/pdf"
+    assert content_type_for("assignments/a/b/c.ZIP") == "application/zip"
+    assert content_type_for("assignments/a/b/c") is None
+
+    service = StorageService()
+    service._public_client = MagicMock()
+    service._public_client.generate_presigned_url.return_value = "https://example.com/x"
+    service.generate_presigned_download_url("assignments/a/b/c.pdf")
+    params = service._public_client.generate_presigned_url.call_args.kwargs["Params"]
+    assert params["ResponseContentType"] == "application/pdf"

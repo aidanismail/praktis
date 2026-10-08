@@ -8,7 +8,6 @@ import {
   useSyncExternalStore,
   type CSSProperties,
   type KeyboardEvent,
-  type MouseEvent,
 } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
@@ -22,6 +21,7 @@ type ProductLogoProps = {
   priority?: boolean;
   size?: number;
   interactive?: boolean;
+  onActivate?: () => void;
 };
 
 type EasterEggStage =
@@ -51,7 +51,9 @@ type FallenCoords = {
   };
 };
 
-const PLANK_PHRASE = "Brooks was here......... so was Bagas...... so was Aidan";
+const PLANK_LINES = ["Brooks was here…", "so was Bagas…", "so was Aidan"];
+const PLANK_PHRASE_SPOKEN = "Brooks was here. So was Bagas. So was Aidan.";
+const AUTO_RECOVER_MS = 10000;
 const PLANK_WIDTH = 188;
 const PLANK_GAP = 12;
 const PLANK_HEIGHT_ESTIMATE = 72;
@@ -62,6 +64,7 @@ export function ProductLogo({
   priority = false,
   size = 32,
   interactive = true,
+  onActivate,
 }: ProductLogoProps) {
   const isClient = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [stage, setStage] = useState<EasterEggStage>("idle");
@@ -74,6 +77,7 @@ export function ProductLogo({
 
   const resetTimerRef = useRef<NodeJS.Timeout | null>(null);
   const autoRecoverTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [isStarHeld, setIsStarHeld] = useState(false);
 
   const clearAllTimers = useCallback(() => {
     if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
@@ -239,20 +243,51 @@ export function ProductLogo({
   }, [stage, fallenCoords]);
 
   useEffect(() => {
-    if (stage === "fallen") {
+    if (stage === "fallen" && !isStarHeld) {
       autoRecoverTimerRef.current = setTimeout(() => {
         triggerRecover();
-      }, 8000);
+      }, AUTO_RECOVER_MS);
     }
     return () => {
       if (autoRecoverTimerRef.current) clearTimeout(autoRecoverTimerRef.current);
     };
-  }, [stage, triggerRecover]);
+  }, [stage, isStarHeld, triggerRecover]);
 
-  function handleClick(e: MouseEvent) {
+  const isDetachedStage =
+    stage === "falling" || stage === "fallen" || stage === "recovering";
+  useEffect(() => {
+    if (!isDetachedStage) return;
+
+    function resetNow() {
+      clearAllTimers();
+      if (activeAnimationRef.current) {
+        activeAnimationRef.current.cancel();
+        activeAnimationRef.current = null;
+      }
+      setStage("idle");
+      setClickCount(0);
+      setFallenCoords(null);
+      setIsStarHeld(false);
+    }
+
+    function handleKey(event: globalThis.KeyboardEvent) {
+      if (event.key === "Escape" && stage === "fallen") triggerRecover();
+    }
+
+    window.addEventListener("resize", resetNow);
+    window.addEventListener("orientationchange", resetNow);
+    window.addEventListener("keydown", handleKey);
+    return () => {
+      window.removeEventListener("resize", resetNow);
+      window.removeEventListener("orientationchange", resetNow);
+      window.removeEventListener("keydown", handleKey);
+    };
+  }, [isDetachedStage, stage, clearAllTimers, triggerRecover]);
+
+  function handleClick() {
     if (!interactive) return;
 
-    e.stopPropagation();
+    onActivate?.();
 
     if (stage === "falling" || stage === "recovering") {
       return;
@@ -361,7 +396,7 @@ export function ProductLogo({
               onKeyDown: (e: KeyboardEvent<HTMLSpanElement>) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
-                  handleClick(e as unknown as MouseEvent);
+                  handleClick();
                 }
               }
             }
@@ -441,6 +476,10 @@ export function ProductLogo({
                   triggerRecover();
                 }
               }}
+              onMouseEnter={() => setIsStarHeld(true)}
+              onMouseLeave={() => setIsStarHeld(false)}
+              onFocus={() => setIsStarHeld(true)}
+              onBlur={() => setIsStarHeld(false)}
               className={`fixed pointer-events-auto select-none flex items-center justify-center ${
                 stage === "fallen" ? "cursor-pointer group" : "cursor-default"
               }`}
@@ -459,12 +498,12 @@ export function ProductLogo({
               }}
               title={
                 stage === "fallen"
-                  ? "Click to snap star back into Praktis logo"
+                  ? "Click (or press Esc) to snap the star back into the logo"
                   : undefined
               }
               aria-label={
                 stage === "fallen"
-                  ? "Dislodged logo asterisk star. Click to return to logo."
+                  ? "Dislodged logo star. Press Enter to return it to the logo."
                   : undefined
               }
             >
@@ -503,7 +542,14 @@ export function ProductLogo({
                     } as CSSProperties
                   }
                 >
-                  <p className="logo-plank-text">{PLANK_PHRASE}</p>
+                  <p className="logo-plank-text" aria-hidden="true">
+                    {PLANK_LINES.map((line) => (
+                      <span key={line} className="block">
+                        {line}
+                      </span>
+                    ))}
+                  </p>
+                  <span className="sr-only">{PLANK_PHRASE_SPOKEN}</span>
                 </div>
               </div>
             )}
