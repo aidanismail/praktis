@@ -5,7 +5,7 @@ import type { User } from "@/types/user.type";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
 import { updateProfile } from "@/features/auth/api/auth.api";
 import { useAuthStore } from "@/stores/auth-store";
-import { X, WarningCircle, User as UserIcon } from "@phosphor-icons/react";
+import { XIcon, WarningCircleIcon, UserIcon } from "@phosphor-icons/react";
 
 type EditProfileModalProps = {
   user: User;
@@ -32,7 +32,7 @@ export function EditProfileModal({
 
   if (!isOpen) return null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -82,13 +82,13 @@ export function EditProfileModal({
             onClick={onClose}
             className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center text-xs apple-press transition-colors"
           >
-            <X className="w-4 h-4" />
+            <XIcon className="w-4 h-4" />
           </button>
         </div>
 
         {error && (
           <div className="p-3 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-800 flex items-center gap-2 animate-apple-fade">
-            <WarningCircle className="w-4 h-4 text-rose-600 shrink-0" />
+            <WarningCircleIcon className="w-4 h-4 text-rose-600 shrink-0" />
             <span>{error}</span>
           </div>
         )}

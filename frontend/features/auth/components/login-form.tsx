@@ -11,10 +11,10 @@ import { loginSchema, type LoginFormValues } from "../schemas/auth.schema";
 import { useLogin } from "../hooks/use-login";
 import { NotificationBanner } from "@/components/ui/notification-banner";
 import {
-  Eye,
-  EyeSlash,
-  LockKey,
-  User
+  EyeIcon,
+  EyeSlashIcon,
+  LockKeyIcon,
+  UserIcon
 } from "@phosphor-icons/react";
 
 export function LoginForm() {
@@ -86,7 +86,7 @@ export function LoginForm() {
           </label>
 
           <div className="relative">
-            <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <UserIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 
             <input
               id="username"
@@ -118,7 +118,7 @@ export function LoginForm() {
           </label>
 
           <div className="relative">
-            <LockKey className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <LockKeyIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 
             <input
               id="password"
@@ -140,9 +140,9 @@ export function LoginForm() {
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? (
-                <EyeSlash className="h-4 w-4" />
+                <EyeSlashIcon className="h-4 w-4" />
               ) : (
-                <Eye className="h-4 w-4" />
+                <EyeIcon className="h-4 w-4" />
               )}
             </button>
           </div>

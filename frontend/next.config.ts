@@ -1,8 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone"
-  /* config options here */
+  output: "standalone",
+  experimental: {
+    optimizePackageImports: ["@phosphor-icons/react", "lucide-react"],
+  },
 };
 
 export default nextConfig;

@@ -79,85 +79,90 @@ export function RoleDashboard({
     }
 
     if (user.role === "asprak") {
-      if (activeItem.id === "overview") {
-        return (
-          <AsprakCourseOverview
-            userId={user.id}
-            onNavigateToCourse={onNavigateToCourse}
-          />
-        );
-      }
-
-      if (activeItem.id === "classes") {
-        if (activeCourse) {
+      switch (activeItem.id) {
+        case "overview":
           return (
-            <AsprakCourseWorkspace
+            <AsprakCourseOverview
               userId={user.id}
-              course={activeCourse}
-              workspaceTab={
-                (workspaceTab as AsprakWorkspaceTab) || "stream"
-              }
-              assignmentId={assignmentId}
-              sessionId={sessionId}
+              onNavigateToCourse={onNavigateToCourse}
             />
           );
-        }
-        return (
-          <AsprakCourseList
-            userId={user.id}
-            onNavigateToCourse={onNavigateToCourse}
-          />
-        );
-      }
-
-      if (activeItem.id === "profile") {
-        return <UserProfile user={user} />;
+        case "classes":
+          if (activeCourse) {
+            return (
+              <AsprakCourseWorkspace
+                userId={user.id}
+                course={activeCourse}
+                workspaceTab={
+                  (workspaceTab as AsprakWorkspaceTab) || "stream"
+                }
+                assignmentId={assignmentId}
+                sessionId={sessionId}
+              />
+            );
+          }
+          return (
+            <AsprakCourseList
+              userId={user.id}
+              onNavigateToCourse={onNavigateToCourse}
+            />
+          );
+        case "modules":
+          return <AdminModuleList />;
+        case "attendance-reports":
+          return <AttendanceReportsView />;
+        case "grade-exports":
+          return <GradeExportsView />;
+        case "profile":
+          return <UserProfile user={user} />;
+        default:
+          return (
+            <DashboardPlaceholderCard
+              title={activeItem.label}
+              description={activeItem.description}
+            />
+          );
       }
     }
+
 
     if (user.role === "praktikan") {
-      if (activeItem.id === "classes") {
-        if (activeCourse) {
+      switch (activeItem.id) {
+        case "classes":
+          if (activeCourse) {
+            return (
+              <PraktikanCourseWorkspace
+                user={user}
+                course={activeCourse}
+                workspaceTab={
+                  (workspaceTab as PraktikanWorkspaceTab) || "stream"
+                }
+                assignmentId={assignmentId}
+                sessionId={sessionId}
+              />
+            );
+          }
           return (
-            <PraktikanCourseWorkspace
-              user={user}
-              course={activeCourse}
-              workspaceTab={
-                (workspaceTab as PraktikanWorkspaceTab) || "stream"
-              }
-              assignmentId={assignmentId}
-              sessionId={sessionId}
+            <PraktikanCourseList
+              userId={user.id}
+              onNavigateToCourse={onNavigateToCourse}
             />
           );
-        }
-        return (
-          <PraktikanCourseList
-            userId={user.id}
-            onNavigateToCourse={onNavigateToCourse}
-          />
-        );
-      }
-
-      if (activeItem.id === "attendance") {
-        return <PraktikanAttendanceHistory userId={user.id} />;
-      }
-
-      if (activeItem.id === "grades") {
-        return <PraktikanGradeHistory userId={user.id} />;
-      }
-
-      if (activeItem.id === "profile") {
-        return <UserProfile user={user} />;
+        case "attendace":
+          return <PraktikanAttendanceHistory userId={user.id} />;
+        case "grades":
+          return <PraktikanGradeHistory userId={user.id} />;
+        case "profile":
+          return <UserProfile user={user} />;
+        default:
+          return (
+            <DashboardPlaceholderCard
+              title={activeItem.label}
+              description={activeItem.description}
+            />
+          );
       }
     }
-
-    return (
-      <DashboardPlaceholderCard
-        title={activeItem.label}
-        description={activeItem.description}
-      />
-    );
-  };
-
+  }
   return <>{renderContent()}</>;
 }

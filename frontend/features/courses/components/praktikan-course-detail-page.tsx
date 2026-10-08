@@ -14,9 +14,9 @@ import {
 import { useEnrolledCourses } from "../hooks/use-enrolled-courses";
 import { PraktikanCourseWorkspaceTabs } from "./praktikan-course-workspace-tabs";
 import {
-  ArrowLeft,
-  CalendarBlank,
-  ArrowsClockwise
+  ArrowLeftIcon,
+  CalendarBlankIcon,
+  ArrowsClockwiseIcon
 } from "@phosphor-icons/react";
 
 type Props = { courseId: string; initialTab: CourseWorkspaceTab };
@@ -107,7 +107,7 @@ export function PraktikanCourseDetailPage({ courseId, initialTab }: Props) {
                 disabled={query.isFetching}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700 transition disabled:opacity-60 shrink-0"
               >
-                <ArrowsClockwise
+                <ArrowsClockwiseIcon
                   className={`h-3.5 w-3.5 ${query.isFetching ? "animate-spin" : ""}`}
                   aria-hidden="true"
                 />
@@ -136,7 +136,7 @@ export function PraktikanCourseDetailPage({ courseId, initialTab }: Props) {
               href={ROUTES.dashboard}
               className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700 transition shrink-0"
             >
-              <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+              <ArrowLeftIcon className="h-3.5 w-3.5" aria-hidden="true" />
               Back to dashboard
             </Link>
           </div>
@@ -158,7 +158,7 @@ export function PraktikanCourseDetailPage({ courseId, initialTab }: Props) {
             href={ROUTES.dashboard}
             className="flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-full shadow-xs transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeftIcon className="w-4 h-4" />
             <span>Back to Classes</span>
           </Link>
 
@@ -202,7 +202,7 @@ export function PraktikanCourseDetailPage({ courseId, initialTab }: Props) {
                 {course.name}
               </h1>
               <p className="text-xs text-slate-200 mt-1.5 flex items-center gap-2">
-                <CalendarBlank className="w-4 h-4 text-white/70" />
+                <CalendarBlankIcon className="w-4 h-4 text-white/70" />
                 <span>
                   Academic Year {course.academic_year} • Semester {course.semester}
                 </span>

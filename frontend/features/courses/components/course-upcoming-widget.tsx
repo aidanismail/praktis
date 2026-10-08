@@ -2,10 +2,10 @@
 
 import { useMemo } from "react";
 import {
-  Clock,
-  CalendarCheck,
-  CheckCircle,
-  CaretRight,
+  ClockIcon,
+  CalendarCheckIcon,
+  CheckCircleIcon,
+  CaretRightIcon,
 } from "@phosphor-icons/react";
 import { useCourseAssignments } from "@/features/assignments/hooks/use-course-assignments";
 import { useCourseSessions } from "@/features/sessions/hooks/use-course-sessions";
@@ -123,7 +123,7 @@ export function CourseUpcomingWidget({
       <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-xs space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-bold text-slate-900 flex items-center gap-1.5 uppercase tracking-wider">
-            <Clock className="w-4 h-4 text-slate-700" weight="bold" />
+            <ClockIcon className="w-4 h-4 text-slate-700" weight="bold" />
             <span>Upcoming</span>
           </h3>
 
@@ -138,9 +138,10 @@ export function CourseUpcomingWidget({
 
         {upcomingAssignments.length === 0 ? (
           <div className="py-3 text-center">
-            <CheckCircle className="w-5 h-5 text-slate-400 mx-auto" />
+            <CheckCircleIcon className="w-5 h-5 text-slate-400 mx-auto" />
             <p className="mt-1.5 text-xs font-medium text-slate-600">
-              No assignments due soon
+              No assignments due soon,
+              wow wow wow!!
             </p>
           </div>
         ) : (
@@ -167,7 +168,7 @@ export function CourseUpcomingWidget({
                     <span className="font-semibold text-xs text-slate-800 line-clamp-1 group-hover:text-slate-950 transition-colors">
                       {assignment.title}
                     </span>
-                    <CaretRight className="w-3.5 h-3.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-0.5" />
+                    <CaretRightIcon className="w-3.5 h-3.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-0.5" />
                   </div>
 
                   <div className="mt-1 flex items-center justify-between gap-2 text-[11px]">
@@ -217,7 +218,7 @@ export function CourseUpcomingWidget({
       >
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-bold text-slate-900 flex items-center gap-1.5 uppercase tracking-wider">
-            <CalendarCheck className="w-4 h-4 text-slate-700" weight="bold" />
+            <CalendarCheckIcon className="w-4 h-4 text-slate-700" weight="bold" />
             <span>Next Session</span>
           </h3>
 

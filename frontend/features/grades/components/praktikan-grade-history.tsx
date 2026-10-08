@@ -7,8 +7,8 @@ import { ApiError } from "@/lib/api/client";
 import { usePersonalGrades } from "../hooks/use-personal-grades";
 import type { PersonalGradeHistoryItem } from "../types/grade.type";
 import {
-  GraduationCap,
-  ArrowsClockwise
+  GraduationCapIcon,
+  ArrowsClockwiseIcon
 } from "@phosphor-icons/react";
 
 type Props = { userId: string };
@@ -113,7 +113,7 @@ export function PraktikanGradeHistory({ userId }: Props) {
               disabled={query.isFetching}
               className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700 transition disabled:opacity-60 shrink-0"
             >
-              <ArrowsClockwise className={`h-3.5 w-3.5 ${query.isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
+              <ArrowsClockwiseIcon className={`h-3.5 w-3.5 ${query.isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
               Try again
             </button>
           ) : null}
@@ -133,7 +133,7 @@ export function PraktikanGradeHistory({ userId }: Props) {
           className="p-2 self-start sm:self-auto rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-xs transition-colors cursor-pointer disabled:opacity-60"
           title="Refresh grades"
         >
-          <ArrowsClockwise className={`w-3.5 h-3.5 ${query.isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
+          <ArrowsClockwiseIcon className={`w-3.5 h-3.5 ${query.isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
         </button>
       </div>
 
@@ -147,7 +147,6 @@ export function PraktikanGradeHistory({ userId }: Props) {
           <dd className="mt-1 text-2xl sm:text-3xl font-bold text-slate-950">
             {average === null ? "—" : formatScore(average)}
           </dd>
-          <p className="mt-1 text-[11px] text-slate-400">Calculated from published scores</p>
         </div>
       </dl>
 
@@ -176,7 +175,7 @@ export function PraktikanGradeHistory({ userId }: Props) {
           role="status"
           className="rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center shadow-xs"
         >
-          <GraduationCap className="mx-auto h-9 w-9 text-slate-400" aria-hidden="true" />
+          <GraduationCapIcon className="mx-auto h-9 w-9 text-slate-400" aria-hidden="true" />
           <h2 className="mt-3 text-sm font-bold text-slate-950">No grades published yet</h2>
           <p className="mt-1 text-xs text-slate-500">
             Once your instructors publish session or assignment scores, they&apos;ll show up right here.

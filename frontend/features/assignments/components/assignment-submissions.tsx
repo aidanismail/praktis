@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
+import { API_ENDPOINTS } from "@/lib/api/endpoints";
 import { useAssignmentSubmissions } from "../hooks/use-course-assignments";
 import type { AssignmentSubmission } from "../types/assignment.type";
 import { SubmissionGradeForm } from "./submission-grade-form";
@@ -232,6 +233,19 @@ export function AssignmentSubmissions({
           <p className="mt-0.5 text-xs text-slate-500">
             Review submitted files and provide private scores and feedback.
           </p>
+        </div>
+
+        <div className="flex items-center gap-2" aria-label="Export grades">
+          {(["csv", "xlsx"] as const).map((format) => (
+            <a
+              key={format}
+              href={API_ENDPOINTS.export.assignmentGrades(assignmentId, format)}
+              className="apple-press inline-flex min-h-9 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 text-xs font-semibold uppercase text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700"
+            >
+              <DownloadSimpleIcon className="h-3.5 w-3.5" aria-hidden="true" />
+              Grades {format}
+            </a>
+          ))}
         </div>
       </div>
 

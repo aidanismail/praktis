@@ -4,17 +4,17 @@ import { ProductLogo } from "@/components/branding/product-logo";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import type { DashboardNavItem } from "../constants/dashboard-navigation";
 import {
-  SquaresFour,
-  BookOpen,
-  Users,
-  CloudArrowUp,
-  FileText,
-  ClipboardText,
-  GraduationCap,
-  Table,
-  SignOut,
-  Stack,
-  X
+  SquaresFourIcon,
+  BookOpenIcon,
+  UsersIcon,
+  CloudArrowUpIcon,
+  FileTextIcon,
+  ClipboardTextIcon,
+  GraduationCapIcon,
+  TableIcon,
+  SignOutIcon,
+  StackIcon,
+  XIcon
 } from "@phosphor-icons/react";
 
 type DashboardSidebarProps = {
@@ -30,17 +30,17 @@ type DashboardSidebarProps = {
 };
 
 const NAV_ICONS: Record<string, React.ElementType> = {
-  overview: SquaresFour,
-  courses: BookOpen,
-  classes: BookOpen,
-  users: Users,
-  "bulk-import": CloudArrowUp,
-  modules: FileText,
-  "attendance-reports": ClipboardText,
-  attendance: ClipboardText,
-  grades: GraduationCap,
-  "grade-exports": Table,
-  profile: Users
+  overview: SquaresFourIcon,
+  courses: BookOpenIcon,
+  classes: BookOpenIcon,
+  users: UsersIcon,
+  "bulk-import": CloudArrowUpIcon,
+  modules: FileTextIcon,
+  "attendance-reports": ClipboardTextIcon,
+  attendance: ClipboardTextIcon,
+  grades: GraduationCapIcon,
+  "grade-exports": TableIcon,
+  profile: UsersIcon
 };
 
 export function DashboardSidebar({
@@ -58,7 +58,7 @@ export function DashboardSidebar({
     <nav className="flex-1 space-y-1 overflow-y-auto p-3 pt-4">
       {items.map((item) => {
         const isActive = item.id === activeItemId;
-        const IconComponent = NAV_ICONS[item.id] || Stack;
+        const IconComponent = NAV_ICONS[item.id] || StackIcon;
 
         return (
           <button
@@ -116,7 +116,7 @@ export function DashboardSidebar({
               aria-hidden="true"
             />
           ) : (
-            <SignOut className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <SignOutIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
           )}
 
           {!collapsed ? <span aria-live="polite">{logoutLabel}</span> : null}
@@ -150,7 +150,7 @@ export function DashboardSidebar({
                 className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center apple-press transition-colors"
                 aria-label="Close Navigation"
               >
-                <X className="w-4 h-4" />
+                <XIcon className="w-4 h-4" />
               </button>
             </div>
 

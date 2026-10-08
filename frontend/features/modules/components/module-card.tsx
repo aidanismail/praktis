@@ -18,8 +18,8 @@ import {
 } from "../schemas/module.schema";
 import type { CourseModule } from "../types/module.type";
 import {
-  ArrowSquareOut,
-  X
+  ArrowSquareOutIcon,
+  XIcon
 } from "@phosphor-icons/react";
 
 type ModuleCardProps = {
@@ -207,7 +207,7 @@ export function ModuleCard({ userId, courseId, module, accessMode }: ModuleCardP
           className="apple-press inline-flex items-center gap-1 text-xs font-semibold text-slate-800 hover:text-slate-950 transition-colors group"
         >
           <span>Open file</span>
-          <ArrowSquareOut className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700 transition-colors" />
+          <ArrowSquareOutIcon className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700 transition-colors" />
         </a>
       </div>
 
@@ -242,7 +242,7 @@ export function ModuleCard({ userId, courseId, module, accessMode }: ModuleCardP
               className="text-slate-400 hover:text-slate-600 transition-colors"
               aria-label="Cancel editing"
             >
-              <X className="w-3.5 h-3.5" />
+              <XIcon className="w-3.5 h-3.5" />
             </button>
           </div>
 
@@ -328,7 +328,7 @@ export function ModuleCard({ userId, courseId, module, accessMode }: ModuleCardP
               className="text-slate-400 hover:text-slate-600 transition-colors"
               aria-label="Cancel file replacement"
             >
-              <X className="w-3.5 h-3.5" />
+              <XIcon className="w-3.5 h-3.5" />
             </button>
           </div>
           <p className="mt-0.5 text-xs text-slate-500">

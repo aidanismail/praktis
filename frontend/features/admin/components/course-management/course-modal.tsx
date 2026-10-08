@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import type { Course } from "@/features/admin/types";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
 import {
-  WarningCircle
+  WarningCircleIcon
 } from "@phosphor-icons/react";
 
 interface CourseModalProps {
@@ -37,7 +37,7 @@ function CourseFormInner({
   const [isActiveCourse, setIsActiveCourse] = useState(initialCourse?.is_active ?? true);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     if (!code.trim() || !name.trim()) return;
     setFormError(null);
@@ -70,7 +70,7 @@ function CourseFormInner({
           aria-live="polite"
           className="flex items-center gap-2 p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs font-medium"
         >
-          <WarningCircle className="w-4 h-4 text-rose-600 shrink-0" />
+          <WarningCircleIcon className="w-4 h-4 text-rose-600 shrink-0" />
           <span className="flex-1">{formError}</span>
         </div>
       )}

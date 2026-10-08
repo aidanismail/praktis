@@ -1,11 +1,11 @@
 "use client";
 
 import {
-  WarningCircle,
-  ArrowLeft,
-  ArrowsClockwise,
-  PencilSimple,
-  Trash
+  WarningCircleIcon,
+  ArrowLeftIcon,
+  ArrowsClockwiseIcon,
+  PencilSimpleIcon,
+  TrashIcon
 } from "@phosphor-icons/react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import Link from "next/link";
@@ -116,7 +116,7 @@ function RequestErrorPanel({
       className="rounded-3xl border border-red-200 bg-red-50 p-6"
     >
       <div className="flex items-start gap-3">
-        <WarningCircle
+        <WarningCircleIcon
           className="mt-0.5 h-5 w-5 shrink-0 text-red-600"
           aria-hidden="true"
         />
@@ -142,7 +142,7 @@ function RequestErrorPanel({
               disabled={isRetrying}
               className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-red-700 px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <ArrowsClockwise
+              <ArrowsClockwiseIcon
                 className={
                   isRetrying ? "h-4 w-4 animate-spin" : "h-4 w-4"
                 }
@@ -156,7 +156,7 @@ function RequestErrorPanel({
               onClick={onBack}
               className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
-              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
               {fallbackLabel}
             </button>
           ) : (
@@ -373,7 +373,7 @@ export function AssignedAssignmentDetail({
             onClick={onBack}
             className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-amber-900 underline underline-offset-4"
           >
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
             Return to dashboard
           </button>
         ) : (
@@ -381,7 +381,7 @@ export function AssignedAssignmentDetail({
             href={ROUTES.dashboard}
             className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-amber-900 underline underline-offset-4"
           >
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
             Return to dashboard
           </Link>
         )}
@@ -426,7 +426,7 @@ export function AssignedAssignmentDetail({
             onClick={onBack}
             className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-amber-900 underline underline-offset-4"
           >
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
             Back to Assignments
           </button>
         ) : (
@@ -434,7 +434,7 @@ export function AssignedAssignmentDetail({
             href={getCourseDetailRoute(courseId, "assignments")}
             className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-amber-900 underline underline-offset-4"
           >
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
             Back to Assignments
           </Link>
         )}
@@ -451,7 +451,7 @@ export function AssignedAssignmentDetail({
             onClick={onBack}
             className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-full shadow-xs apple-press transition-colors cursor-pointer"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeftIcon className="w-4 h-4" />
             <span>Back to Assignments</span>
           </button>
         ) : (
@@ -459,7 +459,7 @@ export function AssignedAssignmentDetail({
             href={getCourseDetailRoute(courseId, "assignments")}
             className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-full shadow-xs apple-press transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeftIcon className="w-4 h-4" />
             <span>Back to Assignments</span>
           </Link>
         )}
@@ -470,7 +470,7 @@ export function AssignedAssignmentDetail({
             onClick={() => setIsEditing((prev) => !prev)}
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-3.5 py-2 rounded-full shadow-xs apple-press transition-colors cursor-pointer"
           >
-            <PencilSimple className="w-3.5 h-3.5 text-slate-500" />
+            <PencilSimpleIcon className="w-3.5 h-3.5 text-slate-500" />
             <span>{isEditing ? "Close settings" : "Edit assignment"}</span>
           </button>
 
@@ -484,7 +484,7 @@ export function AssignedAssignmentDetail({
               disabled={deleteMutation.isPending}
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-700 hover:text-rose-800 bg-white border border-rose-200 hover:bg-rose-50 px-3.5 py-2 rounded-full shadow-xs apple-press transition-colors cursor-pointer disabled:opacity-60"
             >
-              <Trash className="w-3.5 h-3.5 text-rose-500" />
+              <TrashIcon className="w-3.5 h-3.5 text-rose-500" />
               <span>Delete</span>
             </button>
           ) : null}

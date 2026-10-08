@@ -56,7 +56,7 @@ export function CourseStreamTab({
   const [isPosting, setIsPosting] = useState(false);
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
 
-  const handlePost = async (e: React.FormEvent) => {
+  const handlePost = async (e: React.SubmitEvent) => {
     e.preventDefault();
     if (!newContent.trim()) return;
     setIsPosting(true);

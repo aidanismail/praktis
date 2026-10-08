@@ -133,8 +133,8 @@ export const API_ENDPOINTS = {
   export: {
     attendance: (sessionId: string, format: "csv" | "xlsx" = "csv") =>
       `/api/export/attendance/${encodeURIComponent(sessionId)}?format=${encodeURIComponent(format)}`,
-    grades: (sessionId: string, format: "csv" | "xlsx" = "csv") =>
-      `/api/export/grades/${encodeURIComponent(sessionId)}?format=${encodeURIComponent(format)}`
+    assignmentGrades: (assignmentId: string, format: "csv" | "xlsx" = "csv") =>
+      `/api/export/assignments/${encodeURIComponent(assignmentId)}?format=${encodeURIComponent(format)}`
   },
 
   health: "/api/health"

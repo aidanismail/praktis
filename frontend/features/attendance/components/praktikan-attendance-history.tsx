@@ -7,9 +7,9 @@ import { ApiError } from "@/lib/api/client";
 import { usePersonalAttendance } from "../hooks/use-personal-attendance";
 import type { AttendanceStatus, PersonalAttendanceHistoryItem } from "../types/attendance.type";
 import {
-  CheckCircle,
-  ClipboardText,
-  ArrowsClockwise
+  CheckCircleIcon,
+  ClipboardTextIcon,
+  ArrowsClockwiseIcon
 } from "@phosphor-icons/react";
 
 type Props = { userId: string };
@@ -126,7 +126,7 @@ export function PraktikanAttendanceHistory({ userId }: Props) {
               disabled={query.isFetching}
               className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700 transition disabled:opacity-60 shrink-0"
             >
-              <ArrowsClockwise className={`h-3.5 w-3.5 ${query.isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
+              <ArrowsClockwiseIcon className={`h-3.5 w-3.5 ${query.isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
               Try again
             </button>
           ) : null}
@@ -146,7 +146,7 @@ export function PraktikanAttendanceHistory({ userId }: Props) {
           className="p-2 self-start sm:self-auto rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-xs transition-colors cursor-pointer disabled:opacity-60"
           title="Refresh attendance"
         >
-          <ArrowsClockwise className={`w-3.5 h-3.5 ${query.isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
+          <ArrowsClockwiseIcon className={`w-3.5 h-3.5 ${query.isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
         </button>
       </div>
 
@@ -236,7 +236,7 @@ export function PraktikanAttendanceHistory({ userId }: Props) {
           role="status"
           className="rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center shadow-xs"
         >
-          <ClipboardText className="mx-auto h-9 w-9 text-slate-400" aria-hidden="true" />
+          <ClipboardTextIcon className="mx-auto h-9 w-9 text-slate-400" aria-hidden="true" />
           <h2 className="mt-3 text-sm font-bold text-slate-950">No attendance records yet</h2>
           <p className="mt-1 text-xs text-slate-500">
             Attendance marked during your lab sessions will show up here.
@@ -260,7 +260,7 @@ export function PraktikanAttendanceHistory({ userId }: Props) {
                       className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs apple-card-hover transition-all"
                     >
                       <div className="flex min-w-0 items-center gap-3">
-                        <CheckCircle className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
+                        <CheckCircleIcon className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
                         <div className="min-w-0">
                           <p className="text-xs font-bold text-slate-950">{row.session_title}</p>
                           <p className="text-[11px] text-slate-500 mt-0.5">{formatDate(row.session_date)}</p>

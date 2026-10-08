@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PencilSimple, PushPin, Trash, X } from "@phosphor-icons/react";
+import { PencilSimpleIcon, PushPinIcon, TrashIcon, XIcon } from "@phosphor-icons/react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -92,7 +92,7 @@ export function AnnouncementCard({
             {announcement.is_pinned ? (
               <>
                 <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-700">
-                  <PushPin className="h-3.5 w-3.5" aria-hidden="true" />
+                  <PushPinIcon className="h-3.5 w-3.5" aria-hidden="true" />
                   Pinned
                 </span>
                 <span className="text-slate-300" aria-hidden="true">·</span>
@@ -128,7 +128,7 @@ export function AnnouncementCard({
               disabled={deleteMutation.isPending}
               className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-800 disabled:opacity-60"
             >
-              <PencilSimple className="h-3.5 w-3.5" aria-hidden="true" />
+              <PencilSimpleIcon className="h-3.5 w-3.5" aria-hidden="true" />
               Edit
             </button>
             {!isConfirmingDelete ? (
@@ -140,7 +140,7 @@ export function AnnouncementCard({
                 }}
                 className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
               >
-                <Trash className="h-3.5 w-3.5" aria-hidden="true" />
+                <TrashIcon className="h-3.5 w-3.5" aria-hidden="true" />
                 Delete
               </button>
             ) : null}
@@ -194,7 +194,7 @@ export function AnnouncementCard({
               aria-label="Cancel editing announcement"
               className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-800 disabled:opacity-60"
             >
-              <X className="h-4 w-4" aria-hidden="true" />
+              <XIcon className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
           <div className="space-y-2">
@@ -239,7 +239,7 @@ export function AnnouncementCard({
               className="h-4 w-4 rounded border-slate-300 accent-slate-900"
               {...form.register("is_pinned")}
             />
-            <PushPin className="h-4 w-4" aria-hidden="true" />
+            <PushPinIcon className="h-4 w-4" aria-hidden="true" />
             Pin to the top
           </label>
           {updateMutation.isError ? (

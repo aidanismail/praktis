@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PushPin } from "@phosphor-icons/react";
+import { PushPinIcon } from "@phosphor-icons/react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { useForm } from "react-hook-form";
 import { useCreateCourseAnnouncement } from "../hooks/use-course-announcements";
@@ -51,7 +51,7 @@ export function AnnouncementComposer({
             Post an announcement
           </h2>
           <p className="mt-1 text-sm leading-6 text-slate-600">
-            Broadcast updates, reminders, or schedule changes to the entire class.
+            Broadcast updates, reminders, or schedule changes.
           </p>
         </div>
       </div>
@@ -126,7 +126,7 @@ export function AnnouncementComposer({
               className="h-4 w-4 rounded border-slate-300 accent-slate-900"
               {...form.register("is_pinned")}
             />
-            <PushPin className="h-4 w-4" aria-hidden="true" />
+            <PushPinIcon className="h-4 w-4" aria-hidden="true" />
             Pin to top of stream
           </label>
 

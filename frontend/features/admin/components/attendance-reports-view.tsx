@@ -14,9 +14,9 @@ import type { Course } from "@/features/courses/types/course.type";
 import type { ClassSessionItem, StudentItem, AttendanceItem } from "../types/admin.type";
 import { NotificationBanner } from "@/components/ui/notification-banner";
 import {
-  Lock,
-  LockOpen,
-  UserCheck
+  LockIcon,
+  LockOpenIcon,
+  UserCheckIcon
 } from "@phosphor-icons/react";
 
 export function AttendanceReportsView() {
@@ -346,7 +346,7 @@ export function AttendanceReportsView() {
                 disabled={updatingStudentId === "ALL" || students.length === 0}
                 className="rounded-full border border-slate-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-800 hover:bg-slate-100 disabled:opacity-50 transition-colors flex items-center gap-1.5 shadow-xs"
               >
-                <UserCheck className="w-3.5 h-3.5" />
+                <UserCheckIcon className="w-3.5 h-3.5" />
                 <span>{updatingStudentId === "ALL" ? "Updating..." : "Mark all present"}</span>
               </button>
 
@@ -357,8 +357,8 @@ export function AttendanceReportsView() {
                   disabled={isUpdatingSession}
                   className="rounded-full border border-rose-200 bg-rose-50 px-4 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100 disabled:opacity-50 transition-colors flex items-center gap-1.5"
                 >
-                  <Lock className="w-3.5 h-3.5" />
-                  <span>{isUpdatingSession ? "..." : "Close Window"}</span>
+                  <LockIcon className="w-3.5 h-3.5" />
+                  <span>{isUpdatingSession ? "..." : "Close"}</span>
                 </button>
               ) : (
                 <button
@@ -367,7 +367,7 @@ export function AttendanceReportsView() {
                   disabled={isUpdatingSession}
                   className="rounded-full bg-slate-900 px-4 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 shadow-xs disabled:opacity-50 transition-colors flex items-center gap-1.5"
                 >
-                  <LockOpen className="w-3.5 h-3.5" />
+                  <LockOpenIcon className="w-3.5 h-3.5" />
                   <span>{isUpdatingSession ? "..." : "Open Window"}</span>
                 </button>
               )}

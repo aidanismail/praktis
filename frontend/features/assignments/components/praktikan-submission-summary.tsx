@@ -1,9 +1,9 @@
 import { NotificationBanner } from "@/components/ui/notification-banner";
 import type { AssignmentSubmission } from "../types/assignment.type";
 import {
-  DownloadSimple,
-  FileText,
-  ChatText
+  DownloadSimpleIcon,
+  FileTextIcon,
+  ChatTextIcon
 } from "@phosphor-icons/react";
 
 type PraktikanSubmissionSummaryProps = {
@@ -46,7 +46,7 @@ export function PraktikanSubmissionSummary({
           role="status"
           className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-6 text-center"
         >
-          <FileText className="mx-auto h-8 w-8 text-slate-400" aria-hidden="true" />
+          <FileTextIcon className="mx-auto h-8 w-8 text-slate-400" aria-hidden="true" />
           <p className="mt-3 text-xs font-bold text-slate-900">Nothing turned in yet</p>
           <p className="mt-1 text-xs text-slate-500">
             Ready? Drop your file or browse below to turn in your work.
@@ -134,7 +134,7 @@ export function PraktikanSubmissionSummary({
       {submission.feedback ? (
         <div className="mt-4 border-l-2 border-slate-900 pl-3.5 py-1">
           <p className="flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-wider text-slate-400">
-            <ChatText className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+            <ChatTextIcon className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
             Instructor Feedback
           </p>
           <p className="mt-1.5 whitespace-pre-wrap wrap-break-word text-xs leading-relaxed text-slate-700">
@@ -151,7 +151,7 @@ export function PraktikanSubmissionSummary({
             rel="noreferrer"
             className="inline-flex items-center gap-2 rounded-full bg-slate-900 text-white px-4 py-2 text-xs font-semibold hover:bg-slate-800 transition-colors shadow-xs"
           >
-            <DownloadSimple className="h-4 w-4" aria-hidden="true" />
+            <DownloadSimpleIcon className="h-4 w-4" aria-hidden="true" />
             Download submitted file
           </a>
         ) : (

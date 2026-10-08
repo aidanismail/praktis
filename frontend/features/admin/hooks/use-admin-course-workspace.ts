@@ -30,6 +30,7 @@ import {
   closeSessionAttendance,
   updateSessionAttendance,
 } from "../api/admin.api";
+import { updateCourseSession } from "@/features/sessions/api/sessions.api";
 import { adminQueryKeys } from "../constants/admin-query-keys";
 
 export function useCourseWorkspace(courseId: string | null) {
@@ -133,6 +134,12 @@ export function useCourseWorkspace(courseId: string | null) {
   const createSessionMutation = useMutation({
     mutationFn: (data: { title: string; date: string }) =>
       createCourseSession(cid, data),
+    onSuccess: invalidateSessions,
+  });
+
+  const renameSessionMutation = useMutation({
+    mutationFn: ({ sessionId, title }: { sessionId: string; title: string }) =>
+      updateCourseSession(sessionId, { title }),
     onSuccess: invalidateSessions,
   });
 
@@ -258,6 +265,7 @@ export function useCourseWorkspace(courseId: string | null) {
     unenrollStudent: unenrollStudentMutation.mutateAsync,
     removeStaff: removeStaffMutation.mutateAsync,
     createSession: createSessionMutation.mutateAsync,
+    renameSession: renameSessionMutation.mutateAsync,
     deleteModule: deleteModuleMutation.mutateAsync,
     createAnnouncement: createAnnouncementMutation.mutateAsync,
     updateAnnouncement: updateAnnouncementMutation.mutateAsync,

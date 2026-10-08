@@ -2,8 +2,7 @@ import { ApiError } from "@/lib/api/client";
 import { API_ENDPOINTS } from "@/lib/api/endpoints";
 import type {
   SessionExportDownload,
-  SessionExportFormat,
-  SessionExportKind
+  SessionExportFormat
 } from "../types/export.type";
 
 function getExportErrorMessage(status: number) {
@@ -15,25 +14,16 @@ function getExportErrorMessage(status: number) {
   return "The export could not be prepared.";
 }
 
-function buildSafeFilename(
-  kind: SessionExportKind,
-  sessionId: string,
-  format: SessionExportFormat
-) {
+function buildSafeFilename(sessionId: string, format: SessionExportFormat) {
   const safeSessionId = sessionId.replace(/[^a-zA-Z0-9-]/g, "") || "session";
-  return `${kind}_${safeSessionId}.${format}`;
+  return `attendance_${safeSessionId}.${format}`;
 }
 
-export async function downloadSessionExport(
-  kind: SessionExportKind,
+export async function downloadSessionAttendanceExport(
   sessionId: string,
   format: SessionExportFormat
 ): Promise<SessionExportDownload> {
-  const endpoint =
-    kind === "attendance"
-      ? API_ENDPOINTS.export.attendance(sessionId, format)
-      : API_ENDPOINTS.export.grades(sessionId, format);
-  const response = await fetch(endpoint, {
+  const response = await fetch(API_ENDPOINTS.export.attendance(sessionId, format), {
     method: "GET",
     credentials: "include",
     cache: "no-store"
@@ -53,6 +43,6 @@ export async function downloadSessionExport(
 
   return {
     blob: await response.blob(),
-    filename: buildSafeFilename(kind, sessionId, format)
+    filename: buildSafeFilename(sessionId, format)
   };
 }

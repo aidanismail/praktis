@@ -513,8 +513,8 @@ export async function updateSessionAttendance(
   });
 }
 
-export function getGradeExportUrl(sessionId: string, format: "csv" | "xlsx" = "csv"): string {
-  return API_ENDPOINTS.export.grades(sessionId, format);
+export function getAssignmentGradeExportUrl(assignmentId: string, format: "csv" | "xlsx" = "csv"): string {
+  return API_ENDPOINTS.export.assignmentGrades(assignmentId, format);
 }
 
 export function getAttendanceExportUrl(sessionId: string, format: "csv" | "xlsx" = "csv"): string {
