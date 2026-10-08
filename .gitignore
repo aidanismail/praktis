@@ -25,6 +25,7 @@ coverage/
 htmlcov/
 *.tsbuildinfo
 next-env.d.ts
+docker-compose.override.yml
 
 # Logs
 *.log
