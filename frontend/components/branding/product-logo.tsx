@@ -6,6 +6,7 @@ import {
   useEffect,
   useCallback,
   useSyncExternalStore,
+  type CSSProperties,
   type MouseEvent,
 } from "react";
 import { createPortal } from "react-dom";
@@ -41,7 +42,18 @@ type FallenCoords = {
   targetY: number;
   deltaX: number;
   deltaY: number;
+  plank: {
+    left: number;
+    notchX: number;
+    placement: "above" | "below";
+    anchor: number;
+  };
 };
+
+const PLANK_PHRASE = "Brooks was here......... so was Bagas...... so was Aidan";
+const PLANK_WIDTH = 188;
+const PLANK_GAP = 12;
+const PLANK_HEIGHT_ESTIMATE = 72;
 
 export function ProductLogo({
   alt = "Praktis",
@@ -81,7 +93,6 @@ export function ProductLogo({
     const el = portalStarRef.current;
     const { deltaX, deltaY, startX, startY, startScale } = fallenCoords;
 
-    // Dynamically calculate current logo position to align with where the logo is right now
     const rect = logoRef.current?.getBoundingClientRect();
     const currentStartX = rect ? rect.left + rect.width * 0.7135 : startX;
     const currentStartY = rect ? rect.top + rect.height * 0.385 : startY;
@@ -157,7 +168,6 @@ export function ProductLogo({
     };
   }, [clearAllTimers]);
 
-  // Handle cross-screen falling animation via Web Animations API
   useEffect(() => {
     if (stage === "falling" && portalStarRef.current && fallenCoords) {
       const el = portalStarRef.current;
@@ -178,9 +188,7 @@ export function ProductLogo({
       const STEPS = 40;
       const keyframes: Keyframe[] = [];
 
-      // Initial upward pop height (scaled to vertical distance)
       const hPop = Math.min(70, Math.max(40, Math.abs(deltaY) * 0.085));
-      // Parabolic equation: y(t) = a*t^2 + b*t
       const safeDisc = Math.max(0, 4 * hPop * hPop + 4 * hPop * Math.max(20, deltaY));
       const b = -2 * hPop - Math.sqrt(safeDisc);
       const a = deltaY - b;
@@ -192,14 +200,11 @@ export function ProductLogo({
       for (let i = 0; i <= STEPS; i++) {
         const t = i / STEPS; // 0 to 1
 
-        // Horizontal position: smooth ease-out into bottom right corner
         const xProgress = 1 - Math.pow(1 - t, 1.35);
         const x = deltaX * xProgress;
 
-        // Vertical position: exact physical parabola
         const y = a * t * t + b * t;
 
-        // Scale: expands during initial pop, then settles smoothly to 1.0 (~24px)
         let scale = 1.0;
         if (t < 0.18) {
           const sProg = t / 0.18;
@@ -209,7 +214,6 @@ export function ProductLogo({
           scale = 1.25 - 0.25 * (1 - Math.pow(1 - sProg, 2));
         }
 
-        // Rotation: continuous aerodynamic tumble
         const rProg = 1 - Math.pow(1 - t, 1.35);
         const rot = startRot + deltaRot * rProg;
 
@@ -233,7 +237,6 @@ export function ProductLogo({
     }
   }, [stage, fallenCoords]);
 
-  // Auto-recover back to logo after 8.0s of being fallen
   useEffect(() => {
     if (stage === "fallen") {
       autoRecoverTimerRef.current = setTimeout(() => {
@@ -248,7 +251,6 @@ export function ProductLogo({
   function handleClick(e: MouseEvent) {
     if (!interactive) return;
 
-    // Prevent navigation if logo is nested inside a navigation button or link
     e.stopPropagation();
 
     if (stage === "falling" || stage === "recovering") {
@@ -270,11 +272,9 @@ export function ProductLogo({
       const socketX = rect.left + rect.width * 0.7135;
       const socketY = rect.top + rect.height * 0.385;
       const socketSize = rect.width * 0.1425;
-      // Scale up to a crisp 22px+ star glyph in the viewport (~100%+ bigger than socket)
       const starRenderSize = Math.max(Math.round(socketSize * 2.5), 22);
       const startScale = socketSize / starRenderSize;
 
-      // Target: bottom right of the screen (responsive insets)
       const rightPadding = window.innerWidth < 640 ? 44 : 64;
       const bottomPadding = window.innerHeight < 640 ? 44 : 56;
       const targetX = Math.max(80, window.innerWidth - rightPadding);
@@ -282,6 +282,14 @@ export function ProductLogo({
 
       const deltaX = targetX - socketX;
       const deltaY = targetY - socketY;
+
+      const logoCenterX = rect.left + rect.width / 2;
+      const plankLeft = Math.min(
+        Math.max(8, logoCenterX - PLANK_WIDTH / 2),
+        Math.max(8, window.innerWidth - PLANK_WIDTH - 8),
+      );
+      const fitsBelow =
+        rect.bottom + PLANK_GAP + PLANK_HEIGHT_ESTIMATE <= window.innerHeight;
 
       setFallenCoords({
         startX: socketX,
@@ -292,6 +300,14 @@ export function ProductLogo({
         targetY,
         deltaX,
         deltaY,
+        plank: {
+          left: plankLeft,
+          notchX: Math.min(Math.max(16, logoCenterX - plankLeft), PLANK_WIDTH - 16),
+          placement: fitsBelow ? "below" : "above",
+          anchor: fitsBelow
+            ? rect.bottom + PLANK_GAP
+            : window.innerHeight - (rect.top - PLANK_GAP),
+        },
       });
 
       const prefersReducedMotion =
@@ -304,7 +320,6 @@ export function ProductLogo({
       setClickCount(nextCount);
       setStage(`dislodge-${nextCount}` as EasterEggStage);
 
-      // Inactivity timeout: if the user stops clicking, return to resting idle
       resetTimerRef.current = setTimeout(() => {
         setStage("idle");
         setClickCount(0);
@@ -458,6 +473,33 @@ export function ProductLogo({
                 />
               </span>
             </div>
+            {(stage === "falling" || stage === "fallen") && (
+              <div
+                role="status"
+                className="fixed pointer-events-none"
+                style={{
+                  left: fallenCoords.plank.left,
+                  width: PLANK_WIDTH,
+                  ...(fallenCoords.plank.placement === "below"
+                    ? { top: fallenCoords.plank.anchor }
+                    : { bottom: fallenCoords.plank.anchor }),
+                }}
+              >
+                <div
+                  className={`logo-plank logo-plank--${fallenCoords.plank.placement}`}
+                  style={
+                    {
+                      "--notch-x": `${fallenCoords.plank.notchX}px`,
+                      transformOrigin: `${fallenCoords.plank.notchX}px ${
+                        fallenCoords.plank.placement === "below" ? "0%" : "100%"
+                      }`,
+                    } as CSSProperties
+                  }
+                >
+                  <p className="logo-plank-text">{PLANK_PHRASE}</p>
+                </div>
+              </div>
+            )}
           </div>,
           document.body
         )}
