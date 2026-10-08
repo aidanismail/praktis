@@ -17,9 +17,6 @@ export type CourseSession = {
   title: string;
   date: string;
   attendance_status: string;
-  grades_published: boolean;
-  grades_published_at: string | null;
-  grades_published_by: string | null;
 };
 
 export type CreateCourseSessionPayload = {

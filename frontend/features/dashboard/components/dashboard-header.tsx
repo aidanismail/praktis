@@ -21,7 +21,8 @@ export type CourseTabItem = {
 
 type DashboardHeaderProps = {
   user: User;
-  isSidebarCollapsed?: boolean;
+  isSidebarExpanded?: boolean;
+  sidebarControlsId?: string;
   onToggleSidebar?: () => void;
   activeCourse?: Course | null;
   activeAssignmentTitle?: string | null;
@@ -58,6 +59,8 @@ const DEFAULT_PRAKTIKAN_TABS: CourseTabItem[] = [
 
 export function DashboardHeader({
   user,
+  isSidebarExpanded,
+  sidebarControlsId,
   onToggleSidebar,
   activeCourse,
   activeAssignmentTitle,
@@ -71,6 +74,7 @@ export function DashboardHeader({
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const userMenuButtonRef = useRef<HTMLButtonElement>(null);
 
   const displayName = user.name || user.username;
   const initial = displayName.charAt(0).toUpperCase();
@@ -119,6 +123,8 @@ export function DashboardHeader({
             className="p-2 rounded-full text-slate-600 hover:bg-slate-100 hover:text-slate-900 apple-press transition-colors shrink-0"
             title="Toggle Navigation Menu"
             aria-label="Toggle Navigation Menu"
+            aria-expanded={isSidebarExpanded}
+            aria-controls={sidebarControlsId}
           >
             <ListIcon className="w-5 h-5" />
           </button>
@@ -128,9 +134,15 @@ export function DashboardHeader({
               type="button"
               onClick={onBackToCourses}
               className="flex items-center gap-2 font-bold text-slate-900 hover:text-slate-700 apple-press transition-colors shrink-0"
+              aria-label="Praktis - back to course list"
+              title="Back to course list"
             >
-              <ProductLogo size={28} className="rounded-full shadow-xs" />
-              <span className="text-base tracking-tight hidden xs:inline">Praktis</span>
+              <ProductLogo
+                size={28}
+                interactive={false}
+                className="rounded-full shadow-xs"
+              />
+              <span className="text-base tracking-tight hidden sm:inline">Praktis</span>
             </button>
 
             {activeCourse && (
@@ -170,6 +182,7 @@ export function DashboardHeader({
                   key={tab.id}
                   type="button"
                   onClick={() => onSelectTab(tab.id)}
+                  aria-current={isActive ? "page" : undefined}
                   className={`h-full px-4 text-xs font-semibold border-b-2 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center justify-center relative shrink-0 ${
                     isActive
                       ? "border-slate-900 text-slate-900 font-bold"
@@ -188,6 +201,7 @@ export function DashboardHeader({
 
         <div ref={userMenuRef} className="relative ml-auto flex items-center shrink-0">
           <button
+            ref={userMenuButtonRef}
             type="button"
             onClick={() => setIsUserMenuOpen((prev) => !prev)}
             aria-expanded={isUserMenuOpen}
@@ -209,7 +223,7 @@ export function DashboardHeader({
           {isUserMenuOpen && (
             <div className="absolute right-0 top-full mt-2 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-lg z-50 animate-in fade-in zoom-in-95 duration-150">
               <div className="p-3 border-b border-slate-100">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                   Signed in as
                 </p>
                 <p className="text-sm font-bold text-slate-900 mt-0.5 truncate">
@@ -218,7 +232,7 @@ export function DashboardHeader({
                 {user.name && (
                   <p className="text-xs text-slate-500 truncate">@{user.username}</p>
                 )}
-                <p className="text-xs text-slate-400 truncate">{user.email}</p>
+                <p className="text-xs text-slate-500 truncate">{user.email}</p>
               </div>
 
               <div className="py-1">
@@ -271,6 +285,7 @@ export function DashboardHeader({
                 key={tab.id}
                 type="button"
                 onClick={() => onSelectTab(tab.id)}
+                aria-current={isActive ? "page" : undefined}
                 className={`h-full px-3 text-xs font-semibold border-b-2 whitespace-nowrap transition-all flex items-center justify-center shrink-0 ${
                   isActive
                     ? "border-slate-900 text-slate-900 font-bold"
@@ -284,11 +299,14 @@ export function DashboardHeader({
         </nav>
       )}
 
-      <EditProfileModal
-        user={user}
-        isOpen={isEditProfileOpen}
-        onClose={() => setIsEditProfileOpen(false)}
-      />
+      {isEditProfileOpen && (
+        <EditProfileModal
+          user={user}
+          isOpen
+          returnFocusRef={userMenuButtonRef}
+          onClose={() => setIsEditProfileOpen(false)}
+        />
+      )}
     </header>
   );
 }

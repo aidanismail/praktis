@@ -6,6 +6,7 @@ import { NotificationBanner } from "@/components/ui/notification-banner";
 import { getCourseDetailRoute, ROUTES } from "@/constants/routes";
 import { useEnrolledCourses } from "@/features/courses/hooks/use-enrolled-courses";
 import { ApiError } from "@/lib/api/client";
+import { formatDateTime } from "@/lib/format/date";
 import { useAuthStore } from "@/stores/auth-store";
 import { useAssignmentDetail } from "../hooks/use-course-assignments";
 import { getAllowedAssignmentFileTypes } from "../schemas/assignment.schema";
@@ -25,31 +26,18 @@ type PraktikanAssignmentDetailPageProps = {
   onBack?: () => void;
 };
 
-const dateFormatter = new Intl.DateTimeFormat("en", {
-  dateStyle: "medium",
-  timeStyle: "short",
-});
+const CLOCK_TICK_MS = 30_000;
 
-function formatDate(value: string) {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime())
-    ? "Date unavailable"
-    : dateFormatter.format(date);
-}
-
-function useTime() {
-  const [time, setTime] = useState(() => new Date());
+// Coarse clock so the deadline state flips without re-rendering every second.
+function useNow() {
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    const id = setInterval(() => {
-      setTime(new Date());
-    }, 1000);
-
+    const id = setInterval(() => setNow(Date.now()), CLOCK_TICK_MS);
     return () => clearInterval(id);
+  }, []);
 
-  }, [])
-
-  return time;
+  return now;
 }
 
 function PageFrame({
@@ -95,7 +83,7 @@ export function PraktikanAssignmentDetailPage({
     enabled: courseVerified,
   });
 
-  const time = useTime();
+  const now = useNow();
   if (!user) return null;
   const isEmbedded = Boolean(onBack);
 
@@ -265,7 +253,7 @@ export function PraktikanAssignmentDetailPage({
     assignment.allowed_file_types
   );
   const isPastDueDate = Boolean(
-    assignment.due_date && new Date(assignment.due_date).getTime() < time.getTime()
+    assignment.due_date && new Date(assignment.due_date).getTime() < now
   );
   const isSubmissionLocked = !assignment.allow_late_submissions && isPastDueDate;
 
@@ -273,7 +261,7 @@ export function PraktikanAssignmentDetailPage({
     <PageFrame isEmbedded={isEmbedded}>
       <div className="space-y-6">
         {/* Top Navigation Bar */}
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
           {onBack ? (
             <button
               type="button"
@@ -293,7 +281,7 @@ export function PraktikanAssignmentDetailPage({
             </Link>
           )}
 
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+          <span className="min-w-0 break-words text-xs font-bold text-slate-400 uppercase tracking-wider">
             {course.code} / Assignments
           </span>
         </div>
@@ -304,9 +292,9 @@ export function PraktikanAssignmentDetailPage({
           <div className="lg:col-span-7 xl:col-span-8 space-y-6">
             <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs sm:p-8">
               <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="min-w-0 break-words text-xs font-bold uppercase tracking-wider text-slate-400">
                       {course.code} · {course.name}
                     </span>
                     <span className="text-slate-300" aria-hidden="true">·</span>
@@ -314,7 +302,7 @@ export function PraktikanAssignmentDetailPage({
                       Published
                     </span>
                   </div>
-                  <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+                  <h1 className="mt-2 break-words text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
                     {assignment.title}
                   </h1>
                 </div>
@@ -340,7 +328,7 @@ export function PraktikanAssignmentDetailPage({
                   <span className="font-semibold text-slate-900">
                     {assignment.due_date ? (
                       <time dateTime={assignment.due_date}>
-                        {formatDate(assignment.due_date)}
+                        {formatDateTime(assignment.due_date)}
                       </time>
                     ) : (
                       "No deadline"
@@ -385,11 +373,12 @@ export function PraktikanAssignmentDetailPage({
             </section>
           </div>
 
-          {/* Right 5/12 cols: Submission Summary & Upload Dropzone (sticky) */}
+          {/* Right 5/12 cols: Submission Summary & Upload Form (sticky) */}
           <div className="lg:col-span-5 xl:col-span-4 space-y-6 lg:sticky lg:top-20">
             <PraktikanSubmissionSummary
               submission={assignment.my_submission}
               maxPoints={assignment.max_points}
+              gradesPublished={assignment.grades_published}
             />
 
             <PraktikanAssignmentUploadForm
@@ -399,6 +388,8 @@ export function PraktikanAssignmentDetailPage({
               allowedFileTypes={allowedFileTypes}
               hasSubmission={Boolean(assignment.my_submission)}
               isLocked={isSubmissionLocked}
+              isPastDue={isPastDueDate}
+              allowLateSubmissions={assignment.allow_late_submissions}
             />
           </div>
         </div>

@@ -5,7 +5,7 @@ import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { getDefaultDashboardByRole, ROUTES } from "@/constants/routes";
+import { ROUTES } from "@/constants/routes";
 import { ApiError } from "@/lib/api/client";
 import { useAuthStore } from "@/stores/auth-store";
 import type { UserRole } from "@/types/user.type";
@@ -25,6 +25,16 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   const clearAuth = useAuthStore((state) => state.clearAuth);
   const currentUserQuery = useCurrentUser();
   const user = currentUserQuery.data;
+
+  const mustChangePassword = Boolean(
+    user &&
+      user.force_password_change &&
+      user.role === "praktikan" &&
+      pathname !== ROUTES.changePassword
+  );
+  const isRoleBlocked = Boolean(
+    user && allowedRoles && !allowedRoles.includes(user.role)
+  );
 
   useEffect(() => {
     if (currentUserQuery.isError) {
@@ -49,36 +59,37 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
 
     setUser(user);
 
-    if (
-      user.force_password_change &&
-      user.role === "praktikan" &&
-      pathname !== ROUTES.changePassword
-    ) {
+    if (mustChangePassword) {
       router.replace(ROUTES.changePassword);
       return;
     }
 
-    if (allowedRoles && !allowedRoles.includes(user.role)) {
-      router.replace(getDefaultDashboardByRole(user.role));
+    if (isRoleBlocked) {
+      router.replace(ROUTES.dashboard);
     }
   }, [
-    allowedRoles,
     clearAuth,
+    isRoleBlocked,
+    mustChangePassword,
     currentUserQuery.error,
     currentUserQuery.isError,
-    pathname,
     queryClient,
     router,
     setUser,
     user
   ]);
 
-  if (currentUserQuery.isPending || (!user && !currentUserQuery.isError)) {
+  if (
+    currentUserQuery.isPending ||
+    (!user && !currentUserQuery.isError) ||
+    mustChangePassword ||
+    isRoleBlocked
+  ) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-brand text-white">
         <div className="flex flex-col items-center gap-3.5 rounded-3xl border border-white/10 bg-white/5 px-8 py-6 backdrop-blur shadow-2xl">
           <AsteriskLoader className="h-9 w-9 text-white" />
-          <span className="text-xs font-medium text-slate-300">Checking session...</span>
+          <span role="status" className="text-xs font-medium text-slate-300">Checking session...</span>
         </div>
       </div>
     );

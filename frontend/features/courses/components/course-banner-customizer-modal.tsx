@@ -145,7 +145,7 @@ export function CourseBannerCustomizerModal({
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <div>
             <h4 id="banner-customizer-title" className="font-bold text-sm text-slate-900 flex items-center gap-2">
-              <PaletteIcon className="w-4 h-4 text-slate-800" />
+              <PaletteIcon className="w-4 h-4 text-slate-800" aria-hidden="true" />
               <span>Customize Course Banner</span>
             </h4>
             <p className="text-[11px] text-slate-400 mt-0.5">
@@ -158,7 +158,7 @@ export function CourseBannerCustomizerModal({
             aria-label="Close modal"
             className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center text-xs apple-press transition-colors"
           >
-            <XIcon className="w-4 h-4" />
+            <XIcon className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
 
@@ -215,8 +215,9 @@ export function CourseBannerCustomizerModal({
                     }}
                     className="p-1 rounded-lg bg-black/40 hover:bg-rose-600/90 text-white/80 hover:text-white backdrop-blur-xs transition-colors shadow-xs border border-white/10"
                     title="Remove custom banner image"
+                    aria-label="Remove custom banner image"
                   >
-                    <TrashIcon className="w-3.5 h-3.5" />
+                    <TrashIcon className="w-3.5 h-3.5" aria-hidden="true" />
                   </button>
                 )}
               </div>
@@ -241,7 +242,7 @@ export function CourseBannerCustomizerModal({
                 : "text-slate-500 hover:text-slate-900"
             }`}
           >
-            <PaletteIcon className="w-3.5 h-3.5" />
+            <PaletteIcon className="w-3.5 h-3.5" aria-hidden="true" />
             <span>Presets & Patterns</span>
           </button>
           <button
@@ -253,7 +254,7 @@ export function CourseBannerCustomizerModal({
                 : "text-slate-500 hover:text-slate-900"
             }`}
           >
-            <CloudArrowUpIcon className="w-3.5 h-3.5" />
+            <CloudArrowUpIcon className="w-3.5 h-3.5" aria-hidden="true" />
             <span>Upload Image {customImageUrl && "•"}</span>
           </button>
         </div>
@@ -273,6 +274,7 @@ export function CourseBannerCustomizerModal({
                     <button
                       key={theme.id}
                       type="button"
+                      aria-pressed={isSelected}
                       onClick={() => setSelectedThemeId(theme.id)}
                       className={`p-2.5 rounded-2xl border text-center transition-all flex flex-col items-center gap-1.5 ${
                         isSelected
@@ -284,7 +286,7 @@ export function CourseBannerCustomizerModal({
                         className="w-7 h-7 rounded-full flex items-center justify-center text-white shadow-xs"
                         style={{ backgroundColor: theme.previewColor }}
                       >
-                        {isSelected && <CheckIcon className="w-3.5 h-3.5 stroke-[3]" />}
+                        {isSelected && <CheckIcon className="w-3.5 h-3.5 stroke-[3]" aria-hidden="true" />}
                       </div>
                       <span className="text-[10px] font-semibold text-slate-700 block truncate max-w-full">
                         {theme.label}
@@ -307,6 +309,7 @@ export function CourseBannerCustomizerModal({
                     <button
                       key={pattern.id}
                       type="button"
+                      aria-pressed={isSelected}
                       onClick={() => setSelectedPatternId(pattern.id)}
                       className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${
                         isSelected
@@ -326,22 +329,15 @@ export function CourseBannerCustomizerModal({
         {/* Tab 2: Custom Banner Image Upload */}
         {activeTab === "upload" && (
           <div className="space-y-3 animate-in fade-in duration-100">
-            {uploadError && (
-              <div className="p-3 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-800 flex items-center gap-2">
-                <WarningCircleIcon className="w-4 h-4 text-rose-600 shrink-0" />
-                <span>{uploadError}</span>
-              </div>
-            )}
-
-            <div className="border-2 border-dashed border-slate-200 hover:border-slate-400 rounded-2xl p-6 text-center bg-slate-50/50 transition-colors">
+            <div className="border-2 border-dashed border-slate-200 hover:border-slate-400 focus-within:border-slate-400 rounded-2xl p-6 text-center bg-slate-50/50 transition-colors">
               <label className="cursor-pointer flex flex-col items-center justify-center gap-2 py-2">
-                <CloudArrowUpIcon className="w-8 h-8 text-slate-400" />
+                <CloudArrowUpIcon className="w-8 h-8 text-slate-400" aria-hidden="true" />
                 <span className="text-xs font-semibold text-slate-800">
                   {isProcessingImage
                     ? "Processing image..."
                     : customImageUrl
-                      ? "Click or drag to replace banner image"
-                      : "Click to browse or drag custom banner"}
+                      ? "Click to replace banner image"
+                      : "Click to browse for a banner image"}
                 </span>
                 <span className="text-[10px] text-slate-400">
                   Supported: JPG, PNG, WebP (Max 5MB • Panoramic/16:9 recommended)
@@ -351,10 +347,17 @@ export function CourseBannerCustomizerModal({
                   accept="image/png,image/jpeg,image/webp"
                   disabled={isProcessingImage}
                   onChange={handleFileChange}
-                  className="hidden"
+                  className="sr-only"
                 />
               </label>
             </div>
+          </div>
+        )}
+
+        {uploadError && (
+          <div role="alert" className="p-3 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-800 flex items-center gap-2">
+            <WarningCircleIcon className="w-4 h-4 text-rose-600 shrink-0" aria-hidden="true" />
+            <span>{uploadError}</span>
           </div>
         )}
 

@@ -9,10 +9,12 @@ import {
   gradeAssignmentSubmission,
   listAssignmentSubmissions,
   listCourseAssignments,
+  setAssignmentGradesPublished,
   submitCourseAssignment,
   updateCourseAssignment
 } from "../api/assignments.api";
 import { assignmentQueryKeys } from "../constants/assignment-query-keys";
+import { gradeQueryKeys } from "@/features/grades/constants/grade-query-keys";
 import type {
   Assignment,
   AssignmentSubmission,
@@ -177,6 +179,9 @@ export function useSubmitAssignment({
               : assignment
           )
       );
+
+      // A resubmission clears any earlier score, so drop cached grades too.
+      return queryClient.invalidateQueries({ queryKey: gradeQueryKeys.all });
     },
     retry: false
   });
@@ -202,6 +207,31 @@ export function useGradeAssignmentSubmission({
               : submission
           )
       );
+    },
+    retry: false
+  });
+}
+
+export function useSetAssignmentGradesPublished({
+  userId,
+  courseId,
+  assignmentId
+}: AssignmentScope) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (published: boolean) =>
+      setAssignmentGradesPublished(courseId, assignmentId, published),
+    onSuccess: async (updatedAssignment) => {
+      queryClient.setQueryData<Assignment>(
+        assignmentQueryKeys.detail(userId, courseId, assignmentId),
+        updatedAssignment
+      );
+
+      await queryClient.invalidateQueries({
+        queryKey: assignmentQueryKeys.course(userId, courseId),
+        exact: true
+      });
     },
     retry: false
   });

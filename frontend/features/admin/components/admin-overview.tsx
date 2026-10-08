@@ -135,8 +135,7 @@ function SummaryMetric({
         <dd className="mt-3" aria-hidden="true">
           <span className="block h-9 w-20 animate-pulse rounded bg-slate-200" />
           <span
-            className="mt-2 block h-4 w-32 animate-pulse rounded bg-slate-
-            100"
+            className="mt-2 block h-4 w-32 animate-pulse rounded bg-slate-100"
           />
         </dd>
       ) : isUnavailable ? (
@@ -709,8 +708,7 @@ export function AdminOverview({
               >
                 <span className="flex min-w-0 items-center gap-4">
                   <span
-                    className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-slate-
-  100 text-slate-700 leading-none"
+                    className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-700 leading-none"
                   >
                     <Icon
                       className="block h-5 w-5 shrink-0"

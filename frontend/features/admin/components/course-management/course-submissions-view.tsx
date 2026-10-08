@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import type {
   Course,
   CourseStudent,
@@ -8,7 +9,16 @@ import type {
   AssignmentSubmission,
 } from "@/features/admin/types";
 import { useAssignmentSubmissions } from "@/features/admin/hooks/use-admin-course-workspace";
+import { adminQueryKeys } from "@/features/admin/constants/admin-query-keys";
+import { useAuthStore } from "@/stores/auth-store";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
+import { formatDateTime } from "@/lib/format/date";
+import { NotificationBanner } from "@/components/ui/notification-banner";
+import { SubmissionGradeForm } from "@/features/assignments/components/submission-grade-form";
+import {
+  GradePublishBar,
+  getPublishErrorMessage,
+} from "@/features/assignments/components/grade-publish-bar";
 import {
   ArrowLeftIcon,
   ClockIcon,
@@ -18,8 +28,6 @@ import {
   ChecksIcon,
   EyeIcon,
   DownloadSimpleIcon,
-  WarningCircleIcon,
-  XIcon
 } from "@phosphor-icons/react";
 
 interface CourseSubmissionsViewProps {
@@ -47,17 +55,17 @@ export function CourseSubmissionsView({
   const {
     submissions,
     isLoadingSubmissions,
-    gradeSubmission,
-    isGrading,
+    setGradesPublished,
+    isPublishing,
+    publishError,
   } = useAssignmentSubmissions(course.id, assignment.id);
 
   const [submissionSearch, setSubmissionSearch] = useState("");
   const [submissionFilter, setSubmissionFilter] = useState<"all" | "pending" | "graded">("all");
   const [selectedSubForGrade, setSelectedSubForGrade] = useState<AssignmentSubmission | null>(null);
-  const [gradeScore, setGradeScore] = useState<number>(assignment.max_points || 100);
-  const [gradeFeedback, setGradeFeedback] = useState("");
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const userId = useAuthStore((state) => state.user?.id) ?? "";
+  const queryClient = useQueryClient();
 
   const gradeModalRef = useModalFocusTrap<HTMLDivElement>({
     isOpen: Boolean(selectedSubForGrade),
@@ -87,54 +95,15 @@ export function CourseSubmissionsView({
     });
   }, [submissions, submissionSearch, submissionFilter]);
 
-  const handleGradeSubmit = async (e: React.SubmitEvent) => {
-    e.preventDefault();
-    if (!selectedSubForGrade) return;
-
-    setError(null);
-    try {
-      await gradeSubmission({
-        submissionId: selectedSubForGrade.id,
-        score: Number(gradeScore),
-        feedback: gradeFeedback.trim() || undefined,
-      });
-      setSelectedSubForGrade(null);
-      setActionSuccess("Grade recorded.");
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Couldn't record grade. Please try again.");
-    }
-  };
-
   return (
     <div className="space-y-6 animate-in fade-in duration-150">
       {/* Notifications */}
       {actionSuccess && (
-        <div className="rounded-2xl bg-slate-900 border border-slate-800 px-4 py-3 text-xs font-medium text-white flex items-center justify-between shadow-xs">
-          <span>{actionSuccess}</span>
-          <button
-            type="button"
-            onClick={() => setActionSuccess(null)}
-            className="text-slate-400 hover:text-white"
-          >
-            <XIcon className="w-4 h-4" />
-          </button>
-        </div>
-      )}
-
-      {error && (
-        <div className="rounded-2xl bg-rose-50 border border-rose-200 px-4 py-3 text-xs font-medium text-rose-800 flex items-center justify-between shadow-xs">
-          <div className="flex items-center gap-2">
-            <WarningCircleIcon className="w-4 h-4 text-rose-600 shrink-0" />
-            <span>{error}</span>
-          </div>
-          <button
-            type="button"
-            onClick={() => setError(null)}
-            className="text-rose-600 hover:text-rose-900"
-          >
-            <XIcon className="w-4 h-4" />
-          </button>
-        </div>
+        <NotificationBanner
+          variant="success"
+          message={actionSuccess}
+          onClose={() => setActionSuccess(null)}
+        />
       )}
 
       {/* Top Back Action & Navigation */}
@@ -168,7 +137,7 @@ export function CourseSubmissionsView({
                   <span className="text-slate-300" aria-hidden="true">·</span>
                   <span className="font-medium text-slate-500 flex items-center gap-1">
                     <ClockIcon className="w-3.5 h-3.5" />
-                    <span>Due {new Date(assignment.due_date).toLocaleString()}</span>
+                    <span>Due {formatDateTime(assignment.due_date)}</span>
                   </span>
                 </>
               )}
@@ -241,6 +210,16 @@ export function CourseSubmissionsView({
         </div>
       </div>
 
+      <GradePublishBar
+        published={assignment.grades_published}
+        publishedAt={assignment.grades_published_at}
+        pendingCount={pendingCount}
+        gradedCount={gradedCount}
+        isPending={isPublishing}
+        errorMessage={publishError ? getPublishErrorMessage(publishError) : null}
+        onSetPublished={setGradesPublished}
+      />
+
       {/* Submissions Table & Management Controls */}
       <div className="space-y-4">
         {/* Filter Controls & Search */}
@@ -248,12 +227,13 @@ export function CourseSubmissionsView({
           <div className="relative flex-1 max-w-sm">
             <input
               type="text"
+              aria-label="Search submissions by student or file name"
               placeholder="Search by student or file name..."
               value={submissionSearch}
               onChange={(e) => setSubmissionSearch(e.target.value)}
               className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 shadow-xs"
             />
-            <MagnifyingGlassIcon className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+            <MagnifyingGlassIcon className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" aria-hidden="true" />
           </div>
 
           <div className="flex items-center gap-1.5 self-end sm:self-auto bg-white border border-slate-200 rounded-full p-1 shadow-xs">
@@ -336,7 +316,7 @@ export function CourseSubmissionsView({
                       )}
                     </div>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                      Turned in: {new Date(sub.submitted_at).toLocaleString()} • File:{" "}
+                      Turned in: {formatDateTime(sub.submitted_at)} • File:{" "}
                       <span className="font-mono text-slate-700">{sub.file_name}</span>
                     </p>
                     {sub.feedback && (
@@ -394,11 +374,8 @@ export function CourseSubmissionsView({
 
                   <button
                     type="button"
-                    onClick={() => {
-                      setSelectedSubForGrade(sub);
-                      setGradeScore(sub.score ?? assignment.max_points ?? 100);
-                      setGradeFeedback(sub.feedback || "");
-                    }}
+                    onClick={() => setSelectedSubForGrade(sub)}
+                    aria-label={`${sub.score !== null ? "Edit grade for" : "Grade submission from"} ${sub.student_username}`}
                     className="apple-press px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full text-xs shadow-xs transition-colors"
                   >
                     {sub.score !== null ? "Edit Grade" : "Grade"}
@@ -417,61 +394,34 @@ export function CourseSubmissionsView({
           role="dialog"
           aria-modal="true"
           aria-labelledby="grade-submission-modal-title"
-          className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center overflow-y-auto p-4"
         >
-          <form
-            onSubmit={handleGradeSubmit}
-            className="bg-white rounded-3xl border border-slate-200 p-6 w-full max-w-md shadow-xl space-y-4"
-          >
-            <h4 id="grade-submission-modal-title" className="font-bold text-sm text-slate-900">
-              Grade {selectedSubForGrade.student_username}
-            </h4>
-            <div className="space-y-3 text-xs">
-              <div>
-                <label className="block font-semibold text-slate-600 mb-1">
-                  Score (0 - {assignment.max_points || 100})
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max={assignment.max_points || 100}
-                  value={gradeScore}
-                  onChange={(e) => setGradeScore(Number(e.target.value))}
-                  required
-                  className="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-slate-900"
-                />
-              </div>
-              <div>
-                <label className="block font-semibold text-slate-600 mb-1">Feedback (Optional)</label>
-                <textarea
-                  value={gradeFeedback}
-                  onChange={(e) => setGradeFeedback(e.target.value)}
-                  rows={3}
-                  className="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-slate-900 resize-none"
-                  placeholder="Add helpful feedback or notes for the student..."
-                />
-              </div>
-            </div>
-            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
-              <button
-                type="button"
-                onClick={() => setSelectedSubForGrade(null)}
-                className="px-4 py-2 border border-slate-200 rounded-full text-xs font-semibold text-slate-600"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={isGrading}
-                className="px-5 py-2 bg-slate-900 text-white rounded-full text-xs font-semibold hover:bg-slate-800 shadow-xs"
-              >
-                {isGrading ? "Saving..." : "Save Grade"}
-              </button>
-            </div>
-          </form>
+          <SubmissionGradeForm
+            key={selectedSubForGrade.id}
+            userId={userId}
+            courseId={course.id}
+            assignmentId={assignment.id}
+            maxPoints={assignment.max_points || 100}
+            submission={selectedSubForGrade}
+            titleId="grade-submission-modal-title"
+            onCancel={() => setSelectedSubForGrade(null)}
+            onSaved={() => {
+              setSelectedSubForGrade(null);
+              queryClient.invalidateQueries({
+                queryKey: adminQueryKeys.assignmentSubmissions(course.id, assignment.id),
+              });
+              queryClient.invalidateQueries({
+                queryKey: adminQueryKeys.courseAssignments(course.id),
+              });
+              setActionSuccess(
+                assignment.grades_published
+                  ? "Grade recorded. It's visible to the student."
+                  : "Grade recorded. Publish grades when you're ready."
+              );
+            }}
+          />
         </div>
       )}
     </div>
   );
 }
-

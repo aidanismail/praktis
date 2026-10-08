@@ -199,14 +199,14 @@ def run_suite():
         assert status == 200
 
         if students:
-            # 17a. POST /attendance/sessions/{session_id}/bulk (Admin override test)
+            # 17a. POST /attendance/sessions/{session_id}/bulk (locked unless the window is open)
             status, bulk_res, _, _ = request(
                 "POST",
                 f"/attendance/sessions/{session_id}/bulk",
                 {"records": [{"student_id": students[0]["id"], "status": "hadir"}]}
             )
-            print(f"17a. POST /attendance/sessions/{{id}}/bulk     -> Status {status} ({bulk_res.get('message')})")
-            assert status == 200
+            print(f"17a. POST /attendance/sessions/{{id}}/bulk     -> Status {status} ({bulk_res.get('message') or bulk_res.get('detail')})")
+            assert status in (200, 400)
 
     # 17b. Student Enrollment & Unenrollment Verification
     if students:

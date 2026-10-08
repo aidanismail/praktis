@@ -111,6 +111,7 @@ export function PraktikanCourseList({
           <div className="relative w-full">
             <input
               type="text"
+              aria-label="Search your classes"
               placeholder="Search your classes by code, name, or year..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

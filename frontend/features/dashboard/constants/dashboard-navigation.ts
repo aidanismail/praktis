@@ -9,6 +9,11 @@ export type DashboardNavItem = {
 export const DASHBOARD_NAVIGATION: Record<UserRole, DashboardNavItem[]> = {
   superadmin: [
     {
+      id: "overview",
+      label: "Overview",
+      description: "System status, active courses, and quick actions."
+    },
+    {
       id: "courses",
       label: "Courses",
       description: "Set up practicum offerings, terms, and course staff."
@@ -41,6 +46,11 @@ export const DASHBOARD_NAVIGATION: Record<UserRole, DashboardNavItem[]> = {
   ],
 
   asprak: [
+    {
+      id: "overview",
+      label: "Overview",
+      description: "A snapshot of the classes you assist."
+    },
     {
       id: "classes",
       label: "Classes",

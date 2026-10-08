@@ -3,9 +3,7 @@
 import React, { useState } from "react";
 import type { Course } from "@/features/admin/types";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
-import {
-  WarningCircleIcon
-} from "@phosphor-icons/react";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 
 interface CourseModalProps {
   isOpen: boolean;
@@ -58,29 +56,27 @@ function CourseFormInner({
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white rounded-3xl border border-slate-200 p-6 w-full max-w-md shadow-xl space-y-4 animate-apple-modal"
+      className="bg-white rounded-3xl border border-slate-200 p-6 w-full max-w-md max-h-[90dvh] overflow-y-auto shadow-xl space-y-4 animate-apple-modal"
     >
       <h4 id="course-modal-title" className="font-bold text-sm text-slate-900">
         {isEdit ? "Edit Course" : "New Course"}
       </h4>
 
       {formError && (
-        <div
-          role="alert"
-          aria-live="polite"
-          className="flex items-center gap-2 p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs font-medium"
-        >
-          <WarningCircleIcon className="w-4 h-4 text-rose-600 shrink-0" />
-          <span className="flex-1">{formError}</span>
-        </div>
+        <NotificationBanner
+          variant="error"
+          message={formError}
+          onClose={() => setFormError(null)}
+        />
       )}
 
       <div className="space-y-3 text-xs">
         <div>
-          <label className="block font-semibold text-slate-600 mb-1">
+          <label htmlFor="course-code" className="block font-semibold text-slate-600 mb-1">
             Course Code
           </label>
           <input
+            id="course-code"
             type="text"
             value={code}
             onChange={(e) => setCode(e.target.value)}
@@ -91,8 +87,9 @@ function CourseFormInner({
         </div>
 
         <div>
-          <label className="block font-semibold text-slate-600 mb-1">Course Title</label>
+          <label htmlFor="course-title" className="block font-semibold text-slate-600 mb-1">Course Title</label>
           <input
+            id="course-title"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -104,8 +101,9 @@ function CourseFormInner({
 
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <label className="block font-semibold text-slate-600 mb-1">Academic Year</label>
+            <label htmlFor="course-academic-year" className="block font-semibold text-slate-600 mb-1">Academic Year</label>
             <input
+              id="course-academic-year"
               type="text"
               value={academicYear}
               onChange={(e) => setAcademicYear(e.target.value)}
@@ -116,8 +114,9 @@ function CourseFormInner({
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-600 mb-1">Semester</label>
+            <label htmlFor="course-semester" className="block font-semibold text-slate-600 mb-1">Semester</label>
             <select
+              id="course-semester"
               value={semester}
               onChange={(e) => setSemester(e.target.value as "Ganjil" | "Genap")}
               className="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-slate-900 transition-shadow duration-150"
@@ -131,9 +130,9 @@ function CourseFormInner({
         {/* Active / Archived Offering Switch (Edit Mode) */}
         {isEdit && (
           <div className="pt-1">
-            <label className="block font-semibold text-slate-600 mb-1.5">
+            <span id="course-offering-status" className="block font-semibold text-slate-600 mb-1.5">
               Offering Status
-            </label>
+            </span>
             <div className="flex items-center justify-between p-3 rounded-2xl border border-slate-200 bg-slate-50/70">
               <div>
                 <div className="flex items-center gap-2">
@@ -151,6 +150,7 @@ function CourseFormInner({
               <button
                 type="button"
                 role="switch"
+                aria-labelledby="course-offering-status"
                 aria-checked={isActiveCourse}
                 onClick={() => setIsActiveCourse((prev) => !prev)}
                 className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-slate-900 ${
@@ -179,7 +179,7 @@ function CourseFormInner({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-5 py-2 bg-slate-900 text-white rounded-full text-xs font-semibold hover:bg-slate-800 shadow-xs apple-press transition-all cursor-pointer"
+          className="px-5 py-2 bg-slate-900 text-white rounded-full text-xs font-semibold hover:bg-slate-800 shadow-xs apple-press transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {isSubmitting ? "Saving..." : isEdit ? "Save Changes" : "Create Course"}
         </button>
@@ -202,7 +202,7 @@ export function CourseModal(props: CourseModalProps) {
       role="dialog"
       aria-modal="true"
       aria-labelledby="course-modal-title"
-      className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 transition-opacity animate-in fade-in duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+      className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-start sm:items-center justify-center overflow-y-auto p-4 transition-opacity animate-in fade-in duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
     >
       <CourseFormInner
         key={props.initialCourse?.id ?? "create"}

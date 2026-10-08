@@ -5,7 +5,7 @@ from openpyxl import Workbook
 
 
 def _sanitize_cell(val: object) -> object:
-    if isinstance(val, str) and val.startswith(("=", "+", "-", "@")):
+    if isinstance(val, str) and val.startswith(("=", "+", "-", "@", "\t", "\r")):
         return f"'{val}"
     return val
 

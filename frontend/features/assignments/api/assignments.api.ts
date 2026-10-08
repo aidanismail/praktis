@@ -92,6 +92,18 @@ export function gradeAssignmentSubmission(
   );
 }
 
+export function setAssignmentGradesPublished(
+  courseId: string,
+  assignmentId: string,
+  published: boolean
+) {
+  const endpoint = published
+    ? API_ENDPOINTS.assignments.publishGrades(courseId, assignmentId)
+    : API_ENDPOINTS.assignments.unpublishGrades(courseId, assignmentId);
+
+  return apiClient<Assignment>(endpoint, { method: "POST" });
+}
+
 export function deleteCourseAssignment(courseId: string, assignmentId: string) {
   return apiClient<void>(
     API_ENDPOINTS.assignments.delete(courseId, assignmentId),

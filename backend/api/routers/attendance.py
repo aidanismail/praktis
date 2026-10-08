@@ -35,13 +35,15 @@ SESSION_NOT_FOUND_404 = {404: {"description": "No class session exists with the 
         "Superadmin, or an asprak assigned to the session's course. Upserts one attendance "
         "status (hadir/sakit/izin/alfa) per student for the given session — designed to be "
         "called once per attendance-taking pass with the full roster. Every student must be "
-        "an active praktikan enrolled in the session's course. Rate-limited to 30 "
+        "an active praktikan enrolled in the session's course. The session's attendance "
+        "window must be open (this applies to every role). Rate-limited to 30 "
         "requests/minute per client IP."
     ),
     responses={
         **UNAUTHENTICATED_401,
         **FORBIDDEN_403,
         **SESSION_NOT_FOUND_404,
+        400: {"description": "The session's attendance window is not open."},
         422: {"description": "One or more student_ids are not enrolled praktikan accounts in this course."},
         429: {"description": "Too many requests; slow down."},
     },
@@ -55,8 +57,11 @@ async def bulk_update_attendance(
 ):
     session = await require_session_access(db, current_user, session_id, write=True)
 
-    if session.attendance_status != "OPEN" and current_user.role != RoleEnum.SUPERADMIN:
-        raise HTTPException(status_code=400, detail="Attendance window is not open for this session")
+    if session.attendance_status != "OPEN":
+        raise HTTPException(
+            status_code=400,
+            detail="Attendance is locked for this session. Open the attendance window to edit it.",
+        )
 
     if not data.records:
         return {"message": "No records to update"}

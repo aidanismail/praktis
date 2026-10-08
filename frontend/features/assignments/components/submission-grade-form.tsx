@@ -2,7 +2,8 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
-import { useEffect, useMemo } from "react";
+import { WarningCircleIcon } from "@phosphor-icons/react";
+import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { ApiError } from "@/lib/api/client";
 import { useGradeAssignmentSubmission } from "../hooks/use-course-assignments";
@@ -11,7 +12,6 @@ import {
   type SubmissionGradeFormValues
 } from "../schemas/submission-grade.schema";
 import type { AssignmentSubmission } from "../types/assignment.type";
-import { NotificationBanner } from "@/components/ui/notification-banner";
 
 type SubmissionGradeFormProps = {
   userId: string;
@@ -19,7 +19,9 @@ type SubmissionGradeFormProps = {
   assignmentId: string;
   maxPoints: number;
   submission: AssignmentSubmission;
+  titleId: string;
   onCancel: () => void;
+  onSaved: (submission: AssignmentSubmission) => void;
 };
 
 function getDefaultValues(
@@ -65,7 +67,9 @@ export function SubmissionGradeForm({
   assignmentId,
   maxPoints,
   submission,
-  onCancel
+  titleId,
+  onCancel,
+  onSaved
 }: SubmissionGradeFormProps) {
   const schema = useMemo(
     () => createSubmissionGradeSchema(maxPoints),
@@ -83,122 +87,125 @@ export function SubmissionGradeForm({
     defaultValues: getDefaultValues(submission)
   });
 
-  useEffect(() => {
-    form.reset(getDefaultValues(submission));
-  }, [form, submission]);
-
   function onSubmit(values: SubmissionGradeFormValues) {
     mutation.reset();
 
-    mutation.mutate({
-      submissionId: submission.id,
-      payload: {
-        score: Number(values.score),
-        feedback: values.feedback.length > 0 ? values.feedback : null
-      }
-    });
+    mutation.mutate(
+      {
+        submissionId: submission.id,
+        payload: {
+          score: Number(values.score),
+          feedback: values.feedback.length > 0 ? values.feedback : null
+        }
+      },
+      { onSuccess: onSaved }
+    );
   }
 
   const scoreId = `submission-${submission.id}-score`;
   const feedbackId = `submission-${submission.id}-feedback`;
+  const studentLabel = submission.student_name
+    ? `${submission.student_name} (${submission.student_username})`
+    : submission.student_username;
 
   return (
     <form
       noValidate
       onSubmit={form.handleSubmit(onSubmit)}
       aria-busy={mutation.isPending}
-      className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4"
+      className="bg-white rounded-3xl border border-slate-200 p-6 w-full max-w-md max-h-[90dvh] overflow-y-auto shadow-xl space-y-4"
     >
+      <div>
+        <h4 id={titleId} className="font-bold text-sm text-slate-900">
+          Grade {studentLabel}
+        </h4>
+        <p className="mt-0.5 text-[11px] text-slate-500 font-mono wrap-break-word">
+          {submission.file_name}
+        </p>
+      </div>
+
       {mutation.isError ? (
-        <NotificationBanner
-          variant="error"
-          message={getGradeErrorMessage(mutation.error, maxPoints)}
-        />
-      ) : null}
-
-      {mutation.isSuccess ? (
-        <NotificationBanner
-          variant="success"
-          message="Grade recorded!"
-        />
-      ) : null}
-
-      <div className="space-y-2">
-        <label htmlFor={scoreId} className="text-sm font-medium text-slate-800">
-          Score out of {maxPoints}
-        </label>
-
-        <input
-          id={scoreId}
-          type="number"
-          min={0}
-          max={maxPoints}
-          step="any"
-          inputMode="decimal"
-          disabled={mutation.isPending}
-          aria-invalid={Boolean(form.formState.errors.score)}
-          aria-describedby={
-            form.formState.errors.score ? `${scoreId}-error` : undefined
-          }
-          className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100"
-          {...form.register("score")}
-        />
-
-        {form.formState.errors.score ? (
-          <p id={`${scoreId}-error`} className="text-sm text-red-600">
-            {form.formState.errors.score.message}
-          </p>
-        ) : null}
-      </div>
-
-      <div className="space-y-2">
-        <label
-          htmlFor={feedbackId}
-          className="text-sm font-medium text-slate-800"
+        <div
+          role="alert"
+          className="rounded-2xl bg-rose-50 border border-rose-200 px-3 py-2 text-xs font-medium text-rose-800 flex items-center gap-2"
         >
-          Private feedback
-          <span className="ml-1 font-normal text-slate-500">(optional)</span>
-        </label>
+          <WarningCircleIcon className="w-4 h-4 text-rose-600 shrink-0" aria-hidden="true" />
+          <span>{getGradeErrorMessage(mutation.error, maxPoints)}</span>
+        </div>
+      ) : null}
 
-        <textarea
-          id={feedbackId}
-          rows={4}
-          disabled={mutation.isPending}
-          placeholder="Add constructive notes or feedback for the student..."
-          className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100"
-          {...form.register("feedback")}
-        />
+      <div className="space-y-3 text-xs">
+        <div>
+          <label htmlFor={scoreId} className="block font-semibold text-slate-600 mb-1">
+            Score (0 - {maxPoints})
+          </label>
+          <input
+            id={scoreId}
+            type="number"
+            min={0}
+            max={maxPoints}
+            step="any"
+            inputMode="decimal"
+            disabled={mutation.isPending}
+            aria-invalid={Boolean(form.formState.errors.score)}
+            aria-describedby={
+              form.formState.errors.score ? `${scoreId}-error` : undefined
+            }
+            className="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 disabled:bg-slate-100"
+            {...form.register("score")}
+          />
+          {form.formState.errors.score ? (
+            <p id={`${scoreId}-error`} className="mt-1 text-[11px] text-rose-600">
+              {form.formState.errors.score.message}
+            </p>
+          ) : null}
+        </div>
+
+        <div>
+          <label htmlFor={feedbackId} className="block font-semibold text-slate-600 mb-1">
+            Feedback (Optional)
+          </label>
+          <textarea
+            id={feedbackId}
+            rows={3}
+            disabled={mutation.isPending}
+            placeholder="Add helpful feedback or notes for the student..."
+            aria-invalid={Boolean(form.formState.errors.feedback)}
+            aria-describedby={
+              form.formState.errors.feedback ? `${feedbackId}-error` : undefined
+            }
+            className="w-full p-2.5 border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 resize-none disabled:bg-slate-100"
+            {...form.register("feedback")}
+          />
+          {form.formState.errors.feedback ? (
+            <p id={`${feedbackId}-error`} className="mt-1 text-[11px] text-rose-600">
+              {form.formState.errors.feedback.message}
+            </p>
+          ) : null}
+        </div>
       </div>
 
-      <div className="flex flex-wrap justify-end gap-3">
+      <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
         <button
           type="button"
-          onClick={() => {
-            mutation.reset();
-            onCancel();
-          }}
+          onClick={onCancel}
           disabled={mutation.isPending}
-          className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 transition hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="px-4 py-2 border border-slate-200 rounded-full text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-60"
         >
           Cancel
         </button>
-
         <button
           type="submit"
           disabled={mutation.isPending}
-          className="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-5 text-sm font-semibold text-white shadow-xs transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center px-5 py-2 bg-slate-900 text-white rounded-full text-xs font-semibold hover:bg-slate-800 shadow-xs disabled:opacity-60"
         >
           {mutation.isPending ? (
             <>
-              <AsteriskLoader
-                className="mr-2 h-4 w-4"
-              />
+              <AsteriskLoader className="mr-1.5 h-3.5 w-3.5" />
               Saving...
             </>
-          ) : submission.score === null ? (
-            "Save grade"
           ) : (
-            "Update grade"
+            "Save Grade"
           )}
         </button>
       </div>

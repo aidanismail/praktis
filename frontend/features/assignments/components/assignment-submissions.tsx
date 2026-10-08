@@ -1,46 +1,44 @@
 "use client";
 
 import {
-  WarningCircleIcon,
-  DownloadSimpleIcon,
   ArrowsClockwiseIcon,
-  MagnifyingGlassIcon
+  ChecksIcon,
+  DownloadSimpleIcon,
+  EyeIcon,
+  FileTextIcon,
+  MagnifyingGlassIcon,
+  XIcon
 } from "@phosphor-icons/react";
 
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
+import { DocumentPreviewModal } from "@/components/ui/document-preview-modal";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ROUTES } from "@/constants/routes";
+import { useCourseRoster } from "@/features/courses/hooks/use-course-roster";
+import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
 import { ApiError } from "@/lib/api/client";
-import { API_ENDPOINTS } from "@/lib/api/endpoints";
-import { useAssignmentSubmissions } from "../hooks/use-course-assignments";
-import type { AssignmentSubmission } from "../types/assignment.type";
+import { downloadAssignmentGradesExport } from "@/features/exports/api/assignment-exports.api";
+import { useExportDownload } from "@/features/exports/hooks/use-export-download";
+import { formatDateTime } from "@/lib/format/date";
+import {
+  useAssignmentSubmissions,
+  useSetAssignmentGradesPublished
+} from "../hooks/use-course-assignments";
+import type { Assignment, AssignmentSubmission } from "../types/assignment.type";
+import { GradePublishBar, getPublishErrorMessage } from "./grade-publish-bar";
 import { SubmissionGradeForm } from "./submission-grade-form";
 
 type AssignmentSubmissionsProps = {
   userId: string;
   courseId: string;
-  assignmentId: string;
-  maxPoints: number;
-  enabled: boolean;
+  courseCode: string;
+  assignment: Assignment;
 };
 
-type SubmissionFilter = "all" | "awaiting-grade" | "graded";
+type SubmissionFilter = "all" | "pending" | "graded";
 
 const EMPTY_SUBMISSIONS: AssignmentSubmission[] = [];
-
-const dateFormatter = new Intl.DateTimeFormat("en", {
-  dateStyle: "medium",
-  timeStyle: "short"
-});
-
-function formatDate(value: string) {
-  const date = new Date(value);
-
-  return Number.isNaN(date.getTime())
-    ? "Date unavailable"
-    : dateFormatter.format(date);
-}
 
 function formatFileSize(value: number) {
   if (!Number.isFinite(value) || value < 0) {
@@ -58,8 +56,10 @@ function formatFileSize(value: number) {
   return `${(value / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function isGraded(submission: AssignmentSubmission) {
-  return submission.score !== null;
+function getStudentLabel(submission: AssignmentSubmission) {
+  return submission.student_name
+    ? `${submission.student_name} (${submission.student_username})`
+    : submission.student_username;
 }
 
 function getErrorMessage(error: Error) {
@@ -92,27 +92,61 @@ function canRetry(error: Error) {
   );
 }
 
+function StatPill({ label, value }: { label: string; value: number | string }) {
+  return (
+    <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+        {label}
+      </span>
+      <span className="text-lg font-bold text-slate-900 mt-0.5 block tabular-nums">
+        {value}
+      </span>
+    </div>
+  );
+}
+
 export function AssignmentSubmissions({
   userId,
   courseId,
-  assignmentId,
-  maxPoints,
-  enabled
+  courseCode,
+  assignment
 }: AssignmentSubmissionsProps) {
   const [searchValue, setSearchValue] = useState("");
   const [filter, setFilter] = useState<SubmissionFilter>("all");
-  const [expandedSubmissionId, setExpandedSubmissionId] = useState<
-    string | null
-  >(null);
+  const [gradingSubmission, setGradingSubmission] =
+    useState<AssignmentSubmission | null>(null);
+  const [previewSubmission, setPreviewSubmission] =
+    useState<AssignmentSubmission | null>(null);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+  const exportDownload = useExportDownload();
+
+  const maxPoints = assignment.max_points;
 
   const query = useAssignmentSubmissions({
     userId,
     courseId,
-    assignmentId,
-    enabled
+    assignmentId: assignment.id,
+    enabled: true
+  });
+  const rosterQuery = useCourseRoster({ userId, courseId, enabled: true });
+  const publishMutation = useSetAssignmentGradesPublished({
+    userId,
+    courseId,
+    assignmentId: assignment.id
+  });
+
+  const gradeModalRef = useModalFocusTrap<HTMLDivElement>({
+    isOpen: Boolean(gradingSubmission),
+    onClose: () => setGradingSubmission(null)
   });
 
   const submissions = query.data ?? EMPTY_SUBMISSIONS;
+
+  const gradedCount = useMemo(
+    () => submissions.filter((s) => s.score !== null).length,
+    [submissions]
+  );
+  const pendingCount = submissions.length - gradedCount;
 
   const filteredSubmissions = useMemo(() => {
     const normalizedSearch = searchValue.trim().toLowerCase();
@@ -120,48 +154,30 @@ export function AssignmentSubmissions({
     return submissions.filter((submission) => {
       const matchesSearch =
         normalizedSearch.length === 0 ||
-        submission.student_username.toLowerCase().includes(normalizedSearch) ||
-        (submission.student_email ?? "")
-          .toLowerCase()
-          .includes(normalizedSearch);
+        [
+          submission.student_username,
+          submission.student_name,
+          submission.student_email,
+          submission.file_name
+        ].some((value) => (value ?? "").toLowerCase().includes(normalizedSearch));
 
-      const graded = isGraded(submission);
-      const matchesFilter =
-        filter === "all" ||
-        (filter === "graded" && graded) ||
-        (filter === "awaiting-grade" && !graded);
-
-      return matchesSearch && matchesFilter;
+      if (!matchesSearch) return false;
+      if (filter === "pending") return submission.score === null;
+      if (filter === "graded") return submission.score !== null;
+      return true;
     });
   }, [filter, searchValue, submissions]);
 
   if (query.isPending) {
     return (
-      <section
-        aria-labelledby="assignment-submissions-heading"
-        className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+      <div
+        role="status"
+        aria-live="polite"
+        className="flex min-h-40 items-center justify-center rounded-3xl border border-slate-200 bg-white shadow-xs"
       >
-        <h2
-          id="assignment-submissions-heading"
-          className="text-lg font-semibold text-slate-950"
-        >
-          Praktikan submissions
-        </h2>
-
-        <div
-          role="status"
-          aria-live="polite"
-          className="mt-6 flex min-h-40 items-center justify-center"
-        >
-          <AsteriskLoader
-            className="h-5 w-5 text-slate-700"
-            aria-hidden="true"
-          />
-          <span className="ml-3 text-sm text-slate-600">
-            Loading submissions...
-          </span>
-        </div>
-      </section>
+        <AsteriskLoader className="h-5 w-5 text-slate-700" aria-hidden="true" />
+        <span className="ml-3 text-xs text-slate-500">Loading submissions...</span>
+      </div>
     );
   }
 
@@ -170,25 +186,16 @@ export function AssignmentSubmissions({
       query.error instanceof ApiError && query.error.status === 401;
 
     return (
-      <section
-        aria-labelledby="assignment-submissions-heading"
-        className="rounded-3xl border border-red-200 bg-red-50 p-6"
-      >
-        <h2
-          id="assignment-submissions-heading"
-          className="text-lg font-semibold text-red-950"
-        >
-          Submissions are unavailable
-        </h2>
-
-        <p role="alert" className="mt-2 text-sm text-red-800">
+      <section className="rounded-3xl border border-rose-200 bg-rose-50 p-6">
+        <h2 className="text-sm font-bold text-rose-950">Submissions are unavailable</h2>
+        <p role="alert" className="mt-1 text-xs text-rose-800">
           {getErrorMessage(query.error)}
         </p>
 
         {unauthorized ? (
           <Link
             href={ROUTES.login}
-            className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-red-700 px-4 text-sm font-semibold text-white"
+            className="mt-4 inline-flex items-center rounded-full bg-rose-700 px-4 py-2 text-xs font-semibold text-white"
           >
             Go to sign in
           </Link>
@@ -197,12 +204,10 @@ export function AssignmentSubmissions({
             type="button"
             onClick={() => void query.refetch()}
             disabled={query.isFetching}
-            className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-red-700 px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-4 inline-flex items-center gap-2 rounded-full bg-rose-700 px-4 py-2 text-xs font-semibold text-white disabled:opacity-60"
           >
             <ArrowsClockwiseIcon
-              className={
-                query.isFetching ? "h-4 w-4 animate-spin" : "h-4 w-4"
-              }
+              className={query.isFetching ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"}
               aria-hidden="true"
             />
             Try again
@@ -212,285 +217,314 @@ export function AssignmentSubmissions({
     );
   }
 
+  const filterOptions: { value: SubmissionFilter; label: string; count: number }[] = [
+    { value: "all", label: "All", count: submissions.length },
+    { value: "pending", label: "Needs Grading", count: pendingCount },
+    { value: "graded", label: "Graded", count: gradedCount }
+  ];
+
   return (
     <section
       aria-labelledby="assignment-submissions-heading"
       aria-busy={query.isFetching}
-      className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs"
+      className="space-y-4"
     >
-      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 pb-4">
+      {actionSuccess && (
+        <div
+          role="status"
+          className="rounded-2xl bg-slate-900 border border-slate-800 px-4 py-3 text-xs font-medium text-white flex items-center justify-between shadow-xs"
+        >
+          <span>{actionSuccess}</span>
+          <button
+            type="button"
+            onClick={() => setActionSuccess(null)}
+            className="text-slate-400 hover:text-white"
+            aria-label="Dismiss"
+          >
+            <XIcon className="w-4 h-4" aria-hidden="true" />
+          </button>
+        </div>
+      )}
+
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2
             id="assignment-submissions-heading"
-            className="text-base sm:text-lg font-bold tracking-tight text-slate-950"
+            className="text-base font-bold tracking-tight text-slate-950"
           >
-            Praktikan submissions
-            <span className="ml-2 text-xs font-normal text-slate-500 tabular-nums">
-              ({submissions.length})
-            </span>
+            Student Work
           </h2>
-
           <p className="mt-0.5 text-xs text-slate-500">
-            Review submitted files and provide private scores and feedback.
+            Review submitted files, then grade and publish scores.
           </p>
         </div>
 
-        <div className="flex items-center gap-2" aria-label="Export grades">
+        <div role="group" className="flex items-center gap-2" aria-label="Export grades">
           {(["csv", "xlsx"] as const).map((format) => (
-            <a
+            <button
               key={format}
-              href={API_ENDPOINTS.export.assignmentGrades(assignmentId, format)}
-              className="apple-press inline-flex min-h-9 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 text-xs font-semibold uppercase text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700"
+              type="button"
+              onClick={() =>
+                void exportDownload.run(format, () =>
+                  downloadAssignmentGradesExport(assignment.id, format)
+                )
+              }
+              disabled={exportDownload.busyKey !== null}
+              className="apple-press inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold uppercase text-slate-700 shadow-xs transition-colors hover:bg-slate-50 disabled:opacity-60"
             >
               <DownloadSimpleIcon className="h-3.5 w-3.5" aria-hidden="true" />
-              Grades {format}
-            </a>
+              {exportDownload.busyKey === format ? "Preparing..." : format}
+            </button>
           ))}
         </div>
       </div>
 
-      {query.isFetching ? (
-        <p role="status" className="mt-3 text-sm text-slate-500">
-          Refreshing submissions...
-        </p>
-      ) : null}
+      {exportDownload.error && (
+        <div
+          role="alert"
+          className="rounded-2xl bg-rose-50 border border-rose-200 px-4 py-3 text-xs font-medium text-rose-800 flex items-center justify-between gap-3"
+        >
+          <span>{exportDownload.error}</span>
+          <button
+            type="button"
+            onClick={exportDownload.clearError}
+            className="text-rose-600 hover:text-rose-900"
+            aria-label="Dismiss export error"
+          >
+            <XIcon className="w-4 h-4" aria-hidden="true" />
+          </button>
+        </div>
+      )}
 
-      {submissions.length === 0 ? (
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <StatPill
+          label="Total Students"
+          value={rosterQuery.data ? rosterQuery.data.length : "—"}
+        />
+        <StatPill label="Turned In" value={submissions.length} />
+        <StatPill label="Graded" value={gradedCount} />
+        <StatPill label="Needs Grading" value={pendingCount} />
+      </div>
+
+      <GradePublishBar
+        published={assignment.grades_published}
+        publishedAt={assignment.grades_published_at}
+        pendingCount={pendingCount}
+        gradedCount={gradedCount}
+        isPending={publishMutation.isPending}
+        errorMessage={publishMutation.isError ? getPublishErrorMessage(publishMutation.error) : null}
+        onSetPublished={(published) => {
+          publishMutation.reset();
+          return publishMutation.mutateAsync(published);
+        }}
+      />
+
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="relative flex-1 max-w-sm">
+          <label htmlFor="submission-search" className="sr-only">
+            Search submissions
+          </label>
+          <input
+            id="submission-search"
+            type="search"
+            placeholder="Search by student, email, or file name..."
+            value={searchValue}
+            onChange={(event) => setSearchValue(event.target.value)}
+            className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-slate-900 shadow-xs"
+          />
+          <MagnifyingGlassIcon
+            className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5 pointer-events-none"
+            aria-hidden="true"
+          />
+        </div>
+
+        <div
+          role="group"
+          aria-label="Filter by grade status"
+          className="flex items-center gap-1.5 self-end sm:self-auto bg-white border border-slate-200 rounded-full p-1 shadow-xs"
+        >
+          {filterOptions.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              aria-pressed={filter === option.value}
+              onClick={() => setFilter(option.value)}
+              className={`px-3 py-1 text-xs font-semibold rounded-full transition-colors ${
+                filter === option.value
+                  ? "bg-slate-900 text-white"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              {option.label} ({option.count})
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {filteredSubmissions.length === 0 ? (
         <div
           role="status"
-          className="mt-6 rounded-2xl border border-dashed border-slate-300 px-6 py-12 text-center"
+          className="p-16 text-center text-xs text-slate-400 bg-white rounded-3xl border border-slate-200 shadow-xs space-y-2"
         >
-          <h3 className="text-base font-semibold text-slate-950">
-            No submissions yet
-          </h3>
-          <p className="mt-1 text-sm text-slate-600">
-            Praktikan submissions will appear here after they upload their work.
+          <FileTextIcon className="w-8 h-8 text-slate-300 mx-auto" aria-hidden="true" />
+          <p className="font-semibold text-slate-600">
+            {submissions.length === 0 ? "No submissions yet" : "No matching submissions"}
+          </p>
+          <p className="text-[11px]">
+            {submissions.length === 0
+              ? "No one has turned in this assignment yet."
+              : "No submissions match your search or filter."}
           </p>
         </div>
       ) : (
-        <>
-          <div className="mt-6 grid gap-4 sm:grid-cols-[minmax(0,1fr)_12rem]">
-            <div className="space-y-2">
-              <label
-                htmlFor="submission-search"
-                className="text-sm font-medium text-slate-800"
+        <div className="divide-y divide-slate-100 bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
+          {filteredSubmissions.map((submission) => {
+            const graded = submission.score !== null;
+            const studentLabel = getStudentLabel(submission);
+
+            return (
+              <div
+                key={submission.id}
+                className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/70 transition-colors"
               >
-                Search submissions
-              </label>
-
-              <div className="relative">
-                <MagnifyingGlassIcon
-                  className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-slate-400"
-                  aria-hidden="true"
-                />
-                <input
-                  id="submission-search"
-                  type="search"
-                  value={searchValue}
-                  onChange={(event) => setSearchValue(event.target.value)}
-                  placeholder="Search NPM or email"
-                  className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3 text-sm text-slate-950 outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label
-                htmlFor="submission-status-filter"
-                className="text-sm font-medium text-slate-800"
-              >
-                Grade status
-              </label>
-
-              <select
-                id="submission-status-filter"
-                value={filter}
-                onChange={(event) =>
-                  setFilter(event.target.value as SubmissionFilter)
-                }
-                className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
-              >
-                <option value="all">All submissions</option>
-                <option value="awaiting-grade">Awaiting grade</option>
-                <option value="graded">Graded</option>
-              </select>
-            </div>
-          </div>
-
-          {filteredSubmissions.length === 0 ? (
-            <div
-              role="status"
-              className="mt-6 rounded-2xl border border-dashed border-slate-300 px-6 py-10 text-center"
-            >
-              <WarningCircleIcon
-                className="mx-auto h-8 w-8 text-slate-400"
-                aria-hidden="true"
-              />
-              <h3 className="mt-3 font-semibold text-slate-950">
-                No matching submissions
-              </h3>
-              <p className="mt-1 text-sm text-slate-600">
-                Adjust the search text or grade-status filter.
-              </p>
-            </div>
-          ) : (
-            <div className="mt-6 space-y-4">
-              {filteredSubmissions.map((submission) => {
-                const graded = isGraded(submission);
-                const expanded = expandedSubmissionId === submission.id;
-                const gradePanelId =
-                  `submission-grade-panel-${submission.id}`;
-
-                return (
-                  <article
-                    key={submission.id}
-                    className="rounded-2xl border border-slate-200 p-4 sm:p-5"
+                <div className="flex items-start gap-3.5 min-w-0">
+                  <div
+                    aria-hidden="true"
+                    className="w-10 h-10 rounded-full bg-slate-900 text-white font-bold text-xs flex items-center justify-center shrink-0 mt-0.5"
                   >
-                    <div className="flex flex-wrap items-start justify-between gap-4">
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2 text-xs">
-                          <span
-                            className={
-                              graded
-                                ? "font-semibold text-slate-900"
-                                : "font-semibold text-amber-700"
-                            }
-                          >
-                            {graded ? "Graded" : "Awaiting grade"}
-                          </span>
-
-                          <span className="text-slate-300" aria-hidden="true">·</span>
-
-                          <span
-                            className={
-                              submission.is_late
-                                ? "font-semibold text-rose-700"
-                                : "font-medium text-slate-500"
-                            }
-                          >
-                            {submission.is_late ? "Late" : "On time"}
-                          </span>
-                        </div>
-
-                        <h3 className="mt-3 wrap-break-word font-semibold text-slate-950">
-                          {submission.student_username}
-                        </h3>
-
-                        {submission.student_email ? (
-                          <p className="mt-1 wrap-break-word text-sm text-slate-600">
-                            {submission.student_email}
-                          </p>
-                        ) : null}
-                      </div>
-
-                      <div className="text-right">
-                        <p className="text-xs uppercase tracking-wide text-slate-500">
-                          Score
-                        </p>
-                        <p className="mt-1 font-semibold text-slate-950">
-                          {submission.score === null
-                            ? "Not graded"
-                            : `${submission.score} / ${maxPoints}`}
-                        </p>
-                      </div>
-                    </div>
-
-                    <dl className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-slate-600">
-                      <div>
-                        <dt className="inline text-slate-500">File: </dt>
-                        <dd className="inline font-medium text-slate-900">
-                          {submission.file_name}
-                        </dd>{" "}
-                        <span className="text-xs text-slate-400">
-                          ({formatFileSize(submission.file_size)})
-                        </span>
-                      </div>
-
-                      <div>
-                        <dt className="inline text-slate-500">Submitted: </dt>
-                        <dd className="inline text-slate-900">
-                          <time dateTime={submission.submitted_at}>
-                            {formatDate(submission.submitted_at)}
-                          </time>
-                        </dd>
-                      </div>
-                    </dl>
-
-                    {submission.feedback ? (
-                      <div className="mt-3 border-t border-slate-100 pt-3">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                          Private feedback
-                        </p>
-                        <p className="mt-1 whitespace-pre-wrap wrap-break-word text-sm text-slate-700">
-                          {submission.feedback}
-                        </p>
-                      </div>
-                    ) : null}
-
-                    <div className="mt-4 flex flex-wrap gap-3">
-                      {submission.download_url ? (
-                        <a
-                          href={submission.download_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          aria-label={`Download submission from ${submission.student_username}`}
-                          className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700"
-                        >
-                          <DownloadSimpleIcon className="h-4 w-4" aria-hidden="true" />
-                          Download submission
-                        </a>
+                    {(submission.student_name || submission.student_username)
+                      .slice(0, 2)
+                      .toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-x-2">
+                      <h3 className="font-bold text-xs text-slate-900 wrap-break-word">
+                        {studentLabel}
+                      </h3>
+                      <span className="text-slate-300" aria-hidden="true">·</span>
+                      {submission.is_late ? (
+                        <span className="text-xs font-semibold text-rose-700">Late</span>
                       ) : (
-                        <span className="inline-flex min-h-11 items-center rounded-xl bg-slate-100 px-4 text-sm text-slate-500">
-                          Download unavailable
-                        </span>
+                        <span className="text-xs font-medium text-slate-500">On time</span>
                       )}
-
-                      <button
-                        id={`submission-grade-trigger-${submission.id}`}
-                        type="button"
-                        aria-expanded={expanded}
-                        aria-controls={gradePanelId}
-                        aria-label={`${graded ? "Edit grade for" : "Grade submission from"} ${submission.student_username}`}
-                        onClick={() =>
-                          setExpandedSubmissionId(
-                            expanded ? null : submission.id
-                          )
-                        }
-                        className="inline-flex min-h-11 items-center rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white shadow-xs transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
-                      >
-                        {graded ? "Edit grade" : "Grade submission"}
-                      </button>
                     </div>
-
-                    {expanded ? (
-                      <div id={gradePanelId} className="mt-4">
-                        <SubmissionGradeForm
-                          userId={userId}
-                          courseId={courseId}
-                          assignmentId={assignmentId}
-                          maxPoints={maxPoints}
-                          submission={submission}
-                          onCancel={() => {
-                            setExpandedSubmissionId(null);
-
-                            requestAnimationFrame(() => {
-                              document
-                                .getElementById(
-                                  `submission-grade-trigger-${submission.id}`
-                                )
-                                ?.focus();
-                            });
-                          }}
-                        />
-                      </div>
+                    {submission.student_email ? (
+                      <p className="text-[11px] text-slate-500 wrap-break-word">
+                        {submission.student_email}
+                      </p>
                     ) : null}
-                  </article>
-                );
-              })}
-            </div>
-          )}
-        </>
+                    <p className="text-[11px] text-slate-500 mt-0.5 wrap-break-word">
+                      Turned in{" "}
+                      <time dateTime={submission.submitted_at}>
+                        {formatDateTime(submission.submitted_at)}
+                      </time>{" "}
+                      • <span className="font-mono text-slate-700">{submission.file_name}</span>{" "}
+                      <span className="text-slate-400">({formatFileSize(submission.file_size)})</span>
+                    </p>
+                    {submission.feedback && (
+                      <p className="text-[11px] text-slate-600 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100 mt-2 whitespace-pre-wrap wrap-break-word">
+                        <span className="font-semibold text-slate-700">Feedback: </span>
+                        {submission.feedback}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 self-end sm:self-center shrink-0">
+                  {graded ? (
+                    <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5 tabular-nums">
+                      <ChecksIcon className="w-3.5 h-3.5 text-emerald-600" aria-hidden="true" />
+                      <span>
+                        {submission.score} / {maxPoints} pts
+                      </span>
+                    </span>
+                  ) : (
+                    <span className="text-xs font-semibold text-amber-700">Ungraded</span>
+                  )}
+
+                  {submission.download_url ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => setPreviewSubmission(submission)}
+                        className="apple-press px-3.5 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold rounded-full text-xs flex items-center gap-1.5 transition-colors shadow-xs"
+                      >
+                        <EyeIcon className="w-3.5 h-3.5" aria-hidden="true" />
+                        <span>Preview</span>
+                      </button>
+
+                      <a
+                        href={submission.download_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label={`Download submission from ${studentLabel}`}
+                        title="Download student submission"
+                        className="apple-press px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-full text-xs flex items-center gap-1.5 transition-colors"
+                      >
+                        <DownloadSimpleIcon className="w-3.5 h-3.5" aria-hidden="true" />
+                        <span className="hidden md:inline">Download</span>
+                      </a>
+                    </>
+                  ) : (
+                    <span className="text-[11px] text-slate-400">File unavailable</span>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => setGradingSubmission(submission)}
+                    aria-label={`${graded ? "Edit grade for" : "Grade submission from"} ${studentLabel}`}
+                    className="apple-press px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full text-xs shadow-xs transition-colors"
+                  >
+                    {graded ? "Edit Grade" : "Grade"}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       )}
+
+      {gradingSubmission && (
+        <div
+          ref={gradeModalRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="grade-submission-modal-title"
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center overflow-y-auto p-4"
+        >
+          <SubmissionGradeForm
+            key={gradingSubmission.id}
+            userId={userId}
+            courseId={courseId}
+            assignmentId={assignment.id}
+            maxPoints={maxPoints}
+            submission={gradingSubmission}
+            titleId="grade-submission-modal-title"
+            onCancel={() => setGradingSubmission(null)}
+            onSaved={(saved) => {
+              setGradingSubmission(null);
+              setActionSuccess(
+                assignment.grades_published
+                  ? `Grade saved for ${getStudentLabel(saved)}. It's visible to the student.`
+                  : `Grade saved for ${getStudentLabel(saved)}. Publish grades when you're ready.`
+              );
+            }}
+          />
+        </div>
+      )}
+
+      <DocumentPreviewModal
+        isOpen={Boolean(previewSubmission)}
+        title={
+          previewSubmission
+            ? `${previewSubmission.student_username} - ${previewSubmission.file_name}`
+            : ""
+        }
+        courseCode={courseCode}
+        fileUrl={previewSubmission?.download_url || null}
+        fileExtension={previewSubmission?.file_name.split(".").pop() || "pdf"}
+        onClose={() => setPreviewSubmission(null)}
+      />
     </section>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { ProductLogo } from "@/components/branding/product-logo";
@@ -10,6 +10,9 @@ import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { loginSchema, type LoginFormValues } from "../schemas/auth.schema";
 import { useLogin } from "../hooks/use-login";
 import { NotificationBanner } from "@/components/ui/notification-banner";
+import { ROUTES } from "@/constants/routes";
+import { getApiErrorMessage } from "@/lib/api/error-message";
+import { useCurrentUser } from "../hooks/use-current-user";
 import {
   EyeIcon,
   EyeSlashIcon,
@@ -19,33 +22,32 @@ import {
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
   const searchParams = useSearchParams();
   const loginMutation = useLogin();
-  const autoSubmittedRef = useRef(false);
+  const currentUserQuery = useCurrentUser();
+  const currentUser = currentUserQuery.data;
 
+  // Only the username may be prefilled from the URL; never credentials.
   const queryUsername = searchParams.get("username") || "";
-  const queryPassword = searchParams.get("password") || "";
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       username: queryUsername,
-      password: queryPassword
+      password: ""
     }
   });
 
   useEffect(() => {
-    if (queryUsername) {
-      form.setValue("username", queryUsername);
-    }
-    if (queryPassword) {
-      form.setValue("password", queryPassword);
-    }
-    if (queryUsername && queryPassword && !autoSubmittedRef.current) {
-      autoSubmittedRef.current = true;
-      loginMutation.mutate({ username: queryUsername, password: queryPassword });
-    }
-  }, [queryUsername, queryPassword, form, loginMutation]);
+    if (!currentUser) return;
+
+    router.replace(
+      currentUser.force_password_change && currentUser.role === "praktikan"
+        ? ROUTES.changePassword
+        : ROUTES.dashboard
+    );
+  }, [currentUser, router]);
 
   function onSubmit(values: LoginFormValues) {
     loginMutation.mutate(values);
@@ -69,11 +71,10 @@ export function LoginForm() {
         {loginMutation.isError ? (
           <NotificationBanner
             variant="error"
-            message={
-              loginMutation.error instanceof Error
-                ? loginMutation.error.message
-                : "Couldn't sign you in. Double-check your username and password."
-            }
+            message={getApiErrorMessage(
+              loginMutation.error,
+              "Couldn't sign you in. Double-check your username and password."
+            )}
           />
         ) : null}
 
@@ -86,7 +87,7 @@ export function LoginForm() {
           </label>
 
           <div className="relative">
-            <UserIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <UserIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
 
             <input
               id="username"

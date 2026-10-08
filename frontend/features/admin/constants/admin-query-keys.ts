@@ -10,6 +10,7 @@ export const adminQueryKeys = {
     [...adminQueryKeys.overview(userId), "health"] as const,
   courses: () => [...adminQueryKeys.all, "courses"] as const,
   users: () => [...adminQueryKeys.all, "users"] as const,
+  modules: () => [...adminQueryKeys.all, "modules"] as const,
   courseStudents: (courseId: string) =>
     [...adminQueryKeys.all, "courses", courseId, "students"] as const,
   courseStaff: (courseId: string) =>
@@ -24,6 +25,4 @@ export const adminQueryKeys = {
     [...adminQueryKeys.all, "courses", courseId, "assignments"] as const,
   assignmentSubmissions: (courseId: string, assignmentId: string) =>
     [...adminQueryKeys.all, "courses", courseId, "assignments", assignmentId, "submissions"] as const,
-  sessionAttendance: (sessionId: string) =>
-    [...adminQueryKeys.all, "sessions", sessionId, "attendance"] as const,
 };

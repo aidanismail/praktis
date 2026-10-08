@@ -4,7 +4,14 @@ import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { useMemo, useState } from "react";
 import { NotificationBanner } from "@/components/ui/notification-banner";
 import { ApiError } from "@/lib/api/client";
+import { formatCalendarDate } from "@/lib/format/date";
 import { usePersonalAttendance } from "../hooks/use-personal-attendance";
+import {
+  ATTENDANCE_STATUS_DOT_COLORS,
+  ATTENDANCE_STATUS_LABELS as labels,
+  ATTENDANCE_STATUS_ORDER,
+  ATTENDANCE_STATUS_TEXT_COLORS as statusTextColors,
+} from "../constants/praktikan-attendance";
 import type { AttendanceStatus, PersonalAttendanceHistoryItem } from "../types/attendance.type";
 import {
   CheckCircleIcon,
@@ -15,28 +22,6 @@ import {
 type Props = { userId: string };
 type StatusFilter = "all" | AttendanceStatus;
 const INITIAL_LIMIT = 60;
-
-const labels: Record<AttendanceStatus, string> = {
-  hadir: "Hadir",
-  sakit: "Sakit",
-  izin: "Izin",
-  alfa: "Alfa",
-};
-
-const statusTextColors: Record<AttendanceStatus, string> = {
-  hadir: "text-emerald-700 font-semibold",
-  sakit: "text-sky-700 font-semibold",
-  izin: "text-amber-700 font-semibold",
-  alfa: "text-rose-700 font-semibold",
-};
-
-const dateFormatter = new Intl.DateTimeFormat("en", { dateStyle: "medium" });
-
-function formatDate(value: string | null) {
-  if (!value) return "Date unavailable";
-  const date = new Date(`${value}T00:00:00`);
-  return Number.isNaN(date.getTime()) ? "Date unavailable" : dateFormatter.format(date);
-}
 
 function sortRows(rows: PersonalAttendanceHistoryItem[]) {
   return [...rows].sort(
@@ -136,23 +121,10 @@ export function PraktikanAttendanceHistory({ userId }: Props) {
   }
 
   return (
-    <section aria-labelledby="attendance-history-heading" aria-busy={query.isFetching} className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <button
-          type="button"
-          aria-label="Refresh attendance"
-          onClick={() => void query.refetch()}
-          disabled={query.isFetching}
-          className="p-2 self-start sm:self-auto rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-xs transition-colors cursor-pointer disabled:opacity-60"
-          title="Refresh attendance"
-        >
-          <ArrowsClockwiseIcon className={`w-3.5 h-3.5 ${query.isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
-        </button>
-      </div>
-
+    <section aria-label="Attendance records" aria-busy={query.isFetching} className="space-y-6">
       <div className="space-y-3">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <div className="w-full sm:w-auto flex-1 max-w-sm">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2 flex-1 max-w-sm">
             <select
               id="attendance-course-filter"
               aria-label="Filter by course"
@@ -161,7 +133,7 @@ export function PraktikanAttendanceHistory({ userId }: Props) {
                 setCourseFilter(event.target.value);
                 setLimit(INITIAL_LIMIT);
               }}
-              className="w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-xs focus:outline-none focus:ring-2 focus:ring-slate-900 cursor-pointer"
+              className="flex-1 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-xs focus:outline-none focus:ring-2 focus:ring-slate-900 cursor-pointer"
             >
               <option value="all">All practicum classes ({courses.length})</option>
               {courses.map((course) => (
@@ -170,9 +142,19 @@ export function PraktikanAttendanceHistory({ userId }: Props) {
                 </option>
               ))}
             </select>
+            <button
+              type="button"
+              aria-label="Refresh attendance"
+              onClick={() => void query.refetch()}
+              disabled={query.isFetching}
+              className="p-2 shrink-0 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-xs transition-colors cursor-pointer disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-slate-900"
+              title="Refresh attendance"
+            >
+              <ArrowsClockwiseIcon className={`w-3.5 h-3.5 ${query.isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
+            </button>
           </div>
 
-          <span className="text-xs font-medium text-slate-400">
+          <span className="text-xs font-medium text-slate-400 self-end sm:self-center">
             {filtered.length} {filtered.length === 1 ? "record" : "records"} found
           </span>
         </div>
@@ -185,7 +167,8 @@ export function PraktikanAttendanceHistory({ userId }: Props) {
               setStatusFilter("all");
               setLimit(INITIAL_LIMIT);
             }}
-            className={`whitespace-nowrap px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all apple-press ${
+            aria-pressed={statusFilter === "all"}
+            className={`whitespace-nowrap px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all apple-press focus:outline-none focus:ring-2 focus:ring-slate-900 ${
               statusFilter === "all"
                 ? "bg-slate-900 text-white shadow-xs"
                 : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
@@ -194,7 +177,7 @@ export function PraktikanAttendanceHistory({ userId }: Props) {
             All ({rows.length})
           </button>
 
-          {(["hadir", "sakit", "izin", "alfa"] as AttendanceStatus[]).map((status) => {
+          {ATTENDANCE_STATUS_ORDER.map((status) => {
             const count = rows.filter((r) => r.status === status).length;
             const isActive = statusFilter === status;
             return (
@@ -205,22 +188,16 @@ export function PraktikanAttendanceHistory({ userId }: Props) {
                   setStatusFilter(status);
                   setLimit(INITIAL_LIMIT);
                 }}
-                className={`whitespace-nowrap flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all apple-press ${
+                aria-pressed={isActive}
+                className={`whitespace-nowrap flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all apple-press focus:outline-none focus:ring-2 focus:ring-slate-900 ${
                   isActive
                     ? "bg-slate-900 text-white shadow-xs"
                     : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
                 }`}
               >
                 <span
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    status === "hadir"
-                      ? "bg-emerald-500"
-                      : status === "sakit"
-                      ? "bg-sky-500"
-                      : status === "izin"
-                      ? "bg-amber-500"
-                      : "bg-rose-500"
-                  }`}
+                  aria-hidden="true"
+                  className={`w-1.5 h-1.5 rounded-full ${ATTENDANCE_STATUS_DOT_COLORS[status]}`}
                 />
                 <span>{labels[status]}</span>
                 <span className="text-[11px] opacity-70">({count})</span>
@@ -232,16 +209,40 @@ export function PraktikanAttendanceHistory({ userId }: Props) {
 
       {/* List / Groups */}
       {visible.length === 0 ? (
-        <div
-          role="status"
-          className="rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center shadow-xs"
-        >
-          <ClipboardTextIcon className="mx-auto h-9 w-9 text-slate-400" aria-hidden="true" />
-          <h2 className="mt-3 text-sm font-bold text-slate-950">No attendance records yet</h2>
-          <p className="mt-1 text-xs text-slate-500">
-            Attendance marked during your lab sessions will show up here.
-          </p>
-        </div>
+        rows.length === 0 ? (
+          <div
+            role="status"
+            className="rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center shadow-xs"
+          >
+            <ClipboardTextIcon className="mx-auto h-9 w-9 text-slate-400" aria-hidden="true" />
+            <h2 className="mt-3 text-sm font-bold text-slate-950">No attendance records yet</h2>
+            <p className="mt-1 text-xs text-slate-500">
+              Attendance marked during your lab sessions will show up here.
+            </p>
+          </div>
+        ) : (
+          <div
+            role="status"
+            className="rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center shadow-xs"
+          >
+            <ClipboardTextIcon className="mx-auto h-9 w-9 text-slate-400" aria-hidden="true" />
+            <h2 className="mt-3 text-sm font-bold text-slate-950">No matching attendance records</h2>
+            <p className="mt-1 text-xs text-slate-500">
+              No records match your active status or class filters.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setStatusFilter("all");
+                setCourseFilter("all");
+                setLimit(INITIAL_LIMIT);
+              }}
+              className="mt-4 inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-900 cursor-pointer"
+            >
+              Reset filters
+            </button>
+          </div>
+        )
       ) : (
         <div className="space-y-6">
           {groups.map((group, index) => (
@@ -263,7 +264,7 @@ export function PraktikanAttendanceHistory({ userId }: Props) {
                         <CheckCircleIcon className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
                         <div className="min-w-0">
                           <p className="text-xs font-bold text-slate-950">{row.session_title}</p>
-                          <p className="text-[11px] text-slate-500 mt-0.5">{formatDate(row.session_date)}</p>
+                          <p className="text-[11px] text-slate-500 mt-0.5">{formatCalendarDate(row.session_date)}</p>
                         </div>
                       </div>
 

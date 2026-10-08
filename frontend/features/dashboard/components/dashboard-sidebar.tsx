@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
 import { ProductLogo } from "@/components/branding/product-logo";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import type { DashboardNavItem } from "../constants/dashboard-navigation";
@@ -43,6 +45,9 @@ const NAV_ICONS: Record<string, React.ElementType> = {
   profile: UsersIcon
 };
 
+export const DESKTOP_SIDEBAR_ID = "dashboard-sidebar";
+export const MOBILE_SIDEBAR_ID = "dashboard-mobile-navigation";
+
 export function DashboardSidebar({
   items,
   activeItemId,
@@ -54,6 +59,22 @@ export function DashboardSidebar({
   isMobileOpen = false,
   onCloseMobile
 }: DashboardSidebarProps) {
+  const drawerRef = useModalFocusTrap<HTMLElement>({
+    isOpen: isMobileOpen,
+    onClose: () => onCloseMobile?.()
+  });
+
+  // Lock page scroll behind the mobile drawer.
+  useEffect(() => {
+    if (!isMobileOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isMobileOpen]);
+
   const renderNavButtons = (collapsed: boolean, isMobileView: boolean) => (
     <nav className="flex-1 space-y-1 overflow-y-auto p-3 pt-4">
       {items.map((item) => {
@@ -69,6 +90,8 @@ export function DashboardSidebar({
               if (isMobileView) onCloseMobile?.();
             }}
             title={collapsed ? item.label : undefined}
+            aria-label={collapsed ? item.label : undefined}
+            aria-current={isActive ? "page" : undefined}
             className={`w-full rounded-2xl apple-press transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center ${
               collapsed
                 ? "h-11 justify-center px-0"
@@ -137,7 +160,15 @@ export function DashboardSidebar({
           />
 
           {/* Drawer Panel */}
-          <aside className="fixed top-0 bottom-0 left-0 w-72 max-w-[85vw] bg-white z-50 border-r border-slate-200 shadow-xl flex flex-col animate-in slide-in-from-left duration-250 ease-[cubic-bezier(0.16,1,0.3,1)]">
+          <aside
+            ref={drawerRef}
+            id={MOBILE_SIDEBAR_ID}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigation"
+            tabIndex={-1}
+            className="fixed top-0 bottom-0 left-0 w-72 max-w-[85vw] bg-white z-50 border-r border-slate-200 shadow-xl flex flex-col animate-in slide-in-from-left duration-250 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          >
             {/* Drawer Header */}
             <div className="h-16 flex items-center justify-between px-5 border-b border-slate-100">
               <div className="flex items-center gap-2.5 font-bold text-slate-900">
@@ -165,6 +196,7 @@ export function DashboardSidebar({
 
       {/* 2. Desktop Standard Sticky Sidebar (>= md) */}
       <aside
+        id={DESKTOP_SIDEBAR_ID}
         className={`sticky top-16 hidden md:flex h-[calc(100vh-4rem)] shrink-0 flex-col border-r border-slate-200 bg-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] z-30 ${
           isCollapsed ? "w-16" : "w-64"
         }`}

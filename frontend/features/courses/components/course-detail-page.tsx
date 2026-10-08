@@ -4,13 +4,12 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
-import type { CourseWorkspaceTab } from "@/constants/routes";
-import { ROUTES } from "@/constants/routes";
+import { getCourseDetailRoute, ROUTES } from "@/constants/routes";
 import { useAuthStore } from "@/stores/auth-store";
 
 type CourseDetailPageProps = {
   courseId: string;
-  initialTab: CourseWorkspaceTab;
+  initialTab?: string;
 };
 
 export function CourseDetailPage(props: CourseDetailPageProps) {
@@ -18,17 +17,13 @@ export function CourseDetailPage(props: CourseDetailPageProps) {
   const user = useAuthStore((state) => state.user);
 
   useEffect(() => {
-    if (user?.role === "superadmin") {
-      const targetWorkspaceTab =
-        props.initialTab === "modules" || props.initialTab === "assignments"
-          ? "classwork"
-          : props.initialTab;
+    if (
+      user?.role === "superadmin" ||
+      user?.role === "asprak" ||
+      user?.role === "praktikan"
+    ) {
       router.replace(
-        `/dashboard?tab=courses&courseId=${props.courseId}&workspaceTab=${targetWorkspaceTab}`
-      );
-    } else if (user?.role === "asprak" || user?.role === "praktikan") {
-      router.replace(
-        `/dashboard?tab=classes&courseId=${props.courseId}&workspaceTab=${props.initialTab}`
+        getCourseDetailRoute(props.courseId, props.initialTab, user.role)
       );
     }
   }, [user, props.courseId, props.initialTab, router]);

@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { NotificationBanner } from "@/components/ui/notification-banner";
 import { ApiError } from "@/lib/api/client";
+import { formatDateTime } from "@/lib/format/date";
 import {
   useDeleteCourseModule,
   useReplaceCourseModuleFile,
@@ -30,18 +31,6 @@ type ModuleCardProps = {
 };
 
 const MAX_REPLACE_FILE_BYTES = 50 * 1024 * 1024; // 50MB
-
-const moduleDateFormatter = new Intl.DateTimeFormat("en", {
-  dateStyle: "medium",
-  timeStyle: "short",
-});
-
-function formatModuleDate(value: string) {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime())
-    ? "Date unavailable"
-    : moduleDateFormatter.format(date);
-}
 
 function getFileTypeBadge(fileKey?: string | null, downloadUrl?: string | null) {
   const ref = (fileKey ?? downloadUrl ?? "").toLowerCase();
@@ -89,12 +78,17 @@ export function ModuleCard({ userId, courseId, module, accessMode }: ModuleCardP
     },
   });
 
+  // Background refetches must not wipe text the user is typing.
+  const { isDirty } = form.formState;
+
   useEffect(() => {
-    form.reset({
-      title: module.title,
-      description: module.description ?? "",
-    });
-  }, [form, module]);
+    if (!isDirty) {
+      form.reset({
+        title: module.title,
+        description: module.description ?? "",
+      });
+    }
+  }, [form, module, isDirty]);
 
   function changePublication() {
     publishMutation.reset();
@@ -195,7 +189,7 @@ export function ModuleCard({ userId, courseId, module, accessMode }: ModuleCardP
           </span>
           <span className="text-slate-300" aria-hidden="true">·</span>
           <time dateTime={module.created_at} className="text-slate-400 text-[11px]">
-            {formatModuleDate(module.created_at)}
+            {formatDateTime(module.created_at)}
           </time>
         </div>
 
@@ -207,7 +201,7 @@ export function ModuleCard({ userId, courseId, module, accessMode }: ModuleCardP
           className="apple-press inline-flex items-center gap-1 text-xs font-semibold text-slate-800 hover:text-slate-950 transition-colors group"
         >
           <span>Open file</span>
-          <ArrowSquareOutIcon className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700 transition-colors" />
+          <ArrowSquareOutIcon className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700 transition-colors" aria-hidden="true" />
         </a>
       </div>
 
@@ -242,7 +236,7 @@ export function ModuleCard({ userId, courseId, module, accessMode }: ModuleCardP
               className="text-slate-400 hover:text-slate-600 transition-colors"
               aria-label="Cancel editing"
             >
-              <XIcon className="w-3.5 h-3.5" />
+              <XIcon className="w-3.5 h-3.5" aria-hidden="true" />
             </button>
           </div>
 
@@ -328,7 +322,7 @@ export function ModuleCard({ userId, courseId, module, accessMode }: ModuleCardP
               className="text-slate-400 hover:text-slate-600 transition-colors"
               aria-label="Cancel file replacement"
             >
-              <XIcon className="w-3.5 h-3.5" />
+              <XIcon className="w-3.5 h-3.5" aria-hidden="true" />
             </button>
           </div>
           <p className="mt-0.5 text-xs text-slate-500">
@@ -469,6 +463,8 @@ export function ModuleCard({ userId, courseId, module, accessMode }: ModuleCardP
             <button
               type="button"
               onClick={() => {
+                updateMutation.reset();
+                form.reset({ title: module.title, description: module.description ?? "" });
                 setIsEditing(true);
                 setIsReplacingFile(false);
                 setIsConfirmingDelete(false);

@@ -4,6 +4,8 @@ import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { useMemo, useState } from "react";
 import { NotificationBanner } from "@/components/ui/notification-banner";
 import { ApiError } from "@/lib/api/client";
+import { formatCalendarDate } from "@/lib/format/date";
+import { averagePercent, formatScore } from "@/lib/format/score";
 import { usePersonalGrades } from "../hooks/use-personal-grades";
 import type { PersonalGradeHistoryItem } from "../types/grade.type";
 import {
@@ -14,26 +16,12 @@ import {
 type Props = { userId: string };
 const INITIAL_LIMIT = 60;
 
-const dateFormatter = new Intl.DateTimeFormat("en", { dateStyle: "medium" });
-
-function formatDate(value: string | null) {
-  if (!value) return "Date unavailable";
-  const date = new Date(`${value}T00:00:00`);
-  return Number.isNaN(date.getTime()) ? "Date unavailable" : dateFormatter.format(date);
-}
-
 function sortRows(rows: PersonalGradeHistoryItem[]) {
   return [...rows].sort(
     (a, b) =>
       (b.session_date ?? "").localeCompare(a.session_date ?? "") ||
       a.session_title.localeCompare(b.session_title)
   );
-}
-
-function formatScore(value: number) {
-  return Number.isInteger(value)
-    ? value.toString()
-    : value.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
 }
 
 export function PraktikanGradeHistory({ userId }: Props) {
@@ -79,7 +67,7 @@ export function PraktikanGradeHistory({ userId }: Props) {
       .values()
   );
 
-  const average = rows.length > 0 ? rows.reduce((sum, row) => sum + row.score, 0) / rows.length : null;
+  const average = averagePercent(filtered);
 
   if (query.isPending) {
     return (
@@ -124,6 +112,9 @@ export function PraktikanGradeHistory({ userId }: Props) {
 
   return (
     <section aria-labelledby="grade-history-heading" aria-busy={query.isFetching} className="space-y-6">
+      <h2 id="grade-history-heading" className="sr-only">
+        Grade history
+      </h2>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <button
           type="button"
@@ -140,12 +131,12 @@ export function PraktikanGradeHistory({ userId }: Props) {
       <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs">
           <dt className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Graded Items</dt>
-          <dd className="mt-1 text-2xl sm:text-3xl font-bold text-slate-950">{rows.length}</dd>
+          <dd className="mt-1 text-2xl sm:text-3xl font-bold text-slate-950">{filtered.length}</dd>
         </div>
         <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs">
           <dt className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Current Average</dt>
           <dd className="mt-1 text-2xl sm:text-3xl font-bold text-slate-950">
-            {average === null ? "—" : formatScore(average)}
+            {average === null ? "—" : `${formatScore(average)}%`}
           </dd>
         </div>
       </dl>
@@ -199,14 +190,42 @@ export function PraktikanGradeHistory({ userId }: Props) {
                     className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs apple-card-hover transition-all"
                   >
                     <div className="min-w-0">
-                      <p className="text-xs font-bold text-slate-950">{row.session_title}</p>
-                      <p className="text-[11px] text-slate-500 mt-0.5">{formatDate(row.session_date)}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs font-bold text-slate-950">{row.session_title}</p>
+                        {row.item_type ? (
+                          <span
+                            className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full ${
+                              row.item_type === "assignment"
+                                ? "bg-blue-50 text-blue-700 border border-blue-200/60"
+                                : "bg-slate-100 text-slate-600 border border-slate-200"
+                            }`}
+                          >
+                            {row.item_type === "assignment" ? "Assignment" : "Session"}
+                          </span>
+                        ) : null}
+                      </div>
+                      {row.session_date ? (
+                        <p className="text-[11px] text-slate-500 mt-0.5">
+                          {row.item_type === "assignment" ? "Due " : ""}
+                          {formatCalendarDate(row.session_date)}
+                        </p>
+                      ) : null}
+                      {row.feedback ? (
+                        <p className="text-[11px] text-slate-600 mt-1 italic">
+                          Feedback: &ldquo;{row.feedback}&rdquo;
+                        </p>
+                      ) : null}
                     </div>
 
                     <div className="flex items-baseline gap-1.5">
-                      <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Score</span>
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
+                        {row.item_type === "assignment" ? "Score" : "Session score"}
+                      </span>
                       <span className="text-base font-bold text-slate-950 font-mono">
                         {formatScore(row.score)}
+                      </span>
+                      <span className="text-[11px] text-slate-400 font-mono">
+                        / {row.max_points || 100}
                       </span>
                     </div>
                   </article>

@@ -7,8 +7,6 @@ export type {
 export type {
   ClassSessionItem,
   ClassSessionItem as CourseSession,
-  AttendanceItem,
-  AttendanceItem as SessionAttendanceItem,
   StudentItem,
   StudentItem as CourseStudent,
   StaffItem,

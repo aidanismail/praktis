@@ -22,6 +22,8 @@ type PraktikanAssignmentUploadFormProps = {
   hasSubmission: boolean;
   userId: string;
   isLocked?: boolean;
+  isPastDue?: boolean;
+  allowLateSubmissions?: boolean;
 };
 
 const ACCEPTED_FILE_TYPES: Record<AssignmentFileType, string> = {
@@ -66,6 +68,8 @@ export function PraktikanAssignmentUploadForm({
   hasSubmission,
   userId,
   isLocked = false,
+  isPastDue = false,
+  allowLateSubmissions = false,
 }: PraktikanAssignmentUploadFormProps) {
   const inputId = useId();
   const successStatusRef = useRef<HTMLDivElement>(null);
@@ -87,6 +91,8 @@ export function PraktikanAssignmentUploadForm({
   useEffect(() => {
     if (successMessage) successStatusRef.current?.focus();
   }, [successMessage]);
+
+  const willBeLate = isPastDue && allowLateSubmissions;
 
   if (isLocked) {
     return (
@@ -128,13 +134,14 @@ export function PraktikanAssignmentUploadForm({
     .join(",");
 
   function submitFile(values: AssignmentSubmissionFormValues) {
-    if (
-      hasSubmission &&
-      !window.confirm(
-        "Turn in a new version? This replaces your current file and resets any previous score."
-      )
-    ) {
-      return;
+    if (hasSubmission || willBeLate) {
+      const lines = [
+        hasSubmission
+          ? "Turn in a new version? This replaces your current file and resets any previous score."
+          : "Turn in this file?",
+      ];
+      if (willBeLate) lines.push("The deadline has passed, so this will be marked late.");
+      if (!window.confirm(lines.join("\n\n"))) return;
     }
 
     setSuccessMessage(null);
@@ -210,7 +217,7 @@ export function PraktikanAssignmentUploadForm({
             )}
           />
           <p id={`${inputId}-help`} className="mt-2 text-[11px] text-slate-400">
-            Accepted: {allowedLabel}. Maximum size: {ASSIGNMENT_MAX_UPLOAD_BYTES / (1024 * 1024)} MiB.
+            Accepted: {allowedLabel}. Maximum size: {ASSIGNMENT_MAX_UPLOAD_BYTES / (1024 * 1024)} MB.
           </p>
           {form.formState.errors.file ? (
             <p id={`${inputId}-error`} role="alert" className="mt-2 text-xs font-semibold text-red-600">
@@ -218,6 +225,13 @@ export function PraktikanAssignmentUploadForm({
             </p>
           ) : null}
         </div>
+
+        {willBeLate ? (
+          <NotificationBanner
+            variant="warning"
+            message="The deadline has passed. This will be marked late."
+          />
+        ) : null}
 
         {submissionMutation.isError ? (
           <NotificationBanner

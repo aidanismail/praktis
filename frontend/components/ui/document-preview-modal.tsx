@@ -74,7 +74,7 @@ export function DocumentPreviewModal({
                   {fileExtension.toUpperCase()}
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400">Interactive Document Viewer</p>
+              <p className="text-[11px] text-slate-500">Document Viewer</p>
             </div>
           </div>
 
@@ -137,25 +137,25 @@ export function DocumentPreviewModal({
               </div>
               <h4 className="text-base font-bold text-slate-900 mb-1">{title}</h4>
               <p className="max-w-md text-xs text-slate-500 mb-6">
-                This document is a {fileExtension.toUpperCase()} file. You can view it directly in Google Docs / Word or download it.
+                Preview unavailable for this file type ({fileExtension.toUpperCase()}). Download it or open it in a new tab.
               </p>
               <div className="flex items-center gap-3">
                 <a
-                  href={`https://docs.google.com/viewer?url=${encodeURIComponent(fileUrl)}&embedded=true`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href={fileUrl}
+                  download
                   className="rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold text-white hover:bg-slate-800 shadow-xs flex items-center gap-1.5"
                 >
-                  <ArrowSquareOutIcon className="h-3.5 w-3.5" />
-                  <span>Open via Document Viewer</span>
+                  <DownloadSimpleIcon className="h-3.5 w-3.5" />
+                  <span>Download</span>
                 </a>
                 <a
                   href={fileUrl}
-                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="rounded-full border border-slate-200 bg-white px-5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-xs flex items-center gap-1.5"
                 >
-                  <DownloadSimpleIcon className="h-3.5 w-3.5" />
-                  <span>Download File</span>
+                  <ArrowSquareOutIcon className="h-3.5 w-3.5" />
+                  <span>Open in new tab</span>
                 </a>
               </div>
             </div>

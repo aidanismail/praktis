@@ -19,6 +19,9 @@ export function UserProfile({ user }: UserProfileProps) {
 
   return (
     <section aria-labelledby="profile-heading" className="space-y-6">
+      <h2 id="profile-heading" className="sr-only">
+        Profile
+      </h2>
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
         {/* Account Details Card */}
         <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">

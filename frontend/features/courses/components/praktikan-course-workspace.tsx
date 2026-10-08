@@ -15,6 +15,7 @@ import { CourseAssignments } from "@/features/assignments/components/course-assi
 import { PraktikanAssignmentDetailPage } from "@/features/assignments/components/praktikan-assignment-detail-page";
 import { PraktikanCourseMembership } from "./praktikan-course-membership";
 import { PraktikanCourseAttendance } from "@/features/attendance/components/praktikan-course-attendance";
+import { PraktikanCourseGrades } from "@/features/grades/components/praktikan-course-grades";
 import {
   getThemeConfig,
   getPatternConfig,
@@ -36,12 +37,23 @@ type PraktikanCourseWorkspaceProps = {
   sessionId?: string | null;
 };
 
+const WORKSPACE_TABS: readonly PraktikanWorkspaceTab[] = [
+  "stream",
+  "modules",
+  "assignments",
+  "people",
+  "sessions",
+];
+
 export function PraktikanCourseWorkspace({
   user,
   course,
-  workspaceTab,
+  workspaceTab: requestedTab,
   assignmentId,
 }: PraktikanCourseWorkspaceProps) {
+  const workspaceTab: PraktikanWorkspaceTab = WORKSPACE_TABS.includes(requestedTab)
+    ? requestedTab
+    : "stream";
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -102,7 +114,7 @@ export function PraktikanCourseWorkspace({
   return (
     <div className="space-y-6">
       {/* Top back button & breadcrumbs */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         <button
           type="button"
           onClick={handleBackToCourses}
@@ -142,8 +154,8 @@ export function PraktikanCourseWorkspace({
         )}
 
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
               <span
                 className={`text-xs font-bold uppercase tracking-wider ${themeCfg.badgeBg} px-3 py-1 rounded-full backdrop-blur-xs`}
               >
@@ -157,7 +169,7 @@ export function PraktikanCourseWorkspace({
               </span>
             </div>
 
-            <h1 className="mt-3 text-2xl sm:text-3xl font-bold tracking-tight text-white">
+            <h1 className="mt-3 break-words text-2xl sm:text-3xl font-bold tracking-tight text-white">
               {course.name}
             </h1>
 
@@ -192,6 +204,7 @@ export function PraktikanCourseWorkspace({
               onNavigateToAssignments={() => handleSelectTab("assignments")}
               onSelectAssignment={handleSelectAssignment}
               onNavigateToSessions={() => handleSelectTab("sessions")}
+              onNavigateToGrades={() => handleSelectTab("assignments")}
             />
           </aside>
 
@@ -214,14 +227,17 @@ export function PraktikanCourseWorkspace({
         />
       )}
 
-      {/* Assignments Tab: Assignments List */}
+      {/* Assignments Tab: Assignments List & Published Scores */}
       {workspaceTab === "assignments" && (
-        <CourseAssignments
-          userId={user.id}
-          courseId={course.id}
-          viewerRole="praktikan"
-          onSelectAssignment={handleSelectAssignment}
-        />
+        <div className="space-y-10">
+          <CourseAssignments
+            userId={user.id}
+            courseId={course.id}
+            viewerRole="praktikan"
+            onSelectAssignment={handleSelectAssignment}
+          />
+          <PraktikanCourseGrades userId={user.id} courseId={course.id} />
+        </div>
       )}
 
       {/* People Tab: Enrolled Student Membership Details */}

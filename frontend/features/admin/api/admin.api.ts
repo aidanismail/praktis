@@ -2,26 +2,11 @@ import { apiClient } from "@/lib/api/client";
 import { API_ENDPOINTS } from "@/lib/api/endpoints";
 import type { Course } from "@/features/courses/types/course.type";
 import type { User } from "@/types/user.type";
+import type { CourseSession } from "@/features/sessions/types/session.type";
 import type { AdminModuleItem, ImportCsvResponse } from "../types/admin.type";
 export type { AdminModuleItem, ImportCsvResponse };
 
-export type ClassSessionItem = {
-  id: string;
-  course_id: string;
-  title: string;
-  date: string;
-  attendance_status: string;
-  grades_published: boolean;
-};
-
-export type AttendanceItem = {
-  id: string;
-  session_id: string;
-  student_id: string;
-  status: "hadir" | "sakit" | "izin" | "alfa";
-  created_at: string;
-  recorded_by: string | null;
-};
+export type ClassSessionItem = CourseSession;
 
 export type StudentItem = {
   id: string;
@@ -92,6 +77,8 @@ export type AssignmentItem = {
   allowed_file_types: string;
   is_published: boolean;
   allow_late_submissions: boolean;
+  grades_published: boolean;
+  grades_published_at: string | null;
   created_at: string;
   submissions_count: number;
   my_submission: SubmissionItem | null;
@@ -199,10 +186,6 @@ export async function createCourseSession(
     method: "POST",
     body: JSON.stringify(data),
   });
-}
-
-export async function fetchSessionAttendance(sessionId: string): Promise<AttendanceItem[]> {
-  return apiClient<AttendanceItem[]>(API_ENDPOINTS.attendance.listBySession(sessionId));
 }
 
 export async function fetchCourseStudents(courseId: string): Promise<StudentItem[]> {
@@ -479,16 +462,15 @@ export async function fetchAssignmentSubmissions(
   return apiClient<SubmissionItem[]>(API_ENDPOINTS.assignments.submissions(courseId, assignmentId));
 }
 
-export async function gradeAssignmentSubmission(
+export async function setAssignmentGradesPublished(
   courseId: string,
   assignmentId: string,
-  submissionId: string,
-  data: { score: number; feedback?: string }
-): Promise<SubmissionItem> {
-  return apiClient<SubmissionItem>(API_ENDPOINTS.assignments.grade(courseId, assignmentId, submissionId), {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
+  published: boolean
+): Promise<AssignmentItem> {
+  const endpoint = published
+    ? API_ENDPOINTS.assignments.publishGrades(courseId, assignmentId)
+    : API_ENDPOINTS.assignments.unpublishGrades(courseId, assignmentId);
+  return apiClient<AssignmentItem>(endpoint, { method: "POST" });
 }
 
 export async function openSessionAttendance(sessionId: string): Promise<{ message: string }> {
@@ -500,16 +482,6 @@ export async function openSessionAttendance(sessionId: string): Promise<{ messag
 export async function closeSessionAttendance(sessionId: string): Promise<{ message: string }> {
   return apiClient<{ message: string }>(API_ENDPOINTS.classSessions.closeAttendance(sessionId), {
     method: "POST",
-  });
-}
-
-export async function updateSessionAttendance(
-  sessionId: string,
-  records: { student_id: string; status: "hadir" | "sakit" | "izin" | "alfa" }[]
-): Promise<{ message: string }> {
-  return apiClient<{ message: string }>(API_ENDPOINTS.attendance.bulkUpdate(sessionId), {
-    method: "POST",
-    body: JSON.stringify({ records }),
   });
 }
 

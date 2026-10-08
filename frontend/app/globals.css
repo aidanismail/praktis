@@ -245,6 +245,42 @@ textarea {
 }
 
 
+/* Minimal enter-animation utilities (animate-in / fade-in / zoom-in-95 / slide-in-from-*). */
+@keyframes twEnter {
+  from {
+    opacity: var(--tw-enter-opacity, 1);
+    transform: translate3d(var(--tw-enter-x, 0), var(--tw-enter-y, 0), 0)
+      scale(var(--tw-enter-scale, 1));
+  }
+}
+
+.animate-in {
+  animation-name: twEnter;
+  animation-duration: var(--tw-duration, 150ms);
+  animation-timing-function: var(--tw-ease, cubic-bezier(0.16, 1, 0.3, 1));
+  animation-fill-mode: both;
+}
+
+.fade-in {
+  --tw-enter-opacity: 0;
+}
+
+.zoom-in-95 {
+  --tw-enter-scale: 0.95;
+}
+
+.slide-in-from-top-1 {
+  --tw-enter-y: -0.25rem;
+}
+
+.slide-in-from-top {
+  --tw-enter-y: -100%;
+}
+
+.slide-in-from-left {
+  --tw-enter-x: -100%;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

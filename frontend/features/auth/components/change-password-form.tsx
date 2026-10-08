@@ -14,6 +14,7 @@ import {
   type ChangePasswordFormValues
 } from "../schemas/auth.schema";
 import { useChangePassword } from "../hooks/use-change-password";
+import { useLogout } from "../hooks/use-logout";
 import { NotificationBanner } from "@/components/ui/notification-banner";
 import {
   EyeIcon,
@@ -36,6 +37,7 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const changePasswordMutation = useChangePassword();
+  const logoutMutation = useLogout();
 
   const form = useForm<ChangePasswordFormValues>({
     resolver: zodResolver(changePasswordSchema),
@@ -258,8 +260,23 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
           >
             Never mind, take me back
           </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={() => logoutMutation.mutate()}
+            disabled={logoutMutation.isPending}
+            className="flex min-h-11 w-full cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 apple-press hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {logoutMutation.isPending ? "Signing out..." : "Sign out"}
+          </button>
+        )}
+
+        {logoutMutation.isError ? (
+          <NotificationBanner
+            variant="error"
+            message="Couldn't sign you out. Check your connection and try again."
+          />
         ) : null}
-        
       </form>
     </div>
   );

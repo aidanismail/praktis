@@ -1,16 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   fetchAdminCourses,
   fetchAssignments,
   fetchCourseSessions,
   getAssignmentGradeExportUrl,
   getAttendanceExportUrl,
-  type AssignmentItem,
 } from "../api/admin.api";
-import type { Course } from "@/features/courses/types/course.type";
-import type { ClassSessionItem } from "../types/admin.type";
+import { adminQueryKeys } from "../constants/admin-query-keys";
+import { NotificationBanner } from "@/components/ui/notification-banner";
 
 type ExportType = "grades" | "attendance";
 
@@ -18,74 +18,68 @@ const SELECT_CLASS =
   "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900";
 const LABEL_CLASS = "block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5";
 
+function QueryError({ message, onRetry }: { message: string; onRetry: () => void }) {
+  return (
+    <NotificationBanner variant="error">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <span>{message}</span>
+        <button
+          type="button"
+          onClick={onRetry}
+          className="rounded-lg bg-slate-800 border border-slate-700 px-3 py-1 text-xs font-semibold text-white hover:bg-slate-700 transition"
+        >
+          Retry
+        </button>
+      </div>
+    </NotificationBanner>
+  );
+}
+
 export function GradeExportsView() {
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [sessions, setSessions] = useState<ClassSessionItem[]>([]);
-  const [assignments, setAssignments] = useState<AssignmentItem[]>([]);
-  const [selectedCourseId, setSelectedCourseId] = useState<string>("");
-  const [selectedSessionId, setSelectedSessionId] = useState<string>("");
-  const [selectedAssignmentId, setSelectedAssignmentId] = useState<string>("");
+  const [pickedCourseId, setPickedCourseId] = useState<string>("");
+  const [pickedSessionId, setPickedSessionId] = useState<string>("");
+  const [pickedAssignmentId, setPickedAssignmentId] = useState<string>("");
   const [exportType, setExportType] = useState<ExportType>("grades");
   const [fileFormat, setFileFormat] = useState<"csv" | "xlsx">("csv");
 
-  const [isLoadingCourses, setIsLoadingCourses] = useState(true);
-  const [isLoadingTargets, setIsLoadingTargets] = useState(false);
+  const coursesQuery = useQuery({
+    queryKey: adminQueryKeys.courses(),
+    queryFn: fetchAdminCourses,
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+  });
+  const courses = coursesQuery.data ?? [];
+  const selectedCourseId = courses.some((c) => c.id === pickedCourseId)
+    ? pickedCourseId
+    : (courses[0]?.id ?? "");
 
-  useEffect(() => {
-    let isMounted = true;
-    async function loadCourses() {
-      try {
-        const data = await fetchAdminCourses();
-        if (isMounted) {
-          setCourses(data);
-          if (data.length > 0) {
-            setSelectedCourseId(data[0].id);
-          }
-        }
-      } catch {
-        if (isMounted) {
-          setCourses([]);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoadingCourses(false);
-        }
-      }
-    }
-    loadCourses();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const sessionsQuery = useQuery({
+    queryKey: adminQueryKeys.courseSessions(selectedCourseId),
+    queryFn: () => fetchCourseSessions(selectedCourseId),
+    enabled: Boolean(selectedCourseId),
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+  });
+  const assignmentsQuery = useQuery({
+    queryKey: adminQueryKeys.courseAssignments(selectedCourseId),
+    queryFn: () => fetchAssignments(selectedCourseId),
+    enabled: Boolean(selectedCourseId),
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+  });
+  const sessions = sessionsQuery.data ?? [];
+  const assignments = assignmentsQuery.data ?? [];
+  const selectedSessionId = sessions.some((s) => s.id === pickedSessionId)
+    ? pickedSessionId
+    : (sessions[0]?.id ?? "");
+  const selectedAssignmentId = assignments.some((a) => a.id === pickedAssignmentId)
+    ? pickedAssignmentId
+    : (assignments[0]?.id ?? "");
 
-  useEffect(() => {
-    if (!selectedCourseId) return;
-    let isMounted = true;
-
-    async function loadTargets() {
-      setIsLoadingTargets(true);
-      try {
-        const [sList, aList] = await Promise.all([
-          fetchCourseSessions(selectedCourseId).catch(() => []),
-          fetchAssignments(selectedCourseId).catch(() => []),
-        ]);
-        if (isMounted) {
-          setSessions(sList);
-          setAssignments(aList);
-          setSelectedSessionId(sList[0]?.id ?? "");
-          setSelectedAssignmentId(aList[0]?.id ?? "");
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoadingTargets(false);
-        }
-      }
-    }
-    loadTargets();
-    return () => {
-      isMounted = false;
-    };
-  }, [selectedCourseId]);
+  const isLoadingCourses = coursesQuery.isLoading;
+  const isLoadingTargets =
+    exportType === "grades" ? assignmentsQuery.isLoading : sessionsQuery.isLoading;
+  const targetsQuery = exportType === "grades" ? assignmentsQuery : sessionsQuery;
 
   const targetId = exportType === "grades" ? selectedAssignmentId : selectedSessionId;
 
@@ -109,6 +103,11 @@ export function GradeExportsView() {
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-5">
         {isLoadingCourses ? (
           <p className="text-xs text-slate-400 py-4">Loading courses...</p>
+        ) : coursesQuery.isError ? (
+          <QueryError
+            message="Couldn't load courses."
+            onRetry={() => void coursesQuery.refetch()}
+          />
         ) : courses.length === 0 ? (
           <p className="text-xs text-slate-400 py-4">No courses available to export.</p>
         ) : (
@@ -120,7 +119,7 @@ export function GradeExportsView() {
               <select
                 id="export-course"
                 value={selectedCourseId}
-                onChange={(e) => setSelectedCourseId(e.target.value)}
+                onChange={(e) => setPickedCourseId(e.target.value)}
                 className={SELECT_CLASS}
               >
                 {courses.map((c) => (
@@ -174,6 +173,11 @@ export function GradeExportsView() {
               </label>
               {isLoadingTargets ? (
                 <p className="text-xs text-slate-400 py-2">Loading...</p>
+              ) : targetsQuery.isError ? (
+                <QueryError
+                  message={`Couldn't load ${exportType === "grades" ? "assignments" : "sessions"}.`}
+                  onRetry={() => void targetsQuery.refetch()}
+                />
               ) : exportType === "grades" ? (
                 assignments.length === 0 ? (
                   <p className="text-xs text-slate-400 py-2">No assignments in this course yet.</p>
@@ -181,7 +185,7 @@ export function GradeExportsView() {
                   <select
                     id="export-target"
                     value={selectedAssignmentId}
-                    onChange={(e) => setSelectedAssignmentId(e.target.value)}
+                    onChange={(e) => setPickedAssignmentId(e.target.value)}
                     className={SELECT_CLASS}
                   >
                     {assignments.map((a) => (
@@ -197,7 +201,7 @@ export function GradeExportsView() {
                 <select
                   id="export-target"
                   value={selectedSessionId}
-                  onChange={(e) => setSelectedSessionId(e.target.value)}
+                  onChange={(e) => setPickedSessionId(e.target.value)}
                   className={SELECT_CLASS}
                 >
                   {sessions.map((s, idx) => (

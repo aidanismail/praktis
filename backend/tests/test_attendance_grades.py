@@ -168,15 +168,40 @@ async def test_delete_session_lifecycle_and_guards(client, db):
     )
     await client.post(f"/grades/sessions/{session.id}/publish")
 
-    del_blocked = await client.delete(f"/class-sessions/{session.id}")
-    assert del_blocked.status_code == 400
-    assert "Cannot delete session with published grades" in del_blocked.json()["detail"]
-
-    await client.post(f"/grades/sessions/{session.id}/unpublish")
-
+    # Sessions are attendance-only in the UI, so legacy published grades must not block deletion.
     del_ok = await client.delete(f"/class-sessions/{session.id}")
     assert del_ok.status_code == 204
 
     del_verify = await client.get(f"/attendance/sessions/{session.id}")
     assert del_verify.status_code == 404
 
+
+
+async def test_attendance_lock_applies_to_every_role(client, db):
+    course, session, asprak, student = await _setup_session(db)
+    admin = await create_user(db, RoleEnum.SUPERADMIN)
+    payload = {"records": [{"student_id": str(student.id), "status": "hadir"}]}
+
+    set_auth(client, asprak)
+    assert (await client.post(f"/class-sessions/{session.id}/close-attendance")).status_code == 200
+
+    for user in (asprak, admin):
+        set_auth(client, user)
+        resp = await client.post(f"/attendance/sessions/{session.id}/bulk", json=payload)
+        assert resp.status_code == 400
+        assert "locked" in resp.json()["detail"]
+
+    set_auth(client, admin)
+    assert (await client.post(f"/class-sessions/{session.id}/open-attendance")).status_code == 200
+    assert (await client.post(f"/attendance/sessions/{session.id}/bulk", json=payload)).status_code == 200
+
+
+async def test_admin_and_asprak_can_delete_sessions(client, db):
+    course, session, asprak, _ = await _setup_session(db)
+    admin = await create_user(db, RoleEnum.SUPERADMIN)
+    other = await create_class_session(db, course)
+
+    set_auth(client, asprak)
+    assert (await client.delete(f"/class-sessions/{session.id}")).status_code == 204
+    set_auth(client, admin)
+    assert (await client.delete(f"/class-sessions/{other.id}")).status_code == 204

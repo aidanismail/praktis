@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ChangeEvent, type SubmitEvent } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   CloudArrowUpIcon,
   TableIcon,
@@ -9,8 +10,10 @@ import {
 } from "@phosphor-icons/react";
 import { importStudentsCsv } from "../api/admin.api";
 import type { ImportCsvResponse } from "../types/admin.type";
+import { adminQueryKeys } from "../constants/admin-query-keys";
 
 export function BulkImportForm() {
+  const queryClient = useQueryClient();
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [result, setResult] = useState<ImportCsvResponse | null>(null);
@@ -38,6 +41,9 @@ export function BulkImportForm() {
     try {
       const res = await importStudentsCsv(file);
       setResult(res);
+      if (res.inserted > 0) {
+        queryClient.invalidateQueries({ queryKey: adminQueryKeys.all });
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Couldn't process import file. Please check the format and try again.");
     } finally {
@@ -84,7 +90,7 @@ export function BulkImportForm() {
           </div>
 
           {error && (
-            <div className="rounded-xl bg-rose-50 border border-rose-200 px-4 py-3 text-xs font-medium text-rose-800 flex items-center gap-2">
+            <div role="alert" className="rounded-xl bg-rose-50 border border-rose-200 px-4 py-3 text-xs font-medium text-rose-800 flex items-center gap-2">
               <WarningCircleIcon className="w-4 h-4 text-rose-600 shrink-0" />
               <span>{error}</span>
             </div>

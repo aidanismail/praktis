@@ -83,7 +83,11 @@ function getUpdateErrorMessage(error: Error) {
     return "Assignment not found.";
   }
 
-  if (error.status === 400 || error.status === 422) {
+  if (error.status === 400) {
+    return error.message || "Please correct the errors in the form.";
+  }
+
+  if (error.status === 422) {
     return "Please correct the errors in the form.";
   }
 
@@ -113,9 +117,14 @@ export function AssignmentEditor({
     defaultValues: getFormValues(assignment)
   });
 
+  // Background refetches must not wipe text the user is typing.
+  const { isDirty } = form.formState;
+
   useEffect(() => {
-    form.reset(getFormValues(assignment));
-  }, [assignment, form]);
+    if (!isDirty) {
+      form.reset(getFormValues(assignment));
+    }
+  }, [assignment, form, isDirty]);
 
   function startEditing() {
     mutation.reset();

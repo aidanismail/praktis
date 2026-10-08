@@ -84,4 +84,3 @@ export function AsteriskLoader({
   );
 }
 
-export const BrandSpinner = AsteriskLoader;

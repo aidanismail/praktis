@@ -15,6 +15,7 @@ import {
 } from "../schemas/announcement.schema";
 import type { AnnouncementComment } from "../types/announcement.type";
 import { NotificationBanner } from "@/components/ui/notification-banner";
+import { formatDateTime } from "@/lib/format/date";
 
 type AnnouncementCommentsProps = {
   userId: string;
@@ -23,18 +24,6 @@ type AnnouncementCommentsProps = {
   comments: AnnouncementComment[];
   viewerRole?: "asprak" | "praktikan" | "superadmin";
 };
-
-const commentDateFormatter = new Intl.DateTimeFormat("en", {
-  dateStyle: "medium",
-  timeStyle: "short"
-});
-
-function formatCommentDate(value: string) {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime())
-    ? "Date unavailable"
-    : commentDateFormatter.format(date);
-}
 
 export function AnnouncementComments({
   userId,
@@ -140,7 +129,7 @@ export function AnnouncementComments({
                             </span>
                           </p>
                           <p className="mt-1 text-xs text-slate-500">
-                            {formatCommentDate(comment.created_at)}
+                            {formatDateTime(comment.created_at)}
                           </p>
                         </div>
 

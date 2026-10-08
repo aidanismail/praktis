@@ -1,4 +1,3 @@
-import { parseCourseWorkspaceTab } from "@/constants/routes";
 import { CourseDetailPage } from "@/features/courses/components/course-detail-page";
 
 type CourseDetailRouteProps = {
@@ -26,7 +25,7 @@ export default async function CourseDetailRoute({
   return (
     <CourseDetailPage
       courseId={courseId}
-      initialTab={parseCourseWorkspaceTab(rawTab)}
+      initialTab={rawTab}
     />
   );
 }

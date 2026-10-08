@@ -44,8 +44,8 @@ class SubmissionResponse(BaseModel):
 
 
 class GradeSubmissionRequest(BaseModel):
-    score: float = Field(..., ge=0, description="Score awarded to student.")
-    feedback: str | None = Field(None, description="Feedback comment for student.")
+    score: float = Field(..., ge=0, allow_inf_nan=False, description="Score awarded to student.")
+    feedback: str | None = Field(None, max_length=5000, description="Feedback comment for student.")
 
 
 class AssignmentResponse(BaseModel):
@@ -59,6 +59,8 @@ class AssignmentResponse(BaseModel):
     allowed_file_types: str = Field(..., description="Allowed file types.")
     is_published: bool = Field(..., description="Publish status.")
     allow_late_submissions: bool = Field(True, description="Whether late submissions are permitted.")
+    grades_published: bool = Field(False, description="Whether scores and feedback are visible to Praktikan.")
+    grades_published_at: str | None = Field(None, description="When grades were last published.")
     created_at: str = Field(..., description="Creation timestamp.")
     submissions_count: int = Field(0, description="Total submissions count.")
     my_submission: SubmissionResponse | None = Field(None, description="Current user's submission if Praktikan.")
