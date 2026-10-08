@@ -27,7 +27,7 @@ from schemas.assignment import (
     SubmissionResponse,
     GradeSubmissionRequest,
 )
-from services.storage_service import storage_service
+from services.storage_service import content_type_for, storage_service
 
 logger = logging.getLogger(__name__)
 
@@ -514,6 +514,7 @@ async def submit_assignment(
         Bucket=storage_service.bucket_name,
         Key=file_key,
         Body=content,
+        ContentType=content_type_for(file_key) or "application/octet-stream",
     )
 
     try:

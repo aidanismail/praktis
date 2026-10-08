@@ -1,9 +1,14 @@
+"use client";
+
+import { useState } from "react";
+import { DocumentPreviewModal } from "@/components/ui/document-preview-modal";
 import { NotificationBanner } from "@/components/ui/notification-banner";
 import { formatDateTime } from "@/lib/format/date";
 import { formatScore } from "@/lib/format/score";
 import type { AssignmentSubmission } from "../types/assignment.type";
 import {
   DownloadSimpleIcon,
+  EyeIcon,
   FileTextIcon,
   ChatTextIcon
 } from "@phosphor-icons/react";
@@ -26,6 +31,8 @@ export function PraktikanSubmissionSummary({
   maxPoints,
   gradesPublished = false,
 }: PraktikanSubmissionSummaryProps) {
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
   if (!submission) {
     return (
       <section
@@ -148,15 +155,32 @@ export function PraktikanSubmissionSummary({
 
       <div className="mt-5">
         {submission.download_url ? (
-          <a
-            href={submission.download_url}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-full bg-slate-900 text-white px-4 py-2 text-xs font-semibold hover:bg-slate-800 transition-colors shadow-xs"
-          >
-            <DownloadSimpleIcon className="h-4 w-4" aria-hidden="true" />
-            Download submitted file
-          </a>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIsPreviewOpen(true)}
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-xs"
+            >
+              <EyeIcon className="h-4 w-4" aria-hidden="true" />
+              Preview
+            </button>
+            <a
+              href={submission.download_url}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-full bg-slate-900 text-white px-4 py-2 text-xs font-semibold hover:bg-slate-800 transition-colors shadow-xs"
+            >
+              <DownloadSimpleIcon className="h-4 w-4" aria-hidden="true" />
+              Download submitted file
+            </a>
+            <DocumentPreviewModal
+              isOpen={isPreviewOpen}
+              title={submission.file_name}
+              fileUrl={submission.download_url}
+              fileExtension={submission.file_name.split(".").pop() || "pdf"}
+              onClose={() => setIsPreviewOpen(false)}
+            />
+          </div>
         ) : (
           <NotificationBanner
             variant="warning"
