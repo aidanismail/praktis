@@ -1,5 +1,7 @@
 "use client";
 
+import { MODULE_DESCRIPTION_MAX_LENGTH, MODULE_TITLE_MAX_LENGTH } from "@/lib/generated/upload-rules";
+import { MODULE_MAX_UPLOAD_BYTES, MODULE_MAX_UPLOAD_LABEL } from "@/features/modules/schemas/module.schema";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -178,7 +180,7 @@ export function AdminModuleList() {
 
   const addFilesToQueue = (files: FileList | File[]) => {
     const validExtensions = [".pdf", ".docx"];
-    const maxBytes = 20 * 1024 * 1024;
+    const maxBytes = MODULE_MAX_UPLOAD_BYTES;
     const newItems: Array<{ id: string; file: File; title: string; description: string }> = [];
     const rejectionErrors: string[] = [];
 
@@ -189,7 +191,7 @@ export function AdminModuleList() {
         return;
       }
       if (file.size > maxBytes) {
-        rejectionErrors.push(`"${file.name}" is over 20 MB.`);
+        rejectionErrors.push(`"${file.name}" is over ${MODULE_MAX_UPLOAD_LABEL}.`);
         return;
       }
 
@@ -723,7 +725,7 @@ export function AdminModuleList() {
               {/* Drag-and-drop / Multi-file Picker */}
               <div>
                 <label className="block font-semibold text-slate-700 mb-1">
-                  Select Modules (.pdf, .docx up to 20MB) *
+                  Select Modules (.pdf, .docx up to {MODULE_MAX_UPLOAD_LABEL}) *
                 </label>
                 <div
                   onDragOver={(e) => {
@@ -839,6 +841,7 @@ export function AdminModuleList() {
                               }
                               required
                               aria-label={`Title for ${item.file.name}`}
+                              maxLength={MODULE_TITLE_MAX_LENGTH}
                               placeholder="Module title *"
                               className="w-full p-2 text-xs border border-slate-200 rounded-xl bg-white focus:ring-1 focus:ring-slate-900 font-medium"
                             />
@@ -853,6 +856,7 @@ export function AdminModuleList() {
                                   description: e.target.value
                                 })
                               }
+                              maxLength={MODULE_DESCRIPTION_MAX_LENGTH}
                               placeholder="Brief description (optional)"
                               className="w-full p-2 text-xs border border-slate-200 rounded-xl bg-white focus:ring-1 focus:ring-slate-900 text-slate-600"
                             />

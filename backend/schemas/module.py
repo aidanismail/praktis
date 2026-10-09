@@ -1,16 +1,18 @@
 import uuid
 from pydantic import BaseModel, Field
 
+from core.file_types import MODULE_DESCRIPTION_MAX_LENGTH, MODULE_TITLE_MAX_LENGTH
+
 
 class ModuleCreate(BaseModel):
-    title: str = Field(..., description="Display title of the module.", examples=["Modul 1: Pengenalan Python"])
-    description: str | None = Field(None, description="Optional longer description of the module contents.")
+    title: str = Field(..., min_length=1, max_length=MODULE_TITLE_MAX_LENGTH, description="Display title of the module.", examples=["Modul 1: Pengenalan Python"])
+    description: str | None = Field(None, max_length=MODULE_DESCRIPTION_MAX_LENGTH, description="Optional longer description of the module contents.")
     file_extension: str = Field(..., description="Extension of the file to upload; only .pdf and .docx are allowed.", examples=[".pdf"])
     course_id: uuid.UUID = Field(..., description="Course this module belongs to.")
 
 class ModuleConfirm(BaseModel):
-    title: str = Field(..., description="Display title of the module.", examples=["Modul 1: Pengenalan Python"])
-    description: str | None = Field(None, description="Optional longer description of the module contents.")
+    title: str = Field(..., min_length=1, max_length=MODULE_TITLE_MAX_LENGTH, description="Display title of the module.", examples=["Modul 1: Pengenalan Python"])
+    description: str | None = Field(None, max_length=MODULE_DESCRIPTION_MAX_LENGTH, description="Optional longer description of the module contents.")
     file_key: str = Field(..., description="The file_key returned by the presigned-url step, after the file was uploaded to it.")
     course_id: uuid.UUID = Field(..., description="Course this module belongs to.")
 
@@ -23,8 +25,8 @@ class ModuleConfirmResponse(BaseModel):
     id: uuid.UUID = Field(..., description="ID of the newly created module record.")
 
 class ModuleUpdate(BaseModel):
-    title: str | None = Field(None, description="New title of the module.")
-    description: str | None = Field(None, description="New description of the module.")
+    title: str | None = Field(None, min_length=1, max_length=MODULE_TITLE_MAX_LENGTH, description="New title of the module.")
+    description: str | None = Field(None, max_length=MODULE_DESCRIPTION_MAX_LENGTH, description="New description of the module.")
 
 class ModuleReplaceConfirm(BaseModel):
     file_key: str = Field(..., description="The file_key returned by the presigned-url step for replacement.")

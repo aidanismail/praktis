@@ -13,6 +13,7 @@ import {
   createAssignmentSubmissionSchema,
   type AssignmentSubmissionFormValues,
 } from "../schemas/assignment.schema";
+import { ASSIGNMENT_FILE_TYPE_OPTIONS } from "@/lib/generated/upload-rules";
 import type { AssignmentFileType } from "../types/assignment.type";
 
 type PraktikanAssignmentUploadFormProps = {
@@ -26,11 +27,9 @@ type PraktikanAssignmentUploadFormProps = {
   allowLateSubmissions?: boolean;
 };
 
-const ACCEPTED_FILE_TYPES: Record<AssignmentFileType, string> = {
-  pdf: ".pdf,application/pdf",
-  zip: ".zip,application/zip",
-  docx: ".docx",
-};
+const ACCEPTED_FILE_TYPES = Object.fromEntries(
+  ASSIGNMENT_FILE_TYPE_OPTIONS.map((option) => [option.id, option.accept])
+) as Record<AssignmentFileType, string>;
 
 function getSubmissionErrorMessage(error: Error) {
   if (!(error instanceof ApiError)) {

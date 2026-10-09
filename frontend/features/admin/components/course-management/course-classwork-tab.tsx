@@ -1,5 +1,7 @@
 "use client";
 
+import { MODULE_DESCRIPTION_MAX_LENGTH, MODULE_TITLE_MAX_LENGTH } from "@/lib/generated/upload-rules";
+import { MODULE_MAX_UPLOAD_BYTES, MODULE_MAX_UPLOAD_LABEL } from "@/features/modules/schemas/module.schema";
 import React, { useState } from "react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import type {
@@ -99,10 +101,10 @@ export function CourseClassworkTab({
     Array.from(files).forEach((file) => {
       const ext = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
       if (validExts.includes(ext)) {
-        if (file.size <= 20 * 1024 * 1024) {
+        if (file.size <= MODULE_MAX_UPLOAD_BYTES) {
           validFiles.push(file);
         } else {
-          onError?.(`"${file.name}" is over 20 MB. Try compressing it or picking a smaller file.`);
+          onError?.(`"${file.name}" is over ${MODULE_MAX_UPLOAD_LABEL}. Try compressing it or picking a smaller file.`);
         }
       } else {
         onError?.(`"${file.name}" must be a .pdf or .docx file.`);
@@ -475,7 +477,7 @@ export function CourseClassworkTab({
               {/* Drag-and-drop / Multi-file Picker */}
               <div>
                 <label className="block font-semibold text-slate-700 mb-1">
-                  Select Modules (.pdf, .docx up to 20MB) *
+                  Select Modules (.pdf, .docx up to {MODULE_MAX_UPLOAD_LABEL}) *
                 </label>
                 <div
                   onDragOver={(e) => {
@@ -582,6 +584,7 @@ export function CourseClassworkTab({
                               );
                             }}
                             aria-label={`Title for ${item.file.name}`}
+                            maxLength={MODULE_TITLE_MAX_LENGTH}
                             placeholder="Module title *"
                             className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium focus:ring-1 focus:ring-slate-900"
                           />
@@ -598,6 +601,7 @@ export function CourseClassworkTab({
                               );
                             }}
                             aria-label={`Description for ${item.file.name}`}
+                            maxLength={MODULE_DESCRIPTION_MAX_LENGTH}
                             placeholder="Brief description or notes (optional)"
                             className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-[11px] text-slate-600 focus:ring-1 focus:ring-slate-900"
                           />

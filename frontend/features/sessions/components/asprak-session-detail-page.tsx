@@ -359,9 +359,9 @@ export function AssignedSessionDetail({
               setIsConfirmingDelete(true);
             }}
             disabled={deleteMutation.isPending}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-700 hover:text-rose-800 bg-white border border-rose-200 hover:bg-rose-50 px-3.5 py-2 rounded-full shadow-xs apple-press transition-colors cursor-pointer disabled:opacity-60"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold text-rose-700 transition-colors hover:bg-rose-50 hover:text-rose-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600 cursor-pointer disabled:opacity-60 sm:min-h-9"
           >
-            <TrashIcon className="w-3.5 h-3.5 text-rose-500" aria-hidden="true" />
+            <TrashIcon className="w-4 h-4" aria-hidden="true" />
             <span>Delete session</span>
           </button>
         ) : null}
@@ -403,7 +403,7 @@ export function AssignedSessionDetail({
               type="button"
               onClick={() => setIsConfirmingDelete(false)}
               disabled={deleteMutation.isPending}
-              className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+              className="rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
             >
               Cancel
             </button>
@@ -411,9 +411,9 @@ export function AssignedSessionDetail({
               type="button"
               onClick={handleDeleteSession}
               disabled={deleteMutation.isPending}
-              className="rounded-full bg-red-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-800 disabled:opacity-60"
+              className="rounded-lg bg-red-700 px-3.5 py-2 text-xs font-semibold text-white hover:bg-red-800 disabled:opacity-60"
             >
-              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+              {deleteMutation.isPending ? "Deleting..." : "Delete session"}
             </button>
           </div>
           {deleteMutation.isError ? (

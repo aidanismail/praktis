@@ -1,6 +1,21 @@
 import uuid
 import datetime
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+from core.file_types import SUBMISSION_FILE_TYPES
+
+SUPPORTED_SUBMISSION_TYPES = tuple(t.extension for t in SUBMISSION_FILE_TYPES)
+
+
+def _normalize_file_types(value: str | None) -> str | None:
+    if value is None:
+        return None
+    types = [t.strip().lower().lstrip(".") for t in value.split(",") if t.strip()]
+    unsupported = [t for t in types if t not in SUPPORTED_SUBMISSION_TYPES]
+    if not types or unsupported:
+        raise ValueError(
+            f"allowed_file_types must be a comma-separated list of: {', '.join(SUPPORTED_SUBMISSION_TYPES)}"
+        )
+    return ",".join(dict.fromkeys(types))
 
 
 class AssignmentCreate(BaseModel):
@@ -13,6 +28,8 @@ class AssignmentCreate(BaseModel):
     is_published: bool = Field(True, description="Whether assignment is published to students.")
     allow_late_submissions: bool = Field(True, description="Whether late submissions are permitted.")
 
+    _check_file_types = field_validator("allowed_file_types")(_normalize_file_types)
+
 
 class AssignmentUpdate(BaseModel):
     title: str | None = Field(None, min_length=1, max_length=255, description="Assignment title.")
@@ -22,6 +39,8 @@ class AssignmentUpdate(BaseModel):
     allowed_file_types: str | None = Field(None, description="Allowed file extensions.")
     is_published: bool | None = Field(None, description="Publish status.")
     allow_late_submissions: bool | None = Field(None, description="Whether late submissions are permitted.")
+
+    _check_file_types = field_validator("allowed_file_types")(_normalize_file_types)
 
 
 class SubmissionResponse(BaseModel):

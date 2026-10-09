@@ -1,9 +1,11 @@
 "use client";
 
+import { MODULE_DESCRIPTION_MAX_LENGTH, MODULE_TITLE_MAX_LENGTH } from "@/lib/generated/upload-rules";
 import { useRef, useState, type ChangeEvent, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
+import { DocumentPreviewModal } from "@/components/ui/document-preview-modal";
 import { NotificationBanner } from "@/components/ui/notification-banner";
 import { ApiError } from "@/lib/api/client";
 import { formatDateTime } from "@/lib/format/date";
@@ -14,12 +16,15 @@ import {
   useUpdateCourseModule,
 } from "../hooks/use-course-modules";
 import {
+  MODULE_MAX_UPLOAD_BYTES,
+  MODULE_MAX_UPLOAD_LABEL,
   moduleMetadataSchema,
   type ModuleMetadataFormValues,
 } from "../schemas/module.schema";
 import type { CourseModule } from "../types/module.type";
 import {
   ArrowSquareOutIcon,
+  EyeIcon,
   XIcon
 } from "@phosphor-icons/react";
 
@@ -29,8 +34,6 @@ type ModuleCardProps = {
   module: CourseModule;
   accessMode: "manage" | "read-only";
 };
-
-const MAX_REPLACE_FILE_BYTES = 50 * 1024 * 1024; // 50MB
 
 function getFileTypeBadge(fileKey?: string | null, downloadUrl?: string | null) {
   const ref = (fileKey ?? downloadUrl ?? "").toLowerCase();
@@ -54,6 +57,7 @@ export function ModuleCard({ userId, courseId, module, accessMode }: ModuleCardP
   const [isEditing, setIsEditing] = useState(false);
   const [isReplacingFile, setIsReplacingFile] = useState(false);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [replacementFile, setReplacementFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -115,8 +119,8 @@ export function ModuleCard({ userId, courseId, module, accessMode }: ModuleCardP
       return;
     }
 
-    if (file.size > MAX_REPLACE_FILE_BYTES) {
-      setFileError("File size exceeds 50MB limit.");
+    if (file.size > MODULE_MAX_UPLOAD_BYTES) {
+      setFileError(`File size exceeds the ${MODULE_MAX_UPLOAD_LABEL} limit.`);
       setReplacementFile(null);
       return;
     }
@@ -193,16 +197,29 @@ export function ModuleCard({ userId, courseId, module, accessMode }: ModuleCardP
           </time>
         </div>
 
-        <a
-          href={module.download_url}
-          target="_blank"
-          rel="noreferrer"
-          aria-label={`Open ${module.title} in a new tab`}
-          className="apple-press inline-flex items-center gap-1 text-xs font-semibold text-slate-800 hover:text-slate-950 transition-colors group"
-        >
-          <span>Open file</span>
-          <ArrowSquareOutIcon className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700 transition-colors" aria-hidden="true" />
-        </a>
+        <div className="flex items-center gap-3">
+          {isPdf ? (
+            <button
+              type="button"
+              onClick={() => setIsPreviewOpen(true)}
+              aria-label={`Preview ${module.title}`}
+              className="apple-press inline-flex items-center gap-1 text-xs font-semibold text-slate-800 hover:text-slate-950 transition-colors group"
+            >
+              <EyeIcon className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700 transition-colors" aria-hidden="true" />
+              <span>Preview</span>
+            </button>
+          ) : null}
+          <a
+            href={module.download_url}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={`Open ${module.title} in a new tab`}
+            className="apple-press inline-flex items-center gap-1 text-xs font-semibold text-slate-800 hover:text-slate-950 transition-colors group"
+          >
+            <span>Open file</span>
+            <ArrowSquareOutIcon className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700 transition-colors" aria-hidden="true" />
+          </a>
+        </div>
       </div>
 
       {/* Main Content: Title + Description */}
@@ -257,7 +274,7 @@ export function ModuleCard({ userId, courseId, module, accessMode }: ModuleCardP
             <input
               id={`edit-title-${module.id}`}
               type="text"
-              maxLength={255}
+              maxLength={MODULE_TITLE_MAX_LENGTH}
               disabled={updateMutation.isPending}
               className="mt-1 h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-50"
               {...form.register("title")}
@@ -279,7 +296,7 @@ export function ModuleCard({ userId, courseId, module, accessMode }: ModuleCardP
             <textarea
               id={`edit-desc-${module.id}`}
               rows={3}
-              maxLength={2000}
+              maxLength={MODULE_DESCRIPTION_MAX_LENGTH}
               disabled={updateMutation.isPending}
               className="mt-1 w-full resize-y rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs leading-5 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-50"
               {...form.register("description")}
@@ -326,7 +343,7 @@ export function ModuleCard({ userId, courseId, module, accessMode }: ModuleCardP
             </button>
           </div>
           <p className="mt-0.5 text-xs text-slate-500">
-            Select a new {expectedExt.toUpperCase()} file (up to 50MB). The existing file will be replaced immediately.
+            Select a new {expectedExt.toUpperCase()} file (up to {MODULE_MAX_UPLOAD_LABEL}). The existing file will be replaced immediately.
           </p>
 
           <input
@@ -509,6 +526,14 @@ export function ModuleCard({ userId, courseId, module, accessMode }: ModuleCardP
           </div>
         </div>
       ) : null}
+
+      <DocumentPreviewModal
+        isOpen={isPreviewOpen}
+        title={module.title}
+        fileUrl={module.download_url}
+        fileExtension={fileType.toLowerCase()}
+        onClose={() => setIsPreviewOpen(false)}
+      />
     </article>
   );
 }

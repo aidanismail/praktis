@@ -1,5 +1,6 @@
 "use client";
 
+import { MODULE_DESCRIPTION_MAX_LENGTH, MODULE_TITLE_MAX_LENGTH } from "@/lib/generated/upload-rules";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { useId, useState } from "react";
@@ -13,6 +14,7 @@ import {
 } from "../hooks/use-course-modules";
 import {
   getModuleFileExtension,
+  MODULE_MAX_UPLOAD_LABEL,
   moduleUploadSchema,
   type ModuleUploadFormValues
 } from "../schemas/module.schema";
@@ -62,7 +64,7 @@ function getUploadErrorMessage(
 ) {
   if (failedStage === "upload") {
     if (error instanceof ApiError && error.status === 413) {
-      return "That file is too large to upload (maximum 25 MiB).";
+      return `That file is too large to upload (maximum ${MODULE_MAX_UPLOAD_LABEL}).`;
     }
 
     if (error instanceof ApiError && error.status === 403) {
@@ -303,7 +305,7 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
         </h3>
 
         <p className="mt-0.5 text-xs text-slate-500">
-          Upload PDF or DOCX (up to 25 MiB). Saved as draft until published.
+          Upload PDF or DOCX (up to {MODULE_MAX_UPLOAD_LABEL}). Saved as draft until published.
         </p>
       </div>
 
@@ -368,7 +370,7 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
             <input
               id={`module-upload-title-${generatedId}`}
               type="text"
-              maxLength={255}
+              maxLength={MODULE_TITLE_MAX_LENGTH}
               placeholder="Example: Module 1 — Introduction"
               aria-invalid={Boolean(form.formState.errors.title)}
               aria-describedby={
@@ -411,7 +413,7 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
             <textarea
               id={`module-upload-description-${generatedId}`}
               rows={3}
-              maxLength={500}
+              maxLength={MODULE_DESCRIPTION_MAX_LENGTH}
               placeholder="Summarize what students should learn."
               aria-invalid={Boolean(form.formState.errors.description)}
               aria-describedby={
@@ -483,7 +485,7 @@ export function ModuleUploadForm({ userId, courseId }: ModuleUploadFormProps) {
               id={`module-upload-file-help-${generatedId}`}
               className="text-[11px] leading-4 text-slate-400"
             >
-              PDF or DOCX, up to 25 MiB.
+              PDF or DOCX, up to {MODULE_MAX_UPLOAD_LABEL}.
             </p>
 
             {form.formState.errors.file ? (
