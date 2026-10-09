@@ -1,5 +1,7 @@
 "use client";
 
+import { MODULE_DESCRIPTION_MAX_LENGTH, MODULE_TITLE_MAX_LENGTH } from "@/lib/generated/upload-rules";
+import { MODULE_MAX_UPLOAD_BYTES, MODULE_MAX_UPLOAD_LABEL } from "@/features/modules/schemas/module.schema";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -178,7 +180,7 @@ export function AdminModuleList() {
 
   const addFilesToQueue = (files: FileList | File[]) => {
     const validExtensions = [".pdf", ".docx"];
-    const maxBytes = 20 * 1024 * 1024;
+    const maxBytes = MODULE_MAX_UPLOAD_BYTES;
     const newItems: Array<{ id: string; file: File; title: string; description: string }> = [];
     const rejectionErrors: string[] = [];
 
@@ -189,7 +191,7 @@ export function AdminModuleList() {
         return;
       }
       if (file.size > maxBytes) {
-        rejectionErrors.push(`"${file.name}" is over 20 MB.`);
+        rejectionErrors.push(`"${file.name}" is over ${MODULE_MAX_UPLOAD_LABEL}.`);
         return;
       }
 
@@ -422,7 +424,7 @@ export function AdminModuleList() {
             }
             setShowUploadModal(true);
           }}
-          className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-full shadow-xs transition-all flex items-center gap-1.5 self-end sm:self-auto active:scale-[0.98]"
+          className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg shadow-xs transition-all flex items-center gap-1.5 self-end sm:self-auto active:scale-[0.98]"
         >
           <PlusIcon className="w-3.5 h-3.5" />
           <span>Upload Modules</span>
@@ -597,7 +599,7 @@ export function AdminModuleList() {
                                         courseCode: course?.code
                                       })
                                     }
-                                    className="apple-press px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full text-xs flex items-center gap-1.5 transition-colors shadow-xs"
+                                    className="apple-press px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg text-xs flex items-center gap-1.5 transition-colors shadow-xs"
                                   >
                                     <EyeIcon className="w-3.5 h-3.5" />
                                     <span>Preview</span>
@@ -606,7 +608,7 @@ export function AdminModuleList() {
                                   <a
                                     href={mod.download_url}
                                     download
-                                    className="apple-press px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                                    className="apple-press px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors"
                                   >
                                     <DownloadSimpleIcon className="w-3.5 h-3.5" />
                                     <span className="hidden sm:inline">
@@ -620,7 +622,7 @@ export function AdminModuleList() {
                                 type="button"
                                 disabled={activeModuleId === mod.id}
                                 onClick={() => handleTogglePublish(mod)}
-                                className={`apple-press px-3 py-1.5 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+                                className={`apple-press px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
                                   mod.is_published
                                     ? "border border-slate-200 text-slate-700 hover:bg-slate-100"
                                     : "bg-slate-900 text-white hover:bg-slate-800 shadow-xs"
@@ -723,7 +725,7 @@ export function AdminModuleList() {
               {/* Drag-and-drop / Multi-file Picker */}
               <div>
                 <label className="block font-semibold text-slate-700 mb-1">
-                  Select Modules (.pdf, .docx up to 20MB) *
+                  Select Modules (.pdf, .docx up to {MODULE_MAX_UPLOAD_LABEL}) *
                 </label>
                 <div
                   onDragOver={(e) => {
@@ -839,6 +841,7 @@ export function AdminModuleList() {
                               }
                               required
                               aria-label={`Title for ${item.file.name}`}
+                              maxLength={MODULE_TITLE_MAX_LENGTH}
                               placeholder="Module title *"
                               className="w-full p-2 text-xs border border-slate-200 rounded-xl bg-white focus:ring-1 focus:ring-slate-900 font-medium"
                             />
@@ -853,6 +856,7 @@ export function AdminModuleList() {
                                   description: e.target.value
                                 })
                               }
+                              maxLength={MODULE_DESCRIPTION_MAX_LENGTH}
                               placeholder="Brief description (optional)"
                               className="w-full p-2 text-xs border border-slate-200 rounded-xl bg-white focus:ring-1 focus:ring-slate-900 text-slate-600"
                             />
@@ -904,7 +908,7 @@ export function AdminModuleList() {
                   setShowUploadModal(false);
                   setUploadQueue([]);
                 }}
-                className="px-4 py-2 border border-slate-200 rounded-full text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                className="px-4 py-2 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50"
               >
                 Cancel
               </button>
@@ -915,7 +919,7 @@ export function AdminModuleList() {
                   uploadQueue.length === 0 ||
                   !newModuleCourseId
                 }
-                className="px-5 py-2 bg-slate-900 text-white rounded-full text-xs font-semibold hover:bg-slate-800 shadow-xs disabled:opacity-50 flex items-center gap-1.5 active:scale-[0.98]"
+                className="px-5 py-2 bg-slate-900 text-white rounded-lg text-xs font-semibold hover:bg-slate-800 shadow-xs disabled:opacity-50 flex items-center gap-1.5 active:scale-[0.98]"
               >
                 {isUploading ? (
                   <>
@@ -1063,7 +1067,7 @@ export function AdminModuleList() {
                             courseCode: course?.code
                           });
                         }}
-                        className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-full font-semibold flex items-center gap-1.5 transition-colors shadow-xs"
+                        className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-semibold flex items-center gap-1.5 transition-colors shadow-xs"
                       >
                         <EyeIcon className="w-3.5 h-3.5" />
                         <span>Preview</span>
@@ -1072,7 +1076,7 @@ export function AdminModuleList() {
                       <a
                         href={selectedModuleForDetail.download_url}
                         download
-                        className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-full font-semibold flex items-center gap-1.5 transition-colors"
+                        className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg font-semibold flex items-center gap-1.5 transition-colors"
                       >
                         <DownloadSimpleIcon className="w-3.5 h-3.5" />
                         <span>Download</span>
@@ -1084,7 +1088,7 @@ export function AdminModuleList() {
                     type="button"
                     disabled={activeModuleId === selectedModuleForDetail.id}
                     onClick={() => handleTogglePublish(selectedModuleForDetail)}
-                    className="px-3.5 py-2 border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-full font-semibold transition-colors"
+                    className="px-3.5 py-2 border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-lg font-semibold transition-colors"
                   >
                     {selectedModuleForDetail.is_published
                       ? "Unpublish"
@@ -1096,7 +1100,7 @@ export function AdminModuleList() {
                   type="button"
                   disabled={activeModuleId === selectedModuleForDetail.id}
                   onClick={() => handleDelete(selectedModuleForDetail)}
-                  className="px-3 py-2 text-rose-600 hover:bg-rose-50 rounded-full font-semibold transition-colors flex items-center gap-1"
+                  className="px-3 py-2 text-rose-600 hover:bg-rose-50 rounded-lg font-semibold transition-colors flex items-center gap-1"
                 >
                   <TrashIcon className="w-3.5 h-3.5" />
                   <span>Delete</span>

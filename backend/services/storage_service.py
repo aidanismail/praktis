@@ -5,20 +5,15 @@ import boto3
 from botocore.client import Config
 from botocore.exceptions import ClientError
 from core.config import settings
+from core.file_types import get_file_type
 
 logger = logging.getLogger(__name__)
 
-CONTENT_TYPES = {
-    "pdf": "application/pdf",
-    "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "zip": "application/zip",
-}
-
-
 def content_type_for(object_name: str) -> str | None:
     """Return the MIME type for a stored object based on its file extension."""
-    extension = object_name.rsplit(".", 1)[-1].lower() if "." in object_name else ""
-    return CONTENT_TYPES.get(extension)
+    extension = object_name.rsplit(".", 1)[-1] if "." in object_name else ""
+    file_type = get_file_type(extension)
+    return file_type.content_type if file_type else None
 
 
 class StorageService:

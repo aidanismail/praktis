@@ -2,6 +2,7 @@
 
 import type { UseFormReturn } from "react-hook-form";
 import type { AssignmentFormValues } from "../schemas/assignment.schema";
+import { ASSIGNMENT_FILE_TYPE_OPTIONS } from "@/lib/generated/upload-rules";
 import {
   ASSIGNMENT_FILE_TYPES,
   type AssignmentFileType
@@ -14,11 +15,9 @@ type AssignmentFormFieldsProps = {
   compact?: boolean;
 };
 
-const fileTypeLabels: Record<AssignmentFileType, string> = {
-  pdf: "PDF",
-  zip: "ZIP",
-  docx: "DOCX"
-};
+const fileTypeLabels = Object.fromEntries(
+  ASSIGNMENT_FILE_TYPE_OPTIONS.map((option) => [option.id, option.label])
+) as Record<AssignmentFileType, string>;
 
 export function AssignmentFormFields({
   form,

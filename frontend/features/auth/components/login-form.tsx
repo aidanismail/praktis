@@ -158,7 +158,7 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={loginMutation.isPending}
-          className="flex h-11 w-full cursor-pointer items-center justify-center rounded-full bg-slate-900 px-4 text-sm font-semibold text-white apple-press transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-70"
+          className="flex h-11 w-full cursor-pointer items-center justify-center rounded-lg bg-slate-900 px-4 text-sm font-semibold text-white apple-press transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {loginMutation.isPending ? (
             <>

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import type { Assignment } from "@/features/admin/types";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
 import { NotificationBanner } from "@/components/ui/notification-banner";
+import { ASSIGNMENT_FILE_TYPE_OPTIONS } from "@/lib/generated/upload-rules";
 
 interface CourseAssignmentModalProps {
   isOpen: boolean;
@@ -22,17 +23,10 @@ interface CourseAssignmentModalProps {
   isSubmitting?: boolean;
 }
 
-const FORMAT_OPTIONS = [
-  { id: "pdf", label: "PDF (.pdf)" },
-  { id: "zip", label: "ZIP (.zip)" },
-  { id: "rar", label: "RAR (.rar)" },
-  { id: "docx", label: "Word (.docx)" },
-  { id: "py", label: "Python (.py)" },
-  { id: "java", label: "Java (.java)" },
-  { id: "cpp", label: "C++ (.cpp)" },
-  { id: "sql", label: "SQL (.sql)" },
-  { id: "ipynb", label: "Jupyter (.ipynb)" },
-];
+const FORMAT_OPTIONS = ASSIGNMENT_FILE_TYPE_OPTIONS.map((option) => ({
+  id: option.id,
+  label: `${option.label} (.${option.id})`,
+}));
 
 function formatDatetimeLocal(isoString?: string | null): string {
   if (!isoString) return "";
@@ -56,9 +50,13 @@ function AssignmentFormInner({
   const [title, setTitle] = useState(editingAssignment?.title ?? "");
   const [description, setDescription] = useState(editingAssignment?.description ?? "");
   const [maxPoints, setMaxPoints] = useState<number>(editingAssignment?.max_points ?? 100);
-  const [allowedTypes, setAllowedTypes] = useState(
-    editingAssignment?.allowed_file_types ?? "pdf,zip"
-  );
+  const [allowedTypes, setAllowedTypes] = useState(() => {
+    const supported = (editingAssignment?.allowed_file_types ?? "pdf,zip")
+      .split(",")
+      .map((t) => t.trim().toLowerCase().replace(/^\./, ""))
+      .filter((t) => FORMAT_OPTIONS.some((fmt) => fmt.id === t));
+    return supported.length > 0 ? supported.join(",") : "pdf";
+  });
   const [dueDate, setDueDate] = useState(formatDatetimeLocal(editingAssignment?.due_date));
   const [allowLateSubmissions, setAllowLateSubmissions] = useState<boolean>(
     editingAssignment?.allow_late_submissions ?? true
@@ -195,17 +193,6 @@ function AssignmentFormInner({
               );
             })}
           </div>
-          <div className="flex items-center gap-2">
-            <label htmlFor="assignment-custom-types" className="text-[11px] text-slate-400 shrink-0">Selected / Custom:</label>
-            <input
-              id="assignment-custom-types"
-              type="text"
-              value={allowedTypes}
-              onChange={(e) => setAllowedTypes(e.target.value)}
-              placeholder="e.g. pdf,zip,docx"
-              className="flex-1 px-2.5 py-1 text-xs border border-slate-200 rounded-lg bg-slate-50 font-mono text-slate-700 focus:bg-white focus:ring-1 focus:ring-slate-900"
-            />
-          </div>
         </div>
 
         <div>
@@ -260,14 +247,14 @@ function AssignmentFormInner({
         <button
           type="button"
           onClick={onClose}
-          className="px-4 py-2 border border-slate-200 rounded-full text-xs font-semibold text-slate-600 hover:bg-slate-50 apple-press transition-colors"
+          className="px-4 py-2 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 apple-press transition-colors"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-5 py-2 bg-slate-900 text-white rounded-full text-xs font-semibold hover:bg-slate-800 shadow-xs apple-press transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+          className="px-5 py-2 bg-slate-900 text-white rounded-lg text-xs font-semibold hover:bg-slate-800 shadow-xs apple-press transition-all disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {isSubmitting ? "Saving..." : editingAssignment ? "Save Changes" : "Create Assignment"}
         </button>

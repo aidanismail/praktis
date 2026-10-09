@@ -76,7 +76,7 @@ export function GradePublishBar({
             type="button"
             onClick={() => setPublished(false)}
             disabled={isPending}
-            className="apple-press shrink-0 self-end sm:self-auto inline-flex items-center gap-1.5 px-4 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold rounded-full text-xs shadow-xs transition-colors disabled:opacity-60"
+            className="apple-press shrink-0 self-end sm:self-auto inline-flex items-center gap-1.5 px-4 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold rounded-lg text-xs shadow-xs transition-colors disabled:opacity-60"
           >
             <EyeSlashIcon className="w-3.5 h-3.5" aria-hidden="true" />
             {isPending ? "Unpublishing..." : "Unpublish"}
@@ -87,7 +87,7 @@ export function GradePublishBar({
             onClick={handlePublishClick}
             disabled={isPending || gradedCount === 0 || isConfirming}
             title={gradedCount === 0 ? "Grade at least one submission first" : undefined}
-            className="apple-press shrink-0 self-end sm:self-auto inline-flex items-center gap-1.5 px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full text-xs shadow-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="apple-press shrink-0 self-end sm:self-auto inline-flex items-center gap-1.5 px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg text-xs shadow-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <MegaphoneIcon className="w-3.5 h-3.5" aria-hidden="true" />
             {isPending ? "Publishing..." : "Publish grades"}
@@ -108,7 +108,7 @@ export function GradePublishBar({
               type="button"
               onClick={() => setIsConfirming(false)}
               disabled={isPending}
-              className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
             >
               Cancel
             </button>
@@ -116,7 +116,7 @@ export function GradePublishBar({
               type="button"
               onClick={() => setPublished(true)}
               disabled={isPending}
-              className="rounded-full bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
+              className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
             >
               {isPending ? "Publishing..." : "Publish anyway"}
             </button>

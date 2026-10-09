@@ -228,7 +228,7 @@ export function CourseStreamTab({
             <button
               type="submit"
               disabled={isPosting || !newContent.trim()}
-              className="apple-press px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-full shadow-xs transition-colors flex items-center gap-1.5 disabled:opacity-50"
+              className="apple-press px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors flex items-center gap-1.5 disabled:opacity-50"
             >
               <PaperPlaneTiltIcon className="w-3.5 h-3.5" />
               <span>Post announcement</span>
@@ -310,14 +310,14 @@ export function CourseStreamTab({
                             await onDeleteAnnouncement(ann.id);
                             setConfirmDeleteAnnouncementId(null);
                           }}
-                          className="px-2.5 py-1 bg-rose-600 text-white rounded-full font-semibold hover:bg-rose-700"
+                          className="px-2.5 py-1 bg-rose-600 text-white rounded-lg font-semibold hover:bg-rose-700"
                         >
                           Delete
                         </button>
                         <button
                           type="button"
                           onClick={() => setConfirmDeleteAnnouncementId(null)}
-                          className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full hover:bg-slate-200"
+                          className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200"
                         >
                           Cancel
                         </button>
@@ -373,14 +373,14 @@ export function CourseStreamTab({
                                   await onDeleteComment(ann.id, c.id);
                                   setConfirmDeleteCommentId(null);
                                 }}
-                                className="px-2 py-0.5 bg-rose-600 text-white rounded-full text-[10px] font-semibold hover:bg-rose-700"
+                                className="px-2 py-0.5 bg-rose-600 text-white rounded-lg text-[10px] font-semibold hover:bg-rose-700"
                               >
                                 Delete
                               </button>
                               <button
                                 type="button"
                                 onClick={() => setConfirmDeleteCommentId(null)}
-                                className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full text-[10px] hover:bg-slate-200"
+                                className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-lg text-[10px] hover:bg-slate-200"
                               >
                                 Cancel
                               </button>
@@ -425,7 +425,7 @@ export function CourseStreamTab({
                     <button
                       type="button"
                       onClick={() => handleCommentSubmit(ann.id)}
-                      className="apple-press px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-full flex items-center gap-1 shadow-xs"
+                      className="apple-press px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg flex items-center gap-1 shadow-xs"
                     >
                       <PaperPlaneTiltIcon className="w-3.5 h-3.5" />
                       <span>Send</span>

@@ -113,7 +113,7 @@ export function CourseListView({
           <button
             type="button"
             onClick={onCreateCourse}
-            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-full shadow-xs transition-all flex items-center gap-1.5 active:scale-[0.98] cursor-pointer"
+            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg shadow-xs transition-all flex items-center gap-1.5 active:scale-[0.98] cursor-pointer"
           >
             <PlusIcon className="w-3.5 h-3.5" />
             <span>Create course</span>

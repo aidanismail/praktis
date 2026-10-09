@@ -83,7 +83,7 @@ export function DocumentPreviewModal({
               href={fileUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900 shadow-xs"
+              className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900 shadow-xs"
               title="Open in new browser tab"
             >
               <ArrowSquareOutIcon className="h-3.5 w-3.5" />
@@ -93,7 +93,7 @@ export function DocumentPreviewModal({
             <a
               href={fileUrl}
               download
-              className="flex items-center gap-1.5 rounded-full bg-slate-900 px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-slate-800"
+              className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-slate-800"
               title="Download original file"
             >
               <DownloadSimpleIcon className="h-3.5 w-3.5" />
@@ -143,7 +143,7 @@ export function DocumentPreviewModal({
                 <a
                   href={fileUrl}
                   download
-                  className="rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold text-white hover:bg-slate-800 shadow-xs flex items-center gap-1.5"
+                  className="rounded-lg bg-slate-900 px-5 py-2 text-xs font-semibold text-white hover:bg-slate-800 shadow-xs flex items-center gap-1.5"
                 >
                   <DownloadSimpleIcon className="h-3.5 w-3.5" />
                   <span>Download</span>
@@ -152,7 +152,7 @@ export function DocumentPreviewModal({
                   href={fileUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-full border border-slate-200 bg-white px-5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-xs flex items-center gap-1.5"
+                  className="rounded-lg border border-slate-200 bg-white px-5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-xs flex items-center gap-1.5"
                 >
                   <ArrowSquareOutIcon className="h-3.5 w-3.5" />
                   <span>Open in new tab</span>

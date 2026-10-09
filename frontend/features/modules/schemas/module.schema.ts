@@ -4,7 +4,15 @@ import {
   type ModuleFileExtension
 } from "../types/module.type";
 
-export const MODULE_MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
+import {
+  MODULE_DESCRIPTION_MAX_LENGTH,
+  MODULE_MAX_UPLOAD_BYTES,
+  MODULE_TITLE_MAX_LENGTH
+} from "@/lib/generated/upload-rules";
+
+export { MODULE_MAX_UPLOAD_BYTES };
+
+export const MODULE_MAX_UPLOAD_LABEL = `${MODULE_MAX_UPLOAD_BYTES / (1024 * 1024)} MiB`;
 
 export function getModuleFileExtension(
   fileName: string
@@ -38,7 +46,7 @@ const moduleFileSchema = z
     if (file.size > MODULE_MAX_UPLOAD_BYTES) {
       context.addIssue({
         code: "custom",
-        message: "The file must be 25 MiB or smaller"
+        message: `The file must be ${MODULE_MAX_UPLOAD_LABEL} or smaller`
       });
     }
 
@@ -55,11 +63,17 @@ export const moduleMetadataSchema = z.object({
     .string()
     .trim()
     .min(1, "Title is required")
-    .max(255, "Title must be 255 characters or fewer"),
+    .max(
+      MODULE_TITLE_MAX_LENGTH,
+      `Title must be ${MODULE_TITLE_MAX_LENGTH} characters or fewer`
+    ),
   description: z
     .string()
     .trim()
-    .max(500, "Description must be 500 characters or fewer")
+    .max(
+      MODULE_DESCRIPTION_MAX_LENGTH,
+      `Description must be ${MODULE_DESCRIPTION_MAX_LENGTH} characters or fewer`
+    )
 });
 
 export const moduleUploadSchema = moduleMetadataSchema.extend({

@@ -91,16 +91,16 @@ function ErrorPanel({
           <h1 className="text-lg font-semibold text-red-950">{title}</h1>
           <p className="mt-2 text-sm leading-6 text-red-800">{description}</p>
           {status === 401 ? (
-            <Link href={ROUTES.login} className="mt-4 inline-flex min-h-11 items-center rounded-full bg-red-700 px-4 text-sm font-semibold text-white">
+            <Link href={ROUTES.login} className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-red-700 px-4 text-sm font-semibold text-white">
               Go to sign in
             </Link>
           ) : retryable ? (
-            <button type="button" onClick={onRetry} disabled={isRetrying} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-red-700 px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60">
+            <button type="button" onClick={onRetry} disabled={isRetrying} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-lg bg-red-700 px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60">
               <ArrowsClockwiseIcon className={isRetrying ? "h-4 w-4 animate-spin" : "h-4 w-4"} aria-hidden="true" />
               Try again
             </button>
           ) : onBack ? (
-            <button type="button" onClick={onBack} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+            <button type="button" onClick={onBack} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50">
               <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
               Back to sessions
             </button>
@@ -191,7 +191,7 @@ function SessionSummary({
               blockedByOtherOpen
             }
             title={toggleHint}
-            className={`apple-press inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
+            className={`apple-press inline-flex items-center gap-1.5 px-3.5 py-1 rounded-lg text-xs font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
               status === "OPEN"
                 ? "bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200/60"
                 : "bg-slate-900 text-white hover:bg-slate-800"
@@ -345,7 +345,7 @@ export function AssignedSessionDetail({
         <button
           type="button"
           onClick={handleBackAttempt}
-          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-full shadow-xs apple-press transition-colors cursor-pointer"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-lg shadow-xs apple-press transition-colors cursor-pointer"
         >
           <ArrowLeftIcon className="w-4 h-4" aria-hidden="true" />
           <span>Back to Sessions</span>
@@ -359,9 +359,9 @@ export function AssignedSessionDetail({
               setIsConfirmingDelete(true);
             }}
             disabled={deleteMutation.isPending}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-700 hover:text-rose-800 bg-white border border-rose-200 hover:bg-rose-50 px-3.5 py-2 rounded-full shadow-xs apple-press transition-colors cursor-pointer disabled:opacity-60"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold text-rose-700 transition-colors hover:bg-rose-50 hover:text-rose-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600 cursor-pointer disabled:opacity-60 sm:min-h-9"
           >
-            <TrashIcon className="w-3.5 h-3.5 text-rose-500" aria-hidden="true" />
+            <TrashIcon className="w-4 h-4" aria-hidden="true" />
             <span>Delete session</span>
           </button>
         ) : null}
@@ -377,14 +377,14 @@ export function AssignedSessionDetail({
             <button
               type="button"
               onClick={() => setShowUnsavedWarning(false)}
-              className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
             >
               Keep editing
             </button>
             <button
               type="button"
               onClick={navigateBack}
-              className="rounded-full bg-amber-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-800"
+              className="rounded-lg bg-amber-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-800"
             >
               Discard and leave
             </button>
@@ -403,7 +403,7 @@ export function AssignedSessionDetail({
               type="button"
               onClick={() => setIsConfirmingDelete(false)}
               disabled={deleteMutation.isPending}
-              className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+              className="rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
             >
               Cancel
             </button>
@@ -411,9 +411,9 @@ export function AssignedSessionDetail({
               type="button"
               onClick={handleDeleteSession}
               disabled={deleteMutation.isPending}
-              className="rounded-full bg-red-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-800 disabled:opacity-60"
+              className="rounded-lg bg-red-700 px-3.5 py-2 text-xs font-semibold text-white hover:bg-red-800 disabled:opacity-60"
             >
-              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+              {deleteMutation.isPending ? "Deleting..." : "Delete session"}
             </button>
           </div>
           {deleteMutation.isError ? (

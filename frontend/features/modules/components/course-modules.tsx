@@ -88,7 +88,7 @@ export function CourseModules({ userId, courseId, accessMode }: CourseModulesPro
               type="button"
               onClick={() => void refetch()}
               disabled={isFetching}
-              className="apple-press inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+              className="apple-press inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <ArrowsClockwiseIcon
                 className={isFetching ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"}

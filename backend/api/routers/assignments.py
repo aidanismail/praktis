@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from core.config import settings
 from core.database import get_db
+from core.file_types import get_file_type
 from core.rate_limit import rate_limiter
 from api.dependencies import get_current_active_user
 from api.permissions import require_course_access
@@ -32,12 +33,6 @@ from services.storage_service import content_type_for, storage_service
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/courses/{course_id}/assignments", tags=["Assignments"])
-
-MAGIC_SIGNATURES: dict[str, bytes] = {
-    "pdf": b"%PDF-",
-    "docx": b"PK\x03\x04",
-    "zip": b"PK\x03\x04",
-}
 
 ZIP_MAX_ENTRIES = 100
 ZIP_MAX_UNCOMPRESSED_BYTES = 50 * 1024 * 1024
@@ -92,8 +87,6 @@ def _validate_zip_safety(content: bytes) -> None:
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid ZIP archive",
         )
-
-
 
 def _build_submission_response(
     sub: Submission, student: User | None, hide_grade: bool = False
@@ -490,14 +483,14 @@ async def submit_assignment(
     if len(content) == 0:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Uploaded file is empty")
 
-    expected_magic = MAGIC_SIGNATURES.get(ext)
-    if expected_magic and not content.startswith(expected_magic):
+    file_type = get_file_type(ext)
+    if file_type and file_type.magic and not content.startswith(file_type.magic):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"File content does not match .{ext} format",
         )
 
-    if ext in ("zip", "docx"):
+    if file_type and file_type.is_zip_container:
         _validate_zip_safety(content)
 
     display_name = _sanitize_filename(file.filename or "submission", ext)

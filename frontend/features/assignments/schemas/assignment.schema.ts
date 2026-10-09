@@ -4,7 +4,9 @@ import {
   type AssignmentFileType
 } from "../types/assignment.type";
 
-export const ASSIGNMENT_MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+import { ASSIGNMENT_MAX_UPLOAD_BYTES } from "@/lib/generated/upload-rules";
+
+export { ASSIGNMENT_MAX_UPLOAD_BYTES };
 
 export function getAllowedAssignmentFileTypes(
   value: string

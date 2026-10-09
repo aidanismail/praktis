@@ -1,6 +1,8 @@
 from pathlib import Path 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from core.file_types import ASSIGNMENT_MAX_UPLOAD_BYTES_DEFAULT, MODULE_MAX_UPLOAD_BYTES_DEFAULT
+
 ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
 
 class Settings(BaseSettings):
@@ -30,10 +32,10 @@ class Settings(BaseSettings):
     IMPORT_MAX_ROWS: int = 2000
 
     # module upload limit
-    MODULE_MAX_UPLOAD_BYTES: int = 25 * 1024 * 1024
+    MODULE_MAX_UPLOAD_BYTES: int = MODULE_MAX_UPLOAD_BYTES_DEFAULT
 
     # assignment upload limit
-    ASSIGNMENT_MAX_UPLOAD_BYTES: int = 10 * 1024 * 1024
+    ASSIGNMENT_MAX_UPLOAD_BYTES: int = ASSIGNMENT_MAX_UPLOAD_BYTES_DEFAULT
 
     #redis
     REDIS_URL: str = "redis://localhost:6379/0"

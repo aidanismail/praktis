@@ -118,7 +118,7 @@ export function PraktikanCourseWorkspace({
         <button
           type="button"
           onClick={handleBackToCourses}
-          className="flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-full shadow-xs transition-colors apple-press"
+          className="flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-lg shadow-xs transition-colors apple-press"
         >
           <ArrowLeftIcon className="w-4 h-4" />
           <span>Back to Classes</span>

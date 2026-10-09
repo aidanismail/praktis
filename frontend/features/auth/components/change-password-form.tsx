@@ -241,7 +241,7 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
         <button
           type="submit"
           disabled={changePasswordMutation.isPending}
-          className="flex h-11 w-full cursor-pointer items-center justify-center rounded-full bg-slate-900 px-4 text-sm font-semibold text-white apple-press transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-70"
+          className="flex h-11 w-full cursor-pointer items-center justify-center rounded-lg bg-slate-900 px-4 text-sm font-semibold text-white apple-press transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {changePasswordMutation.isPending ? (
             <>
@@ -256,7 +256,7 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
         {!isForced ? (
           <Link
             href={ROUTES.dashboard}
-            className="flex min-h-11 w-full items-center justify-center rounded-full border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 apple-press hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+            className="flex min-h-11 w-full items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 apple-press hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
           >
             Never mind, take me back
           </Link>
@@ -265,7 +265,7 @@ export function ChangePasswordForm({ isForced }: ChangePasswordFormProps) {
             type="button"
             onClick={() => logoutMutation.mutate()}
             disabled={logoutMutation.isPending}
-            className="flex min-h-11 w-full cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 apple-press hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex min-h-11 w-full cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 apple-press hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {logoutMutation.isPending ? "Signing out..." : "Sign out"}
           </button>

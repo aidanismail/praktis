@@ -190,14 +190,14 @@ export function SubmissionGradeForm({
           type="button"
           onClick={onCancel}
           disabled={mutation.isPending}
-          className="px-4 py-2 border border-slate-200 rounded-full text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-60"
+          className="px-4 py-2 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-60"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={mutation.isPending}
-          className="inline-flex items-center px-5 py-2 bg-slate-900 text-white rounded-full text-xs font-semibold hover:bg-slate-800 shadow-xs disabled:opacity-60"
+          className="inline-flex items-center px-5 py-2 bg-slate-900 text-white rounded-lg text-xs font-semibold hover:bg-slate-800 shadow-xs disabled:opacity-60"
         >
           {mutation.isPending ? (
             <>

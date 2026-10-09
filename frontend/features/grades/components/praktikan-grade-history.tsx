@@ -240,7 +240,7 @@ export function PraktikanGradeHistory({ userId }: Props) {
         <button
           type="button"
           onClick={() => setLimit((value) => value + INITIAL_LIMIT)}
-          className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 transition-colors"
+          className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 transition-colors"
         >
           Show {filtered.length - visible.length} more
         </button>

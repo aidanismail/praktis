@@ -180,7 +180,7 @@ function InlineDataError({ title, message, onRetry }: InlineDataErrorProps) {
             <button
               type="button"
               onClick={onRetry}
-              className="inline-flex items-center gap-1.5 rounded-full bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-700 shrink-0 apple-press"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-700 shrink-0 apple-press"
             >
               <ArrowsClockwiseIcon className="h-3.5 w-3.5" aria-hidden="true" />
               Try again
@@ -309,7 +309,7 @@ export function AdminOverview({
             {accessError.status === 401 ? (
               <Link
                 href={ROUTES.login}
-                className="inline-flex rounded-full bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-700 shrink-0 apple-press"
+                className="inline-flex rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-700 shrink-0 apple-press"
               >
                 Sign in
               </Link>
@@ -327,7 +327,7 @@ export function AdminOverview({
               type="button"
               onClick={() => void refreshAll()}
               disabled={isRefreshing}
-              className="inline-flex items-center rounded-full bg-slate-800 border border-slate-700 px-3 py-1 text-xs font-semibold text-white hover:bg-slate-700 transition disabled:opacity-60 shrink-0 apple-press"
+              className="inline-flex items-center rounded-lg bg-slate-800 border border-slate-700 px-3 py-1 text-xs font-semibold text-white hover:bg-slate-700 transition disabled:opacity-60 shrink-0 apple-press"
             >
               Retry refresh
             </button>
@@ -344,7 +344,7 @@ export function AdminOverview({
             onClick={() => void refreshAll()}
             disabled={isRefreshing}
             className="apple-press inline-flex min-h-10 items-center justify-center gap-2
-              self-start rounded-full border border-slate-200 bg-white px-4 py-2
+              self-start rounded-lg border border-slate-200 bg-white px-4 py-2
               text-sm font-semibold text-slate-700 transition hover:bg-slate-50
               focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed
               disabled:opacity-60 sm:self-auto"
@@ -466,7 +466,7 @@ export function AdminOverview({
                 <button
                   type="button"
                   onClick={() => onNavigateToNavItem("courses")}
-                  className="apple-press mt-4 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+                  className="apple-press mt-4 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
                 >
                   Open Course Management
                 </button>
@@ -486,7 +486,7 @@ export function AdminOverview({
                 <button
                   type="button"
                   onClick={() => onNavigateToNavItem("courses")}
-                  className="apple-press mt-4 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+                  className="apple-press mt-4 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
                 >
                   View historical courses
                 </button>

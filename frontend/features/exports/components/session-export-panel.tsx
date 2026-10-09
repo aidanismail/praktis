@@ -112,7 +112,7 @@ export function SessionExportPanel({
               type="button"
               onClick={() => startDownload(format)}
               disabled={attendanceQuery.data === undefined || attendanceCount === 0 || activeFormat !== null}
-              className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-semibold uppercase text-slate-700 transition hover:bg-slate-50 apple-press focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold uppercase text-slate-700 transition hover:bg-slate-50 apple-press focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {activeFormat === format ? (
                 <AsteriskLoader className="h-3.5 w-3.5" aria-hidden="true" />

@@ -40,14 +40,14 @@ export default function RootGlobalError({
               <button
                 type="button"
                 onClick={() => reset()}
-                className="w-full cursor-pointer rounded-full bg-slate-900 px-5 py-2.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-slate-800 sm:w-auto"
+                className="w-full cursor-pointer rounded-lg bg-slate-900 px-5 py-2.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-slate-800 sm:w-auto"
               >
                 Try again
               </button>
               {/* A plain anchor on purpose: a full reload resets all client state. */}
               <a
                 href="/dashboard"
-                className="w-full rounded-full bg-slate-100 px-5 py-2.5 text-xs font-semibold text-slate-800 transition-colors hover:bg-slate-200 sm:w-auto"
+                className="w-full rounded-lg bg-slate-100 px-5 py-2.5 text-xs font-semibold text-slate-800 transition-colors hover:bg-slate-200 sm:w-auto"
               >
                 Return to dashboard
               </a>

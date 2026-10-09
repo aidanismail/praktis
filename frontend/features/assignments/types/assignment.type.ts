@@ -1,6 +1,10 @@
-export const ASSIGNMENT_FILE_TYPES = ["pdf", "zip", "docx"] as const;
+import { ASSIGNMENT_FILE_TYPE_OPTIONS } from "@/lib/generated/upload-rules";
 
-export type AssignmentFileType = (typeof ASSIGNMENT_FILE_TYPES)[number];
+export type AssignmentFileType = (typeof ASSIGNMENT_FILE_TYPE_OPTIONS)[number]["id"];
+
+export const ASSIGNMENT_FILE_TYPES = ASSIGNMENT_FILE_TYPE_OPTIONS.map(
+  (option) => option.id
+) as unknown as readonly [AssignmentFileType, ...AssignmentFileType[]];
 
 export type AssignmentSubmission = {
   id: string;

@@ -51,14 +51,14 @@ export default function DashboardError({
           <button
             type="button"
             onClick={() => reset()}
-            className="w-full sm:w-auto px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-full text-xs font-semibold shadow-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+            className="w-full sm:w-auto px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
           >
             <ArrowsClockwiseIcon className="w-3.5 h-3.5" />
             <span>Try Again</span>
           </button>
           <Link
             href={ROUTES.dashboard}
-            className="w-full sm:w-auto px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+            className="w-full sm:w-auto px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
           >
             <SquaresFourIcon className="w-3.5 h-3.5" />
             <span>Back to dashboard</span>

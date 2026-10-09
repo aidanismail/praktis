@@ -95,7 +95,7 @@ export function CourseAssignments({
             {isUnauthorized ? (
               <Link
                 href={ROUTES.login}
-                className="mt-4 inline-flex rounded-full bg-red-700 px-4 py-2 text-xs font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
+                className="mt-4 inline-flex rounded-lg bg-red-700 px-4 py-2 text-xs font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
               >
                 Go to sign in
               </Link>
@@ -115,7 +115,7 @@ export function CourseAssignments({
                 type="button"
                 onClick={() => void refetch()}
                 disabled={isFetching}
-                className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-red-700 px-4 py-2 text-xs font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-red-700 px-4 py-2 text-xs font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <ArrowsClockwiseIcon
                   className={isFetching ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"}
