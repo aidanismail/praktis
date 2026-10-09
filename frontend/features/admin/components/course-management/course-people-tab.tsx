@@ -281,7 +281,7 @@ export function CoursePeopleTab({
               setTagInput("");
               setShowEnrollModal(true);
             }}
-            className="apple-press px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-full flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="apple-press px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <UserPlusIcon className="w-3.5 h-3.5" />
             <span>Assign Assistant</span>
@@ -295,7 +295,7 @@ export function CoursePeopleTab({
               setTagInput("");
               setShowEnrollModal(true);
             }}
-            className="apple-press px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs rounded-full shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="apple-press px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs rounded-lg shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <UserPlusIcon className="w-3.5 h-3.5" />
             <span>Enroll Students</span>
@@ -561,14 +561,14 @@ export function CoursePeopleTab({
                   setShowEnrollModal(false);
                   setEnrollModalError(null);
                 }}
-                className="px-4 py-2 border border-slate-200 rounded-full text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer"
+                className="px-4 py-2 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting || (tags.length === 0 && !tagInput.trim())}
-                className="px-5 py-2 bg-slate-900 text-white rounded-full text-xs font-semibold hover:bg-slate-800 shadow-xs disabled:opacity-50 cursor-pointer"
+                className="px-5 py-2 bg-slate-900 text-white rounded-lg text-xs font-semibold hover:bg-slate-800 shadow-xs disabled:opacity-50 cursor-pointer"
               >
                 {isSubmitting ? "Saving..." : enrollType === "student" ? "Enroll Students" : "Assign Assistants"}
               </button>

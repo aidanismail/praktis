@@ -188,7 +188,7 @@ export function CourseClassworkTab({
           <button
             type="button"
             onClick={() => setShowUploadModal(true)}
-            className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 text-xs font-semibold rounded-full shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+            className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 text-xs font-semibold rounded-lg shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
           >
             <CloudArrowUpIcon className="w-3.5 h-3.5" />
             <span>Upload Module</span>
@@ -196,7 +196,7 @@ export function CourseClassworkTab({
           <button
             type="button"
             onClick={onOpenCreateAssignment}
-            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-full shadow-xs apple-press transition-colors flex items-center gap-1.5 cursor-pointer"
+            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg shadow-xs apple-press transition-colors flex items-center gap-1.5 cursor-pointer"
           >
             <PlusIcon className="w-3.5 h-3.5" />
             <span>Create Assignment</span>
@@ -281,7 +281,7 @@ export function CourseClassworkTab({
                             setConfirmDeleteKey(null);
                           })
                         }
-                        className="px-2.5 py-1 bg-rose-600 text-white rounded-full font-semibold hover:bg-rose-700 disabled:opacity-50"
+                        className="px-2.5 py-1 bg-rose-600 text-white rounded-lg font-semibold hover:bg-rose-700 disabled:opacity-50"
                       >
                         {busyKey === `assignment:${a.id}` ? "Deleting..." : "Delete"}
                       </button>
@@ -289,7 +289,7 @@ export function CourseClassworkTab({
                         type="button"
                         disabled={busyKey === `assignment:${a.id}`}
                         onClick={() => setConfirmDeleteKey(null)}
-                        className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full hover:bg-slate-200 disabled:opacity-50"
+                        className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 disabled:opacity-50"
                       >
                         Cancel
                       </button>
@@ -405,7 +405,7 @@ export function CourseClassworkTab({
                             setConfirmDeleteKey(null);
                           })
                         }
-                        className="px-2.5 py-1 bg-rose-600 text-white rounded-full font-semibold hover:bg-rose-700 disabled:opacity-50"
+                        className="px-2.5 py-1 bg-rose-600 text-white rounded-lg font-semibold hover:bg-rose-700 disabled:opacity-50"
                       >
                         {busyKey === `module:${m.id}` ? "Deleting..." : "Delete"}
                       </button>
@@ -413,7 +413,7 @@ export function CourseClassworkTab({
                         type="button"
                         disabled={busyKey === `module:${m.id}`}
                         onClick={() => setConfirmDeleteKey(null)}
-                        className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full hover:bg-slate-200 disabled:opacity-50"
+                        className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 disabled:opacity-50"
                       >
                         Cancel
                       </button>
@@ -648,7 +648,7 @@ export function CourseClassworkTab({
                   setShowUploadModal(false);
                   setModUploadQueue([]);
                 }}
-                className="px-4 py-2 border border-slate-200 rounded-full text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                className="px-4 py-2 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50"
               >
                 Cancel
               </button>
@@ -659,7 +659,7 @@ export function CourseClassworkTab({
                   modUploadQueue.length === 0 ||
                   modUploadQueue.some((item) => !item.title.trim())
                 }
-                className="px-5 py-2 bg-slate-900 text-white rounded-full text-xs font-semibold hover:bg-slate-800 shadow-xs disabled:opacity-50 flex items-center gap-1.5 transition-all"
+                className="px-5 py-2 bg-slate-900 text-white rounded-lg text-xs font-semibold hover:bg-slate-800 shadow-xs disabled:opacity-50 flex items-center gap-1.5 transition-all"
               >
                 {isUploadingMod ? (
                   <>

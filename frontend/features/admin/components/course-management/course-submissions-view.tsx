@@ -111,7 +111,7 @@ export function CourseSubmissionsView({
         <button
           type="button"
           onClick={onBack}
-          className="flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-full shadow-xs transition-colors"
+          className="flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-lg shadow-xs transition-colors"
         >
           <ArrowLeftIcon className="w-4 h-4" />
           <span>Back to Classwork</span>
@@ -158,7 +158,7 @@ export function CourseSubmissionsView({
               <button
                 type="button"
                 onClick={() => onOpenEditAssignment(assignment)}
-                className="px-3.5 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs rounded-full flex items-center gap-1.5 apple-press shadow-xs transition-colors"
+                className="px-3.5 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs rounded-lg flex items-center gap-1.5 apple-press shadow-xs transition-colors"
                 title="Edit Assignment Details"
               >
                 <PencilSimpleIcon className="w-3 h-3" />
@@ -240,7 +240,7 @@ export function CourseSubmissionsView({
             <button
               type="button"
               onClick={() => setSubmissionFilter("all")}
-              className={`px-3 py-1 text-xs font-semibold rounded-full transition-colors ${
+              className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${
                 submissionFilter === "all"
                   ? "bg-slate-900 text-white"
                   : "text-slate-600 hover:text-slate-900"
@@ -251,7 +251,7 @@ export function CourseSubmissionsView({
             <button
               type="button"
               onClick={() => setSubmissionFilter("pending")}
-              className={`px-3 py-1 text-xs font-semibold rounded-full transition-colors ${
+              className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${
                 submissionFilter === "pending"
                   ? "bg-slate-900 text-white"
                   : "text-slate-600 hover:text-slate-900"
@@ -262,7 +262,7 @@ export function CourseSubmissionsView({
             <button
               type="button"
               onClick={() => setSubmissionFilter("graded")}
-              className={`px-3 py-1 text-xs font-semibold rounded-full transition-colors ${
+              className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${
                 submissionFilter === "graded"
                   ? "bg-slate-900 text-white"
                   : "text-slate-600 hover:text-slate-900"
@@ -354,7 +354,7 @@ export function CourseSubmissionsView({
                             courseCode: course.code,
                           })
                         }
-                        className="apple-press px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full text-xs flex items-center gap-1.5 transition-colors shadow-xs"
+                        className="apple-press px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg text-xs flex items-center gap-1.5 transition-colors shadow-xs"
                       >
                         <EyeIcon className="w-3.5 h-3.5" />
                         <span>Preview</span>
@@ -363,7 +363,7 @@ export function CourseSubmissionsView({
                       <a
                         href={sub.download_url}
                         download
-                        className="apple-press px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-full text-xs flex items-center gap-1.5 transition-colors"
+                        className="apple-press px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs flex items-center gap-1.5 transition-colors"
                         title="Download student submission"
                       >
                         <DownloadSimpleIcon className="w-3.5 h-3.5" />
@@ -376,7 +376,7 @@ export function CourseSubmissionsView({
                     type="button"
                     onClick={() => setSelectedSubForGrade(sub)}
                     aria-label={`${sub.score !== null ? "Edit grade for" : "Grade submission from"} ${sub.student_username}`}
-                    className="apple-press px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full text-xs shadow-xs transition-colors"
+                    className="apple-press px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg text-xs shadow-xs transition-colors"
                   >
                     {sub.score !== null ? "Edit Grade" : "Grade"}
                   </button>

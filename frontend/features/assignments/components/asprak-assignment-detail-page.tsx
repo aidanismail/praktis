@@ -113,7 +113,7 @@ function RequestErrorPanel({
           {status === 401 ? (
             <Link
               href={ROUTES.login}
-              className="mt-4 inline-flex min-h-11 items-center rounded-full bg-red-700 px-4 text-sm font-semibold text-white"
+              className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-red-700 px-4 text-sm font-semibold text-white"
             >
               Go to sign in
             </Link>
@@ -122,7 +122,7 @@ function RequestErrorPanel({
               type="button"
               onClick={onRetry}
               disabled={isRetrying}
-              className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-red-700 px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-lg bg-red-700 px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
             >
               <ArrowsClockwiseIcon
                 className={
@@ -136,7 +136,7 @@ function RequestErrorPanel({
             <button
               type="button"
               onClick={onBack}
-              className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
               <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
               {fallbackLabel}
@@ -144,7 +144,7 @@ function RequestErrorPanel({
           ) : (
             <Link
               href={fallbackHref}
-              className="mt-4 inline-flex min-h-11 items-center rounded-full bg-red-700 px-4 text-sm font-semibold text-white"
+              className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-red-700 px-4 text-sm font-semibold text-white"
             >
               {fallbackLabel}
             </Link>
@@ -441,7 +441,7 @@ export function AssignedAssignmentDetail({
           <button
             type="button"
             onClick={onBack}
-            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-full shadow-xs apple-press transition-colors cursor-pointer"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-lg shadow-xs apple-press transition-colors cursor-pointer"
           >
             <ArrowLeftIcon className="w-4 h-4" aria-hidden="true" />
             <span>Back to Assignments</span>
@@ -449,7 +449,7 @@ export function AssignedAssignmentDetail({
         ) : (
           <Link
             href={getCourseDetailRoute(courseId, "assignments")}
-            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-full shadow-xs apple-press transition-colors"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-lg shadow-xs apple-press transition-colors"
           >
             <ArrowLeftIcon className="w-4 h-4" aria-hidden="true" />
             <span>Back to Assignments</span>
@@ -460,7 +460,7 @@ export function AssignedAssignmentDetail({
           <button
             type="button"
             onClick={() => setIsEditing((prev) => !prev)}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-3.5 py-2 rounded-full shadow-xs apple-press transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-3.5 py-2 rounded-lg shadow-xs apple-press transition-colors cursor-pointer"
           >
             <PencilSimpleIcon className="w-3.5 h-3.5 text-slate-500" aria-hidden="true" />
             <span>{isEditing ? "Close settings" : "Edit assignment"}</span>
@@ -474,7 +474,7 @@ export function AssignedAssignmentDetail({
                 setIsConfirmingDelete(true);
               }}
               disabled={deleteMutation.isPending}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-700 hover:text-rose-800 bg-white border border-rose-200 hover:bg-rose-50 px-3.5 py-2 rounded-full shadow-xs apple-press transition-colors cursor-pointer disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-700 hover:text-rose-800 bg-white border border-rose-200 hover:bg-rose-50 px-3.5 py-2 rounded-lg shadow-xs apple-press transition-colors cursor-pointer disabled:opacity-60"
             >
               <TrashIcon className="w-3.5 h-3.5 text-rose-500" aria-hidden="true" />
               <span>Delete</span>
@@ -494,7 +494,7 @@ export function AssignedAssignmentDetail({
               type="button"
               onClick={() => setIsConfirmingDelete(false)}
               disabled={deleteMutation.isPending}
-              className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
             >
               Cancel
             </button>
@@ -502,7 +502,7 @@ export function AssignedAssignmentDetail({
               type="button"
               onClick={handleDeleteAssignment}
               disabled={deleteMutation.isPending}
-              className="rounded-full bg-red-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-800 disabled:opacity-60"
+              className="rounded-lg bg-red-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-800 disabled:opacity-60"
             >
               {deleteMutation.isPending ? "Deleting..." : "Delete"}
             </button>

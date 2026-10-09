@@ -30,7 +30,7 @@ export default function NotFound() {
         <div className="pt-2">
           <Link
             href={ROUTES.dashboard}
-            className="inline-flex items-center justify-center gap-1.5 px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-full text-xs font-semibold shadow-xs transition-colors"
+            className="inline-flex items-center justify-center gap-1.5 px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors"
           >
             <HouseIcon className="w-3.5 h-3.5" />
             <span>Take Me Home</span>

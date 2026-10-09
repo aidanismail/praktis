@@ -160,7 +160,7 @@ export function AsprakCourseWorkspace({
         <button
           type="button"
           onClick={handleBackToCourses}
-          className="flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-full shadow-xs transition-colors apple-press"
+          className="flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-lg shadow-xs transition-colors apple-press"
         >
           <ArrowLeftIcon className="w-4 h-4" aria-hidden="true" />
           <span>Back to Classes</span>
@@ -233,7 +233,7 @@ export function AsprakCourseWorkspace({
             <button
               type="button"
               onClick={() => setShowCustomizeModal(true)}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-white/90 hover:text-white bg-white/10 hover:bg-white/20 border border-white/15 px-3.5 py-1.5 rounded-full backdrop-blur-xs transition-colors apple-press"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-white/90 hover:text-white bg-white/10 hover:bg-white/20 border border-white/15 px-3.5 py-1.5 rounded-lg backdrop-blur-xs transition-colors apple-press"
             >
               <PaletteIcon className="h-3.5 w-3.5" aria-hidden="true" />
               <span>Customize</span>

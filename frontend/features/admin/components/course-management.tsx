@@ -454,7 +454,7 @@ export function CourseManagement() {
           <button
             type="button"
             onClick={handleBackToCourses}
-            className="px-5 py-2 bg-slate-900 text-white text-xs font-semibold rounded-full hover:bg-slate-800 transition-colors shadow-xs cursor-pointer"
+            className="px-5 py-2 bg-slate-900 text-white text-xs font-semibold rounded-lg hover:bg-slate-800 transition-colors shadow-xs cursor-pointer"
           >
             Back to courses
           </button>
@@ -529,7 +529,7 @@ export function CourseManagement() {
                 <button
                   type="button"
                   onClick={handleBackToClasswork}
-                  className="px-5 py-2 bg-slate-900 text-white text-xs font-semibold rounded-full hover:bg-slate-800 transition-colors shadow-xs cursor-pointer"
+                  className="px-5 py-2 bg-slate-900 text-white text-xs font-semibold rounded-lg hover:bg-slate-800 transition-colors shadow-xs cursor-pointer"
                 >
                   Back to classwork
                 </button>

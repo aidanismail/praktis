@@ -251,7 +251,7 @@ export function PraktikanAssignmentUploadForm({
         <button
           type="submit"
           disabled={submissionMutation.isPending}
-          className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800 shadow-xs disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800 shadow-xs disabled:cursor-not-allowed disabled:opacity-60"
         >
           {submissionMutation.isPending ? (
             <AsteriskLoader className="h-3.5 w-3.5" />

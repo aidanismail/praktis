@@ -161,7 +161,7 @@ export function CourseSessions({
               setCreateError(null);
               setShowCreateModal(true);
             }}
-            className="apple-press px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-full shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+            className="apple-press px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
           >
             <PlusIcon className="w-3.5 h-3.5" aria-hidden="true" />
             <span>Add Session</span>
@@ -280,7 +280,7 @@ export function CourseSessions({
                     <button
                       type="button"
                       onClick={() => openSession(s.id)}
-                      className="apple-press px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                      className="apple-press px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
                     >
                       <ClipboardTextIcon className="w-3.5 h-3.5" aria-hidden="true" />
                       <span>Attendance Register</span>
@@ -291,7 +291,7 @@ export function CourseSessions({
                       onClick={() => handleToggleWindow(s)}
                       disabled={isTransitioning || blockedByOtherOpen}
                       title={blockedByOtherOpen ? `Lock '${openSessionRecord?.title}' first` : undefined}
-                      className={`apple-press px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
+                      className={`apple-press px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
                         s.attendance_status === "OPEN"
                           ? "bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200/60"
                           : "bg-slate-100 text-slate-700 hover:bg-slate-200"
@@ -318,7 +318,7 @@ export function CourseSessions({
                         )
                       }
                       disabled={exportDownload.busyKey !== null}
-                      className="apple-press px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-full text-xs flex items-center gap-1 transition-colors cursor-pointer disabled:opacity-60"
+                      className="apple-press px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-lg text-xs flex items-center gap-1 transition-colors cursor-pointer disabled:opacity-60"
                       title="Export attendance CSV"
                       aria-label={`Export attendance CSV for ${s.title}`}
                     >
@@ -332,7 +332,7 @@ export function CourseSessions({
                           type="button"
                           onClick={() => handleDeleteSession(s.id)}
                           disabled={isDeleting}
-                          className="px-2.5 py-1 bg-rose-600 text-white rounded-full font-semibold hover:bg-rose-700 disabled:opacity-50"
+                          className="px-2.5 py-1 bg-rose-600 text-white rounded-lg font-semibold hover:bg-rose-700 disabled:opacity-50"
                         >
                           {isDeleting ? "Deleting..." : "Delete"}
                         </button>
@@ -340,7 +340,7 @@ export function CourseSessions({
                           type="button"
                           onClick={() => setDeletingSessionId(null)}
                           disabled={isDeleting}
-                          className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full hover:bg-slate-200 disabled:opacity-50"
+                          className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 disabled:opacity-50"
                         >
                           Cancel
                         </button>
@@ -438,14 +438,14 @@ export function CourseSessions({
               <button
                 type="button"
                 onClick={() => setShowCreateModal(false)}
-                className="apple-press px-4 py-2 border border-slate-200 rounded-full text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer"
+                className="apple-press px-4 py-2 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={createMutation.isPending}
-                className="apple-press px-5 py-2 bg-slate-900 text-white rounded-full text-xs font-semibold hover:bg-slate-800 shadow-xs cursor-pointer disabled:opacity-60"
+                className="apple-press px-5 py-2 bg-slate-900 text-white rounded-lg text-xs font-semibold hover:bg-slate-800 shadow-xs cursor-pointer disabled:opacity-60"
               >
                 {createMutation.isPending ? "Saving..." : "Add Session"}
               </button>

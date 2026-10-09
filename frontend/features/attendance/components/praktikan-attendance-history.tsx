@@ -237,7 +237,7 @@ export function PraktikanAttendanceHistory({ userId }: Props) {
                 setCourseFilter("all");
                 setLimit(INITIAL_LIMIT);
               }}
-              className="mt-4 inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-900 cursor-pointer"
+              className="mt-4 inline-flex items-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-900 cursor-pointer"
             >
               Reset filters
             </button>
@@ -285,7 +285,7 @@ export function PraktikanAttendanceHistory({ userId }: Props) {
         <button
           type="button"
           onClick={() => setLimit((value) => value + INITIAL_LIMIT)}
-          className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 transition-colors"
+          className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 transition-colors"
         >
           Show more ({filtered.length - visible.length} remaining)
         </button>

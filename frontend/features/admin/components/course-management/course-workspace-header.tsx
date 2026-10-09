@@ -118,7 +118,7 @@ export function CourseWorkspaceHeader({
             <button
               type="button"
               onClick={onEditCourse}
-              className="rounded-full border border-white/20 bg-white/10 hover:bg-white/20 px-3.5 py-1.5 text-xs font-semibold text-white transition-colors flex items-center gap-1 backdrop-blur-xs shadow-xs"
+              className="rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 px-3.5 py-1.5 text-xs font-semibold text-white transition-colors flex items-center gap-1 backdrop-blur-xs shadow-xs"
             >
               <PencilSimpleIcon className="w-3 h-3" />
               <span>Edit</span>

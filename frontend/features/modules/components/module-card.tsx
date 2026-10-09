@@ -312,14 +312,14 @@ export function ModuleCard({ userId, courseId, module, accessMode }: ModuleCardP
                 setIsEditing(false);
               }}
               disabled={updateMutation.isPending}
-              className="apple-press rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+              className="apple-press rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={updateMutation.isPending}
-              className="apple-press inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-4 py-1 text-xs font-semibold text-white hover:bg-slate-800 shadow-xs transition-colors disabled:opacity-60"
+              className="apple-press inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-1 text-xs font-semibold text-white hover:bg-slate-800 shadow-xs transition-colors disabled:opacity-60"
             >
               {updateMutation.isPending ? <AsteriskLoader className="h-3.5 w-3.5" /> : null}
               <span>{updateMutation.isPending ? "Saving..." : "Save changes"}</span>
@@ -379,7 +379,7 @@ export function ModuleCard({ userId, courseId, module, accessMode }: ModuleCardP
               type="button"
               onClick={cancelReplacement}
               disabled={replaceMutation.isPending}
-              className="apple-press rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-60"
+              className="apple-press rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-60"
             >
               Cancel
             </button>
@@ -387,7 +387,7 @@ export function ModuleCard({ userId, courseId, module, accessMode }: ModuleCardP
               type="button"
               onClick={handleConfirmReplacement}
               disabled={!replacementFile || replaceMutation.isPending}
-              className="apple-press inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-4 py-1 text-xs font-semibold text-white hover:bg-slate-800 shadow-xs transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+              className="apple-press inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-1 text-xs font-semibold text-white hover:bg-slate-800 shadow-xs transition-colors disabled:cursor-not-allowed disabled:opacity-50"
             >
               {replaceMutation.isPending ? <AsteriskLoader className="h-3.5 w-3.5" /> : null}
               <span>{replaceMutation.isPending ? "Uploading..." : "Replace file"}</span>
@@ -408,7 +408,7 @@ export function ModuleCard({ userId, courseId, module, accessMode }: ModuleCardP
               type="button"
               onClick={() => setIsConfirmingDelete(false)}
               disabled={deleteMutation.isPending}
-              className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60 transition-colors"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60 transition-colors"
             >
               Cancel
             </button>
@@ -416,7 +416,7 @@ export function ModuleCard({ userId, courseId, module, accessMode }: ModuleCardP
               type="button"
               onClick={() => deleteMutation.mutate(module.id)}
               disabled={deleteMutation.isPending}
-              className="rounded-full bg-red-700 px-3 py-1 text-xs font-semibold text-white hover:bg-red-800 disabled:opacity-60 transition-colors"
+              className="rounded-lg bg-red-700 px-3 py-1 text-xs font-semibold text-white hover:bg-red-800 disabled:opacity-60 transition-colors"
             >
               {deleteMutation.isPending ? "Deleting..." : "Delete"}
             </button>
@@ -459,8 +459,8 @@ export function ModuleCard({ userId, courseId, module, accessMode }: ModuleCardP
             disabled={publishMutation.isPending}
             className={
               module.is_published
-                ? "apple-press inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 disabled:opacity-60 transition-colors"
-                : "apple-press inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-3.5 py-1 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 disabled:opacity-60 transition-colors"
+                ? "apple-press inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 disabled:opacity-60 transition-colors"
+                : "apple-press inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-1 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 disabled:opacity-60 transition-colors"
             }
           >
             {publishMutation.isPending ? (

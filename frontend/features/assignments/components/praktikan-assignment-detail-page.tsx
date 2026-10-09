@@ -266,7 +266,7 @@ export function PraktikanAssignmentDetailPage({
             <button
               type="button"
               onClick={onBack}
-              className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-full shadow-xs apple-press transition-colors cursor-pointer"
+              className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-lg shadow-xs apple-press transition-colors cursor-pointer"
             >
               <ArrowLeftIcon className="w-4 h-4" />
               <span>Back to Assignments</span>
@@ -274,7 +274,7 @@ export function PraktikanAssignmentDetailPage({
           ) : (
             <Link
               href={getCourseDetailRoute(courseId, "assignments")}
-              className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-full shadow-xs apple-press transition-colors"
+              className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-lg shadow-xs apple-press transition-colors"
             >
               <ArrowLeftIcon className="w-4 h-4" />
               <span>Back to Assignments</span>

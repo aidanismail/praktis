@@ -56,7 +56,7 @@ export function CourseLookupState({
           <button
             type="button"
             onClick={onRetry}
-            className="inline-flex min-h-10 w-full cursor-pointer items-center justify-center gap-1.5 rounded-full bg-slate-900 px-5 text-xs font-semibold text-white transition-colors hover:bg-slate-800 sm:w-auto"
+            className="inline-flex min-h-10 w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-slate-900 px-5 text-xs font-semibold text-white transition-colors hover:bg-slate-800 sm:w-auto"
           >
             <ArrowsClockwiseIcon className="h-3.5 w-3.5" aria-hidden="true" />
             Try again
@@ -65,7 +65,7 @@ export function CourseLookupState({
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex min-h-10 w-full cursor-pointer items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 sm:w-auto"
+          className="inline-flex min-h-10 w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 sm:w-auto"
         >
           <ArrowLeftIcon className="h-3.5 w-3.5" aria-hidden="true" />
           Back to courses

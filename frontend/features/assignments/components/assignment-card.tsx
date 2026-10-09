@@ -225,7 +225,7 @@ export function AssignmentCard({
               type="button"
               onClick={() => setIsConfirmingDelete(false)}
               disabled={deleteMutation.isPending}
-              className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
             >
               Cancel
             </button>
@@ -233,7 +233,7 @@ export function AssignmentCard({
               type="button"
               onClick={() => deleteMutation.mutate(assignment.id)}
               disabled={deleteMutation.isPending}
-              className="rounded-full bg-red-700 px-3 py-1 text-xs font-semibold text-white hover:bg-red-800 disabled:opacity-60"
+              className="rounded-lg bg-red-700 px-3 py-1 text-xs font-semibold text-white hover:bg-red-800 disabled:opacity-60"
             >
               {deleteMutation.isPending ? "Deleting..." : "Delete"}
             </button>

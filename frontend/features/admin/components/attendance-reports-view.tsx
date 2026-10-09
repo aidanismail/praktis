@@ -262,7 +262,7 @@ export function AttendanceReportsView() {
                 type="button"
                 onClick={() => handleSetWindow(false)}
                 disabled={windowMutation.isPending}
-                className="rounded-full border border-rose-200 bg-rose-50 px-4 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100 disabled:opacity-50 transition-colors flex items-center gap-1.5"
+                className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100 disabled:opacity-50 transition-colors flex items-center gap-1.5"
               >
                 <LockIcon className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>{windowMutation.isPending ? "Locking..." : "Lock"}</span>
@@ -273,7 +273,7 @@ export function AttendanceReportsView() {
                 onClick={() => handleSetWindow(true)}
                 disabled={windowMutation.isPending || openBlockedBy !== null}
                 title={openBlockedBy ? `Lock "${openBlockedBy.title}" first` : undefined}
-                className="rounded-full bg-slate-900 px-4 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 shadow-xs disabled:opacity-50 transition-colors flex items-center gap-1.5"
+                className="rounded-lg bg-slate-900 px-4 py-1.5 text-xs font-semibold text-white hover:bg-slate-800 shadow-xs disabled:opacity-50 transition-colors flex items-center gap-1.5"
               >
                 <LockOpenIcon className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>{windowMutation.isPending ? "Opening..." : "Open for editing"}</span>

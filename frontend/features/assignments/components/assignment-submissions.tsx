@@ -195,7 +195,7 @@ export function AssignmentSubmissions({
         {unauthorized ? (
           <Link
             href={ROUTES.login}
-            className="mt-4 inline-flex items-center rounded-full bg-rose-700 px-4 py-2 text-xs font-semibold text-white"
+            className="mt-4 inline-flex items-center rounded-lg bg-rose-700 px-4 py-2 text-xs font-semibold text-white"
           >
             Go to sign in
           </Link>
@@ -204,7 +204,7 @@ export function AssignmentSubmissions({
             type="button"
             onClick={() => void query.refetch()}
             disabled={query.isFetching}
-            className="mt-4 inline-flex items-center gap-2 rounded-full bg-rose-700 px-4 py-2 text-xs font-semibold text-white disabled:opacity-60"
+            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-rose-700 px-4 py-2 text-xs font-semibold text-white disabled:opacity-60"
           >
             <ArrowsClockwiseIcon
               className={query.isFetching ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"}
@@ -270,7 +270,7 @@ export function AssignmentSubmissions({
                 )
               }
               disabled={exportDownload.busyKey !== null}
-              className="apple-press inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold uppercase text-slate-700 shadow-xs transition-colors hover:bg-slate-50 disabled:opacity-60"
+              className="apple-press inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold uppercase text-slate-700 shadow-xs transition-colors hover:bg-slate-50 disabled:opacity-60"
             >
               <DownloadSimpleIcon className="h-3.5 w-3.5" aria-hidden="true" />
               {exportDownload.busyKey === format ? "Preparing..." : format}
@@ -447,7 +447,7 @@ export function AssignmentSubmissions({
                       <button
                         type="button"
                         onClick={() => setPreviewSubmission(submission)}
-                        className="apple-press px-3.5 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold rounded-full text-xs flex items-center gap-1.5 transition-colors shadow-xs"
+                        className="apple-press px-3.5 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold rounded-lg text-xs flex items-center gap-1.5 transition-colors shadow-xs"
                       >
                         <EyeIcon className="w-3.5 h-3.5" aria-hidden="true" />
                         <span>Preview</span>
@@ -459,7 +459,7 @@ export function AssignmentSubmissions({
                         rel="noreferrer"
                         aria-label={`Download submission from ${studentLabel}`}
                         title="Download student submission"
-                        className="apple-press px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-full text-xs flex items-center gap-1.5 transition-colors"
+                        className="apple-press px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs flex items-center gap-1.5 transition-colors"
                       >
                         <DownloadSimpleIcon className="w-3.5 h-3.5" aria-hidden="true" />
                         <span className="hidden md:inline">Download</span>
@@ -473,7 +473,7 @@ export function AssignmentSubmissions({
                     type="button"
                     onClick={() => setGradingSubmission(submission)}
                     aria-label={`${graded ? "Edit grade for" : "Grade submission from"} ${studentLabel}`}
-                    className="apple-press px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full text-xs shadow-xs transition-colors"
+                    className="apple-press px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg text-xs shadow-xs transition-colors"
                   >
                     {graded ? "Edit Grade" : "Grade"}
                   </button>

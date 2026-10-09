@@ -247,14 +247,14 @@ function AssignmentFormInner({
         <button
           type="button"
           onClick={onClose}
-          className="px-4 py-2 border border-slate-200 rounded-full text-xs font-semibold text-slate-600 hover:bg-slate-50 apple-press transition-colors"
+          className="px-4 py-2 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 apple-press transition-colors"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-5 py-2 bg-slate-900 text-white rounded-full text-xs font-semibold hover:bg-slate-800 shadow-xs apple-press transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+          className="px-5 py-2 bg-slate-900 text-white rounded-lg text-xs font-semibold hover:bg-slate-800 shadow-xs apple-press transition-all disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {isSubmitting ? "Saving..." : editingAssignment ? "Save Changes" : "Create Assignment"}
         </button>

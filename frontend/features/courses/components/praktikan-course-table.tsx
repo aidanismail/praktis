@@ -53,7 +53,7 @@ export function PraktikanCourseTable({
                     }
                   }}
                   aria-label={`Open ${course.name}`}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold text-slate-900 bg-slate-100 hover:bg-slate-900 hover:text-white transition-colors cursor-pointer apple-press"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-900 bg-slate-100 hover:bg-slate-900 hover:text-white transition-colors cursor-pointer apple-press"
                 >
                   <span>Open</span>
                   <CaretRightIcon className="w-3.5 h-3.5" />

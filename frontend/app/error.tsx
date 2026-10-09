@@ -52,7 +52,7 @@ export default function GlobalError({
           <button
             type="button"
             onClick={() => reset()}
-            className="w-full sm:w-auto px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-full text-xs font-semibold shadow-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+            className="w-full sm:w-auto px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
           >
             <ArrowsClockwiseIcon className="w-3.5 h-3.5" />
             <span>Try Again</span>
@@ -60,7 +60,7 @@ export default function GlobalError({
 
           <Link
             href={ROUTES.dashboard}
-            className="w-full sm:w-auto px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-full text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+            className="w-full sm:w-auto px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
           >
             <HouseIcon className="w-3.5 h-3.5" />
             <span>Return to Dashboard</span>

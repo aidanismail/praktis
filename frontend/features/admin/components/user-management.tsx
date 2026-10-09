@@ -345,7 +345,7 @@ export function UserManagement() {
               setCreateUserError(null);
               setShowCreateUserModal(true);
             }}
-            className="rounded-full bg-slate-900 hover:bg-slate-800 text-white px-4 py-1.5 text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors shrink-0 active:scale-[0.98]"
+            className="rounded-lg bg-slate-900 hover:bg-slate-800 text-white px-4 py-1.5 text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors shrink-0 active:scale-[0.98]"
           >
             <PlusIcon className="w-3.5 h-3.5" />
             <span>Add User</span>
@@ -365,7 +365,7 @@ export function UserManagement() {
               <button
                 type="button"
                 onClick={() => setSelectedUserIds(new Set())}
-                className="rounded-full px-3 py-1 text-xs font-medium text-slate-600 hover:bg-white transition-colors"
+                className="rounded-lg px-3 py-1 text-xs font-medium text-slate-600 hover:bg-white transition-colors"
               >
                 Clear selection
               </button>
@@ -375,7 +375,7 @@ export function UserManagement() {
                   setAssignError(null);
                   setShowEditModal(true);
                 }}
-                className="rounded-full bg-slate-900 px-4 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 transition-colors"
+                className="rounded-lg bg-slate-900 px-4 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 transition-colors"
               >
                 Assign to Course
               </button>
@@ -484,7 +484,7 @@ export function UserManagement() {
                           <button
                             type="button"
                             onClick={() => handleResetPassword(user)}
-                            className="apple-press rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-xs hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                            className="apple-press rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-xs hover:bg-slate-50 hover:text-slate-900 transition-colors"
                           >
                             Reset password
                           </button>
@@ -493,7 +493,7 @@ export function UserManagement() {
                               <button
                                 type="button"
                                 onClick={() => handleDeactivateUser(user)}
-                                className="apple-press rounded-full border border-rose-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-rose-700 shadow-xs hover:bg-rose-50 hover:border-rose-300 transition-colors"
+                                className="apple-press rounded-lg border border-rose-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-rose-700 shadow-xs hover:bg-rose-50 hover:border-rose-300 transition-colors"
                               >
                                 Deactivate
                               </button>
@@ -501,7 +501,7 @@ export function UserManagement() {
                               <button
                                 type="button"
                                 onClick={() => handleReactivateUser(user)}
-                                className="apple-press rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-xs hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                                className="apple-press rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-xs hover:bg-slate-50 hover:text-slate-900 transition-colors"
                               >
                                 Reactivate
                               </button>
@@ -656,14 +656,14 @@ export function UserManagement() {
                 <button
                   type="button"
                   onClick={() => setShowCreateUserModal(false)}
-                  className="rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 apple-press transition-colors"
+                  className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 apple-press transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isCreatingUser}
-                  className="rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 disabled:opacity-50 apple-press transition-all flex items-center gap-1.5"
+                  className="rounded-lg bg-slate-900 px-5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 disabled:opacity-50 apple-press transition-all flex items-center gap-1.5"
                 >
                   {isCreatingUser && <AsteriskLoader className="w-3.5 h-3.5" />}
                   <span>{isCreatingUser ? "Creating..." : "Create User"}</span>
@@ -741,7 +741,7 @@ export function UserManagement() {
               <button
                 type="button"
                 onClick={() => setShowEditModal(false)}
-                className="rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 apple-press transition-colors"
+                className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 apple-press transition-colors"
               >
                 Cancel
               </button>
@@ -749,7 +749,7 @@ export function UserManagement() {
                 type="button"
                 onClick={handleApplyCourseAssign}
                 disabled={isSubmitting || !targetCourseId}
-                className="rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 disabled:opacity-50 apple-press transition-all"
+                className="rounded-lg bg-slate-900 px-5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 disabled:opacity-50 apple-press transition-all"
               >
                 {isSubmitting ? "Saving..." : "Assign Users"}
               </button>
