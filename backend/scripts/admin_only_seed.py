@@ -25,7 +25,7 @@ from models.assignment import Assignment, Submission
 USERS_DATA = [
     {
         "username": "admin",
-        "email": "aspraktiunpapd@gmail.com",
+        "email": "aspraktiunpad@gmail.com",
         "role": RoleEnum.SUPERADMIN,
         "password": "aidanbagas123",
         "force_password_change": False,
