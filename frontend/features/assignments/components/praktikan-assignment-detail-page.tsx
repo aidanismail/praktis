@@ -387,6 +387,7 @@ export function PraktikanAssignmentDetailPage({
               assignmentId={assignmentId}
               allowedFileTypes={allowedFileTypes}
               hasSubmission={Boolean(assignment.my_submission)}
+              hasFile={Boolean(assignment.my_submission?.file_name)}
               isLocked={isSubmissionLocked}
               isPastDue={isPastDueDate}
               allowLateSubmissions={assignment.allow_late_submissions}

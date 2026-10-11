@@ -23,6 +23,7 @@ export function EditProfileModal({
   returnFocusRef,
 }: EditProfileModalProps) {
   const [name, setName] = useState(user.name ?? "");
+  const [email, setEmail] = useState(user.email);
   const [error, setError] = useState<string | null>(null);
   const updateProfileMutation = useUpdateProfile();
   const isSubmitting = updateProfileMutation.isPending;
@@ -45,13 +46,22 @@ export function EditProfileModal({
       return;
     }
 
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
+      setError("Please enter your email.");
+      return;
+    }
+
     try {
-      await updateProfileMutation.mutateAsync({ name: trimmed });
-      onSuccess?.("Your display name has been updated.");
+      await updateProfileMutation.mutateAsync({
+        name: trimmed,
+        ...(trimmedEmail !== user.email && { email: trimmedEmail }),
+      });
+      onSuccess?.("Your profile has been updated.");
       onClose();
     } catch (err: unknown) {
       setError(
-        getApiErrorMessage(err, "Couldn't update your name. Please try again.")
+        getApiErrorMessage(err, "Couldn't update your profile. Please try again.")
       );
     }
   };
@@ -72,10 +82,10 @@ export function EditProfileModal({
               className="font-bold text-sm text-slate-900 flex items-center gap-2"
             >
               <UserIcon className="w-4 h-4 text-slate-800" />
-              <span>Edit Display Name</span>
+              <span>Edit Profile</span>
             </h4>
             <p className="text-[11px] text-slate-500 mt-0.5">
-              Change the name displayed across courses, rosters, and assignments.
+              Change your display name and email address.
             </p>
           </div>
           <button
@@ -116,14 +126,30 @@ export function EditProfileModal({
             />
           </div>
 
+          <div>
+            <label
+              htmlFor="edit-profile-email"
+              className="block font-semibold text-slate-700 mb-1"
+            >
+              Email
+            </label>
+            <input
+              id="edit-profile-email"
+              type="email"
+              required
+              maxLength={255}
+              autoComplete="email"
+              placeholder="e.g. name@unpad.ac.id"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-shadow duration-150"
+            />
+          </div>
+
           <div className="bg-slate-50 rounded-2xl p-3 border border-slate-100 space-y-1.5 text-[11px] text-slate-500">
             <div className="flex justify-between">
               <span className="font-medium text-slate-500">Username / NPM:</span>
               <span className="font-semibold text-slate-700">{user.username}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="font-medium text-slate-500">Email:</span>
-              <span className="font-semibold text-slate-700 truncate max-w-[200px]">{user.email}</span>
             </div>
             <div className="flex justify-between">
               <span className="font-medium text-slate-500">Role:</span>

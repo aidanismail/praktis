@@ -45,7 +45,8 @@ class AdminResetPasswordRequest(BaseModel):
     new_password: str | None = Field(default=None, description="Optional custom new password. Defaults to Praktis{username}.")
 
 class UpdateProfileRequest(BaseModel):
-    name: str = Field(..., min_length=1, max_length=100, description="User's new full name.", examples=["Plastic Trees"])
+    name: str | None = Field(default=None, min_length=1, max_length=100, description="User's new full name.", examples=["Plastic Trees"])
+    email: EmailStr | None = Field(default=None, max_length=255, description="User's new email address. Must not belong to another account.", examples=["plastic.trees@unpad.ac.id"])
 
 class LoginRequest(BaseModel):
     username: str = Field(..., description="Login username (NPM for students).", examples=["140810220001"])

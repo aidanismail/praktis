@@ -66,7 +66,7 @@ export function SessionExportPanel({
     setSuccessMessage(null);
 
     try {
-      const download = await downloadSessionAttendanceExport(session.id, format);
+      const download = await downloadSessionAttendanceExport(session.id, format, session.title);
       const objectUrl = URL.createObjectURL(download.blob);
       activeObjectUrl.current = objectUrl;
 

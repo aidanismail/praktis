@@ -11,6 +11,7 @@ import {
   listCourseAssignments,
   setAssignmentGradesPublished,
   submitCourseAssignment,
+  turnInCourseAssignmentWithoutFile,
   updateCourseAssignment
 } from "../api/assignments.api";
 import { assignmentQueryKeys } from "../constants/assignment-query-keys";
@@ -151,38 +152,51 @@ export function useUpdateCourseAssignment({
   });
 }
 
-export function useSubmitAssignment({
-  userId,
-  courseId,
-  assignmentId
-}: AssignmentScope) {
+function useCacheMySubmission({ userId, courseId, assignmentId }: AssignmentScope) {
   const queryClient = useQueryClient();
+
+  return (submission: AssignmentSubmission) => {
+    queryClient.setQueryData<Assignment>(
+      assignmentQueryKeys.detail(userId, courseId, assignmentId),
+      (currentAssignment) =>
+        currentAssignment
+          ? { ...currentAssignment, my_submission: submission }
+          : currentAssignment
+    );
+
+    queryClient.setQueryData<Assignment[]>(
+      assignmentQueryKeys.course(userId, courseId),
+      (currentAssignments) =>
+        currentAssignments?.map((assignment) =>
+          assignment.id === assignmentId
+            ? { ...assignment, my_submission: submission }
+            : assignment
+        )
+    );
+
+    // A resubmission clears any earlier score, so drop cached grades too.
+    return queryClient.invalidateQueries({ queryKey: gradeQueryKeys.all });
+  };
+}
+
+export function useSubmitAssignment(scope: AssignmentScope) {
+  const cacheMySubmission = useCacheMySubmission(scope);
 
   return useMutation({
     mutationFn: (file: File) =>
-      submitCourseAssignment(courseId, assignmentId, file),
-    onSuccess: (submission) => {
-      queryClient.setQueryData<Assignment>(
-        assignmentQueryKeys.detail(userId, courseId, assignmentId),
-        (currentAssignment) =>
-          currentAssignment
-            ? { ...currentAssignment, my_submission: submission }
-            : currentAssignment
-      );
+      submitCourseAssignment(scope.courseId, scope.assignmentId, file),
+    onSuccess: cacheMySubmission,
+    retry: false
+  });
+}
 
-      queryClient.setQueryData<Assignment[]>(
-        assignmentQueryKeys.course(userId, courseId),
-        (currentAssignments) =>
-          currentAssignments?.map((assignment) =>
-            assignment.id === assignmentId
-              ? { ...assignment, my_submission: submission }
-              : assignment
-          )
-      );
+export function useTurnInWithoutFile(scope: AssignmentScope) {
+  const cacheMySubmission = useCacheMySubmission(scope);
 
-      // A resubmission clears any earlier score, so drop cached grades too.
-      return queryClient.invalidateQueries({ queryKey: gradeQueryKeys.all });
-    },
+  return useMutation({
+    mutationFn: () =>
+      turnInCourseAssignmentWithoutFile(scope.courseId, scope.assignmentId),
+    onSuccess: cacheMySubmission,
     retry: false
   });
 }

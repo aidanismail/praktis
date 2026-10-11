@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
+import { useFileDrop } from "@/hooks/use-file-drop";
 import { courseQueryKeys } from "../constants/course-query-keys";
 import { adminQueryKeys } from "@/features/admin/constants/admin-query-keys";
 import {
@@ -62,11 +63,7 @@ export function CourseBannerCustomizerModal({
     onClose,
   });
 
-  if (!isOpen) return null;
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || !e.target.files[0]) return;
-    const file = e.target.files[0];
+  const loadBannerFile = async (file: File) => {
     setIsProcessingImage(true);
     setUploadError(null);
 
@@ -79,6 +76,17 @@ export function CourseBannerCustomizerModal({
     } finally {
       setIsProcessingImage(false);
     }
+  };
+
+  const { isDragging, dropProps } = useFileDrop({
+    onFiles: (files) => void loadBannerFile(files[0]),
+    disabled: isProcessingImage,
+  });
+
+  if (!isOpen) return null;
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) void loadBannerFile(e.target.files[0]);
   };
 
   const handleApply = async () => {
@@ -329,15 +337,22 @@ export function CourseBannerCustomizerModal({
         {/* Tab 2: Custom Banner Image Upload */}
         {activeTab === "upload" && (
           <div className="space-y-3 animate-in fade-in duration-100">
-            <div className="border-2 border-dashed border-slate-200 hover:border-slate-400 focus-within:border-slate-400 rounded-2xl p-6 text-center bg-slate-50/50 transition-colors">
+            <div
+              {...dropProps}
+              className={`border-2 border-dashed rounded-2xl p-6 text-center transition-colors focus-within:border-slate-900 focus-within:ring-2 focus-within:ring-slate-900 ${
+                isDragging
+                  ? "border-slate-900 bg-slate-100"
+                  : "border-slate-200 hover:border-slate-400 bg-slate-50/50"
+              }`}
+            >
               <label className="cursor-pointer flex flex-col items-center justify-center gap-2 py-2">
                 <CloudArrowUpIcon className="w-8 h-8 text-slate-400" aria-hidden="true" />
                 <span className="text-xs font-semibold text-slate-800">
                   {isProcessingImage
                     ? "Processing image..."
                     : customImageUrl
-                      ? "Click to replace banner image"
-                      : "Click to browse for a banner image"}
+                      ? "Click or drop an image to replace the banner"
+                      : "Click to browse or drop a banner image here"}
                 </span>
                 <span className="text-[10px] text-slate-400">
                   Supported: JPG, PNG, WebP (Max 5MB • Panoramic/16:9 recommended)

@@ -1,5 +1,6 @@
 import { ApiError } from "@/lib/api/client";
 import { API_ENDPOINTS } from "@/lib/api/endpoints";
+import { toFileName } from "@/lib/format/file-name";
 import type {
   SessionExportDownload,
   SessionExportFormat
@@ -16,7 +17,8 @@ function getExportErrorMessage(status: number) {
 
 export async function downloadAssignmentGradesExport(
   assignmentId: string,
-  format: SessionExportFormat
+  format: SessionExportFormat,
+  title?: string
 ): Promise<SessionExportDownload> {
   const response = await fetch(
     API_ENDPOINTS.export.assignmentGrades(assignmentId, format),
@@ -34,6 +36,6 @@ export async function downloadAssignmentGradesExport(
   const safeId = assignmentId.replace(/[^a-zA-Z0-9-]/g, "") || "assignment";
   return {
     blob: await response.blob(),
-    filename: `assignment_grades_${safeId}.${format}`
+    filename: `${toFileName(title, safeId)} - grades.${format}`
   };
 }

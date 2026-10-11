@@ -13,6 +13,7 @@ import type {
 } from "@/features/admin/types";
 import { createAndUploadMultipleModules } from "@/features/admin/api/admin.api";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
+import { useFileDrop } from "@/hooks/use-file-drop";
 import { formatDateTime } from "@/lib/format/date";
 import {
   DownloadSimpleIcon,
@@ -67,7 +68,6 @@ export function CourseClassworkTab({
   // Module Upload Modal State
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [modUploadQueue, setModUploadQueue] = useState<ModUploadQueueItem[]>([]);
-  const [isDraggingMod, setIsDraggingMod] = useState(false);
   const [isUploadingMod, setIsUploadingMod] = useState(false);
   const [modUploadProgress, setModUploadProgress] = useState<ModUploadProgress | null>(null);
 
@@ -129,6 +129,11 @@ export function CourseClassworkTab({
       ]);
     }
   };
+
+  const { isDragging: isDraggingMod, dropProps: modDropProps } = useFileDrop({
+    onFiles: addModFilesToQueue,
+    disabled: isUploadingMod,
+  });
 
   const handleUploadModules = async (e: React.SubmitEvent) => {
     e.preventDefault();
@@ -474,28 +479,14 @@ export function CourseClassworkTab({
             </div>
 
             <div className="space-y-4 text-xs overflow-y-auto flex-1 pr-1">
-              {/* Drag-and-drop / Multi-file Picker */}
+              {/* Drag-and-drop */}
               <div>
                 <label className="block font-semibold text-slate-700 mb-1">
                   Select Modules (.pdf, .docx up to {MODULE_MAX_UPLOAD_LABEL}) *
                 </label>
                 <div
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    setIsDraggingMod(true);
-                  }}
-                  onDragLeave={(e) => {
-                    e.preventDefault();
-                    setIsDraggingMod(false);
-                  }}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    setIsDraggingMod(false);
-                    if (e.dataTransfer.files) {
-                      addModFilesToQueue(e.dataTransfer.files);
-                    }
-                  }}
-                  className={`border-2 border-dashed rounded-2xl p-4 text-center transition-colors ${
+                  {...modDropProps}
+                  className={`border-2 border-dashed rounded-2xl p-4 text-center transition-colors focus-within:ring-2 focus-within:ring-slate-900 ${
                     isDraggingMod
                       ? "border-slate-900 bg-slate-100"
                       : "border-slate-200 hover:border-slate-400 bg-slate-50/50"
@@ -519,7 +510,7 @@ export function CourseClassworkTab({
                           addModFilesToQueue(e.target.files);
                         }
                       }}
-                      className="hidden"
+                      className="sr-only"
                     />
                   </label>
                 </div>

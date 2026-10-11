@@ -92,7 +92,7 @@ def _build_submission_response(
     sub: Submission, student: User | None, hide_grade: bool = False
 ) -> SubmissionResponse:
     """Build a submission payload. `hide_grade` strips grading data for Praktikan until grades are published."""
-    download_url = storage_service.generate_presigned_download_url(sub.file_key)
+    download_url = storage_service.generate_presigned_download_url(sub.file_key) if sub.file_key else None
     response = SubmissionResponse(
         id=str(sub.id),
         assignment_id=str(sub.assignment_id),
@@ -387,12 +387,46 @@ async def delete_assignment(
     sub_res = await db.execute(select(Submission).where(Submission.assignment_id == assignment.id))
     for sub in sub_res.scalars().all():
         try:
-            await storage_service.delete_object(sub.file_key)
+            if sub.file_key:
+                await storage_service.delete_object(sub.file_key)
         except Exception:
             pass
 
     await db.delete(assignment)
     await db.commit()
+
+
+async def _load_submittable_assignment(
+    db: AsyncSession, current_user: User, course_id: uuid.UUID, assignment_id: uuid.UUID
+) -> tuple[Assignment, datetime.datetime, bool]:
+    """Checks the caller may turn in work now; returns the assignment, the current time, and whether it is late."""
+    await require_course_access(db, current_user, course_id, write=False)
+
+    if current_user.role != RoleEnum.PRAKTIKAN:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only students can submit assignments")
+
+    result = await db.execute(
+        select(Assignment).where(Assignment.id == assignment_id, Assignment.course_id == course_id)
+    )
+    assignment = result.scalars().first()
+    if not assignment or not assignment.is_published:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Assignment not found")
+
+    now = datetime.datetime.now(datetime.timezone.utc)
+    is_late = False
+    if assignment.due_date:
+        due = assignment.due_date
+        if due.tzinfo is None:
+            due = due.replace(tzinfo=datetime.timezone.utc)
+        if now > due:
+            if not assignment.allow_late_submissions:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Submissions are closed because the deadline for this assignment has passed.",
+                )
+            is_late = True
+
+    return assignment, now, is_late
 
 
 @router.post(
@@ -432,31 +466,7 @@ async def submit_assignment(
 ):
     max_bytes = settings.ASSIGNMENT_MAX_UPLOAD_BYTES
 
-    await require_course_access(db, current_user, course_id, write=False)
-
-    if current_user.role != RoleEnum.PRAKTIKAN:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only students can submit assignments")
-
-    result = await db.execute(
-        select(Assignment).where(Assignment.id == assignment_id, Assignment.course_id == course_id)
-    )
-    assignment = result.scalars().first()
-    if not assignment or not assignment.is_published:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Assignment not found")
-
-    now = datetime.datetime.now(datetime.timezone.utc)
-    is_late = False
-    if assignment.due_date:
-        due = assignment.due_date
-        if due.tzinfo is None:
-            due = due.replace(tzinfo=datetime.timezone.utc)
-        if now > due:
-            if not assignment.allow_late_submissions:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Submissions are closed because the deadline for this assignment has passed.",
-                )
-            is_late = True
+    assignment, now, is_late = await _load_submittable_assignment(db, current_user, course_id, assignment_id)
 
     ext = os.path.splitext(file.filename or "")[1].lower().lstrip(".")
     allowed = [t.strip().lower().lstrip(".") for t in assignment.allowed_file_types.split(",")]
@@ -594,7 +604,7 @@ async def submit_assignment(
             student_name=current_user.name,
             file_name=submission.file_name,
             file_size=submission.file_size,
-            download_url="",
+            download_url=None,
             submitted_at=submission.submitted_at.isoformat() if submission.submitted_at else "",
             is_late=submission.is_late,
             score=submission.score,
@@ -603,6 +613,68 @@ async def submit_assignment(
             graded_at=submission.graded_at.isoformat() if submission.graded_at else None,
             status=submission.status,
         )
+
+
+@router.post(
+    "/{assignment_id}/turn-in",
+    response_model=SubmissionResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Turn in without a file",
+    description=(
+        "Marks the assignment as turned in for the calling student without attaching a file, "
+        "for example when a group representative uploads on everyone's behalf. Same access and "
+        "deadline rules as file submission, including `is_late`. Rejected if the student already "
+        "turned in; a file can still be attached afterwards through the submit endpoint."
+    ),
+    dependencies=[Depends(rate_limiter(times=5, seconds=60, scope="assignment_turn_in"))],
+    responses={
+        **UNAUTHENTICATED_401,
+        **FORBIDDEN_403,
+        **NOT_FOUND_404,
+        400: {"description": "The deadline has passed and late submissions are closed."},
+        409: {"description": "The student has already turned in this assignment."},
+        **TOO_MANY_REQUESTS_429,
+    },
+)
+async def turn_in_without_file(
+    course_id: uuid.UUID,
+    assignment_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    assignment, now, is_late = await _load_submittable_assignment(db, current_user, course_id, assignment_id)
+
+    already_turned_in = HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail="You've already turned in this assignment.",
+    )
+    existing = await db.execute(
+        select(Submission.id).where(
+            Submission.assignment_id == assignment.id,
+            Submission.student_id == current_user.id,
+        )
+    )
+    if existing.first():
+        raise already_turned_in
+
+    submission = Submission(
+        assignment_id=assignment.id,
+        student_id=current_user.id,
+        file_key=None,
+        file_name=None,
+        file_size=0,
+        submitted_at=now,
+        is_late=is_late,
+        status="submitted",
+    )
+    db.add(submission)
+    try:
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise already_turned_in
+    await db.refresh(submission)
+    return _build_submission_response(submission, current_user)
 
 
 @router.get(

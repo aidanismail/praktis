@@ -65,6 +65,8 @@ export const API_ENDPOINTS = {
       `/api/courses/${encodeURIComponent(courseId)}/assignments/${encodeURIComponent(assignmentId)}`,
     submit: (courseId: string, assignmentId: string) =>
       `/api/courses/${encodeURIComponent(courseId)}/assignments/${encodeURIComponent(assignmentId)}/submit`,
+    turnIn: (courseId: string, assignmentId: string) =>
+      `/api/courses/${encodeURIComponent(courseId)}/assignments/${encodeURIComponent(assignmentId)}/turn-in`,
     update: (courseId: string, assignmentId: string) =>
       `/api/courses/${encodeURIComponent(courseId)}/assignments/${encodeURIComponent(assignmentId)}`,
     delete: (courseId: string, assignmentId: string) =>

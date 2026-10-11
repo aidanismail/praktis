@@ -85,7 +85,7 @@ export function CourseSubmissionsView({
     return submissions.filter((sub) => {
       const matchesSearch =
         sub.student_username.toLowerCase().includes(submissionSearch.toLowerCase()) ||
-        sub.file_name.toLowerCase().includes(submissionSearch.toLowerCase()) ||
+        Boolean(sub.file_name && sub.file_name.toLowerCase().includes(submissionSearch.toLowerCase())) ||
         Boolean(sub.student_name && sub.student_name.toLowerCase().includes(submissionSearch.toLowerCase()));
       if (!matchesSearch) return false;
 
@@ -316,8 +316,14 @@ export function CourseSubmissionsView({
                       )}
                     </div>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                      Turned in: {formatDateTime(sub.submitted_at)} • File:{" "}
-                      <span className="font-mono text-slate-700">{sub.file_name}</span>
+                      Turned in: {formatDateTime(sub.submitted_at)} •{" "}
+                      {sub.file_name ? (
+                        <>
+                          File: <span className="font-mono text-slate-700">{sub.file_name}</span>
+                        </>
+                      ) : (
+                        <span className="text-slate-500">No file attached</span>
+                      )}
                     </p>
                     {sub.feedback && (
                       <p className="text-[11px] text-slate-600 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100 mt-2">
@@ -342,7 +348,7 @@ export function CourseSubmissionsView({
                     </span>
                   )}
 
-                  {sub.download_url && (
+                  {sub.download_url && sub.file_name && (
                     <>
                       <button
                         type="button"
@@ -350,7 +356,7 @@ export function CourseSubmissionsView({
                           onPreviewDoc({
                             title: `${sub.student_username} - ${sub.file_name}`,
                             fileUrl: sub.download_url!,
-                            fileExtension: sub.file_name.split(".").pop() || "pdf",
+                            fileExtension: sub.file_name!.split(".").pop() || "pdf",
                             courseCode: course.code,
                           })
                         }

@@ -11,6 +11,7 @@ import {
 import { importStudentsCsv } from "../api/admin.api";
 import type { ImportCsvResponse } from "../types/admin.type";
 import { adminQueryKeys } from "../constants/admin-query-keys";
+import { useFileDrop } from "@/hooks/use-file-drop";
 
 export function BulkImportForm() {
   const queryClient = useQueryClient();
@@ -19,13 +20,27 @@ export function BulkImportForm() {
   const [result, setResult] = useState<ImportCsvResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  function selectFile(picked: File) {
+    setResult(null);
+    if (!/\.(csv|xlsx)$/i.test(picked.name)) {
+      setFile(null);
+      setError(`"${picked.name}" is not a .csv or .xlsx file.`);
+      return;
+    }
+    setFile(picked);
+    setError(null);
+  }
+
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-      setError(null);
-      setResult(null);
+      selectFile(e.target.files[0]);
     }
   }
+
+  const { isDragging, dropProps } = useFileDrop({
+    onFiles: (files) => selectFile(files[0]),
+    disabled: isUploading,
+  });
 
   async function handleSubmit(e: SubmitEvent) {
     e.preventDefault();
@@ -56,7 +71,14 @@ export function BulkImportForm() {
       {/* Upload Box */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 p-8 text-center bg-slate-50/50 hover:bg-slate-50 transition-colors">
+          <div
+            {...dropProps}
+            className={`flex flex-col items-center justify-center rounded-2xl border border-dashed p-8 text-center transition-colors focus-within:ring-2 focus-within:ring-slate-900 ${
+              isDragging
+                ? "border-slate-900 bg-slate-100"
+                : "border-slate-200 bg-slate-50/50 hover:bg-slate-50"
+            }`}
+          >
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-700 mb-3">
               <CloudArrowUpIcon className="h-6 w-6" />
             </div>

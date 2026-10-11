@@ -1,7 +1,7 @@
 import asyncio
 import uuid
 
-from sqlalchemy import or_
+from sqlalchemy import func, or_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.future import select
 
@@ -173,23 +173,60 @@ async def read_users_me(current_user: User = Depends(get_current_user)):
     "/me",
     response_model=UserResponse,
     summary="Update current user's profile",
-    description="Allows any logged-in user to update their own full name.",
-    responses={**UNAUTHENTICATED_401, **PASSWORD_CHANGE_REQUIRED_403},
+    description=(
+        "Allows any logged-in user to update their own full name and/or email. "
+        "Omitted fields are left unchanged. Emails are compared case-insensitively."
+    ),
+    responses={
+        **UNAUTHENTICATED_401,
+        **PASSWORD_CHANGE_REQUIRED_403,
+        400: {"description": "Blank name, or no fields provided."},
+        409: {"description": "Email is already used by another account."},
+    },
 )
 async def update_current_user_profile(
     data: UpdateProfileRequest,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
-    cleaned = data.name.strip()
-    if not cleaned:
+    if data.name is None and data.email is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Name cannot be blank.",
+            detail="Nothing to update.",
         )
-    current_user.name = cleaned
+
+    if data.name is not None:
+        cleaned = data.name.strip()
+        if not cleaned:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Name cannot be blank.",
+            )
+        current_user.name = cleaned
+
+    if data.email is not None and data.email.lower() != current_user.email.lower():
+        taken = await db.execute(
+            select(User.id).where(
+                func.lower(User.email) == data.email.lower(),
+                User.id != current_user.id,
+            )
+        )
+        if taken.first():
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="That email is already used by another account.",
+            )
+        current_user.email = data.email
+
     db.add(current_user)
-    await db.commit()
+    try:
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="That email is already used by another account.",
+        )
     await db.refresh(current_user)
     return current_user
 

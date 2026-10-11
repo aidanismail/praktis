@@ -247,7 +247,7 @@ export function DashboardHeader({
                   className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors text-left"
                 >
                   <UserCircleIcon className="w-4 h-4 text-slate-500" />
-                  <span>Edit display name</span>
+                  <span>Edit profile</span>
                 </button>
                 <Link
                   href={ROUTES.changePassword}
