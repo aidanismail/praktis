@@ -137,3 +137,35 @@ async def test_import_requires_superadmin(client, db):
 
     resp = await _import(client, _csv_file([("140810220010", "q@example.com")]))
     assert resp.status_code == 403
+
+
+async def test_import_as_asprak(client, db):
+    from sqlalchemy import select
+    from models.user import User
+
+    admin = await create_user(db, RoleEnum.SUPERADMIN)
+    set_auth(client, admin)
+
+    resp = await client.post(
+        "/auth/import-csv",
+        files={"file": _csv_file([("140810229001", "asisten1@example.com")])},
+        data={"role": "asprak"},
+    )
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["inserted"] == 1
+
+    user = (await db.execute(select(User).where(User.username == "140810229001"))).scalar_one()
+    assert user.role == RoleEnum.ASPRAK
+    assert user.force_password_change is True
+
+
+async def test_import_rejects_superadmin_role(client, db):
+    admin = await create_user(db, RoleEnum.SUPERADMIN)
+    set_auth(client, admin)
+
+    resp = await client.post(
+        "/auth/import-csv",
+        files={"file": _csv_file([("140810229002", "x@example.com")])},
+        data={"role": "superadmin"},
+    )
+    assert resp.status_code == 400

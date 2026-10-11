@@ -3,8 +3,10 @@ import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
-from sqlalchemy import CursorResult
+from sqlalchemy import CursorResult, delete
 from models.user import User, RoleEnum
+from models.enrollment import Enrollment
+from models.course_staff import CourseStaff
 from schemas.user import UserCreate
 from core.security import get_password_hash
 
@@ -40,6 +42,21 @@ async def bulk_create_users(db: AsyncSession, users_data: list[dict]) -> int:
     await db.commit()
     
     return result.rowcount
+
+async def change_user_role(db: AsyncSession, user: User, role: RoleEnum) -> int:
+    """Sets the role and drops course memberships the new role cannot hold; returns how many were removed."""
+    removed = 0
+    if role != RoleEnum.PRAKTIKAN:
+        result = await db.execute(delete(Enrollment).where(Enrollment.student_id == user.id))
+        removed += result.rowcount or 0
+    if role != RoleEnum.ASPRAK:
+        result = await db.execute(delete(CourseStaff).where(CourseStaff.user_id == user.id))
+        removed += result.rowcount or 0
+    user.role = role
+    db.add(user)
+    await db.commit()
+    await db.refresh(user)
+    return removed
 
 async def deactivate_user(db: AsyncSession, user_id: uuid.UUID) -> User | None:
     result = await db.execute(select(User).where(User.id == user_id))

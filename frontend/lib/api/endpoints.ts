@@ -12,6 +12,8 @@ export const API_ENDPOINTS = {
       `/api/auth/users/${encodeURIComponent(userId)}/reset-password`,
     deleteUser: (userId: string) =>
       `/api/auth/users/${encodeURIComponent(userId)}`,
+    updateUserRole: (userId: string) =>
+      `/api/auth/users/${encodeURIComponent(userId)}/role`,
     reactivateUser: (userId: string) =>
       `/api/auth/users/${encodeURIComponent(userId)}/reactivate`
   },

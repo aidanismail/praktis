@@ -84,9 +84,13 @@ export type AssignmentItem = {
   my_submission: SubmissionItem | null;
 };
 
-export async function importStudentsCsv(file: File): Promise<ImportCsvResponse> {
+export async function importStudentsCsv(
+  file: File,
+  role: "praktikan" | "asprak" = "praktikan"
+): Promise<ImportCsvResponse> {
   const formData = new FormData();
   formData.append("file", file);
+  formData.append("role", role);
 
   return apiClient<ImportCsvResponse>(API_ENDPOINTS.auth.importCsv, {
     method: "POST",
@@ -123,6 +127,16 @@ export async function resetUserPassword(userId: string, newPassword?: string): P
 export async function deactivateUser(userId: string): Promise<{ message: string }> {
   return apiClient<{ message: string }>(API_ENDPOINTS.auth.deleteUser(userId), {
     method: "DELETE",
+  });
+}
+
+export async function updateUserRole(
+  userId: string,
+  role: User["role"]
+): Promise<{ message: string }> {
+  return apiClient<{ message: string }>(API_ENDPOINTS.auth.updateUserRole(userId), {
+    method: "PATCH",
+    body: JSON.stringify({ role }),
   });
 }
 

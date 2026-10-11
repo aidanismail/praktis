@@ -29,7 +29,6 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   const mustChangePassword = Boolean(
     user &&
       user.force_password_change &&
-      user.role === "praktikan" &&
       pathname !== ROUTES.changePassword
   );
   const isRoleBlocked = Boolean(

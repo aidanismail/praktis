@@ -132,3 +132,97 @@ async def test_update_profile_empty_body_rejected(client, db):
     set_auth(client, user)
     resp = await client.patch("/auth/me", json={})
     assert resp.status_code == 400
+
+
+async def _memberships(db, user):
+    from sqlalchemy import func, select
+    from models.course_staff import CourseStaff
+    from models.enrollment import Enrollment
+
+    enrolled = (await db.execute(select(func.count()).where(Enrollment.student_id == user.id))).scalar_one()
+    staffed = (await db.execute(select(func.count()).where(CourseStaff.user_id == user.id))).scalar_one()
+    return enrolled, staffed
+
+
+async def test_change_role_praktikan_to_asprak_drops_enrollments(client, db):
+    from tests.helpers import create_course, enroll_student
+
+    admin = await create_user(db, RoleEnum.SUPERADMIN)
+    user = await create_user(db, RoleEnum.PRAKTIKAN)
+    await enroll_student(db, await create_course(db), user)
+    set_auth(client, admin)
+
+    resp = await client.patch(f"/auth/users/{user.id}/role", json={"role": "asprak"})
+
+    assert resp.status_code == 200, resp.text
+    assert "Removed from 1 course membership" in resp.json()["message"]
+    await db.refresh(user)
+    assert user.role == RoleEnum.ASPRAK
+    assert await _memberships(db, user) == (0, 0)
+
+
+async def test_change_role_asprak_to_praktikan_drops_staff(client, db):
+    from tests.helpers import assign_course_staff, create_course
+
+    admin = await create_user(db, RoleEnum.SUPERADMIN)
+    user = await create_user(db, RoleEnum.ASPRAK)
+    await assign_course_staff(db, await create_course(db), user)
+    set_auth(client, admin)
+
+    resp = await client.patch(f"/auth/users/{user.id}/role", json={"role": "praktikan"})
+
+    assert resp.status_code == 200, resp.text
+    await db.refresh(user)
+    assert user.role == RoleEnum.PRAKTIKAN
+    assert await _memberships(db, user) == (0, 0)
+
+
+async def test_change_own_role_rejected(client, db):
+    admin = await create_user(db, RoleEnum.SUPERADMIN)
+    set_auth(client, admin)
+
+    resp = await client.patch(f"/auth/users/{admin.id}/role", json={"role": "asprak"})
+
+    assert resp.status_code == 400
+
+
+async def test_change_role_to_same_role_rejected(client, db):
+    admin = await create_user(db, RoleEnum.SUPERADMIN)
+    user = await create_user(db, RoleEnum.ASPRAK)
+    set_auth(client, admin)
+
+    resp = await client.patch(f"/auth/users/{user.id}/role", json={"role": "asprak"})
+
+    assert resp.status_code == 400
+    assert "already" in resp.json()["detail"]
+
+
+async def test_change_role_requires_superadmin(client, db):
+    asprak = await create_user(db, RoleEnum.ASPRAK)
+    user = await create_user(db, RoleEnum.PRAKTIKAN)
+    set_auth(client, asprak)
+
+    resp = await client.patch(f"/auth/users/{user.id}/role", json={"role": "asprak"})
+
+    assert resp.status_code == 403
+
+
+async def test_change_role_unknown_user(client, db):
+    import uuid
+
+    admin = await create_user(db, RoleEnum.SUPERADMIN)
+    set_auth(client, admin)
+
+    resp = await client.patch(f"/auth/users/{uuid.uuid4()}/role", json={"role": "asprak"})
+
+    assert resp.status_code == 404
+
+
+async def test_force_password_change_applies_to_asprak(client, db):
+    user = await create_user(db, RoleEnum.ASPRAK, force_password_change=True)
+    set_auth(client, user)
+
+    assert (await client.get("/auth/me")).status_code == 200
+    blocked = await client.patch("/auth/me", json={"name": "Asisten"})
+    assert blocked.status_code == 403
+    assert blocked.json()["detail"] == "Password change required"
