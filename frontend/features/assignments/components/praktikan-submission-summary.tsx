@@ -85,20 +85,25 @@ export function PraktikanSubmissionSummary({
         </div>
       </div>
 
-      {/* Clean Typographic Key-Value List */}
       <dl className="mt-4 divide-y divide-slate-100 text-xs">
         <div className="flex items-start justify-between py-2.5 gap-3">
           <dt className="text-slate-400 font-medium">File</dt>
           <dd className="text-right min-w-0 break-all">
-            <span
-              title={submission.file_name}
-              className="font-semibold text-slate-900 block break-all"
-            >
-              {submission.file_name}
-            </span>
-            <span className="text-[11px] text-slate-400 block mt-0.5">
-              {formatFileSize(submission.file_size)}
-            </span>
+            {submission.file_name ? (
+              <>
+                <span
+                  title={submission.file_name}
+                  className="font-semibold text-slate-900 block break-all"
+                >
+                  {submission.file_name}
+                </span>
+                <span className="text-[11px] text-slate-400 block mt-0.5">
+                  {formatFileSize(submission.file_size)}
+                </span>
+              </>
+            ) : (
+              <span className="text-slate-500">No file attached</span>
+            )}
           </dd>
         </div>
 
@@ -154,7 +159,7 @@ export function PraktikanSubmissionSummary({
       ) : null}
 
       <div className="mt-5">
-        {submission.download_url ? (
+        {submission.download_url && submission.file_name ? (
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
@@ -181,12 +186,12 @@ export function PraktikanSubmissionSummary({
               onClose={() => setIsPreviewOpen(false)}
             />
           </div>
-        ) : (
+        ) : submission.file_name ? (
           <NotificationBanner
             variant="warning"
             message="Your file is safely stored, but the download link is taking a moment. Refresh in a bit."
           />
-        )}
+        ) : null}
       </div>
     </section>
   );

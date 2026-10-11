@@ -13,9 +13,9 @@ export type AssignmentSubmission = {
   student_username: string;
   student_email: string | null;
   student_name?: string | null;
-  file_name: string;
+  file_name: string | null;
   file_size: number;
-  download_url: string;
+  download_url: string | null;
   submitted_at: string;
   is_late: boolean;
   score: number | null;

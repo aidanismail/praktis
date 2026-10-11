@@ -64,7 +64,7 @@ async def _reset_rate_limit():
     _in_memory_limits.clear()
     if cache.redis_client is not None:
         try:
-            keys = await cache.redis_client.keys("rate_limit:assignment_submit:*")
+            keys = await cache.redis_client.keys("rate_limit:assignment_*")
             if keys:
                 await cache.redis_client.delete(*keys)
         except Exception:
@@ -73,7 +73,7 @@ async def _reset_rate_limit():
     _in_memory_limits.clear()
     if cache.redis_client is not None:
         try:
-            keys = await cache.redis_client.keys("rate_limit:assignment_submit:*")
+            keys = await cache.redis_client.keys("rate_limit:assignment_*")
             if keys:
                 await cache.redis_client.delete(*keys)
         except Exception:
@@ -466,3 +466,139 @@ def test_download_urls_carry_the_real_content_type():
     service.generate_presigned_download_url("assignments/a/b/c.pdf")
     params = service._public_client.generate_presigned_url.call_args.kwargs["Params"]
     assert params["ResponseContentType"] == "application/pdf"
+
+
+def _turn_in_url(course_id, assignment_id) -> str:
+    return f"/courses/{course_id}/assignments/{assignment_id}/turn-in"
+
+
+@pytest.mark.asyncio
+async def test_turn_in_without_file(client, db, _setup, _mock_storage):
+    s = _setup
+    set_auth(client, s["student"])
+
+    resp = await client.post(_turn_in_url(s["course"].id, s["assignment"].id))
+
+    assert resp.status_code == 201, resp.text
+    body = resp.json()
+    assert body["status"] == "submitted"
+    assert body["is_late"] is False
+    assert body["file_name"] is None
+    assert body["download_url"] is None
+    assert body["file_size"] == 0
+    _mock_storage.internal.put_object.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_turn_in_without_file_late(client, db, _setup):
+    s = _setup
+    set_auth(client, s["student"])
+    s["assignment"].due_date = datetime.datetime(2020, 1, 1, tzinfo=datetime.timezone.utc)
+    await db.commit()
+
+    resp = await client.post(_turn_in_url(s["course"].id, s["assignment"].id))
+
+    assert resp.status_code == 201
+    assert resp.json()["is_late"] is True
+
+
+@pytest.mark.asyncio
+async def test_turn_in_without_file_blocked_when_late_disallowed(client, db, _setup):
+    s = _setup
+    set_auth(client, s["student"])
+    s["assignment"].due_date = datetime.datetime(2020, 1, 1, tzinfo=datetime.timezone.utc)
+    s["assignment"].allow_late_submissions = False
+    await db.commit()
+
+    resp = await client.post(_turn_in_url(s["course"].id, s["assignment"].id))
+
+    assert resp.status_code == 400
+    assert "Submissions are closed" in resp.json()["detail"]
+
+
+@pytest.mark.asyncio
+async def test_turn_in_without_file_twice_rejected(client, db, _setup):
+    s = _setup
+    set_auth(client, s["student"])
+    url = _turn_in_url(s["course"].id, s["assignment"].id)
+
+    assert (await client.post(url)).status_code == 201
+    resp = await client.post(url)
+
+    assert resp.status_code == 409
+    assert "already turned in" in resp.json()["detail"]
+
+
+@pytest.mark.asyncio
+async def test_turn_in_without_file_rejected_after_file_upload(client, db, _setup):
+    s = _setup
+    set_auth(client, s["student"])
+    await client.post(
+        _submit_url(s["course"].id, s["assignment"].id),
+        files={"file": ("tugas.pdf", _valid_pdf(), "application/pdf")},
+    )
+
+    resp = await client.post(_turn_in_url(s["course"].id, s["assignment"].id))
+
+    assert resp.status_code == 409
+    sub = (await db.execute(select(Submission).where(Submission.student_id == s["student"].id))).scalar_one()
+    await db.refresh(sub)
+    assert sub.file_key is not None
+
+
+@pytest.mark.asyncio
+async def test_attach_file_after_turning_in_without_file(client, db, _setup, _mock_storage):
+    s = _setup
+    set_auth(client, s["student"])
+    await client.post(_turn_in_url(s["course"].id, s["assignment"].id))
+
+    resp = await client.post(
+        _submit_url(s["course"].id, s["assignment"].id),
+        files={"file": ("laporan.pdf", _valid_pdf(), "application/pdf")},
+    )
+
+    assert resp.status_code == 200, resp.text
+    assert "laporan" in resp.json()["file_name"]
+    _mock_storage.delete_object.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_turn_in_without_file_wrong_role(client, db, _setup):
+    s = _setup
+    set_auth(client, s["asprak"])
+
+    resp = await client.post(_turn_in_url(s["course"].id, s["assignment"].id))
+
+    assert resp.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_staff_sees_and_grades_submission_without_file(client, db, _setup):
+    s = _setup
+    set_auth(client, s["student"])
+    sub_id = (await client.post(_turn_in_url(s["course"].id, s["assignment"].id))).json()["id"]
+
+    set_auth(client, s["asprak"])
+    base = f"/courses/{s['course'].id}/assignments/{s['assignment'].id}"
+    listing = await client.get(f"{base}/submissions")
+    assert listing.status_code == 200, listing.text
+    entry = next(item for item in listing.json() if item["id"] == sub_id)
+    assert entry["file_name"] is None
+    assert entry["download_url"] is None
+
+    graded = await client.post(f"{base}/submissions/{sub_id}/grade", json={"score": 90})
+    assert graded.status_code == 200, graded.text
+    assert graded.json()["score"] == 90
+
+
+@pytest.mark.asyncio
+async def test_delete_assignment_with_submission_without_file(client, db, _setup, _mock_storage):
+    s = _setup
+    set_auth(client, s["student"])
+    await client.post(_turn_in_url(s["course"].id, s["assignment"].id))
+
+    set_auth(client, s["asprak"])
+    resp = await client.delete(f"/courses/{s['course'].id}/assignments/{s['assignment'].id}")
+
+    assert resp.status_code == 204
+    _mock_storage.delete_object.assert_not_called()

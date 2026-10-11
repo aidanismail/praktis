@@ -314,7 +314,7 @@ export function CourseSessions({
                       type="button"
                       onClick={() =>
                         void exportDownload.run(s.id, () =>
-                          downloadSessionAttendanceExport(s.id, "csv")
+                          downloadSessionAttendanceExport(s.id, "csv", s.title)
                         )
                       }
                       disabled={exportDownload.busyKey !== null}

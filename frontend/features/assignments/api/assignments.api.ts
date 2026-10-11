@@ -51,6 +51,18 @@ export function submitCourseAssignment(
   );
 }
 
+export function turnInCourseAssignmentWithoutFile(
+  courseId: string,
+  assignmentId: string
+) {
+  return apiClient<AssignmentSubmission>(
+    API_ENDPOINTS.assignments.turnIn(courseId, assignmentId),
+    {
+      method: "POST"
+    }
+  );
+}
+
 export function updateCourseAssignment(
   courseId: string,
   assignmentId: string,

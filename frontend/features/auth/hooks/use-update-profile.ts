@@ -10,7 +10,7 @@ export function useUpdateProfile() {
   const setUser = useAuthStore((state) => state.setUser);
 
   return useMutation({
-    mutationFn: (payload: { name: string }) => updateProfile(payload),
+    mutationFn: (payload: { name?: string; email?: string }) => updateProfile(payload),
     retry: false,
     onSuccess: (user) => {
       // AuthGuard syncs the store from this query, so update both.

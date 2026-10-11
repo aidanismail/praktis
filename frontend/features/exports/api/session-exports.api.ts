@@ -1,5 +1,6 @@
 import { ApiError } from "@/lib/api/client";
 import { API_ENDPOINTS } from "@/lib/api/endpoints";
+import { toFileName } from "@/lib/format/file-name";
 import type {
   SessionExportDownload,
   SessionExportFormat
@@ -14,14 +15,16 @@ function getExportErrorMessage(status: number) {
   return "The export could not be prepared.";
 }
 
-function buildSafeFilename(sessionId: string, format: SessionExportFormat) {
+function buildSafeFilename(sessionId: string, format: SessionExportFormat, title?: string) {
   const safeSessionId = sessionId.replace(/[^a-zA-Z0-9-]/g, "") || "session";
-  return `attendance_${safeSessionId}.${format}`;
+
+  return `${toFileName(title, safeSessionId)} - attendance.${format}`;
 }
 
 export async function downloadSessionAttendanceExport(
   sessionId: string,
-  format: SessionExportFormat
+  format: SessionExportFormat,
+  title?: string
 ): Promise<SessionExportDownload> {
   const response = await fetch(API_ENDPOINTS.export.attendance(sessionId, format), {
     method: "GET",
@@ -43,6 +46,6 @@ export async function downloadSessionAttendanceExport(
 
   return {
     blob: await response.blob(),
-    filename: buildSafeFilename(sessionId, format)
+    filename: buildSafeFilename(sessionId, format, title)
   };
 }

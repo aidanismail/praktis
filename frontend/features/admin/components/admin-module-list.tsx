@@ -32,6 +32,7 @@ import { adminQueryKeys } from "../constants/admin-query-keys";
 import { formatDate } from "@/lib/format/date";
 import { DocumentPreviewModal } from "@/components/ui/document-preview-modal";
 import { useModalFocusTrap } from "@/hooks/use-modal-focus-trap";
+import { useFileDrop } from "@/hooks/use-file-drop";
 import { NotificationBanner } from "@/components/ui/notification-banner";
 
 export function AdminModuleList() {
@@ -83,7 +84,6 @@ export function AdminModuleList() {
     total: number;
     filename: string;
   } | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
 
   const uploadModalRef = useModalFocusTrap<HTMLDivElement>({
     isOpen: showUploadModal,
@@ -216,6 +216,11 @@ export function AdminModuleList() {
       setUploadQueue((prev) => [...prev, ...newItems]);
     }
   };
+
+  const { isDragging, dropProps: moduleDropProps } = useFileDrop({
+    onFiles: addFilesToQueue,
+    disabled: isUploading,
+  });
 
   const updateQueueItem = (
     id: string,
@@ -728,22 +733,8 @@ export function AdminModuleList() {
                   Select Modules (.pdf, .docx up to {MODULE_MAX_UPLOAD_LABEL}) *
                 </label>
                 <div
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    setIsDragging(true);
-                  }}
-                  onDragLeave={(e) => {
-                    e.preventDefault();
-                    setIsDragging(false);
-                  }}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    setIsDragging(false);
-                    if (e.dataTransfer.files) {
-                      addFilesToQueue(e.dataTransfer.files);
-                    }
-                  }}
-                  className={`border-2 border-dashed rounded-2xl p-4 text-center transition-colors ${
+                  {...moduleDropProps}
+                  className={`border-2 border-dashed rounded-2xl p-4 text-center transition-colors focus-within:ring-2 focus-within:ring-slate-900 ${
                     isDragging
                       ? "border-slate-900 bg-slate-100"
                       : "border-slate-200 hover:border-slate-400 bg-slate-50/50"
@@ -767,7 +758,7 @@ export function AdminModuleList() {
                           addFilesToQueue(e.target.files);
                         }
                       }}
-                      className="hidden"
+                      className="sr-only"
                     />
                   </label>
                 </div>
@@ -780,7 +771,7 @@ export function AdminModuleList() {
                     <span className="font-bold text-slate-900 text-xs">
                       Files to Upload ({uploadQueue.length})
                     </span>
-                    <label className="text-[11px] font-semibold text-slate-900 hover:underline cursor-pointer flex items-center gap-1">
+                    <label className="text-[11px] font-semibold text-slate-900 hover:underline cursor-pointer flex items-center gap-1 rounded focus-within:ring-2 focus-within:ring-slate-900">
                       <PlusIcon className="w-3 h-3" />
                       <span>Add more</span>
                       <input
@@ -793,7 +784,7 @@ export function AdminModuleList() {
                             addFilesToQueue(e.target.files);
                           }
                         }}
-                        className="hidden"
+                        className="sr-only"
                       />
                     </label>
                   </div>

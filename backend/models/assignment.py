@@ -37,8 +37,9 @@ class Submission(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     assignment_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("assignments.id", ondelete="CASCADE"), index=True)
     student_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), index=True)
-    file_key: Mapped[str] = mapped_column(String(500))
-    file_name: Mapped[str] = mapped_column(String(255))
+    # Both are null when the student turned in without attaching a file.
+    file_key: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    file_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     file_size: Mapped[int] = mapped_column(Integer, default=0)
     submitted_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.datetime.now(datetime.timezone.utc))
     is_late: Mapped[bool] = mapped_column(Boolean, default=False)

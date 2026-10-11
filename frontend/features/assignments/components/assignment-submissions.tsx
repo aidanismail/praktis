@@ -266,7 +266,7 @@ export function AssignmentSubmissions({
               type="button"
               onClick={() =>
                 void exportDownload.run(format, () =>
-                  downloadAssignmentGradesExport(assignment.id, format)
+                  downloadAssignmentGradesExport(assignment.id, format, assignment.title)
                 )
               }
               disabled={exportDownload.busyKey !== null}
@@ -418,8 +418,15 @@ export function AssignmentSubmissions({
                       <time dateTime={submission.submitted_at}>
                         {formatDateTime(submission.submitted_at)}
                       </time>{" "}
-                      • <span className="font-mono text-slate-700">{submission.file_name}</span>{" "}
-                      <span className="text-slate-400">({formatFileSize(submission.file_size)})</span>
+                      •{" "}
+                      {submission.file_name ? (
+                        <>
+                          <span className="font-mono text-slate-700">{submission.file_name}</span>{" "}
+                          <span className="text-slate-400">({formatFileSize(submission.file_size)})</span>
+                        </>
+                      ) : (
+                        <span className="text-slate-500">No file attached</span>
+                      )}
                     </p>
                     {submission.feedback && (
                       <p className="text-[11px] text-slate-600 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100 mt-2 whitespace-pre-wrap wrap-break-word">
@@ -442,7 +449,7 @@ export function AssignmentSubmissions({
                     <span className="text-xs font-semibold text-amber-700">Ungraded</span>
                   )}
 
-                  {submission.download_url ? (
+                  {submission.download_url && submission.file_name ? (
                     <>
                       <button
                         type="button"
@@ -465,9 +472,9 @@ export function AssignmentSubmissions({
                         <span className="hidden md:inline">Download</span>
                       </a>
                     </>
-                  ) : (
+                  ) : submission.file_name ? (
                     <span className="text-[11px] text-slate-400">File unavailable</span>
-                  )}
+                  ) : null}
 
                   <button
                     type="button"
@@ -522,7 +529,7 @@ export function AssignmentSubmissions({
         }
         courseCode={courseCode}
         fileUrl={previewSubmission?.download_url || null}
-        fileExtension={previewSubmission?.file_name.split(".").pop() || "pdf"}
+        fileExtension={previewSubmission?.file_name?.split(".").pop() || "pdf"}
         onClose={() => setPreviewSubmission(null)}
       />
     </section>

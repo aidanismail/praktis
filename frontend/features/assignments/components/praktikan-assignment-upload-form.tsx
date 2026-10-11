@@ -1,13 +1,13 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FileArrowUpIcon, ArrowCounterClockwiseIcon, LockKeyIcon } from "@phosphor-icons/react";
+import { FileArrowUpIcon, ArrowCounterClockwiseIcon, LockKeyIcon, CheckCircleIcon, PaperclipIcon } from "@phosphor-icons/react";
 import { AsteriskLoader } from "@/components/ui/asterisk-loader";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { NotificationBanner } from "@/components/ui/notification-banner";
 import { ApiError } from "@/lib/api/client";
-import { useSubmitAssignment } from "../hooks/use-course-assignments";
+import { useSubmitAssignment, useTurnInWithoutFile } from "../hooks/use-course-assignments";
 import {
   ASSIGNMENT_MAX_UPLOAD_BYTES,
   createAssignmentSubmissionSchema,
@@ -21,6 +21,7 @@ type PraktikanAssignmentUploadFormProps = {
   assignmentId: string;
   courseId: string;
   hasSubmission: boolean;
+  hasFile: boolean;
   userId: string;
   isLocked?: boolean;
   isPastDue?: boolean;
@@ -65,6 +66,7 @@ export function PraktikanAssignmentUploadForm({
   assignmentId,
   courseId,
   hasSubmission,
+  hasFile,
   userId,
   isLocked = false,
   isPastDue = false,
@@ -79,6 +81,13 @@ export function PraktikanAssignmentUploadForm({
     courseId,
     assignmentId,
   });
+  const turnInMutation = useTurnInWithoutFile({
+    userId,
+    courseId,
+    assignmentId,
+  });
+  const isBusy = submissionMutation.isPending || turnInMutation.isPending;
+  const turnedInWithoutFile = hasSubmission && !hasFile;
   const submissionSchema = useMemo(
     () => createAssignmentSubmissionSchema(allowedFileTypes),
     [allowedFileTypes]
@@ -135,24 +144,46 @@ export function PraktikanAssignmentUploadForm({
   function submitFile(values: AssignmentSubmissionFormValues) {
     if (hasSubmission || willBeLate) {
       const lines = [
-        hasSubmission
-          ? "Turn in a new version? This replaces your current file and resets any previous score."
-          : "Turn in this file?",
+        turnedInWithoutFile
+          ? "Attach this file to your turned-in assignment? This resets any score already given."
+          : hasSubmission
+            ? "Turn in a new version? This replaces your current file and resets any previous score."
+            : "Turn in this file?",
       ];
       if (willBeLate) lines.push("The deadline has passed, so this will be marked late.");
       if (!window.confirm(lines.join("\n\n"))) return;
     }
 
     setSuccessMessage(null);
+    turnInMutation.reset();
     submissionMutation.mutate(values.file, {
       onSuccess: () => {
         setSuccessMessage(
-          hasSubmission
-            ? "New version turned in! Your updated file has been saved."
-            : "You're all set! Your assignment has been turned in."
+          turnedInWithoutFile
+            ? "File attached. Your assignment is turned in with this file."
+            : hasSubmission
+              ? "New version turned in! Your updated file has been saved."
+              : "You're all set! Your assignment has been turned in."
         );
         form.reset();
         setInputKey((currentKey) => currentKey + 1);
+      },
+    });
+  }
+
+  function turnInWithoutFile() {
+    const lines = [
+      "Turn in without a file?",
+      "Use this when someone else in your group uploads the work. You can still attach a file later.",
+    ];
+    if (willBeLate) lines.push("The deadline has passed, so this will be marked late.");
+    if (!window.confirm(lines.join("\n\n"))) return;
+
+    setSuccessMessage(null);
+    submissionMutation.reset();
+    turnInMutation.mutate(undefined, {
+      onSuccess: () => {
+        setSuccessMessage("Turned in without a file.");
       },
     });
   }
@@ -164,7 +195,9 @@ export function PraktikanAssignmentUploadForm({
     >
       <div className="flex items-start gap-4">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">
-          {hasSubmission ? (
+          {turnedInWithoutFile ? (
+            <PaperclipIcon className="h-5 w-5" aria-hidden="true" />
+          ) : hasSubmission ? (
             <ArrowCounterClockwiseIcon className="h-5 w-5" aria-hidden="true" />
           ) : (
             <FileArrowUpIcon className="h-5 w-5" aria-hidden="true" />
@@ -172,12 +205,18 @@ export function PraktikanAssignmentUploadForm({
         </span>
         <div>
           <h2 id="assignment-upload-heading" className="text-lg font-bold text-slate-950">
-            {hasSubmission ? "Turn in a new version" : "Turn in assignment"}
+            {turnedInWithoutFile
+              ? "Attach a file"
+              : hasSubmission
+                ? "Turn in a new version"
+                : "Turn in assignment"}
           </h2>
           <p className="mt-1 text-xs text-slate-500">
-            {hasSubmission
-              ? "Uploading a new file replaces your current submission and clears previous feedback."
-              : "Select your assignment file and click turn in."}
+            {turnedInWithoutFile
+              ? "You turned in without a file. You can still attach one, which resets any score already given."
+              : hasSubmission
+                ? "Uploading a new file replaces your current submission and clears previous feedback."
+                : "Select your assignment file and click turn in, or turn in without a file if a group member is uploading for your team."}
           </p>
         </div>
       </div>
@@ -203,11 +242,12 @@ export function PraktikanAssignmentUploadForm({
                 ref={field.ref}
                 type="file"
                 accept={accept}
-                disabled={submissionMutation.isPending}
+                disabled={isBusy}
                 aria-describedby={`${inputId}-help${form.formState.errors.file ? ` ${inputId}-error` : ""}`}
                 aria-invalid={Boolean(form.formState.errors.file)}
                 onChange={(event) => {
                   submissionMutation.reset();
+                  turnInMutation.reset();
                   setSuccessMessage(null);
                   field.onChange(event.target.files?.[0]);
                 }}
@@ -239,6 +279,13 @@ export function PraktikanAssignmentUploadForm({
           />
         ) : null}
 
+        {turnInMutation.isError ? (
+          <NotificationBanner
+            variant="error"
+            message={getSubmissionErrorMessage(turnInMutation.error)}
+          />
+        ) : null}
+
         {successMessage ? (
           <NotificationBanner
             ref={successStatusRef}
@@ -248,24 +295,46 @@ export function PraktikanAssignmentUploadForm({
           />
         ) : null}
 
-        <button
-          type="submit"
-          disabled={submissionMutation.isPending}
-          className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800 shadow-xs disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {submissionMutation.isPending ? (
-            <AsteriskLoader className="h-3.5 w-3.5" />
-          ) : hasSubmission ? (
-            <ArrowCounterClockwiseIcon className="h-3.5 w-3.5" aria-hidden="true" />
-          ) : (
-            <FileArrowUpIcon className="h-3.5 w-3.5" aria-hidden="true" />
-          )}
-          {submissionMutation.isPending
-            ? "Turning in..."
-            : hasSubmission
-              ? "Turn in new version"
-              : "Turn in"}
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="submit"
+            disabled={isBusy}
+            className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800 shadow-xs disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {submissionMutation.isPending ? (
+              <AsteriskLoader className="h-3.5 w-3.5" />
+            ) : turnedInWithoutFile ? (
+              <PaperclipIcon className="h-3.5 w-3.5" aria-hidden="true" />
+            ) : hasSubmission ? (
+              <ArrowCounterClockwiseIcon className="h-3.5 w-3.5" aria-hidden="true" />
+            ) : (
+              <FileArrowUpIcon className="h-3.5 w-3.5" aria-hidden="true" />
+            )}
+            {submissionMutation.isPending
+              ? "Turning in..."
+              : turnedInWithoutFile
+                ? "Attach and turn in"
+                : hasSubmission
+                  ? "Turn in new version"
+                  : "Turn in"}
+          </button>
+
+          {!hasSubmission ? (
+            <button
+              type="button"
+              onClick={turnInWithoutFile}
+              disabled={isBusy}
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {turnInMutation.isPending ? (
+                <AsteriskLoader className="h-3.5 w-3.5" />
+              ) : (
+                <CheckCircleIcon className="h-3.5 w-3.5" aria-hidden="true" />
+              )}
+              {turnInMutation.isPending ? "Turning in..." : "Turn in without file"}
+            </button>
+          ) : null}
+        </div>
       </form>
     </section>
   );
