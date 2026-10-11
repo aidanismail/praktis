@@ -12,6 +12,7 @@ import {
   resetUserPassword,
   deactivateUser,
   reactivateUser,
+  updateUserRole,
 } from "../api/admin.api";
 import type { User } from "@/types/user.type";
 import { adminQueryKeys } from "../constants/admin-query-keys";
@@ -52,6 +53,7 @@ export function UserManagement() {
 
   const [error, setError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+  const [changingRoleUserId, setChangingRoleUserId] = useState<string | null>(null);
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [pickedCourseId, setPickedCourseId] = useState("");
@@ -173,6 +175,33 @@ export function UserManagement() {
       setActionSuccess(res.message || `Password reset for ${user.username}.`);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Couldn't reset password. Please try again.");
+    }
+  };
+
+  const handleChangeRole = async (user: User, role: User["role"]) => {
+    if (role === user.role) return;
+    const consequences = [
+      role !== "praktikan" && user.role === "praktikan"
+        ? "They will be removed from every course they are enrolled in as a student."
+        : null,
+      user.role === "asprak" ? "They will be removed as staff from every course they assist." : null,
+    ].filter(Boolean);
+    if (!confirm([`Change ${user.username} from ${user.role} to ${role}?`, ...consequences].join("\n\n"))) {
+      return;
+    }
+
+    setError(null);
+    setActionSuccess(null);
+    setChangingRoleUserId(user.id);
+
+    try {
+      const res = await updateUserRole(user.id, role);
+      setActionSuccess(res.message || `Changed ${user.username} to ${role}.`);
+      await refreshUsers();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Couldn't change the role. Please try again.");
+    } finally {
+      setChangingRoleUserId(null);
     }
   };
 
@@ -465,9 +494,23 @@ export function UserManagement() {
 
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1.5 flex-wrap text-xs">
-                          <span className="font-semibold text-slate-900 capitalize">
-                            {user.role}
-                          </span>
+                          {user.id === currentUser?.id ? (
+                            <span className="font-semibold text-slate-900 capitalize">
+                              {user.role}
+                            </span>
+                          ) : (
+                            <select
+                              aria-label={`Role for ${user.username}`}
+                              value={user.role}
+                              disabled={changingRoleUserId === user.id}
+                              onChange={(e) => handleChangeRole(user, e.target.value as User["role"])}
+                              className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-900 capitalize shadow-xs hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900 disabled:opacity-60"
+                            >
+                              <option value="praktikan">praktikan</option>
+                              <option value="asprak">asprak</option>
+                              <option value="superadmin">superadmin</option>
+                            </select>
+                          )}
                           {!user.is_active && (
                             <>
                               <span className="text-slate-300" aria-hidden="true">·</span>

@@ -43,7 +43,7 @@ export function LoginForm() {
     if (!currentUser) return;
 
     router.replace(
-      currentUser.force_password_change && currentUser.role === "praktikan"
+      currentUser.force_password_change
         ? ROUTES.changePassword
         : ROUTES.dashboard
     );

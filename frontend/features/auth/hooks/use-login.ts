@@ -39,7 +39,7 @@ export function useLogin() {
       queryClient.setQueryData(authQueryKeys.currentUser(), user);
       setUser(user);
 
-      if (user.force_password_change && user.role === "praktikan") {
+      if (user.force_password_change) {
         router.replace(ROUTES.changePassword);
         return;
       }

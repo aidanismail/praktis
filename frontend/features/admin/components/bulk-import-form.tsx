@@ -19,6 +19,7 @@ export function BulkImportForm() {
   const [isUploading, setIsUploading] = useState(false);
   const [result, setResult] = useState<ImportCsvResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [role, setRole] = useState<"praktikan" | "asprak">("praktikan");
 
   function selectFile(picked: File) {
     setResult(null);
@@ -54,7 +55,7 @@ export function BulkImportForm() {
     setResult(null);
 
     try {
-      const res = await importStudentsCsv(file);
+      const res = await importStudentsCsv(file, role);
       setResult(res);
       if (res.inserted > 0) {
         queryClient.invalidateQueries({ queryKey: adminQueryKeys.all });
@@ -71,6 +72,36 @@ export function BulkImportForm() {
       {/* Upload Box */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <span id="import-role-label" className="block text-xs font-semibold text-slate-700 mb-1">
+              Import as
+            </span>
+            <div role="group" aria-labelledby="import-role-label" className="grid grid-cols-2 gap-1.5 max-w-xs">
+              {([
+                ["praktikan", "Students (praktikan)"],
+                ["asprak", "Assistants (asprak)"],
+              ] as const).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={role === value}
+                  disabled={isUploading}
+                  onClick={() => {
+                    setRole(value);
+                    setResult(null);
+                  }}
+                  className={`py-2 px-2 rounded-xl text-xs font-semibold border apple-press transition-all duration-150 text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 disabled:opacity-60 ${
+                    role === value
+                      ? "bg-slate-900 border-slate-900 text-white shadow-xs"
+                      : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div
             {...dropProps}
             className={`flex flex-col items-center justify-center rounded-2xl border border-dashed p-8 text-center transition-colors focus-within:ring-2 focus-within:ring-slate-900 ${
@@ -100,7 +131,7 @@ export function BulkImportForm() {
               </label>
               <span className="pl-1 text-slate-500 font-normal">or drag and drop</span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-1">.csv or .xlsx up to 5 MB with columns: username, email</p>
+            <p className="text-[11px] text-slate-400 mt-1">.csv or .xlsx up to 5 MB with columns: npm, email (name optional)</p>
 
             {file && (
               <div className="mt-3.5 inline-flex items-center gap-2 rounded-xl bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-800">
@@ -120,7 +151,7 @@ export function BulkImportForm() {
 
           <div className="flex items-center justify-between pt-2 border-t border-slate-100">
             <span className="text-[11px] text-slate-400">
-              New accounts will be initialized with default passwords.
+              New accounts get the default password &quot;Praktis&quot; + NPM and must change it at first login.
             </span>
 
             <button
@@ -128,7 +159,7 @@ export function BulkImportForm() {
               disabled={!file || isUploading}
               className="rounded-lg bg-slate-900 px-5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 disabled:opacity-50 transition-all active:scale-[0.98]"
             >
-              {isUploading ? "Importing..." : "Import Students"}
+              {isUploading ? "Importing..." : role === "asprak" ? "Import Assistants" : "Import Students"}
             </button>
           </div>
         </form>

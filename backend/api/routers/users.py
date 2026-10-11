@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.future import select
 
 from datetime import timedelta
-from fastapi import APIRouter, Depends, HTTPException, status, Response, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, status, Response, UploadFile, File, Form
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
@@ -25,6 +25,7 @@ from schemas.user import (
     AdminResetPasswordRequest,
     UserCreate,
     UpdateProfileRequest,
+    UpdateUserRoleRequest,
 )
 
 from services.user_service import (
@@ -32,6 +33,7 @@ from services.user_service import (
     get_password_hash,
     bulk_create_users,
     create_user,
+    change_user_role,
     deactivate_user,
     reactivate_user,
 )
@@ -319,6 +321,51 @@ async def reset_user_password(
     return {"message": f"Successfully reset password for user '{user.username}'"}
 
 
+@router.patch(
+    "/users/{user_id}/role",
+    response_model=MessageResponse,
+    summary="Change a user's role",
+    description=(
+        "Superadmin only. Changes the account's role. Course enrollments are removed when the user "
+        "stops being `praktikan`, and course staff assignments when they stop being `asprak`; "
+        "submissions, grades, and attendance records are kept. Changing your own role is rejected."
+    ),
+    responses={
+        **UNAUTHENTICATED_401,
+        400: {"description": "Cannot change your own role, or the user already has that role."},
+        403: {"description": "Superadmin role required."},
+        404: {"description": "User not found."},
+    },
+)
+async def update_user_role(
+    user_id: uuid.UUID,
+    data: UpdateUserRoleRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_superadmin),
+):
+    if user_id == current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You cannot change your own role.",
+        )
+
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
+    if user.role == data.role:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"'{user.username}' is already {data.role.value}.",
+        )
+
+    removed = await change_user_role(db, user, data.role)
+    message = f"Changed '{user.username}' to {data.role.value}."
+    if removed:
+        message += f" Removed from {removed} course {'membership' if removed == 1 else 'memberships'}."
+    return {"message": message}
+
+
 @router.delete(
     "/users/{user_id}",
     response_model=MessageResponse,
@@ -378,7 +425,7 @@ async def restore_user(
     return {"message": f"Successfully reactivated user '{user.username}'."}
 
 
-def build_user_rows(rows: list[ImportRow]) -> list[dict]:
+def build_user_rows(rows: list[ImportRow], role: RoleEnum = RoleEnum.PRAKTIKAN) -> list[dict]:
     users_to_insert = []
     for row in rows:
         hashed_password = get_password_hash(f"Praktis{row.npm}")
@@ -386,7 +433,7 @@ def build_user_rows(rows: list[ImportRow]) -> list[dict]:
             "username": row.npm,
             "email": row.email,
             "name": row.name,
-            "role": RoleEnum.PRAKTIKAN,
+            "role": role,
             "hashed_password": hashed_password,
             "force_password_change": True,
             "is_active": True
@@ -397,10 +444,11 @@ def build_user_rows(rows: list[ImportRow]) -> list[dict]:
 @router.post(
     "/import-csv",
     response_model=ImportCsvResponse,
-    summary="Bulk-import students from a CSV or XLSX file",
+    summary="Bulk-import students or assistants from a CSV or XLSX file",
     description=(
         "Superadmin-only. Accepts a `.csv` or `.xlsx` file with `npm` and `email` columns "
-        "and creates a `praktikan` account for each valid row: username = NPM, default "
+        "and creates an account with the chosen `role` (`praktikan` by default, or `asprak`) "
+        "for each valid row: username = NPM, default "
         "password = `Praktis{npm}`, with `force_password_change=True`. Rows with an NPM or "
         "email that already exists are skipped and counted; rows that fail validation are "
         "reported in `invalid_rows` (not an error)."
@@ -408,15 +456,19 @@ def build_user_rows(rows: list[ImportRow]) -> list[dict]:
     responses={
         **UNAUTHENTICATED_401,
         **PASSWORD_CHANGE_REQUIRED_403,
-        400: {"description": "Unsupported file type, file is empty/unparseable, or missing npm/email columns."},
+        400: {"description": "Unsupported file type, file is empty/unparseable, missing npm/email columns, or `role` is superadmin."},
         413: {"description": "File exceeds the size limit."},
         422: {"description": "File exceeds the maximum number of rows."},
     },
 )
 async def import_students_csv(
     file: UploadFile = File(..., description="CSV or XLSX file with `npm` and `email` header columns."),
+    role: RoleEnum = Form(RoleEnum.PRAKTIKAN, description="Role for every imported account: `praktikan` or `asprak`."),
     db: AsyncSession = Depends(get_db),
     _current_user: User = Depends(require_superadmin)):
+
+    if role == RoleEnum.SUPERADMIN:
+        raise HTTPException(status_code=400, detail="Bulk import can only create praktikan or asprak accounts.")
 
     if not file.filename or not file.filename.lower().endswith((".csv", ".xlsx")):
         raise HTTPException(status_code=400, detail="Invalid file format. Please upload a .csv or .xlsx file.")
@@ -474,7 +526,7 @@ async def import_students_csv(
 
     inserted_count = 0
     if rows_to_insert:
-        users_to_insert = await asyncio.to_thread(build_user_rows, rows_to_insert)
+        users_to_insert = await asyncio.to_thread(build_user_rows, rows_to_insert, role)
         try:
             inserted_count = await bulk_create_users(db, users_to_insert)
         except IntegrityError:
