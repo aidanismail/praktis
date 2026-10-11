@@ -50,6 +50,7 @@ class UpdateUserRoleRequest(BaseModel):
 class UpdateProfileRequest(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=100, description="User's new full name.", examples=["Plastic Trees"])
     email: EmailStr | None = Field(default=None, max_length=255, description="User's new email address. Must not belong to another account.", examples=["plastic.trees@unpad.ac.id"])
+    username: str | None = Field(default=None, max_length=50, description="User's new login username (asprak and superadmin only). Must not belong to another account.", examples=["plastictrees"])
 
 class LoginRequest(BaseModel):
     username: str = Field(..., description="Login username (NPM for students).", examples=["140810220001"])

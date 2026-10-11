@@ -1,3 +1,4 @@
+from core.security import create_access_token
 from models.user import RoleEnum
 
 from tests.helpers import DEFAULT_PASSWORD, create_user, set_auth
@@ -131,6 +132,58 @@ async def test_update_profile_empty_body_rejected(client, db):
     user = await create_user(db, RoleEnum.PRAKTIKAN)
     set_auth(client, user)
     resp = await client.patch("/auth/me", json={})
+    assert resp.status_code == 400
+
+
+async def test_update_profile_username_staff_success(client, db):
+    for role in (RoleEnum.ASPRAK, RoleEnum.SUPERADMIN):
+        user = await create_user(db, role)
+        set_auth(client, user)
+        new_username = f"renamed-{user.username}"
+        resp = await client.patch("/auth/me", json={"username": f"  {new_username} "})
+        assert resp.status_code == 200
+        assert resp.json()["username"] == new_username
+        me = await client.get("/auth/me")
+        assert me.status_code == 200
+        assert me.json()["username"] == new_username
+
+
+async def test_token_keyed_on_username_rejected(client, db):
+    user = await create_user(db, RoleEnum.ASPRAK)
+    token = create_access_token({"sub": user.username, "role": user.role.value})
+    client.cookies.set("access_token", f"Bearer {token}")
+    resp = await client.get("/auth/me")
+    assert resp.status_code == 401
+
+
+async def test_update_profile_username_praktikan_forbidden(client, db):
+    user = await create_user(db, RoleEnum.PRAKTIKAN)
+    set_auth(client, user)
+    resp = await client.patch("/auth/me", json={"username": "new-npm"})
+    assert resp.status_code == 403
+    me = await client.get("/auth/me")
+    assert me.json()["username"] == user.username
+
+
+async def test_update_profile_username_praktikan_unchanged_allowed(client, db):
+    user = await create_user(db, RoleEnum.PRAKTIKAN)
+    set_auth(client, user)
+    resp = await client.patch("/auth/me", json={"name": "X", "username": user.username})
+    assert resp.status_code == 200
+
+
+async def test_update_profile_username_taken_rejected(client, db):
+    other = await create_user(db, RoleEnum.PRAKTIKAN)
+    user = await create_user(db, RoleEnum.ASPRAK)
+    set_auth(client, user)
+    resp = await client.patch("/auth/me", json={"username": other.username})
+    assert resp.status_code == 409
+
+
+async def test_update_profile_username_blank_rejected(client, db):
+    user = await create_user(db, RoleEnum.ASPRAK)
+    set_auth(client, user)
+    resp = await client.patch("/auth/me", json={"username": "   "})
     assert resp.status_code == 400
 
 

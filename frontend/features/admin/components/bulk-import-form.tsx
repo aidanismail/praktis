@@ -78,8 +78,8 @@ export function BulkImportForm() {
             </span>
             <div role="group" aria-labelledby="import-role-label" className="grid grid-cols-2 gap-1.5 max-w-xs">
               {([
-                ["praktikan", "Students (praktikan)"],
-                ["asprak", "Assistants (asprak)"],
+                ["praktikan", "Praktikan"],
+                ["asprak", "Asprak"],
               ] as const).map(([value, label]) => (
                 <button
                   key={value}

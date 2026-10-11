@@ -24,7 +24,9 @@ export function EditProfileModal({
 }: EditProfileModalProps) {
   const [name, setName] = useState(user.name ?? "");
   const [email, setEmail] = useState(user.email);
+  const [username, setUsername] = useState(user.username);
   const [error, setError] = useState<string | null>(null);
+  const canEditUsername = user.role !== "praktikan";
   const updateProfileMutation = useUpdateProfile();
   const isSubmitting = updateProfileMutation.isPending;
 
@@ -52,10 +54,18 @@ export function EditProfileModal({
       return;
     }
 
+    const trimmedUsername = username.trim();
+    if (canEditUsername && !trimmedUsername) {
+      setError("Please enter your username.");
+      return;
+    }
+
     try {
       await updateProfileMutation.mutateAsync({
         name: trimmed,
         ...(trimmedEmail !== user.email && { email: trimmedEmail }),
+        ...(canEditUsername &&
+          trimmedUsername !== user.username && { username: trimmedUsername }),
       });
       onSuccess?.("Your profile has been updated.");
       onClose();
@@ -85,7 +95,9 @@ export function EditProfileModal({
               <span>Edit Profile</span>
             </h4>
             <p className="text-[11px] text-slate-500 mt-0.5">
-              Change your display name and email address.
+              {canEditUsername
+                ? "Change your display name, username, and email address."
+                : "Change your display name and email address."}
             </p>
           </div>
           <button
@@ -146,11 +158,38 @@ export function EditProfileModal({
             />
           </div>
 
-          <div className="bg-slate-50 rounded-2xl p-3 border border-slate-100 space-y-1.5 text-[11px] text-slate-500">
-            <div className="flex justify-between">
-              <span className="font-medium text-slate-500">Username / NPM:</span>
-              <span className="font-semibold text-slate-700">{user.username}</span>
+          {canEditUsername && (
+            <div>
+              <label
+                htmlFor="edit-profile-username"
+                className="block font-semibold text-slate-700 mb-1"
+              >
+                Username
+              </label>
+              <input
+                id="edit-profile-username"
+                type="text"
+                required
+                maxLength={50}
+                autoComplete="username"
+                placeholder="e.g. plastictrees"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-shadow duration-150"
+              />
+              <p className="mt-1 text-[11px] text-slate-500">
+                You&apos;ll use this to sign in.
+              </p>
             </div>
+          )}
+
+          <div className="bg-slate-50 rounded-2xl p-3 border border-slate-100 space-y-1.5 text-[11px] text-slate-500">
+            {!canEditUsername && (
+              <div className="flex justify-between">
+                <span className="font-medium text-slate-500">Username / NPM:</span>
+                <span className="font-semibold text-slate-700">{user.username}</span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="font-medium text-slate-500">Role:</span>
               <span className="font-semibold text-slate-700 capitalize">{user.role}</span>
