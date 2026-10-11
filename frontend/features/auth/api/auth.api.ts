@@ -35,7 +35,7 @@ export function changePassword(payload: ChangePasswordRequest) {
   });
 }
 
-export function updateProfile(payload: { name?: string; email?: string }) {
+export function updateProfile(payload: { name?: string; email?: string; username?: string }) {
   return apiClient<AuthMeResponse>(API_ENDPOINTS.auth.updateProfile, {
     method: "PATCH",
     body: JSON.stringify(payload)

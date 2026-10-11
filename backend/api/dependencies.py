@@ -1,3 +1,5 @@
+import uuid
+
 import jwt
 from jwt.exceptions import InvalidTokenError
 from fastapi import Depends, HTTPException, status, Request
@@ -6,7 +8,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.config import settings
 from core.database import get_db
 from models.user import User, RoleEnum
-from services.user_service import get_user_by_username
 
 async def get_token_from_cookie(request: Request) -> str:
     token = request.cookies.get("access_token")
@@ -27,13 +28,11 @@ async def get_current_user(
     )
     try:
         payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM])
-        username: str | None = payload.get("sub")
-        if username is None:
-            raise credentials_exception
-    except InvalidTokenError:
+        user_id = uuid.UUID(payload.get("sub") or "")
+    except (InvalidTokenError, ValueError):
         raise credentials_exception
-    
-    user = await get_user_by_username(db, username=username)
+
+    user = await db.get(User, user_id)
     if user is None or not user.is_active:
         raise credentials_exception
     return user

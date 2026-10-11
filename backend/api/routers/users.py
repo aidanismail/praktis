@@ -86,7 +86,7 @@ async def login(response: Response,
 
     access_token_expires = timedelta(minutes=int(settings.ACCESS_TOKEN_EXPIRE_MINUTES))
     access_token = create_access_token(
-        data={"sub": user.username, "role": user.role.value},
+        data={"sub": str(user.id), "role": user.role.value},
         expires_delta=access_token_expires
     )
 
@@ -177,13 +177,14 @@ async def read_users_me(current_user: User = Depends(get_current_user)):
     summary="Update current user's profile",
     description=(
         "Allows any logged-in user to update their own full name and/or email. "
+        "Asprak and superadmin may also change their username; praktikan get 403. "
         "Omitted fields are left unchanged. Emails are compared case-insensitively."
     ),
     responses={
         **UNAUTHENTICATED_401,
         **PASSWORD_CHANGE_REQUIRED_403,
-        400: {"description": "Blank name, or no fields provided."},
-        409: {"description": "Email is already used by another account."},
+        400: {"description": "Blank name or username, or no fields provided."},
+        409: {"description": "Email or username is already used by another account."},
     },
 )
 async def update_current_user_profile(
@@ -191,7 +192,7 @@ async def update_current_user_profile(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
-    if data.name is None and data.email is None:
+    if data.name is None and data.email is None and data.username is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Nothing to update.",
@@ -220,6 +221,32 @@ async def update_current_user_profile(
             )
         current_user.email = data.email
 
+    new_username = data.username.strip() if data.username is not None else None
+    if new_username is not None and new_username != current_user.username:
+        # praktikan usernames are their NPM, so only staff may rename themselves.
+        if current_user.role == RoleEnum.PRAKTIKAN:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Praktikan cannot change their username.",
+            )
+        if not new_username:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username cannot be blank.",
+            )
+        taken = await db.execute(
+            select(User.id).where(
+                User.username == new_username,
+                User.id != current_user.id,
+            )
+        )
+        if taken.first():
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="That username is already used by another account.",
+            )
+        current_user.username = new_username
+
     db.add(current_user)
     try:
         await db.commit()
@@ -227,7 +254,7 @@ async def update_current_user_profile(
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="That email is already used by another account.",
+            detail="That email or username is already used by another account.",
         )
     await db.refresh(current_user)
     return current_user
